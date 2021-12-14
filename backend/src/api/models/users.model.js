@@ -5,32 +5,34 @@ const jwt = require('jwt-simple');
 const {
   pwdSaltRounds,
   jwtExpirationInterval,
-  pwEncruptionKey
+  pwEncruptionKey,
 } = require('../../config/vars');
 
 /**
  * User Schema
  * @private
  */
-const UserSchema = new mongoose.Schema({
-  type: { type: Number }, // 1 = Creator, 2 = User or Buyer or Owner
-  username: { type: String },
-  email: { type: String },
-  emailVerified: { type: Boolean },
-  description: { type: String },
-  profileImage: { type: String },
-  bannerImage: { type: String },
-  address: { type: String },
-  facebookLink: { type: String },
-  twitterLink: { type: String },
-  gPlusLink: { type: String },
-  vineLink: { type: String },
-  password: {
-    type: String,
-    required: true
+const UserSchema = new mongoose.Schema(
+  {
+    // type: { type: Number }, // 1 = Creator, 2 = User or Buyer or Owner
+    // username: { type: String },
+    email: { type: String },
+    // emailVerified: { type: Boolean },
+    // description: { type: String },
+    // profileImage: { type: String },
+    // bannerImage: { type: String },
+    // address: { type: String },
+    // facebookLink: { type: String },
+    // twitterLink: { type: String },
+    // gPlusLink: { type: String },
+    // vineLink: { type: String },
+    // password: {
+    //   type: String,
+    //   required: true
+    // },
+    // signature: { type: String },
   },
-  signature: { type: String },
-}, { timestamps: true }
+  { timestamps: true }
 );
 
 UserSchema.methods.verifyPassword = function (password) {
@@ -43,7 +45,19 @@ UserSchema.methods.verifyPassword = function (password) {
 UserSchema.method({
   transform() {
     const transformed = {};
-    const fields = ['_id', 'email', 'address', 'description', 'facebookLink', 'gPlusLink', 'profileImage', 'bannerImage', 'twitterLink', 'username', 'vineLink'];
+    const fields = [
+      '_id',
+      'email',
+      'address',
+      'description',
+      'facebookLink',
+      'gPlusLink',
+      'profileImage',
+      'bannerImage',
+      'twitterLink',
+      'username',
+      'vineLink',
+    ];
     fields.forEach((field) => {
       transformed[field] = this[field];
     });
@@ -70,8 +84,7 @@ UserSchema.pre('save', async function save(next) {
     const hash = await bcrypt.hash(this.password, rounds);
     this.password = hash;
     return next();
-  }
-  catch (error) {
+  } catch (error) {
     return next(error);
   }
 });

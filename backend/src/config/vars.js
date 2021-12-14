@@ -22,5 +22,14 @@ module.exports = {
   userDefaultImage: '/img/placeholder.png', // 'https://via.placeholder.com/600'
   categoryDefaultImage: '/img/placeholder.png',
   collectionDefaultImage: '/img/placeholder.png',
-  globalImgPlaceholder: '/img/placeholder.png'
+  globalImgPlaceholder: '/img/placeholder.png',
+
+  mailChimp: {
+    apiKey: process.env.MAILCHIMP_APIKEY,
+    server: process.env.MAILCHIMP_SERVER,
+    listId: process.env.MAILCHIMP_LISTID,
+  },
+  sendGrid: {
+    apiKey: process.env.SENDGRID_API,
+  },
 };
