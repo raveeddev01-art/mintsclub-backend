@@ -435,7 +435,6 @@ exports.minting = () => {
 };
 
 exports.addEmail = async (req, res, next) => {
-  //res.send('implementing this');
   try {
     let newPayload = {
       email: req.body.email,
@@ -454,7 +453,6 @@ exports.addEmail = async (req, res, next) => {
       const newUser = await UserModal.create(newPayload);
       const email = await emailToOne(newPayload.email);
       const addedContact = await addContact(newPayload.email);
-      console.log('added contact', addedContact);
       return res.send({ status: true, data: newPayload });
     }
     return res.send({ status: true, data: newPayload });

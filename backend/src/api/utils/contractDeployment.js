@@ -15,7 +15,7 @@ const fs = require('fs-extra');
  * Makes sure that the build folder is deleted, before every compilation
  * @returns {*} - Path where the compiled sources should be saved.
  */
-console.log('path test', __dirname);
+//console.log('path test', __dirname);
 // interfaces folder
 const ERC721 = fs.readFileSync(
   path.resolve(
