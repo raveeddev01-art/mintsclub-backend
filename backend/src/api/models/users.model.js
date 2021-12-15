@@ -15,21 +15,21 @@ const {
 const UserSchema = new mongoose.Schema(
   {
     // type: { type: Number }, // 1 = Creator, 2 = User or Buyer or Owner
-    // username: { type: String },
+    username: { type: String },
     email: { type: String },
     // emailVerified: { type: Boolean },
     // description: { type: String },
     // profileImage: { type: String },
     // bannerImage: { type: String },
-    // address: { type: String },
+    address: { type: String },
     // facebookLink: { type: String },
     // twitterLink: { type: String },
     // gPlusLink: { type: String },
     // vineLink: { type: String },
-    // password: {
-    //   type: String,
-    //   required: true
-    // },
+    password: {
+      type: String,
+      required: true,
+    },
     // signature: { type: String },
   },
   { timestamps: true }
