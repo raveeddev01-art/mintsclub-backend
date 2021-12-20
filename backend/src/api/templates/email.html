@@ -19,6 +19,7 @@
         font-weight: 400;
       }
       .footer {
+        color: black;
         text-align: center;
         font-size: 16px;
         padding: 40px 30px;
@@ -33,10 +34,13 @@
         text-align: center;
       }
       .footerSocial {
-        margin-right: 10px;
+        margin-right: 0px;
         /* display: flex;
         justify-content: center;
         align-items: center; */
+      }
+      .footerSocial .m-5 {
+        margin: 20px !important;
       }
       .browser {
         text-decoration: underline;
@@ -46,10 +50,9 @@
       }
       .clsCenter {
         display: flex;
-        justify-content: center;
-        align-items: center;
       }
       .backGrounCls {
+        text-align: center !important;
         background: #090c28;
         margin: 2% 8%;
         padding: 2%;
@@ -58,17 +61,21 @@
       .absoulteCls {
         position: absolute;
       }
+      /* div .CToWUd {
+        margin: 20px;
+      } */
     </style>
   </head>
   <body class="mainsection">
-    <img
-      id="iconImageas"
-      src="https://email-static.mintsclub.io/MintsClub.png"
-      style="width: 10%"
-    />
+    <a href="https://mintsclub.io/">
+      <img
+        id="iconImageas"
+        src="https://email-static.mintsclub.io/MintsClub.png"
+        style="width: 10%"
+    /></a>
     <div>
       <!-- <header>logo</header> -->
-      <div class="clsCenter backGrounCls">
+      <div class="backGrounCls" style="text-align: center">
         <img
           id="image1"
           class="absoulteCls"
@@ -110,32 +117,42 @@
             <span><b>Help Center</b></span>
           </div>
           <div class="footerSocial">
+            <!-- <a href=""> -->
             <img
+              class="m-5"
               src="https://email-static.mintsclub.io/instagram.png"
               alt="instagram image"
             />
+            <!-- </a> -->
+            <a href="https://www.facebook.com/MintsClub.io/"
+              ><img
+                class="m-5"
+                src="https://email-static.mintsclub.io/fbic.png"
+                alt="facebook image"
+                height="30"
+                width="30"
+            /></a>
+            <a href="https://www.linkedin.com/showcase/mints-club">
+              <img
+                class="m-5"
+                src="https://email-static.mintsclub.io/linkedIn.png"
+                alt="linkedIn image"
+                height="30"
+                width="30"
+            /></a>
+            <!-- <a href="https://twitter.com/Hinru4chan"> -->
             <img
-              src="https://email-static.mintsclub.io/linkedIn.png"
-              alt="linedIn image"
-              height="30"
-              width="30"
-            />
-            <img
-              src="https://email-static.mintsclub.io/fbic.png"
-              alt="linedIn image"
-              height="30"
-              width="30"
-            />
-            <img
+              class="m-5"
               id="wp_thbn_25"
               src="https://email-static.mintsclub.io/twitter.png"
               class="rISBZc zr758c M4dUYb"
               height="30"
               width="30"
-              alt=""
+              alt="twitter img"
               data-atf="1"
               data-frt="0"
             />
+            <!-- </a> -->
           </div>
           <p>
             You received this because you subscribed newsletter or download our
@@ -145,14 +162,14 @@
             <span class="viewBrowser">View in browser</span>
             <span>Unsubscribe</span>
           </div>
-          <div>
-            <!-- logo -->
-            <!-- <img
-              id="iconBottomImage"
-              src="https://email-static.mintsclub.io/MintsClub.png"
-              style="width: 10%"
-            /> -->
-            <img />
+          <div class="footerSocial">
+            <a href="https://mintsclub.io/">
+              <img
+                class="m-5"
+                id="iconBottomImage"
+                src="https://email-static.mintsclub.io/MintsClub.png"
+                style="width: 10%"
+            /></a>
           </div>
         </footer>
       </div>
