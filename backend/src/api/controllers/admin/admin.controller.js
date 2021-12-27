@@ -9,6 +9,7 @@ const { sendEmail } = require('../../utils/emails/emails')
 const { adminUrl } = require('../../../config/vars');
 const randomstring = require("randomstring");
 
+
 // API to login admin
 exports.login = async (req, res, next) => {
     try {
