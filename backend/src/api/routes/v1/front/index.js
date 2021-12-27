@@ -12,6 +12,7 @@ const faqRoutes = require('./faq.route')
 const contactRoutes = require('./contact.route')
 const nftTokenRoutes=require('./nftTokens.route')
 const fixedPriceTokens=require('./fixedPriceTokens.route')
+const verificationRoute=require('./otp-verification.route.js')
 const router = express.Router()
 /**
  * GET v1/status
@@ -29,5 +30,6 @@ router.use('/faq', faqRoutes)
 router.use('/contact', contactRoutes)
 router.use('/nftTokens', nftTokenRoutes)
 router.use('/nftFixedTokens', fixedPriceTokens)
+router.use('/otpVerification', verificationRoute)
 
 module.exports = router
