@@ -7,7 +7,7 @@ mints-backend:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
     - echo "Deploy to dev server"
-    - ssh-add <(echo "$ID_RSA" | base64 -d)
+    - ssh-add <(echo "$ID_RSA")
     - rm -rf .git
     - ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP " cd /home/ariswap/ariswap/backend; git reset --hard; git pull origin task/Integrate-MintsClubBackend; cd /home/ariswap/ariswap/backend; npm install; pm2 reload 0; exit"
   only:
