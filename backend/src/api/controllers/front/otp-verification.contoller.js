@@ -58,10 +58,14 @@ exports.sendEmail=async(req,res,next)=>{
     // });
     let filePath = path.join(__dirname, `../../templates/email.html`);
     let userEmail=req.body.email;
+
 let payload={
     email:req.body.email,
     otpCode:otp,
+    date:new Date()
 }
+
+
     fs.readFile(filePath, { encoding: 'utf-8' }, (err, data) => {
       if (!err) {
         let helper = require('sendgrid').mail;
@@ -101,17 +105,40 @@ let payload={
   
 }
 
-
+function msToTime(ms) {
+  let seconds = (ms / 1000).toFixed(1);
+  let minutes = (ms / (1000 * 60)).toFixed(1);
+  let hours = (ms / (1000 * 60 * 60)).toFixed(1);
+  let days = (ms / (1000 * 60 * 60 * 24)).toFixed(1);
+  if (seconds < 60) return seconds + " Sec";
+  else if (minutes < 60) return minutes + " Min";
+  else if (hours < 24) return hours + " Hrs";
+  else return days + " Days"
+}
 
 exports.verify=async(req,res,next)=>{
     let email=req.body.email
     
+
   let foundCode= await OtpModal.find({email})
+  console.log(typeof(foundCode[0].createdAt),"typof")
+  ///////////////////////////////////////////////////////
+  var today = new Date();
+          var otpDate =foundCode[0].createdAt;
+          var diffMs = (otpDate - today); // milliseconds between now & Christmas
+          console.log(diffMs,"diffMs====>")
+          var diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000); // minutes
+         console.log(diffMins,"diffMins")
+          // if(diffMins >1){
+          //   toast.error("Token Expired");
+          // }
+          
+  /////////////////////////////////////////////////////////
   console.log(foundCode,"otp")
   if(foundCode){
     console.log(foundCode,"---",req.body.otp)
     if(foundCode[0].otpCode==req.body.otp){
-      res.status(200).send({status:true,message:"Email Verified"})
+      res.status(200).send({status:true,message:"Email Verified",data:foundCode,diffMins})
     }
     else {
 
