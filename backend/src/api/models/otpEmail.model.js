@@ -3,10 +3,13 @@ const mongoose = require('mongoose');
 /**
  * Settings Schema
  * @private
+ * 
  */
+let date=new Date()
 const otpSchema = new mongoose.Schema({
     email: { type: String, default: '' },
     otpCode: { type: Number},
+    date:{type:String}
 
 }, { timestamps: true }
 );
