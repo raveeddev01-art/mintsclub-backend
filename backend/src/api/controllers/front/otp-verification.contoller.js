@@ -138,7 +138,7 @@ exports.verify=async(req,res,next)=>{
   if(foundCode){
     console.log(foundCode,"---",req.body.otp)
     if(foundCode[0].otpCode==req.body.otp){
-      res.status(200).send({status:true,message:"Email Verified",data:foundCode,diffMins})
+      res.status(200).send({status:true,message:"Email Verified",data:foundCode,diffMins,email})
     }
     else {
 
