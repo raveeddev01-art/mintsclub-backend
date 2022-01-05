@@ -19,7 +19,7 @@ const UserSchema = new mongoose.Schema(
     email: { type: String },
     // emailVerified: { type: Boolean },
     // description: { type: String },
-    // profileImage: { type: String },
+    profileImage: { type: String },
     // bannerImage: { type: String },
     address: { type: String },
     // facebookLink: { type: String },

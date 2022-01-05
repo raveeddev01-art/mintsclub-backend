@@ -1,9 +1,9 @@
 const express = require('express');
 const authRoutes = require('./auth.route');
-//const categoryRoutes = require('./category.route')
+const categoryRoutes = require('./category.route')
 const nftsRoutes = require('./nfts.route');
 const offerRoutes = require('./offer.route');
-//const bidRoutes = require('./bid.route');
+const bidRoutes = require('./bid.route');
 const usersRoutes = require('./users.route');
 const auctionsRoutes = require('./auctions.route');
 const collectionRoutes = require('./collection.route');
@@ -18,10 +18,10 @@ const router = express.Router();
  * GET v1/status
  */
 router.use('/auth', authRoutes);
-//router.use('/category', categoryRoutes)
+router.use('/category', categoryRoutes)
 router.use('/nfts', nftsRoutes);
 router.use('/offer', offerRoutes);
-//router.use('/bid', bidRoutes);
+router.use('/bid', bidRoutes);
 router.use('/users', usersRoutes);
 router.use('/auctions', auctionsRoutes);
 router.use('/collection', collectionRoutes);
@@ -30,6 +30,5 @@ router.use('/faq', faqRoutes);
 router.use('/contact', contactRoutes);
 router.use('/nftTokens', nftTokenRoutes);
 router.use('/nftFixedTokens', fixedPriceTokens);
-router.use('/otpVerification', verificationRoute);
-
+router.use('/otpVerification', verificationRoute);            
 module.exports = router;

@@ -74,6 +74,8 @@ exports.edit = async (req, res, next) => {
 exports.update = async (req, res, next) => {
     try {
         let payload = req.body
+
+        console.log('request', req.body)
        
 
         // set NFT selling config. 

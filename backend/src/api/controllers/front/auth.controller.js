@@ -5,8 +5,13 @@ const localStrategy = require('passport-local').Strategy;
 exports.register = async (req, res, next) => {
   try {
     let { username, address, email, password } = req.body;
-
+    console.log('hello world',username )
+    console.log('hello world',address )
+    console.log('hello world',email )
+    console.log('hello world',password )
     if (username && email && password && address) {
+
+      console.log('hello world2')
       email = email.toLowerCase();
 
       let user = await User.findOne({ address });

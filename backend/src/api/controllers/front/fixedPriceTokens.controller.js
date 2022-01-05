@@ -41,10 +41,13 @@ exports.getNftTokens=async (req,res)=>{
 }
 
 exports.getNftToken=async (req,res)=>{
-       const id=req.params
+
+
+       const id=req.params.id
+
     try {
         let result = await FixedPriceTokens.findOne({nftId:id})
-
+       
         res.status(200).send({
             status:"success",
             data:result

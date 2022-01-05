@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-
+//done
 const controller = require('../../../controllers/front/fixedPriceTokens.controller')
 router.route('/addFixedToken').post(controller.addNftToken)
 router.route('/getFixedtokens').get(controller.getNftTokens)

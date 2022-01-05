@@ -7,7 +7,8 @@ const Web3 = require('web3'); // https://www.npmjs.com/package/web3
 const path = require('path');
 const mailchimp = require('@mailchimp/mailchimp_marketing');
 const { mailChimp, sendGrid } = require('../../../config/vars');
-
+const passport = require('passport');
+const localStrategy = require('passport-local').Strategy;
 const {
   compilingPreperations,
   createConfiguration,
@@ -40,17 +41,18 @@ exports.create = async (req, res, next) => {
 exports.update = async (req, res, next) => {
   try {
     let payload = req.body;
-    const _id = req.user;
-    if (!payload.username) {
+    const _id = payload.userId
+    console.log("_id", _id)
+    if (!payload.userId) {
       return res.send({
         status: false,
         message: 'Please fill all required fields',
       });
     }
-    // if(req.file) {
-    //   const imgData = fs.readFileSync(req.file.path)
-    //   payload.profileImage = await addImage(imgData);
-    // }
+    if(req.file) {
+      const imgData = fs.readFileSync(req.file.path)
+      payload.profileImage = await addImage(imgData);
+    }
     if (req.files) {
       for (const key in req.files) {
         const image = req.files[key][0];
@@ -64,6 +66,7 @@ exports.update = async (req, res, next) => {
       { $set: payload },
       { new: true }
     );
+    console.log(user)
     let data = user.transform();
     return res.send({
       status: true,

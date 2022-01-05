@@ -11,6 +11,7 @@ const rateLimit = require('express-rate-limit');
 const bearerToken = require('express-bearer-token');
 const compression = require('compression');
 const job = require('../cron-jobs/expriedBidsJob');
+
 /**
  * Express instance
  * @public
@@ -19,6 +20,7 @@ const app = express();
 
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+
 app.use(bearerToken());
 
 app.use(methodOverride());
@@ -65,10 +67,10 @@ app.get('/admin/*', function (req, res) {
 });
 
 // Front Site Build Path
-app.use('/', express.static(path.join(__dirname, '../../build')));
-app.get('/*', function (req, res) {
-  res.sendFile(path.join(__dirname, '../../build', 'index.html'));
-});
+// app.use('/', express.static(path.join(__dirname, '../../build')));
+// app.get('/*', function (req, res) {
+//   res.sendFile(path.join(__dirname, '../../build', 'index.html'));
+// });
 
 // if error is not an instanceOf APIError, convert it.
 app.use(error.converter);

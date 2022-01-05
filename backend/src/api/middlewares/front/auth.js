@@ -46,6 +46,7 @@ exports.userValidation = async (req, res, next) => {
   let flag = true;
   req.user = 0;
   if (req.headers['x-access-token']) {
+    console.log('i was called');
     await jwt.verify(
       req.headers['x-access-token'],
       pwEncruptionKey,

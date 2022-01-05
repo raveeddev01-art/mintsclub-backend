@@ -70,7 +70,7 @@ exports.edit = async (req, res, next) => {
             }
 
         // TEMP appending userId
-        payload.userId = '61408000cef27850fdea272b'
+        // payload.userId = '61408000cef27850fdea272b'
 
         if (!payload._id || !payload.userId)
             return res.status(400).send({ success: false, message: 'Please provide all required fields' })

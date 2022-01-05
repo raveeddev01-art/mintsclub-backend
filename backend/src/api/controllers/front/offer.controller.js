@@ -7,7 +7,7 @@ const { globalImgPlaceholder } = require('../../../config/vars')
 
 // API to create offer
 exports.create = async (req, res, next) => {
-    console.log("in the create offer get function===>")
+    console.log("in the create offer get function===>" ,req.body)
     try {
         let payload = req.body
         payload.offerBy = req.user
