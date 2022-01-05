@@ -4,12 +4,14 @@ const mongoose = require('mongoose');
  * Category Schema
  * @private
  */
-const CategorySchema = new mongoose.Schema({
+const CategorySchema = new mongoose.Schema(
+  {
     name: { type: String, required: true, unique: true },
     description: { type: String },
     image: { type: String, required: true },
-    status: { type: Boolean, required: true, default: false }
-}, { timestamps: true }
+    status: { type: Boolean, required: true, default: false },
+  },
+  { timestamps: true }
 );
 
 /**
