@@ -81,7 +81,7 @@ app.use(error.notFound);
 // error handler, send stacktrace only during development
 app.use(error.handler);
 
-// start cron jobs
-// job.startCron();
+//start cron jobs
+job.startCron();
 
 module.exports = app;
