@@ -1,7 +1,7 @@
 const express = require('express');
 const categoryRoutes = require('./categories.route');
 const userRoutes = require('./users.route');
-//const adminRoutes = require('./admin.route')
+const adminRoutes = require('./admin.route');
 const collectionRoutes = require('./collection.route');
 const creatorRoutes = require('./creator.route');
 const nftsRoutes = require('./nfts.route');
@@ -15,7 +15,7 @@ const router = express.Router();
 /**
  * GET v1/admin
  */
-//router.use('/staff', adminRoutes)
+router.use('/staff', adminRoutes);
 router.use('/category', categoryRoutes);
 router.use('/user', userRoutes);
 router.use('/collection', collectionRoutes);
