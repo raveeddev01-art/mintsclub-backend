@@ -485,7 +485,7 @@ const emailToOne = async (email) => {
   fs.readFile(filePath, { encoding: 'utf-8' }, (err, data) => {
     if (!err) {
       let helper = require('sendgrid').mail;
-      const from_email = new helper.Email('mintsclub@em6739.invo.zone');
+      const from_email = new helper.Email(sendGrid.senderAddress);
       const to_email = new helper.Email(email);
       const subject = 'You are all set!';
       let content = new helper.Content('text/html', data);
