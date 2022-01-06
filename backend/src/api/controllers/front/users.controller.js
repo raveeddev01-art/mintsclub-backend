@@ -138,6 +138,7 @@ exports.getUser = async (req, res, next) => {
 };
 
 exports.createUser = async (req, res, next) => {
+  console.log(req.body,"req.body")
   try {
     let payload = {
       name: req.body.name,
@@ -148,6 +149,7 @@ exports.createUser = async (req, res, next) => {
       email: req.body.email,
       description: req.body.description,
     };
+    console.log(payload,"payload==>")
     const { error } = validation.validateContractSchema(payload);
 
     if (error) {
