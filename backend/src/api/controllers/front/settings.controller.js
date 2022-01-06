@@ -1,6 +1,6 @@
 const Settings = require('../../models/settings.model')
 
-// // API to get Settings
+// // API to get Settings to
 exports.get = async (req, res, next) => {
     try {
         const settings = await Settings.findOne({}, { __v: 0, createdAt: 0, updatedAt: 0, api: 0, domain: 0 }).lean(true)

@@ -2,7 +2,8 @@ const express = require('express');
 const controller = require('../../../controllers/front/users.controller');
 const router = express.Router();
 const { profileUpload, uploadSingle } = require('../../../utils/upload');
-
+const passport = require('passport');
+const localStrategy = require('passport-local').Strategy;
 router.route('/').post(controller.create);
 router.route('/').put(profileUpload, controller.update);
 router.route('/creators').post(controller.getCreators);
