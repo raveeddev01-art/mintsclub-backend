@@ -41,16 +41,16 @@ exports.create = async (req, res, next) => {
 exports.update = async (req, res, next) => {
   try {
     let payload = req.body;
-    const _id = payload.userId
-    console.log("_id", _id)
+    const _id = payload.userId;
+    console.log('_id', _id);
     if (!payload.userId) {
       return res.send({
         status: false,
         message: 'Please fill all required fields',
       });
     }
-    if(req.file) {
-      const imgData = fs.readFileSync(req.file.path)
+    if (req.file) {
+      const imgData = fs.readFileSync(req.file.path);
       payload.profileImage = await addImage(imgData);
     }
     if (req.files) {
@@ -66,7 +66,7 @@ exports.update = async (req, res, next) => {
       { $set: payload },
       { new: true }
     );
-    console.log(user)
+    console.log(user);
     let data = user.transform();
     return res.send({
       status: true,
@@ -141,6 +141,7 @@ exports.getUser = async (req, res, next) => {
 };
 
 exports.createUser = async (req, res, next) => {
+  console.log(req.body, 'req.body');
   try {
     let payload = {
       name: req.body.name,
@@ -151,6 +152,7 @@ exports.createUser = async (req, res, next) => {
       email: req.body.email,
       description: req.body.description,
     };
+    console.log(payload, 'payload==>');
     const { error } = validation.validateContractSchema(payload);
 
     if (error) {
@@ -488,7 +490,7 @@ const emailToOne = async (email) => {
   fs.readFile(filePath, { encoding: 'utf-8' }, (err, data) => {
     if (!err) {
       let helper = require('sendgrid').mail;
-      const from_email = new helper.Email('mintsclub@em6739.invo.zone');
+      const from_email = new helper.Email(sendGrid.senderAddress);
       const to_email = new helper.Email(email);
       const subject = 'You are all set!';
       let content = new helper.Content('text/html', data);

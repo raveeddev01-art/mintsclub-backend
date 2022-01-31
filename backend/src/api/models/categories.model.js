@@ -14,8 +14,8 @@ const CategorySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-/**
- * @typedef Category
- */
+// /**
+//  * @typedef Category
+//  */
 
 module.exports = mongoose.model('Category', CategorySchema);

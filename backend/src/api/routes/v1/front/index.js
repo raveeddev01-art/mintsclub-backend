@@ -30,5 +30,5 @@ router.use('/faq', faqRoutes);
 router.use('/contact', contactRoutes);
 router.use('/nftTokens', nftTokenRoutes);
 router.use('/nftFixedTokens', fixedPriceTokens);
-router.use('/otpVerification', verificationRoute);            
+router.use('/otpVerification', verificationRoute);
 module.exports = router;

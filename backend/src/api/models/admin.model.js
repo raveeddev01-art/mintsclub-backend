@@ -79,8 +79,8 @@ AdminSchema.pre('save', async function save(next) {
   }
 });
 
-/**
- * @typedef Admin
- */
+// /**
+//  * @typedef Admin
+//  */
 
 module.exports = mongoose.model('Admin', AdminSchema);

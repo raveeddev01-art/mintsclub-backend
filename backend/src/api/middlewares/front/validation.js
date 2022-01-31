@@ -34,6 +34,29 @@ const validateContractSchema = (contract) => {
   return schema.validate(contract, options);
 };
 
+const validateSignUpSchema = (data) => {
+  const schema = Joi.object().keys({
+    address: Joi.string().max(600).required(),
+    email: Joi.string()
+      .strict()
+      .trim()
+      .email({
+        minDomainSegments: 2,
+        tlds: { allow: ['com', 'net'] },
+      })
+      .required(),
+    username: Joi.string().max(50).required(),
+  });
+  const options = {
+    errors: {
+      wrap: {
+        label: '',
+      },
+    },
+  };
+  return schema.validate(data, options);
+};
+
 const validateEmail = (email) => {
   const schema = Joi.object().keys({
     email: Joi.string()
@@ -58,4 +81,5 @@ const validateEmail = (email) => {
 module.exports = {
   validateContractSchema,
   validateEmail,
+  validateSignUpSchema,
 };
