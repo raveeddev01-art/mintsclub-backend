@@ -5,25 +5,30 @@ const Collection = require('../../models/collection.model');
 const { addImage } = require('../../utils/upload');
 const { checkDuplicate } = require('../../../config/errors');
 const { collectionDefaultImage } = require('../../../config/vars');
+const validation = require('../../middlewares/front/collectionValidation');
 
 // API to create collection
 exports.create = async (req, res, next) => {
   try {
-    // let payload = req.body
-    // console.log(req.body,"req.body")
-
     let payload = {
       userId: req.body.userId,
       categoryId: req.body.categoryId,
       name: req.body.name,
       url: req.body.url,
-      logo: req.body.logoUrl,
+      logo: req.body.logo,
       featuredImg: req.body.featuredImgUrl,
       banner: req.body.bannerUrl,
       description: req.body.description,
       category: req.body.category,
     };
-    console.log(' payload.category ', payload.category);
+
+    // const { error } = validation.validateCollectionSchema(payload);
+
+    // if (error) {
+    //   let errorMsg = error.details[0].message;
+    //   return res.status(400).send({ status: false, data: errorMsg });
+    // }
+
     categoryArray = [
       'art',
       'collectibles',
@@ -33,7 +38,8 @@ exports.create = async (req, res, next) => {
       'cards',
       'utility',
     ];
-    if (!payload.category in categoryArray) {
+
+    if (payload.category && !categoryArray.includes(payload.category)) {
       return res.status(400).send({
         success: false,
         message: 'Please provide valid category',
@@ -67,7 +73,6 @@ exports.create = async (req, res, next) => {
       });
     }
 
-    // console.log("reached on collection")
     const collection = await Collection.create(payload);
     // console.log(collection,"collection==========>")
     return res.status(200).send({
@@ -76,7 +81,6 @@ exports.create = async (req, res, next) => {
       collection,
     });
   } catch (error) {
-    // console.log(error,"error in the api")
     if (error.code === 11000 || error.code === 11001)
       checkDuplicate(error, res, 'Collection');
     else return next(error);
@@ -86,7 +90,18 @@ exports.create = async (req, res, next) => {
 // API to edit collection
 exports.edit = async (req, res, next) => {
   try {
-    let payload = req.body;
+    //let payload = req.body;
+    let payload = {
+      userId: req.body.userId,
+      _id: req.body._id,
+    };
+    const { error } = validation.validateEditCollectionSchema(payload);
+
+    if (error) {
+      let errorMsg = error.details[0].message;
+      return res.status(400).send({ status: false, data: errorMsg });
+    }
+
     if (req.files)
       for (const key in req.files) {
         const image = req.files[key][0];
@@ -97,20 +112,14 @@ exports.edit = async (req, res, next) => {
     // TEMP appending userId
     // payload.userId = '61408000cef27850fdea272b'
 
-    if (!payload._id || !payload.userId)
-      return res.status(400).send({
-        success: false,
-        message: 'Please provide all required fields',
-      });
-
     // if name is given then check user existing collection
+
     if (payload.name) {
       const existingCollection = await Collection.findOne({
         _id: { $ne: payload._id },
         name: new RegExp(payload.name, 'gi'),
         userId: payload.userId,
       });
-
       if (existingCollection)
         return res.status(400).send({
           success: false,
