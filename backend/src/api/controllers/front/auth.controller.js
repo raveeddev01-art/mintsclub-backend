@@ -54,12 +54,17 @@ exports.register = async (req, res, next) => {
  */
 exports.login = async (req, res, next) => {
   try {
-    let { address, sign } = req.body;
-    if (!address) {
-      return res
-        .status(400)
-        .send({ status: false, data: 'address is required' });
+    let payload = {
+      address: req.body.address,
+    };
+
+    const { error } = validation.validateAddress(payload);
+
+    if (error) {
+      let errorMsg = error.details[0].message;
+      return res.status(400).send({ status: false, data: errorMsg });
     }
+    const address = payload.address;
     let user = await User.findOne({ address });
     if (!user) {
       return res.status(200).send({

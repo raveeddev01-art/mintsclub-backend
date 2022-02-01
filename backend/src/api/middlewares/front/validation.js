@@ -56,7 +56,19 @@ const validateSignUpSchema = (data) => {
   };
   return schema.validate(data, options);
 };
-
+const validateAddress = (address) => {
+  const schema = Joi.object().keys({
+    address: Joi.string().max(600).required(),
+  });
+  const options = {
+    errors: {
+      wrap: {
+        label: '',
+      },
+    },
+  };
+  return schema.validate(address, options);
+};
 const validateEmail = (email) => {
   const schema = Joi.object().keys({
     email: Joi.string()
@@ -82,4 +94,5 @@ module.exports = {
   validateContractSchema,
   validateEmail,
   validateSignUpSchema,
+  validateAddress,
 };
