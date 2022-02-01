@@ -21,9 +21,26 @@ exports.create = async (req, res, next) => {
       featuredImg: req.body.featuredImgUrl,
       banner: req.body.bannerUrl,
       description: req.body.description,
+      category: req.body.category,
     };
-    // console.log(payload,"payload")
+    console.log(' payload.category ', payload.category);
+    categoryArray = [
+      'art',
+      'collectibles',
+      'music',
+      'photography',
+      'sports',
+      'cards',
+      'utility',
+    ];
+    if (!payload.category in categoryArray) {
+      return res.status(400).send({
+        success: false,
+        message: 'Please provide valid category',
+      });
+    }
     if (req.files)
+      // console.log(payload,"payload")
       for (const key in req.files) {
         const image = req.files[key][0];
         const imgData = fs.readFileSync(image.path);
