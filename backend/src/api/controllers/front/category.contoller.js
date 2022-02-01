@@ -14,6 +14,7 @@ exports.list = async (req, res, next) => {
       categories,
     });
   } catch (error) {
+    console.log(error, 'error');
     return next(error);
   }
 };

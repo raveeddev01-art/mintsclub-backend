@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
-/**
- * Category Schema
- * @private
- */
+// /**
+//  * Category Schema
+//  * @private
+//  */
 const CategorySchema = new mongoose.Schema(
   {
     name: { type: String, required: true, unique: true },
