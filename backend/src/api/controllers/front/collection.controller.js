@@ -2,6 +2,8 @@ const fs = require('fs');
 const ObjectId = require('mongoose').Types.ObjectId;
 const NFT = require('../../models/nfts.model');
 const Collection = require('../../models/collection.model');
+const Categories = require('../../models/categories.model');
+
 const { addImage } = require('../../utils/upload');
 const { checkDuplicate } = require('../../../config/errors');
 const { collectionDefaultImage } = require('../../../config/vars');
@@ -15,20 +17,24 @@ exports.create = async (req, res, next) => {
       categoryId: req.body.categoryId,
       name: req.body.name,
       url: req.body.url,
-      logo: req.body.logo,
-      featuredImg: req.body.featuredImgUrl,
-      banner: req.body.bannerUrl,
       description: req.body.description,
       category: req.body.category,
     };
+    const { error } = validation.validateCollectionSchema(payload);
 
-    // const { error } = validation.validateCollectionSchema(payload);
+    if (error) {
+      let errorMsg = error.details[0].message;
+      return res.status(400).send({ status: false, data: errorMsg });
+    }
 
-    // if (error) {
-    //   let errorMsg = error.details[0].message;
-    //   return res.status(400).send({ status: false, data: errorMsg });
-    // }
+    imagesPayload = {
+      logo: req.body.logo,
+      featuredImg: req.body.featuredImgUrl,
+      banner: req.body.bannerUrl,
+    };
 
+    const newPayload = { ...payload, ...imagesPayload };
+    //const List = await Categories.find()
     categoryArray = [
       'art',
       'collectibles',
@@ -39,31 +45,31 @@ exports.create = async (req, res, next) => {
       'utility',
     ];
 
-    if (payload.category && !categoryArray.includes(payload.category)) {
+    if (newPayload.category && !categoryArray.includes(newPayload.category)) {
       return res.status(400).send({
         success: false,
         message: 'Please provide valid category',
       });
     }
+
     if (req.files)
       // console.log(payload,"payload")
       for (const key in req.files) {
         const image = req.files[key][0];
         const imgData = fs.readFileSync(image.path);
-        payload[key] = await addImage(imgData);
+        newPayload[key] = await addImage(imgData);
       }
 
-    if (!payload.userId || !payload.name || !payload.logo) {
+    if (!newPayload.logo) {
       return res.status(400).send({
         success: false,
-        message: 'Please provide all required fields',
+        message: 'logo image is required',
       });
     }
-
     // check user existing collection
     const existingCollection = await Collection.findOne({
-      name: new RegExp(payload.name, 'gi'),
-      userId: payload.userId,
+      name: new RegExp(newPayload.name, 'gi'),
+      userId: newPayload.userId,
     });
 
     if (existingCollection) {
@@ -73,7 +79,7 @@ exports.create = async (req, res, next) => {
       });
     }
 
-    const collection = await Collection.create(payload);
+    const collection = await Collection.create(newPayload);
     // console.log(collection,"collection==========>")
     return res.status(200).send({
       success: true,
@@ -240,7 +246,7 @@ exports.list = async (req, res, next) => {
       limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
 
       total = await Collection.countDocuments(filter);
-      console.log('totalcount===>', total);
+      //console.log('totalcount===>', total);
       if (page > Math.ceil(total / limit) && total > 0)
         page = Math.ceil(total / limit);
     }
@@ -291,6 +297,7 @@ exports.list = async (req, res, next) => {
     return res.send({
       success: true,
       message: 'Collections fetched successfully',
+      count: total,
       data: {
         collections: allcollections.length ? allcollections : null,
 

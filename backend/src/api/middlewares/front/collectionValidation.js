@@ -10,9 +10,9 @@ const validateCollectionSchema = (data) => {
     categoryId: Joi.string().allow(''),
     name: Joi.string().required(),
     url: Joi.string().allow(''),
-    logo: Joi.allow(''),
-    featuredImg: Joi.allow(''),
-    banner: Joi.allow(''),
+    // logo: Joi.required(),
+    // featuredImg: Joi.allow(''),
+    // banner: Joi.allow(''),
     description: Joi.string().allow(''),
     category: Joi.string().allow(''),
   });
