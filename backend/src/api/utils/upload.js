@@ -19,13 +19,22 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     var fileExtension = file.mimetype.split('/')[1];
-    if (!file.originalname.toLowerCase().match(/\.(jpg|jpeg|png|gif|svg)$/)) {
-      return cb(new Error('Only image files are allowed.'));
+    if (
+      !file.originalname
+        .toLowerCase()
+        .match(/\.(jpg|jpeg|png|mp3|mp4|gif|svg)$/)
+    ) {
+      return cb(new Error('The selected file format is not supported'));
     }
     cb(null, +Date.now() + '.' + fileExtension);
   },
 });
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 100000000, //100MB
+  },
+});
 exports.cpUpload = upload.fields([{ name: 'image', maxCount: 1 }]);
 exports.uploadSingle = upload.single('image');
 exports.collectionUpload = upload.fields([
