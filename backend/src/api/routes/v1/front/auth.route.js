@@ -4,6 +4,5 @@ const router = express.Router();
 
 router.route('/register').post(controller.register);
 router.route('/login').post(controller.login);
-// all routes tested
 
 module.exports = router;

@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 
-/**
- * Category Schema
- * @private
- */
+// /**
+//  * Category Schema
+//  * @private
+//  */
 const CategorySchema = new mongoose.Schema(
   {
     name: { type: String, required: true, unique: true },
@@ -14,8 +14,8 @@ const CategorySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-/**
- * @typedef Category
- */
+// /**
+//  * @typedef Category
+//  */
 
 module.exports = mongoose.model('Category', CategorySchema);

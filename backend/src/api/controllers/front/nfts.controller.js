@@ -2,13 +2,14 @@ const fs = require('fs')
 const moment = require('moment')
 const User = require('../../models/users.model')
 const NFT = require('../../models/nfts.model')
+const NftTokens = require('../../models/nftTokens.model')
 const { addImage, addContent } = require('../../utils/upload')
 const ObjectId = require('mongoose').Types.ObjectId
 const { userDefaultImage, collectionDefaultImage } = require('../../../config/vars')
 
 // API to create NFT
 exports.create = async (req, res, next) => {
-  //console.log(req.body,"req.body in the backend")
+  
     try {
         let payload = req.body
         if (req.files && req.files.image) {
@@ -30,13 +31,31 @@ exports.create = async (req, res, next) => {
 
         payload.ownerId = req.user
         payload.creatorId = req.user
-        console.log(payload,"payload to create nft")
+     
         
-        const nft = await NFT.create(payload)
-        //console.log(nft,"created Nft==>")
-        return res.send({ success: true, message: 'Item created successfully', nft })
+        return res.send({ success: true, message: 'Uploaded data on IPFS successfully', nft:payload })
     } catch (error) {
         //console.log(error,"error while creating nft")
+        return next(error)
+    }
+}
+
+exports.storeDataInDb=async (req, res, next)=>{
+    try {
+               //create nft 
+               let createNFTPayload=req.body.data
+               createNFTPayload.image=req.body.image
+               const nft = await NFT.create(createNFTPayload)
+              
+               //create nft token
+               let nftTokenPaylod={
+                   nftToken:req.body.nftToken,
+                   nftId:req.body.nftId
+               }
+               let nftToken = await NftTokens.create(nftTokenPaylod);
+            
+                return res.send({ success: true, message: 'Item created successfully', nft })
+    }catch(error){
         return next(error)
     }
 }

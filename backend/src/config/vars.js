@@ -31,5 +31,6 @@ module.exports = {
   },
   sendGrid: {
     apiKey: process.env.SENDGRID_API,
+    senderAddress: process.env.SENDGRID_SENDER_ADDRESS,
   },
 };

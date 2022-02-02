@@ -42,8 +42,8 @@ const BidSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-/**
- * @typedef Bid
- */
+// /**
+//  * @typedef Bid
+//  */
 
 module.exports = mongoose.model('Bid', BidSchema);
