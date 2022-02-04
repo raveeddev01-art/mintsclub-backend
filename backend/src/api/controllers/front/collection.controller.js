@@ -272,29 +272,33 @@ exports.get = async (req, res, next) => {
 // API to get collection list
 exports.list = async (req, res, next) => {
   try {
-    let { page, limit, categoryId, all, userId } = req.query;
-    // console.log(userId,"userId===>")
+    let { page, limit, myFilter, all, userId } = req.query;
     // let userId = req.user
-    // console.log("userId------@", userId);
-    // console.log("category------@", req.categoryId)
     // if (!userId)
     //     return res.status(400).send({ success: false, message: 'Please Sign In First' })
-
-    const filter = {};
-
-    // if (userId)
-    //     filter.userId = ObjectId(userId)
-
-    if (categoryId) filter.categoryId = ObjectId(categoryId);
-
+    // console.log('filter', req.body.myFilter);
+    let filter = {};
+    if (req.query.myFilter) {
+      const applyFilter = await Categories.findOne({}, '_id').where(
+        'description',
+        req.query.myFilter
+      );
+      if (!applyFilter) {
+        return res.status(400).send({
+          status: false,
+          message: 'Invalid Filter passed',
+        });
+      }
+      filter = { categoryId: applyFilter._id };
+    }
     let total = 0;
 
     if (!all) {
       page = page !== undefined && page !== '' ? parseInt(page) : 1;
       limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
 
-      total = await Collection.countDocuments(filter);
-      //console.log('totalcount===>', total);
+      total = await Collection.countDocuments({});
+
       if (total == 0) {
         return res.status(400).send({
           status: false,
@@ -308,57 +312,58 @@ exports.list = async (req, res, next) => {
     const pipeline = [
       {
         $match: filter,
+        //$match: { categoryId: ObjectId('616d7fe8fea5e26fe01de584') },
       },
       { $sort: { name: 1 } },
-      {
-        $lookup: {
-          from: 'categories',
-          foreignField: '_id',
-          localField: 'categoryId',
-          as: 'category',
-        },
-      },
-      {
-        $unwind: '$category',
-      },
-      {
-        $project: {
-          _id: 1,
-          name: 1,
-          logo: 1,
-          userId: 1,
-          featuredImg: { $ifNull: ['$featuredImg', collectionDefaultImage] },
-          category: {
-            _id: '$category._id',
-            name: '$category.name',
-          },
-        },
-      },
+      // {
+      //   $lookup: {
+      //     from: 'categories',
+      //     foreignField: '_id',
+      //     localField: 'categoryId',
+      //     as: 'category',
+      //   },
+      // },
+      // {
+      //   $unwind: '$category',
+      // },
+      //{
+      // $project: {
+      //   _id: 1,
+      //   name: 1,
+      //   logo: 1,
+      //   userId: 1,
+      //   featuredImg: { $ifNull: ['$featuredImg', collectionDefaultImage] },
+      // category: {
+      //   _id: '$category._id',
+      //   name: '$category.name',
+      // },
+      // },
+      //},
     ];
+    const newTotal = await Collection.aggregate(pipeline);
 
+    const totalRecords = newTotal.length;
     if (!all) {
       pipeline.push({ $skip: limit * (page - 1) });
       pipeline.push({ $limit: limit });
     }
-    console.log('pipeline===========>', pipeline);
-    console.log('limit===========>', limit);
-    console.log('page===========>', page);
-
     const collections = await Collection.aggregate(pipeline);
-    // console.log("collections.....@@@", collections);
-    const allcollections = await Collection.find();
-    console.log('length===========>', allcollections.length);
+
     return res.send({
       success: true,
       message: 'Collections fetched successfully',
-      count: total,
       data: {
-        collections: allcollections.length ? allcollections : null,
+        collections: collections.length ? collections : null,
 
-        // pagination: {
-        //     page, limit, total,
-        //     pages: Math.ceil(total / limit) <= 0 ? 1 : Math.ceil(total / limit)
-        // }
+        pagination: {
+          page,
+          limit,
+          totalRecords,
+          pages:
+            Math.ceil(totalRecords / limit) <= 0
+              ? 1
+              : Math.ceil(totalRecords / limit),
+        },
       },
     });
   } catch (error) {
@@ -447,5 +452,55 @@ exports.all = async (req, res, next) => {
     });
   } catch (error) {
     return next(error);
+  }
+};
+
+const getChatPagination = async (req, res) => {
+  const CHAT_PER_PAGE = 5;
+  let originalChats = await Chat.getUserChatByRole(req.user);
+  const baseUrl = req.protocol + '://' + req.get('host');
+
+  if (
+    originalChats.length >= req.params.pageNumber * CHAT_PER_PAGE &&
+    req.params.pageNumber > 0
+  ) {
+    let chats = originalChats.slice(
+      (req.params.pageNumber - 1) * CHAT_PER_PAGE,
+      req.params.pageNumber * CHAT_PER_PAGE
+    );
+    return res.status(SUCCESS_CODE).json({
+      data: {
+        chats,
+        hasNext: originalChats.length > req.params.pageNumber * CHAT_PER_PAGE,
+        nextPage:
+          originalChats.length > req.params.pageNumber * CHAT_PER_PAGE
+            ? `${baseUrl}/api/v1/chat/${parseInt(req.params.pageNumber) + 1}`
+            : null,
+      },
+    });
+  } else if (
+    (req.params.pageNumber - 1) * CHAT_PER_PAGE <= originalChats.length &&
+    req.params.pageNumber > 0
+  ) {
+    chats = originalChats.slice(
+      (req.params.pageNumber - 1) * CHAT_PER_PAGE,
+      originalChats.length
+    );
+    return res.status(SUCCESS_CODE).json({
+      data: {
+        chats,
+        hasNext: originalChats.length > req.params.pageNumber * CHAT_PER_PAGE,
+        nextPage:
+          originalChats.length > req.params.pageNumber * CHAT_PER_PAGE
+            ? `${baseUrl}/api/v1/chat/${parseInt(req.params.pageNumber) + 1}`
+            : null,
+      },
+    });
+  } else {
+    return res.status(SUCCESS_CODE).json({
+      data: {
+        chats: [],
+      },
+    });
   }
 };
