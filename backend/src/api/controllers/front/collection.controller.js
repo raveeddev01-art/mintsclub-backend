@@ -2,6 +2,8 @@ const fs = require('fs');
 const ObjectId = require('mongoose').Types.ObjectId;
 const NFT = require('../../models/nfts.model');
 const Collection = require('../../models/collection.model');
+const Categories = require('../../models/categories.model');
+
 const { addImage } = require('../../utils/upload');
 const { checkDuplicate } = require('../../../config/errors');
 const { collectionDefaultImage } = require('../../../config/vars');
@@ -15,55 +17,66 @@ exports.create = async (req, res, next) => {
       categoryId: req.body.categoryId,
       name: req.body.name,
       url: req.body.url,
-      logo: req.body.logo,
-      featuredImg: req.body.featuredImgUrl,
-      banner: req.body.bannerUrl,
       description: req.body.description,
       category: req.body.category,
     };
+    const { error } = validation.validateCollectionSchema(payload);
 
-    // const { error } = validation.validateCollectionSchema(payload);
+    if (error) {
+      let errorMsg = error.details[0].message;
+      return res.status(400).send({ status: false, data: errorMsg });
+    }
 
-    // if (error) {
-    //   let errorMsg = error.details[0].message;
-    //   return res.status(400).send({ status: false, data: errorMsg });
-    // }
+    imagesPayload = {
+      logo: req.body.logo,
+      featuredImg: req.body.featuredImgUrl,
+      banner: req.body.bannerUrl,
+    };
 
-    categoryArray = [
-      'art',
-      'collectibles',
-      'music',
-      'photography',
-      'sports',
-      'cards',
-      'utility',
-    ];
+    const newPayload = { ...payload, ...imagesPayload };
 
-    if (payload.category && !categoryArray.includes(payload.category)) {
+    const List = await Categories.find({}, 'description').where(
+      'status',
+      'true'
+    );
+
+    allNames = [];
+    categoryNames = List.map((value) => {
+      allNames.push(value.description);
+      return allNames;
+    });
+
+    if (newPayload.category && !allNames.includes(newPayload.category)) {
       return res.status(400).send({
-        success: false,
+        status: false,
         message: 'Please provide valid category',
       });
     }
+    categoryId = await Categories.findOne({}, '_id').where(
+      'description',
+      newPayload.category
+    );
+
+    newPayload.categoryId = categoryId._id;
+
     if (req.files)
       // console.log(payload,"payload")
       for (const key in req.files) {
         const image = req.files[key][0];
         const imgData = fs.readFileSync(image.path);
-        payload[key] = await addImage(imgData);
+        newPayload[key] = await addImage(imgData);
       }
 
-    if (!payload.userId || !payload.name || !payload.logo) {
+    if (!newPayload.logo) {
       return res.status(400).send({
         success: false,
-        message: 'Please provide all required fields',
+        message: 'logo image is required',
       });
     }
-
     // check user existing collection
     const existingCollection = await Collection.findOne({
-      name: new RegExp(payload.name, 'gi'),
-      userId: payload.userId,
+      name: new RegExp(newPayload.name, 'gi'),
+      userId: newPayload.userId,
     });
 
     if (existingCollection) {
@@ -73,8 +86,7 @@ exports.create = async (req, res, next) => {
       });
     }
 
-    const collection = await Collection.create(payload);
-    // console.log(collection,"collection==========>")
+    const collection = await Collection.create(newPayload);
     return res.status(200).send({
       success: true,
       message: 'Collection created successfully',
@@ -90,35 +102,77 @@ exports.create = async (req, res, next) => {
 // API to edit collection
 exports.edit = async (req, res, next) => {
   try {
-    //let payload = req.body;
     let payload = {
       userId: req.body.userId,
       _id: req.body._id,
+      categoryId: req.body.categoryId,
+      name: req.body.name,
+      url: req.body.url,
+      description: req.body.description,
+      category: req.body.category,
     };
+
     const { error } = validation.validateEditCollectionSchema(payload);
 
     if (error) {
       let errorMsg = error.details[0].message;
       return res.status(400).send({ status: false, data: errorMsg });
     }
+    imagesPayload = {
+      logo: req.body.logo,
+      featuredImg: req.body.featuredImgUrl,
+      banner: req.body.bannerUrl,
+    };
+
+    const newPayload = { ...payload, ...imagesPayload };
+
+    const List = await Categories.find({}, 'description').where(
+      'status',
+      'true'
+    );
+
+    allNames = [];
+    categoryNames = List.map((value) => {
+      allNames.push(value.description);
+      return allNames;
+    });
+
+    if (newPayload.category && !allNames.includes(newPayload.category)) {
+      return res.status(400).send({
+        status: false,
+        message: 'Please provide valid category',
+      });
+    }
+    categoryId = await Categories.findOne({}, '_id').where(
+      'description',
+      newPayload.category
+    );
+
+    newPayload.categoryId = categoryId._id;
 
     if (req.files)
       for (const key in req.files) {
         const image = req.files[key][0];
         const imgData = fs.readFileSync(image.path);
-        payload[key] = await addImage(imgData);
+        newPayload[key] = await addImage(imgData);
       }
 
+    if (!newPayload.logo) {
+      return res.status(400).send({
+        success: false,
+        message: 'logo image is required',
+      });
+    }
     // TEMP appending userId
     // payload.userId = '61408000cef27850fdea272b'
 
     // if name is given then check user existing collection
 
-    if (payload.name) {
+    if (newPayload.name) {
       const existingCollection = await Collection.findOne({
-        _id: { $ne: payload._id },
-        name: new RegExp(payload.name, 'gi'),
-        userId: payload.userId,
+        _id: { $ne: newPayload._id },
+        name: new RegExp(newPayload.name, 'gi'),
+        userId: newPayload.userId,
       });
       if (existingCollection)
         return res.status(400).send({
@@ -128,8 +182,8 @@ exports.edit = async (req, res, next) => {
     }
 
     const collection = await Collection.findByIdAndUpdate(
-      { _id: payload._id },
-      { $set: payload },
+      { _id: newPayload._id },
+      { $set: newPayload },
       { new: true }
     );
     return res.send({
@@ -240,7 +294,13 @@ exports.list = async (req, res, next) => {
       limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
 
       total = await Collection.countDocuments(filter);
-      console.log('totalcount===>', total);
+      //console.log('totalcount===>', total);
+      if (total == 0) {
+        return res.status(400).send({
+          status: false,
+          message: 'No Collections Found',
+        });
+      }
       if (page > Math.ceil(total / limit) && total > 0)
         page = Math.ceil(total / limit);
     }
@@ -291,6 +351,7 @@ exports.list = async (req, res, next) => {
     return res.send({
       success: true,
       message: 'Collections fetched successfully',
+      count: total,
       data: {
         collections: allcollections.length ? allcollections : null,
 
