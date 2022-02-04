@@ -112,83 +112,83 @@ exports.get = async (req, res, next) => {
         const { nftId } = req.params
         let wholeData = await NFT.findOne({ _id: nftId })
         // console.log(wholeData,"testNft===>data")
-        const nft = await NFT.aggregate([
-            {
-                $match: { _id: ObjectId(nftId) }
-            },
-            {
-                $lookup: {
-                    from: 'users',
-                    foreignField: '_id',
-                    localField: 'creatorId',
-                    as: 'creator'
-                }
-            },
-            // {
-            //     $unwind: '$creator'
-            // },
-            {
-                $lookup: {
-                    from: 'users',
-                    foreignField: '_id',
-                    localField: 'ownerId',
-                    as: 'owner'
-                }
-            },
-            // {
-            //     $unwind: '$owner'
-            // },
-            {
-                $lookup: {
-                    from: 'collections',
-                    foreignField: '_id',
-                    localField: 'collectionId',
-                    as: 'collection'
-                }
-            },
-            {
-                $unwind: '$collection'
-            },
-            // {collection
-            //         from: 'bids',
-            //         foreignField: 'nftId',
-            //         localField: '_id',
-            //         as: 'bids'
-            //     }
-            // },
-            {
-                $project: {
-                    _id: 1, name: 1, description: 1, image: 1, createdAt: 1, sellingMethod: 1,nftOwnerId:1,
-                    size: { $ifNull: ['$size', 'N/A'] },
-                    sold: 1, copies: 1, currentPrice: 1,
-                    auctionEndDate: 1,
-                    // creator: {
-                    //     _id: '$creator._id',
-                    //     username: '$creator.username',
-                    //     profilePhoto: { $ifNull: ['$creator.profilePhoto', userDefaultImage] }
-                    // },
-                    // owner: {
-                    //     _id: '$owner._id',
-                    //     username: '$owner.username',
-                    //     profilePhoto: { $ifNull: ['$owner.profilePhoto', userDefaultImage] }
-                    // },
-                    collection: {
-                        _id: '$collection._id',
-                        name: '$collection.name',
-                        image: { $ifNull: ['$collection.featuredImg', collectionDefaultImage] },
-                        userId: '$collection.userId'
-                    },
-                    // highestBidAmt: { $max: '$bids.price.amount' }
-                },
-            }
-        ])
+        // const nft = await NFT.aggregate([
+        //     {
+        //         $match: { _id: ObjectId(nftId) }
+        //     },
+        //     {
+        //         $lookup: {
+        //             from: 'users',
+        //             foreignField: '_id',
+        //             localField: 'creatorId',
+        //             as: 'creator'
+        //         }
+        //     },
+        //     // {
+        //     //     $unwind: '$creator'
+        //     // },
+        //     {
+        //         $lookup: {
+        //             from: 'users',
+        //             foreignField: '_id',
+        //             localField: 'ownerId',
+        //             as: 'owner'
+        //         }
+        //     },
+        //     // {
+        //     //     $unwind: '$owner'
+        //     // },
+        //     {
+        //         $lookup: {
+        //             from: 'collections',
+        //             foreignField: '_id',
+        //             localField: 'collectionId',
+        //             as: 'collection'
+        //         }
+        //     },
+        //     {
+        //         $unwind: '$collection'
+        //     },
+        //     // {collection
+        //     //         from: 'bids',
+        //     //         foreignField: 'nftId',
+        //     //         localField: '_id',
+        //     //         as: 'bids'
+        //     //     }
+        //     // },
+        //     {
+        //         $project: {
+        //             _id: 1, name: 1, description: 1, image: 1, createdAt: 1, sellingMethod: 1,nftOwnerId:1,
+        //             size: { $ifNull: ['$size', 'N/A'] },
+        //             sold: 1, copies: 1, currentPrice: 1,
+        //             auctionEndDate: 1,
+        //             // creator: {
+        //             //     _id: '$creator._id',
+        //             //     username: '$creator.username',
+        //             //     profilePhoto: { $ifNull: ['$creator.profilePhoto', userDefaultImage] }
+        //             // },
+        //             // owner: {
+        //             //     _id: '$owner._id',
+        //             //     username: '$owner.username',
+        //             //     profilePhoto: { $ifNull: ['$owner.profilePhoto', userDefaultImage] }
+        //             // },
+        //             collection: {
+        //                 _id: '$collection._id',
+        //                 name: '$collection.name',
+        //                 image: { $ifNull: ['$collection.featuredImg', collectionDefaultImage] },
+        //                 userId: '$collection.userId'
+        //             },
+        //             // highestBidAmt: { $max: '$bids.price.amount' }
+        //         },
+        //     }
+        // ])
 
         // console.log(nft,"it's the retrieved nft")
 
         return res.send(
             { success: true,
                  message: 'Item retrieved successfully',
-                  nft: nft.length ? nft[0] : null ,
+                //   nft: nft.length ? nft[0] : null ,
                   allData:wholeData
                 }
             )
@@ -201,13 +201,20 @@ exports.get = async (req, res, next) => {
 // API to get NFTs list
 exports.list = async (req, res, next) => {
     try {
-        let { page, limit, collectionId, explore } = req.query
-        // console.log(explore,"explore==>")
+        let { page, limit, collectionId, explore ,gtePrice,ltePrice,categoryId,oldest,lowToHigh,newest} = req.query
+
+       console.log(req.query,"query")
+       console.log(limit,"limit in start")
+       console.log(page,"page")
+      
+        console.log( gtePrice,"gtePrice")
         const userId = req.user
         let filter = {
-            status: { $ne: 0}
+            status: { $ne: 0},
+          ...gtePrice&&{ currentPrice:{$gte:Number(gtePrice),$lte:Number(ltePrice)}},
+           ...collectionId && {collectionId},
+           ...categoryId && {categoryId}  
         }
-
         // get NFTs for given collection 
         if (collectionId)
             filter.collectionId = ObjectId(collectionId)
@@ -232,49 +239,42 @@ exports.list = async (req, res, next) => {
 
         page = page !== undefined && page !== '' ? parseInt(page) : 1
         limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
+        console.log(limit,"limti testing")
 
         const total = await NFT.countDocuments(filter)
 
         const nfts = await NFT.aggregate([
-            { $match: filter },
-            { $sort: { createdAt: -1 } },
+            { $match:  filter },
+            { $sort: {createdAt: -1,...oldest && {createdAt: 1},...lowToHigh &&{currentPrice:1},...highToLow && {currentPrice:-1} } },
             { $skip: limit * (page - 1) },
             { $limit: limit },
-            {
-                $lookup: {
-                    from: 'users',
-                    foreignField: '_id',
-                    localField: 'ownerId',
-                    as: 'owner'
-                }
-            },
+            // {
+            //     $lookup: {
+            //         from: 'users',
+            //         foreignField: '_id',
+            //         localField: 'ownerId',
+            //         as: 'owner'
+            //     }
+            // },
             // {
             //     $unwind: '$owner'
             // },
-            {
-                $project: {
-                    name: 1, image: 1, sold: 1, copies: 1, currentPrice: 1,collectionId:1,currentPrice:1,description:1,royalty:1,size:1,userId,
-                    owner: {
-                        _id: '$owner._id',
-                        username: '$owner.username',
-                        profilePhoto: { $ifNull: ['$owner.profilePhoto', userDefaultImage] }
-                    }
-                }
-            }
+            // {
+            //     $project: {
+            //         name: 1, image: 1, sold: 1, copies: 1, currentPrice: 1,collectionId:1,currentPrice:1,description:1,royalty:1,size:1,userId,
+            //         owner: {
+            //             _id: '$owner._id',
+            //             username: '$owner.username',
+            //             profilePhoto: { $ifNull: ['$owner.profilePhoto', userDefaultImage] }
+            //         }
+            //     }
+            // }
         ])
-        const wholeData = await NFT.find({
-            status: { $ne: 0}
-        })
-
-
-
-        // console.log(wholeData,"nfts fetched ");
-// nfts.push(wholeData)
+     
         return res.send({
             success: true, message: 'NFTs fetched successfully',
             data: {
-                nfts:wholeData,
-                allData:wholeData,
+                nfts:nfts,
                 pagination: {
                     page, limit, total,
                     pages: Math.ceil(total / limit) <= 0 ? 1 : Math.ceil(total / limit)

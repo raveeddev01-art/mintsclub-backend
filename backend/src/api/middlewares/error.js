@@ -24,6 +24,7 @@ const handler = (err, req, res, next) => {
 };
 exports.handler = handler;
 
+
 /**
  * If error is not an instanceOf APIError, convert it.
  * @public

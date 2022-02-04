@@ -11,7 +11,10 @@ exports.register = async (req, res, next) => {
       email: req.body.email,
     };
 
+    console.log(payload,"payload")
+
     const { error } = validation.validateSignUpSchema(payload);
+    console.log(error,"error")
 
     if (error) {
       let errorMsg = error.details[0].message;
@@ -44,6 +47,7 @@ exports.register = async (req, res, next) => {
       data: data,
     });
   } catch (error) {
+    console.log("catch",error)
     next(error);
   }
 };
