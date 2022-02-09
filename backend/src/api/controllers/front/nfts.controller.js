@@ -1,6 +1,7 @@
 const fs = require('fs');
 const moment = require('moment');
 const User = require('../../models/users.model');
+const Collection = require('../../models/collection.model');
 const NFT = require('../../models/nfts.model');
 const NftTokens = require('../../models/nftTokens.model');
 const { addImage, addContent } = require('../../utils/upload');
@@ -97,7 +98,14 @@ exports.storeDataInDb = async (req, res, next) => {
     createNFTPayload.image = req.body.image;
 
     const nft = await NFT.create(createNFTPayload);
-
+    if (nft) {
+      //req.body.data.collectionId
+      let collectionRecord = await Collection.findOne({
+        _id: req.body.data.collectionId,
+      });
+      collectionRecord.nft.push(nft._id);
+      collectionRecord.save();
+    }
     //create nft token
     let nftTokenPayload = {
       nftToken: req.body.nftToken,
