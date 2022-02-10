@@ -4,21 +4,22 @@ const mongoose = require('mongoose');
  * NFT Schema
  * @private
  */
-const NFTSchema = new mongoose.Schema({
+const NFTSchema = new mongoose.Schema(
+  {
     name: { type: String },
     description: { type: String },
     creatorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    nftOwnerId:{type:String},
+    nftOwnerId: { type: String },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     // categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
     collectionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Collection' },
     currentPrice: { type: Number },
-    ownerAddress:{type:String},
+    ownerAddress: { type: String },
     txHash: { type: String },
     image: { type: String },
     royalty: { type: String },
-    size: { type: String },
+    //size: { type: String },
     copies: { type: Number, default: 0 },
     status: { type: Number, default: 1 }, // 1 = Put on Sale, 2 = Instant Sale Price, 3 = Unlock Purchased
     sold: { type: Number, default: 0 },
@@ -29,7 +30,8 @@ const NFTSchema = new mongoose.Schema({
     auctionStartTime: { type: String },
     auctionEndTime: { type: String },
     metaData: { type: String }, // ipfs link
-}, { timestamps: true }
+  },
+  { timestamps: true }
 );
 
 /**

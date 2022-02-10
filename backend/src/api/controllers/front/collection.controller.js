@@ -3,6 +3,7 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const NFT = require('../../models/nfts.model');
 const Collection = require('../../models/collection.model');
 const Categories = require('../../models/categories.model');
+const Likes = require('../../models/likes.model');
 
 const { addImage } = require('../../utils/upload');
 const { checkDuplicate } = require('../../../config/errors');
@@ -273,6 +274,17 @@ exports.get = async (req, res, next) => {
 exports.list = async (req, res, next) => {
   console.log("reached to the api")
   try {
+    //const countNft = NFT.aggregate([
+    // { $group: { collectionId: '$collectionId', count: { $sum: 1 } } },
+    //   { $group: { _id: { collectionId: '$collectionId' } } },
+    // ]);
+
+    // const countNft = await NFT.aggregate([
+    //   { $group: { _id: '$collectionId', nftCount: { $sum: 1 } } },
+    // ]);
+
+    //    console.log('countNft', JSON.stringify(countNft));
+
     let { page, limit, myFilter, all, userId } = req.query;
     // let userId = req.user
     // if (!userId)
@@ -318,6 +330,7 @@ exports.list = async (req, res, next) => {
         //$match: { categoryId: ObjectId('616d7fe8fea5e26fe01de584') },
       },
       { $sort: { name: 1 } },
+      // { $group: { _id: '$collectionId', nftCount: { $sum: 1 } } },
       // {
       //   $lookup: {
       //     from: 'categories',
@@ -351,6 +364,18 @@ exports.list = async (req, res, next) => {
       pipeline.push({ $limit: limit });
     }
     const collections = await Collection.aggregate(pipeline);
+    for (const collection of collections) {
+      if (collection.nft) {
+        collection.NFTCount = collection.nft.length;
+      }
+      const findCount = await Likes.findOne().where(
+        'collectionId',
+        collection._id
+      );
+      if (findCount) {
+        collection.likeCount = findCount.count;
+      }
+    }
 
     return res.send({
       success: true,
@@ -373,6 +398,7 @@ exports.list = async (req, res, next) => {
     return next(error);
   }
 };
+
 exports.all = async (req, res, next) => {
   console.log("all")
   try {

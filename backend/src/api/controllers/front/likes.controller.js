@@ -1,5 +1,5 @@
-const LikesModal = require("../../models/likes.model");
-var ObjectId = require("mongodb").ObjectId;
+const LikesModal = require('../../models/likes.model');
+var ObjectId = require('mongodb').ObjectId;
 
 exports.likeDislike = async (req, res, next) => {
   let collectionId = req.body.collectionId;
@@ -16,13 +16,13 @@ exports.likeDislike = async (req, res, next) => {
         //error
 
         if (err) {
-          console.log("error", err);
+          console.log('error', err);
         }
 
         //if user exist then delete that record
 
         if (user) {
-          console.log("found user");
+          console.log('found user');
           await LikesModal.updateOne(
             { collectionId: new ObjectId(collectionId) },
             { $inc: { count: -1 } }
@@ -37,7 +37,7 @@ exports.likeDislike = async (req, res, next) => {
         }
         //if user not found then insert a user like
         else {
-          console.log("user not found inserting one");
+          console.log('user not found inserting one');
 
           let data = {
             userId,
@@ -55,13 +55,11 @@ exports.likeDislike = async (req, res, next) => {
               { $push: { likes: data } },
               { new: true, upsert: true }
             ).exec();
-            res
-              .status(200)
-              .send({
-                success: true,
-                message: "record updated successfully",
-                result: insertedLike,
-              });
+            res.status(200).send({
+              success: true,
+              message: 'record updated successfully',
+              result: insertedLike,
+            });
           } catch (err) {
             res.status(200).send(err);
           }
@@ -71,7 +69,7 @@ exports.likeDislike = async (req, res, next) => {
   }
   //if collecton not found
   else {
-    console.log("colleciton not found inserting one");
+    console.log('colleciton not found inserting one');
     let data = {
       collectionId,
       count,
