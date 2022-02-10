@@ -272,7 +272,7 @@ exports.get = async (req, res, next) => {
 
 // API to get collection list
 exports.list = async (req, res, next) => {
-  console.log("reached to the api")
+  console.log('reached to the api');
   try {
     //const countNft = NFT.aggregate([
     // { $group: { collectionId: '$collectionId', count: { $sum: 1 } } },
@@ -322,7 +322,7 @@ exports.list = async (req, res, next) => {
         page = Math.ceil(total / limit);
     }
 
-    console.log(filter,"filter for collection")
+    console.log(filter, 'filter for collection');
 
     const pipeline = [
       {
@@ -400,7 +400,7 @@ exports.list = async (req, res, next) => {
 };
 
 exports.all = async (req, res, next) => {
-  console.log("all")
+  console.log('all');
   try {
     let { page, limit, categoryId, all, userId } = req.query;
     // console.log(userId,"userId===>")
@@ -532,5 +532,35 @@ const getChatPagination = async (req, res) => {
         chats: [],
       },
     });
+  }
+};
+
+// API to get my collections list
+exports.myCollectionList = async (req, res, next) => {
+  try {
+    let { userId } = req.query;
+
+    if (!userId)
+      return res
+        .status(400)
+        .send({ status: false, message: 'Please Sign In First' });
+
+    const myCollections = await Collection.find({}).where('userId', userId);
+
+    if (myCollections.length != 0) {
+      return res.status(200).send({
+        status: true,
+        message: 'My Collections fetched successfully',
+        data: {
+          collections: myCollections,
+        },
+      });
+    }
+    return res.status(400).send({
+      status: false,
+      message: 'No collection Found',
+    });
+  } catch (error) {
+    return next(error);
   }
 };
