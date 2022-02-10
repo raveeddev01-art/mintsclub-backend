@@ -58,8 +58,8 @@ exports.create = async (req, res, next) => {
       newPayload.category
     );
 
-    newPayload.categoryId = categoryId._id;
-
+    newPayload.categoryId = newPayload.category ? categoryId._id : null;
+    // collections.length ? collections : null,
     if (req.files)
       // console.log(payload,"payload")
       for (const key in req.files) {
