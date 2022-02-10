@@ -6,12 +6,13 @@ const mongoose = require("mongoose");
  */
 const LikesSchema = new mongoose.Schema(
   {
-    collectionId: { type: String },
+    nftId: { type: String },
     count:{type:Number},
     likes: [{userId: String }],
   },
   { timestamps: true }
 );
+
 
 /**
  * @typedef LikesSchema

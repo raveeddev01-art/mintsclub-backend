@@ -2,11 +2,14 @@ const LikesModal = require('../../models/likes.model');
 var ObjectId = require('mongodb').ObjectId;
 
 exports.likeDislike = async (req, res, next) => {
-  let collectionId = req.body.collectionId;
+ 
+  let nftId = req.body.nftId;
   let userId = req.body.userId;
   let count = req.body.count;
+  console.log(req.body,"body")
 
-  let foundCollection = await LikesModal.find({ collectionId });
+
+  let foundCollection = await LikesModal.find({ nftId });
 
   if (foundCollection[0]) {
     //find if user already exist
@@ -24,12 +27,12 @@ exports.likeDislike = async (req, res, next) => {
         if (user) {
           console.log('found user');
           await LikesModal.updateOne(
-            { collectionId: new ObjectId(collectionId) },
+            { nftId: new ObjectId(nftId) },
             { $inc: { count: -1 } }
           ).exec();
 
           let result = await LikesModal.updateOne(
-            { collectionId: new ObjectId(collectionId) },
+            { nftId: new ObjectId(nftId) },
             { $pull: { likes: { userId: new ObjectId(userId) } } },
             { multi: true }
           );
@@ -44,14 +47,14 @@ exports.likeDislike = async (req, res, next) => {
           };
           try {
             await LikesModal.updateOne(
-              { collectionId: new ObjectId(collectionId) },
+              { nftId: new ObjectId(nftId) },
               { $inc: { count: 1 } },
 
               { new: true, upsert: true }
             ).exec();
 
             let insertedLike = await LikesModal.updateOne(
-              { collectionId: new ObjectId(collectionId) },
+              { nftId: new ObjectId(nftId) },
               { $push: { likes: data } },
               { new: true, upsert: true }
             ).exec();
@@ -71,7 +74,7 @@ exports.likeDislike = async (req, res, next) => {
   else {
     console.log('colleciton not found inserting one');
     let data = {
-      collectionId,
+      nftId,
       count,
       likes: [
         {

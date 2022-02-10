@@ -32,5 +32,5 @@ router.use('/contact', contactRoutes);
 router.use('/nftTokens', nftTokenRoutes);
 router.use('/nftFixedTokens', fixedPriceTokens);
 router.use('/otpVerification', verificationRoute);
-router.use('/collectionLikes', likesRoutes);
+router.use('/nftLikes', likesRoutes);
 module.exports = router;

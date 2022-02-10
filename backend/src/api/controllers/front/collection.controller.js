@@ -12,6 +12,7 @@ const validation = require('../../middlewares/front/collectionValidation');
 
 // API to create collection
 exports.create = async (req, res, next) => {
+  console.log(req.body,"req.body in collection")
   try {
     let payload = {
       userId: req.body.userId,
