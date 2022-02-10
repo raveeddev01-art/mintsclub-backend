@@ -10,3 +10,4 @@ router.route('/get/:collectionId').get(controller.get);
 router.route('/list').get(controller.list);
 
 module.exports = router;
+

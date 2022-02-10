@@ -201,7 +201,7 @@ exports.get = async (req, res, next) => {
 // API to get NFTs list
 exports.list = async (req, res, next) => {
     try {
-        let { page, limit, collectionId, explore ,gtePrice,ltePrice,categoryId,oldest,lowToHigh,newest} = req.query
+        let { page, limit, collectionId, explore ,gtePrice,ltePrice,categoryId,oldest,lowToHigh,newest,highToLow} = req.query
 
        console.log(req.query,"query")
        console.log(limit,"limit in start")

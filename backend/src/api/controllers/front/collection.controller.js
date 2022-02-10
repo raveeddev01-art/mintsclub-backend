@@ -271,6 +271,7 @@ exports.get = async (req, res, next) => {
 
 // API to get collection list
 exports.list = async (req, res, next) => {
+  console.log("reached to the api")
   try {
     let { page, limit, myFilter, all, userId } = req.query;
     // let userId = req.user
@@ -308,6 +309,8 @@ exports.list = async (req, res, next) => {
       if (page > Math.ceil(total / limit) && total > 0)
         page = Math.ceil(total / limit);
     }
+
+    console.log(filter,"filter for collection")
 
     const pipeline = [
       {
@@ -371,6 +374,7 @@ exports.list = async (req, res, next) => {
   }
 };
 exports.all = async (req, res, next) => {
+  console.log("all")
   try {
     let { page, limit, categoryId, all, userId } = req.query;
     // console.log(userId,"userId===>")
