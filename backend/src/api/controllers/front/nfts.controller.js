@@ -312,91 +312,114 @@ exports.get = async (req, res, next) => {
 
 // API to get NFTs list
 exports.list = async (req, res, next) => {
-    try {
-        let { page, limit, collectionId, explore ,gtePrice,ltePrice,categoryId,oldest,lowToHigh,newest,highToLow} = req.query
+  try {
+    let {
+      page,
+      limit,
+      collectionId,
+      explore,
+      gtePrice,
+      ltePrice,
+      categoryId,
+      oldest,
+      lowToHigh,
+      newest,
+      highToLow,
+    } = req.query;
 
-       console.log(req.query,"query")
-       console.log(limit,"limit in start")
-       console.log(page,"page")
-      
-        console.log( gtePrice,"gtePrice")
-        const userId = req.user
-        let filter = {
-            status: { $ne: 0},
-          ...gtePrice&&{ currentPrice:{$gte:Number(gtePrice),$lte:Number(ltePrice)}},
-           ...collectionId && {collectionId},
-           ...categoryId && {categoryId}  
-        }
-        // get NFTs for given collection 
-        if (collectionId)
-            filter.collectionId = ObjectId(collectionId)
+    console.log(req.query, 'query');
+    console.log(limit, 'limit in start');
+    console.log(page, 'page');
 
-        // COMMENTED TEMP.
-        // explore exclusive assets
-        // if (explore) {
-        //     filter = {
-        //         $or: [
-        //             { creatorId: ObjectId(userId) },
-        //             {
-        //                 $or: [
-        //                     { sellingMethod: 1 },
-        //                     { sellingMethod: 2 }
-        //                 ],
-        //                 auctionStartDate: { $lt: new Date(moment().add(1, 'days').format('YYYY/MM/DD')) },
-        //                 auctionEndDate: { $gte: new Date(moment().format('YYYY/MM/DD')) }
-        //             }
-        //         ]
-        //     }
-        // }
+    console.log(gtePrice, 'gtePrice');
+    const userId = req.user;
+    let filter = {
+      status: { $ne: 0 },
+      ...(gtePrice && {
+        currentPrice: { $gte: Number(gtePrice), $lte: Number(ltePrice) },
+      }),
+      ...(collectionId && { collectionId }),
+      ...(categoryId && { categoryId }),
+    };
+    // get NFTs for given collection
+    if (collectionId) filter.collectionId = ObjectId(collectionId);
 
-        page = page !== undefined && page !== '' ? parseInt(page) : 1
-        limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
-        console.log(limit,"limti testing")
+    // COMMENTED TEMP.
+    // explore exclusive assets
+    // if (explore) {
+    //     filter = {
+    //         $or: [
+    //             { creatorId: ObjectId(userId) },
+    //             {
+    //                 $or: [
+    //                     { sellingMethod: 1 },
+    //                     { sellingMethod: 2 }
+    //                 ],
+    //                 auctionStartDate: { $lt: new Date(moment().add(1, 'days').format('YYYY/MM/DD')) },
+    //                 auctionEndDate: { $gte: new Date(moment().format('YYYY/MM/DD')) }
+    //             }
+    //         ]
+    //     }
+    // }
 
-        const total = await NFT.countDocuments(filter)
+    page = page !== undefined && page !== '' ? parseInt(page) : 1;
+    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
+    console.log(limit, 'limti testing');
 
-        const nfts = await NFT.aggregate([
-            { $match:  filter },
-            { $sort: {createdAt: -1,...oldest && {createdAt: 1},...lowToHigh &&{currentPrice:1},...highToLow && {currentPrice:-1} } },
-            { $skip: limit * (page - 1) },
-            { $limit: limit },
-            // {
-            //     $lookup: {
-            //         from: 'users',
-            //         foreignField: '_id',
-            //         localField: 'ownerId',
-            //         as: 'owner'
-            //     }
-            // },
-            // {
-            //     $unwind: '$owner'
-            // },
-            // {
-            //     $project: {
-            //         name: 1, image: 1, sold: 1, copies: 1, currentPrice: 1,collectionId:1,currentPrice:1,description:1,royalty:1,size:1,userId,
-            //         owner: {
-            //             _id: '$owner._id',
-            //             username: '$owner.username',
-            //             profilePhoto: { $ifNull: ['$owner.profilePhoto', userDefaultImage] }
-            //         }
-            //     }
-            // }
-        ])
-     
-        return res.send({
-            success: true, message: 'NFTs fetched successfully',
-            data: {
-                nfts:nfts,
-                pagination: {
-                    page, limit, total,
-                    pages: Math.ceil(total / limit) <= 0 ? 1 : Math.ceil(total / limit)
-                }
-            }
-        })
-    } catch (error) {
-        return next(error)
-    }
-}
+    const total = await NFT.countDocuments(filter);
+
+    const nfts = await NFT.aggregate([
+      { $match: filter },
+      {
+        $sort: {
+          createdAt: -1,
+          ...(oldest && { createdAt: 1 }),
+          ...(lowToHigh && { currentPrice: 1 }),
+          ...(highToLow && { currentPrice: -1 }),
+        },
+      },
+      { $skip: limit * (page - 1) },
+      { $limit: limit },
+      // {
+      //     $lookup: {
+      //         from: 'users',
+      //         foreignField: '_id',
+      //         localField: 'ownerId',
+      //         as: 'owner'
+      //     }
+      // },
+      // {
+      //     $unwind: '$owner'
+      // },
+      // {
+      //     $project: {
+      //         name: 1, image: 1, sold: 1, copies: 1, currentPrice: 1,collectionId:1,currentPrice:1,description:1,royalty:1,size:1,userId,
+      //         owner: {
+      //             _id: '$owner._id',
+      //             username: '$owner.username',
+      //             profilePhoto: { $ifNull: ['$owner.profilePhoto', userDefaultImage] }
+      //         }
+      //     }
+      // }
+    ]);
+
+    return res.send({
+      success: true,
+      message: 'NFTs fetched successfully',
+      data: {
+        nfts: nfts,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit) <= 0 ? 1 : Math.ceil(total / limit),
+        },
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
 
 exports.editNft = async (req, res, next) => {
   try {
@@ -506,6 +529,61 @@ exports.delete = async (req, res, next) => {
       return res
         .status(400)
         .send({ status: false, message: 'NFT Id is required' });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+// API to get user NFTs listing
+exports.myNftListing = async (req, res, next) => {
+  try {
+    let { userId, page, limit } = req.query;
+
+    page = page !== undefined && page !== '' ? parseInt(page) : 1;
+    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
+
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+
+    if (!userId)
+      return res
+        .status(400)
+        .send({ status: false, message: 'Please Sign In First' });
+
+    const myNfts = await NFT.find({})
+      .where('userId', userId)
+      .populate('collectionId', 'name');
+
+    if (myNfts.length == 0) {
+      return res.status(400).send({
+        status: false,
+        message: 'No NFT Found',
+      });
+    }
+
+    let data = {};
+
+    data.totalRecords = myNfts.length;
+
+    if (endIndex < myNfts.length) {
+      data.next = {
+        page: page + 1,
+        limit: limit,
+      };
+    }
+    if (startIndex > 0) {
+      data.previous = {
+        page: page - 1,
+        limit: limit,
+      };
+    }
+    data.NFTs = myNfts.slice(startIndex, endIndex);
+
+    return res.status(200).send({
+      status: true,
+      message: 'My NFTs fetched successfully',
+      data,
+    });
   } catch (error) {
     return next(error);
   }

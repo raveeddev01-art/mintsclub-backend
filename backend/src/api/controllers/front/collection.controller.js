@@ -12,7 +12,7 @@ const validation = require('../../middlewares/front/collectionValidation');
 
 // API to create collection
 exports.create = async (req, res, next) => {
-  console.log(req.body,"req.body in collection")
+  console.log(req.body, 'req.body in collection');
   try {
     let payload = {
       userId: req.body.userId,
@@ -273,24 +273,9 @@ exports.get = async (req, res, next) => {
 
 // API to get collection list
 exports.list = async (req, res, next) => {
-  console.log('reached to the api');
   try {
-    //const countNft = NFT.aggregate([
-    // { $group: { collectionId: '$collectionId', count: { $sum: 1 } } },
-    //   { $group: { _id: { collectionId: '$collectionId' } } },
-    // ]);
-
-    // const countNft = await NFT.aggregate([
-    //   { $group: { _id: '$collectionId', nftCount: { $sum: 1 } } },
-    // ]);
-
-    //    console.log('countNft', JSON.stringify(countNft));
-
     let { page, limit, myFilter, all, userId } = req.query;
-    // let userId = req.user
-    // if (!userId)
-    //     return res.status(400).send({ success: false, message: 'Please Sign In First' })
-    // console.log('filter', req.body.myFilter);
+
     let filter = {};
     if (req.query.myFilter) {
       const applyFilter = await Categories.findOne({}, '_id').where(
@@ -328,34 +313,8 @@ exports.list = async (req, res, next) => {
     const pipeline = [
       {
         $match: filter,
-        //$match: { categoryId: ObjectId('616d7fe8fea5e26fe01de584') },
       },
       { $sort: { name: 1 } },
-      // { $group: { _id: '$collectionId', nftCount: { $sum: 1 } } },
-      // {
-      //   $lookup: {
-      //     from: 'categories',
-      //     foreignField: '_id',
-      //     localField: 'categoryId',
-      //     as: 'category',
-      //   },
-      // },
-      // {
-      //   $unwind: '$category',
-      // },
-      //{
-      // $project: {
-      //   _id: 1,
-      //   name: 1,
-      //   logo: 1,
-      //   userId: 1,
-      //   featuredImg: { $ifNull: ['$featuredImg', collectionDefaultImage] },
-      // category: {
-      //   _id: '$category._id',
-      //   name: '$category.name',
-      // },
-      // },
-      //},
     ];
     const newTotal = await Collection.aggregate(pipeline);
 
@@ -404,10 +363,6 @@ exports.all = async (req, res, next) => {
   console.log('all');
   try {
     let { page, limit, categoryId, all, userId } = req.query;
-    // console.log(userId,"userId===>")
-    // let userId = req.user
-    // console.log("userId------@", userId);
-    // console.log("category------@", req.categoryId)
     // if (!userId)
     //     return res.status(400).send({ success: false, message: 'Please Sign In First' })
 
@@ -486,80 +441,65 @@ exports.all = async (req, res, next) => {
   }
 };
 
-const getChatPagination = async (req, res) => {
-  const CHAT_PER_PAGE = 5;
-  let originalChats = await Chat.getUserChatByRole(req.user);
-  const baseUrl = req.protocol + '://' + req.get('host');
-
-  if (
-    originalChats.length >= req.params.pageNumber * CHAT_PER_PAGE &&
-    req.params.pageNumber > 0
-  ) {
-    let chats = originalChats.slice(
-      (req.params.pageNumber - 1) * CHAT_PER_PAGE,
-      req.params.pageNumber * CHAT_PER_PAGE
-    );
-    return res.status(SUCCESS_CODE).json({
-      data: {
-        chats,
-        hasNext: originalChats.length > req.params.pageNumber * CHAT_PER_PAGE,
-        nextPage:
-          originalChats.length > req.params.pageNumber * CHAT_PER_PAGE
-            ? `${baseUrl}/api/v1/chat/${parseInt(req.params.pageNumber) + 1}`
-            : null,
-      },
-    });
-  } else if (
-    (req.params.pageNumber - 1) * CHAT_PER_PAGE <= originalChats.length &&
-    req.params.pageNumber > 0
-  ) {
-    chats = originalChats.slice(
-      (req.params.pageNumber - 1) * CHAT_PER_PAGE,
-      originalChats.length
-    );
-    return res.status(SUCCESS_CODE).json({
-      data: {
-        chats,
-        hasNext: originalChats.length > req.params.pageNumber * CHAT_PER_PAGE,
-        nextPage:
-          originalChats.length > req.params.pageNumber * CHAT_PER_PAGE
-            ? `${baseUrl}/api/v1/chat/${parseInt(req.params.pageNumber) + 1}`
-            : null,
-      },
-    });
-  } else {
-    return res.status(SUCCESS_CODE).json({
-      data: {
-        chats: [],
-      },
-    });
-  }
-};
-
 // API to get my collections list
 exports.myCollectionList = async (req, res, next) => {
   try {
-    let { userId } = req.query;
+    let { userId, page, limit } = req.query;
+
+    page = page !== undefined && page !== '' ? parseInt(page) : 1;
+    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
+
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
 
     if (!userId)
       return res
         .status(400)
         .send({ status: false, message: 'Please Sign In First' });
 
-    const myCollections = await Collection.find({}).where('userId', userId);
+    const allCollection = await Collection.find({}).where('userId', userId);
 
-    if (myCollections.length != 0) {
-      return res.status(200).send({
-        status: true,
-        message: 'My Collections fetched successfully',
-        data: {
-          collections: myCollections,
-        },
+    if (allCollection.length == 0) {
+      return res.status(400).send({
+        status: false,
+        message: 'No collection Found',
       });
     }
-    return res.status(400).send({
-      status: false,
-      message: 'No collection Found',
+
+    const myCollections = JSON.parse(JSON.stringify(allCollection)).map(
+      (item) => {
+        const collection = item;
+        if (collection.nft.length > 0) {
+          collection.NFTCount = collection.nft.length;
+        }
+        return collection;
+      }
+    );
+
+    let data = {};
+
+    data.totalRecords = myCollections.length;
+
+    if (endIndex < myCollections.length) {
+      data.next = {
+        page: page + 1,
+        limit: limit,
+      };
+    }
+    if (startIndex > 0) {
+      data.previous = {
+        page: page - 1,
+        limit: limit,
+      };
+    }
+    data.Collections = myCollections.slice(startIndex, endIndex);
+
+    return res.status(200).send({
+      status: true,
+      message: 'My Collections fetched successfully',
+      data: {
+        collections: data,
+      },
     });
   } catch (error) {
     return next(error);
