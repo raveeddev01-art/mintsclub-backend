@@ -273,24 +273,9 @@ exports.get = async (req, res, next) => {
 
 // API to get collection list
 exports.list = async (req, res, next) => {
-  console.log('reached to the api');
   try {
-    //const countNft = NFT.aggregate([
-    // { $group: { collectionId: '$collectionId', count: { $sum: 1 } } },
-    //   { $group: { _id: { collectionId: '$collectionId' } } },
-    // ]);
-
-    // const countNft = await NFT.aggregate([
-    //   { $group: { _id: '$collectionId', nftCount: { $sum: 1 } } },
-    // ]);
-
-    //    console.log('countNft', JSON.stringify(countNft));
-
     let { page, limit, myFilter, all, userId } = req.query;
-    // let userId = req.user
-    // if (!userId)
-    //     return res.status(400).send({ success: false, message: 'Please Sign In First' })
-    // console.log('filter', req.body.myFilter);
+
     let filter = {};
     if (req.query.myFilter) {
       const applyFilter = await Categories.findOne({}, '_id').where(
@@ -328,34 +313,8 @@ exports.list = async (req, res, next) => {
     const pipeline = [
       {
         $match: filter,
-        //$match: { categoryId: ObjectId('616d7fe8fea5e26fe01de584') },
       },
       { $sort: { name: 1 } },
-      // { $group: { _id: '$collectionId', nftCount: { $sum: 1 } } },
-      // {
-      //   $lookup: {
-      //     from: 'categories',
-      //     foreignField: '_id',
-      //     localField: 'categoryId',
-      //     as: 'category',
-      //   },
-      // },
-      // {
-      //   $unwind: '$category',
-      // },
-      //{
-      // $project: {
-      //   _id: 1,
-      //   name: 1,
-      //   logo: 1,
-      //   userId: 1,
-      //   featuredImg: { $ifNull: ['$featuredImg', collectionDefaultImage] },
-      // category: {
-      //   _id: '$category._id',
-      //   name: '$category.name',
-      // },
-      // },
-      //},
     ];
     const newTotal = await Collection.aggregate(pipeline);
 
@@ -404,10 +363,6 @@ exports.all = async (req, res, next) => {
   console.log('all');
   try {
     let { page, limit, categoryId, all, userId } = req.query;
-    // console.log(userId,"userId===>")
-    // let userId = req.user
-    // console.log("userId------@", userId);
-    // console.log("category------@", req.categoryId)
     // if (!userId)
     //     return res.status(400).send({ success: false, message: 'Please Sign In First' })
 
@@ -485,65 +440,47 @@ exports.all = async (req, res, next) => {
     return next(error);
   }
 };
+
 // API to get my collections list
 exports.myCollectionList = async (req, res, next) => {
   try {
     let { userId, page, limit } = req.query;
-    //const page = req.query.page ?
+
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
 
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
+
     if (!userId)
       return res
         .status(400)
         .send({ status: false, message: 'Please Sign In First' });
 
-    // const collections = await Collection.find({}).where('userId', userId);
-    //db.bios.find( { _id: 5 } )
+    const allCollection = await Collection.find({}).where('userId', userId);
 
-    const collections = await Collection.find({ userId: userId });
-    //console.log('collections', collections);
-    collections.forEach(function (collection) {
-      //console.log('collection', collection);
-      if (collection.nft.length > 0) {
-        collection.NFTCount = collection.nft.length;
-      }
-      //console.log('collection count', collection);
-    });
-    //const collections = await Collection.aggregate(pipeline);
-    // for (const collection of collections) {
-    //   console.log('collections', collection);
-
-    // if (collection.nft) {
-    //   collection.NFTCount = collection.nft.length;
-    // }
-    //console.log('nft', collection);
-    // const findCount = await Likes.findOne().where(
-    //   'collectionId',
-    //   collection._id
-    // );
-    // if (findCount) {
-    //   collection.likeCount = findCount.count;
-    // }
-    // }
-
-    // .populate('nft', '_id')
-    // .execPopulate((records) => {
-    //   console('records', records.length);
-    //});
-    if (collections.length == 0) {
+    if (allCollection.length == 0) {
       return res.status(400).send({
         status: false,
         message: 'No collection Found',
       });
     }
+
+    const myCollections = JSON.parse(JSON.stringify(allCollection)).map(
+      (item) => {
+        const collection = item;
+        if (collection.nft.length > 0) {
+          collection.NFTCount = collection.nft.length;
+        }
+        return collection;
+      }
+    );
+
     let data = {};
 
-    data.totalRecords = collections.length;
+    data.totalRecords = myCollections.length;
 
-    if (endIndex < collections.length) {
+    if (endIndex < myCollections.length) {
       data.next = {
         page: page + 1,
         limit: limit,
@@ -555,55 +492,14 @@ exports.myCollectionList = async (req, res, next) => {
         limit: limit,
       };
     }
-    // for (const NFTcount of myCollections) {
-    //   // if (collection.nft) {
-    //   NFTcount.NFTCount = NFTcount.nft.length;
-    //   // }
-    //   console.log('count', NFTcount);
-    //   //console.log('collection.NFTCount', collection.NFTCount);
-    // }
-    //console.log('collections', NFTcount);
-    // collections.forEach((element) => {
-    //   element.test = 'test';
-    //   console.log(element);
-    // });
-    // collections.test = 'test';
-    data.finalCollection = collections.slice(startIndex, endIndex);
+    data.Collections = myCollections.slice(startIndex, endIndex);
 
     return res.status(200).send({
       status: true,
       message: 'My Collections fetched successfully',
-      data,
-    });
-  } catch (error) {
-    return next(error);
-  }
-};
-
-// API to get my collections list
-exports.myCollectionList = async (req, res, next) => {
-  try {
-    let { userId } = req.query;
-
-    if (!userId)
-      return res
-        .status(400)
-        .send({ status: false, message: 'Please Sign In First' });
-
-    const myCollections = await Collection.find({}).where('userId', userId);
-
-    if (myCollections.length != 0) {
-      return res.status(200).send({
-        status: true,
-        message: 'My Collections fetched successfully',
-        data: {
-          collections: myCollections,
-        },
-      });
-    }
-    return res.status(400).send({
-      status: false,
-      message: 'No collection Found',
+      data: {
+        collections: data,
+      },
     });
   } catch (error) {
     return next(error);
