@@ -12,7 +12,7 @@ const validation = require('../../middlewares/front/collectionValidation');
 
 // API to create collection
 exports.create = async (req, res, next) => {
-  console.log(req.body,"req.body in collection")
+  console.log(req.body, 'req.body in collection');
   try {
     let payload = {
       userId: req.body.userId,
@@ -485,54 +485,98 @@ exports.all = async (req, res, next) => {
     return next(error);
   }
 };
+// API to get my collections list
+exports.myCollectionList = async (req, res, next) => {
+  try {
+    let { userId, page, limit } = req.query;
+    //const page = req.query.page ?
+    page = page !== undefined && page !== '' ? parseInt(page) : 1;
+    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
 
-const getChatPagination = async (req, res) => {
-  const CHAT_PER_PAGE = 5;
-  let originalChats = await Chat.getUserChatByRole(req.user);
-  const baseUrl = req.protocol + '://' + req.get('host');
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    if (!userId)
+      return res
+        .status(400)
+        .send({ status: false, message: 'Please Sign In First' });
 
-  if (
-    originalChats.length >= req.params.pageNumber * CHAT_PER_PAGE &&
-    req.params.pageNumber > 0
-  ) {
-    let chats = originalChats.slice(
-      (req.params.pageNumber - 1) * CHAT_PER_PAGE,
-      req.params.pageNumber * CHAT_PER_PAGE
-    );
-    return res.status(SUCCESS_CODE).json({
-      data: {
-        chats,
-        hasNext: originalChats.length > req.params.pageNumber * CHAT_PER_PAGE,
-        nextPage:
-          originalChats.length > req.params.pageNumber * CHAT_PER_PAGE
-            ? `${baseUrl}/api/v1/chat/${parseInt(req.params.pageNumber) + 1}`
-            : null,
-      },
+    // const collections = await Collection.find({}).where('userId', userId);
+    //db.bios.find( { _id: 5 } )
+
+    const collections = await Collection.find({ userId: userId });
+    //console.log('collections', collections);
+    collections.forEach(function (collection) {
+      //console.log('collection', collection);
+      if (collection.nft.length > 0) {
+        collection.NFTCount = collection.nft.length;
+      }
+      //console.log('collection count', collection);
     });
-  } else if (
-    (req.params.pageNumber - 1) * CHAT_PER_PAGE <= originalChats.length &&
-    req.params.pageNumber > 0
-  ) {
-    chats = originalChats.slice(
-      (req.params.pageNumber - 1) * CHAT_PER_PAGE,
-      originalChats.length
-    );
-    return res.status(SUCCESS_CODE).json({
-      data: {
-        chats,
-        hasNext: originalChats.length > req.params.pageNumber * CHAT_PER_PAGE,
-        nextPage:
-          originalChats.length > req.params.pageNumber * CHAT_PER_PAGE
-            ? `${baseUrl}/api/v1/chat/${parseInt(req.params.pageNumber) + 1}`
-            : null,
-      },
+    //const collections = await Collection.aggregate(pipeline);
+    // for (const collection of collections) {
+    //   console.log('collections', collection);
+
+    // if (collection.nft) {
+    //   collection.NFTCount = collection.nft.length;
+    // }
+    //console.log('nft', collection);
+    // const findCount = await Likes.findOne().where(
+    //   'collectionId',
+    //   collection._id
+    // );
+    // if (findCount) {
+    //   collection.likeCount = findCount.count;
+    // }
+    // }
+
+    // .populate('nft', '_id')
+    // .execPopulate((records) => {
+    //   console('records', records.length);
+    //});
+    if (collections.length == 0) {
+      return res.status(400).send({
+        status: false,
+        message: 'No collection Found',
+      });
+    }
+    let data = {};
+
+    data.totalRecords = collections.length;
+
+    if (endIndex < collections.length) {
+      data.next = {
+        page: page + 1,
+        limit: limit,
+      };
+    }
+    if (startIndex > 0) {
+      data.previous = {
+        page: page - 1,
+        limit: limit,
+      };
+    }
+    // for (const NFTcount of myCollections) {
+    //   // if (collection.nft) {
+    //   NFTcount.NFTCount = NFTcount.nft.length;
+    //   // }
+    //   console.log('count', NFTcount);
+    //   //console.log('collection.NFTCount', collection.NFTCount);
+    // }
+    //console.log('collections', NFTcount);
+    // collections.forEach((element) => {
+    //   element.test = 'test';
+    //   console.log(element);
+    // });
+    // collections.test = 'test';
+    data.finalCollection = collections.slice(startIndex, endIndex);
+
+    return res.status(200).send({
+      status: true,
+      message: 'My Collections fetched successfully',
+      data,
     });
-  } else {
-    return res.status(SUCCESS_CODE).json({
-      data: {
-        chats: [],
-      },
-    });
+  } catch (error) {
+    return next(error);
   }
 };
 
