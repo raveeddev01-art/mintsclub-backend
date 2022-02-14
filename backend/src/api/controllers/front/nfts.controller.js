@@ -15,29 +15,30 @@ const {
 
 // API to create NFT
 exports.create = async (req, res, next) => {
+  console.log(req.body,"req.body")
   try {
     //let payload = req.body;
 
     let payload = {
       name: req.body.name,
       description: req.body.description,
-      attributes: req.body.attributes,
-      levels: req.body.levels,
+      // attributes: req.body.attributes,
+      // levels: req.body.levels,
       ownerId: req.body.ownerId,
       userId: req.body.userId,
       collectionId: req.body.collectionId,
       currentPrice: req.body.currentPrice,
       ownerAddress: req.body.ownerAddress,
-      txHash: req.body.txHash,
+      // txHash: req.body.txHash,
       royalty: req.body.royalty,
       copies: req.body.copies,
       status: req.body.status,
-      sold: req.body.sold,
-      sellingMethod: req.body.sellingMethod,
-      auctionStartDate: req.body.auctionStartDate,
-      auctionEndDate: req.body.auctionEndDate,
-      auctionStartTime: req.body.auctionStartTime,
-      auctionEndTime: req.body.auctionEndTime,
+      // sold: req.body.sold,
+      // sellingMethod: req.body.sellingMethod,
+      // auctionStartDate: req.body.auctionStartDate,
+      // auctionEndDate: req.body.auctionEndDate,
+      // auctionStartTime: req.body.auctionStartTime,
+      // auctionEndTime: req.body.auctionEndTime,
     };
     const { error } = validation.validateNFTSchema(payload);
 
@@ -294,12 +295,12 @@ exports.get = async (req, res, next) => {
 
     if (!nftDetail && !tokenData) {
       return res.send({
-        status: false,
+        success: false,
         message: 'No data found for this id',
       });
     }
     return res.send({
-      status: true,
+      success: true,
       message: 'Item retrieved successfully',
       //   nft: nft.length ? nft[0] : null ,
       data: nftDetail,
@@ -421,6 +422,8 @@ exports.list = async (req, res, next) => {
   }
 };
 
+
+
 exports.editNft = async (req, res, next) => {
   try {
     const filter = { _id: req.body.nftOwnerId };
@@ -505,6 +508,23 @@ exports.updateNft = async (req, res, next) => {
     return next(error);
   }
 };
+
+exports.getNFTsbyCollection= async (req,res,next)=>{
+try {
+   const collectionId=req.body.collectionId;
+   console.log(collectionId,"collectionId")
+   const NFTs= await NFT.aggregate([
+     {
+       $match:{collectionId:ObjectId(collectionId)}
+     }
+   ])
+   console.log(NFTs,"nfts")
+   res.status(200).send({success:true,data:NFTs})
+}catch(err){
+  res.status(200).send({success:false,error:err})
+}
+
+}
 
 // API to delete collection
 exports.delete = async (req, res, next) => {

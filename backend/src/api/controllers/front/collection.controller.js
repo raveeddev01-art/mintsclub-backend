@@ -505,3 +505,17 @@ exports.myCollectionList = async (req, res, next) => {
     return next(error);
   }
 };
+
+
+exports.myCollections= async (req,res,next)=>{
+  let {userId}=req.query
+  try{
+    let myCollections= await Collection.aggregate([{ $match: {userId: ObjectId(userId) }}])
+   
+    res.status(200).send({success:true,data:myCollections})
+
+  }catch(err){
+  res.status(200).send(err)
+  }
+
+}

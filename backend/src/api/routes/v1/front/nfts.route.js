@@ -13,5 +13,5 @@ router.route('/storeNFTData').post(cpUpload, controller.storeDataInDb);
 router.route('/updateNft').put(cpUpload, controller.updateNft);
 router.route('/delete/:nftId').delete(controller.delete);
 router.route('/myNftListing').get(controller.myNftListing);
-
+router.route('/getNFTsByCollection').post(controller.getNFTsbyCollection);
 module.exports = router;

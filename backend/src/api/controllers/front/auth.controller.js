@@ -57,6 +57,7 @@ exports.register = async (req, res, next) => {
  * @public
  */
 exports.login = async (req, res, next) => {
+  console.log(req.body,"req.body login==>")
   try {
     let payload = {
       address: req.body.address,
