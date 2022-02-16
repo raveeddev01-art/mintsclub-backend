@@ -364,6 +364,7 @@ exports.list = async (req, res, next) => {
     //     }
     // }
 
+
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
     //console.log(limit, 'limti testing');
@@ -374,10 +375,11 @@ exports.list = async (req, res, next) => {
       { $match: filter },
       {
         $sort: {
-          createdAt: -1,
-          ...(oldest && { createdAt: 1 }),
+          ...(newest && {createdAt:1}),
+          ...(oldest && { createdAt: -1 }),
           ...(lowToHigh && { currentPrice: 1 }),
           ...(highToLow && { currentPrice: -1 }),
+          name: 1,
         },
       },
       { $skip: limit * (page - 1) },
@@ -410,6 +412,7 @@ exports.list = async (req, res, next) => {
         nft.likeCount = findCount.count;
       }
     }
+
 
     return res.send({
       success: true,
@@ -514,6 +517,26 @@ exports.updateNft = async (req, res, next) => {
   }
 };
 
+<<<<<<< HEAD
+exports.getNFTsbyCollection= async (req,res,next)=>{
+
+try {
+
+   const collectionId=req.body.collectionId;
+   console.log(req.body,"collectionId")
+   const NFTs= await NFT.aggregate([
+     {
+       $match:{collectionId:ObjectId(collectionId)}
+     }
+   ])
+   console.log(NFTs,"nfts")
+   res.status(200).send({success:true,data:NFTs})
+}catch(err){
+  res.status(200).send({success:false,error:err})
+}
+
+}
+=======
 exports.getNFTsbyCollection = async (req, res, next) => {
   try {
     const collectionId = req.body.collectionId;
@@ -529,6 +552,7 @@ exports.getNFTsbyCollection = async (req, res, next) => {
     res.status(200).send({ success: false, error: err });
   }
 };
+>>>>>>> 2b76bfbe06d11ba49f6b98aa86782f0a12fc1ab9
 
 // API to delete collection
 exports.delete = async (req, res, next) => {
