@@ -2,12 +2,10 @@ const LikesModal = require('../../models/likes.model');
 var ObjectId = require('mongodb').ObjectId;
 
 exports.likeDislike = async (req, res, next) => {
- 
   let nftId = req.body.nftId;
   let userId = req.body.userId;
   let count = req.body.count;
-  console.log(req.body,"body")
-
+  console.log(req.body, 'body');
 
   let foundCollection = await LikesModal.find({ nftId });
 
@@ -98,5 +96,26 @@ exports.get = async (req, res, next) => {
     res.status(201).json({ success: true, data: likes });
   } catch (error) {
     res.status(200).json({ success: false, error: error });
+  }
+};
+
+exports.userNftLikes = async (req, res, next) => {
+  try {
+    let { userId } = req.query;
+    if (!userId)
+      return res
+        .status(400)
+        .send({ status: false, message: 'Please Sign In First' });
+
+    const likes = await LikesModal.find({}, 'nftId').where(
+      'likes.userId',
+      userId
+    );
+    if (likes.length > 0) {
+      res.status(200).json({ status: true, data: likes });
+    }
+    res.status(404).json({ status: false, data: 'No data found' });
+  } catch (error) {
+    res.status(400).json({ status: false, error: error });
   }
 };
