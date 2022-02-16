@@ -363,6 +363,7 @@ exports.list = async (req, res, next) => {
     //     }
     // }
 
+
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
     console.log(limit, 'limti testing');
@@ -373,10 +374,11 @@ exports.list = async (req, res, next) => {
       { $match: filter },
       {
         $sort: {
-          createdAt: -1,
-          ...(oldest && { createdAt: 1 }),
+          ...(newest && {createdAt:1}),
+          ...(oldest && { createdAt: -1 }),
           ...(lowToHigh && { currentPrice: 1 }),
           ...(highToLow && { currentPrice: -1 }),
+          name: 1,
         },
       },
       { $skip: limit * (page - 1) },
@@ -403,6 +405,7 @@ exports.list = async (req, res, next) => {
       //     }
       // }
     ]);
+
 
     return res.send({
       success: true,
@@ -510,9 +513,11 @@ exports.updateNft = async (req, res, next) => {
 };
 
 exports.getNFTsbyCollection= async (req,res,next)=>{
+
 try {
+
    const collectionId=req.body.collectionId;
-   console.log(collectionId,"collectionId")
+   console.log(req.body,"collectionId")
    const NFTs= await NFT.aggregate([
      {
        $match:{collectionId:ObjectId(collectionId)}
