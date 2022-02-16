@@ -7,6 +7,7 @@ const NftTokens = require('../../models/nftTokens.model');
 const { addImage, addContent } = require('../../utils/upload');
 const ObjectId = require('mongoose').Types.ObjectId;
 const validation = require('../../middlewares/front/nftValidation');
+const Likes = require('../../models/likes.model');
 
 const {
   userDefaultImage,
@@ -15,7 +16,7 @@ const {
 
 // API to create NFT
 exports.create = async (req, res, next) => {
-  console.log(req.body,"req.body")
+  console.log(req.body, 'req.body');
   try {
     //let payload = req.body;
 
@@ -328,11 +329,11 @@ exports.list = async (req, res, next) => {
       highToLow,
     } = req.query;
 
-    console.log(req.query, 'query');
-    console.log(limit, 'limit in start');
-    console.log(page, 'page');
+    // console.log(req.query, 'query');
+    // console.log(limit, 'limit in start');
+    // console.log(page, 'page');
 
-    console.log(gtePrice, 'gtePrice');
+    // console.log(gtePrice, 'gtePrice');
     const userId = req.user;
     let filter = {
       status: { $ne: 0 },
@@ -366,7 +367,7 @@ exports.list = async (req, res, next) => {
 
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
-    console.log(limit, 'limti testing');
+    //console.log(limit, 'limti testing');
 
     const total = await NFT.countDocuments(filter);
 
@@ -405,6 +406,12 @@ exports.list = async (req, res, next) => {
       //     }
       // }
     ]);
+    for (const nft of nfts) {
+      const findCount = await Likes.findOne().where('nftId', nft._id);
+      if (findCount) {
+        nft.likeCount = findCount.count;
+      }
+    }
 
 
     return res.send({
@@ -424,8 +431,6 @@ exports.list = async (req, res, next) => {
     return next(error);
   }
 };
-
-
 
 exports.editNft = async (req, res, next) => {
   try {
@@ -512,6 +517,7 @@ exports.updateNft = async (req, res, next) => {
   }
 };
 
+<<<<<<< HEAD
 exports.getNFTsbyCollection= async (req,res,next)=>{
 
 try {
@@ -530,6 +536,23 @@ try {
 }
 
 }
+=======
+exports.getNFTsbyCollection = async (req, res, next) => {
+  try {
+    const collectionId = req.body.collectionId;
+    console.log(collectionId, 'collectionId');
+    const NFTs = await NFT.aggregate([
+      {
+        $match: { collectionId: ObjectId(collectionId) },
+      },
+    ]);
+    console.log(NFTs, 'nfts');
+    res.status(200).send({ success: true, data: NFTs });
+  } catch (err) {
+    res.status(200).send({ success: false, error: err });
+  }
+};
+>>>>>>> 2b76bfbe06d11ba49f6b98aa86782f0a12fc1ab9
 
 // API to delete collection
 exports.delete = async (req, res, next) => {

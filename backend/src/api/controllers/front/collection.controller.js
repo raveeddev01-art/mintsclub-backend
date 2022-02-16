@@ -328,13 +328,13 @@ exports.list = async (req, res, next) => {
       if (collection.nft) {
         collection.NFTCount = collection.nft.length;
       }
-      const findCount = await Likes.findOne().where(
-        'collectionId',
-        collection._id
-      );
-      if (findCount) {
-        collection.likeCount = findCount.count;
-      }
+      // const findCount = await Likes.findOne().where(
+      //   'collectionId',
+      //   collection._id
+      // );
+      // if (findCount) {
+      //   collection.likeCount = findCount.count;
+      // }
     }
 
     return res.send({
@@ -506,16 +506,15 @@ exports.myCollectionList = async (req, res, next) => {
   }
 };
 
+exports.myCollections = async (req, res, next) => {
+  let { userId } = req.query;
+  try {
+    let myCollections = await Collection.aggregate([
+      { $match: { userId: ObjectId(userId) } },
+    ]);
 
-exports.myCollections= async (req,res,next)=>{
-  let {userId}=req.query
-  try{
-    let myCollections= await Collection.aggregate([{ $match: {userId: ObjectId(userId) }}])
-   
-    res.status(200).send({success:true,data:myCollections})
-
-  }catch(err){
-  res.status(200).send(err)
+    res.status(200).send({ success: true, data: myCollections });
+  } catch (err) {
+    res.status(200).send(err);
   }
-
-}
+};
