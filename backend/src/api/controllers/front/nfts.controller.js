@@ -364,7 +364,6 @@ exports.list = async (req, res, next) => {
     //     }
     // }
 
-
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
     //console.log(limit, 'limti testing');
@@ -375,7 +374,7 @@ exports.list = async (req, res, next) => {
       { $match: filter },
       {
         $sort: {
-          ...(newest && {createdAt:1}),
+          ...(newest && { createdAt: 1 }),
           ...(oldest && { createdAt: -1 }),
           ...(lowToHigh && { currentPrice: 1 }),
           ...(highToLow && { currentPrice: -1 }),
@@ -412,7 +411,6 @@ exports.list = async (req, res, next) => {
         nft.likeCount = findCount.count;
       }
     }
-
 
     return res.send({
       success: true,
