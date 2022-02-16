@@ -112,10 +112,18 @@ exports.userNftLikes = async (req, res, next) => {
       userId
     );
     if (likes.length > 0) {
-      res.status(200).json({ status: true, data: likes });
+      return res.status(200).send({
+        status: true,
+        message: 'User NFTs likes fetched successfully',
+        data: likes,
+      });
     }
-    res.status(404).json({ status: false, data: 'No data found' });
+    return res.status(400).send({
+      status: false,
+      message: 'No data found',
+      data,
+    });
   } catch (error) {
-    res.status(400).json({ status: false, error: error });
+    return next(error);
   }
 };
