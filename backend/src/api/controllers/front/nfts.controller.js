@@ -517,7 +517,6 @@ exports.updateNft = async (req, res, next) => {
   }
 };
 
-<<<<<<< HEAD
 exports.getNFTsbyCollection= async (req,res,next)=>{
 
 try {
@@ -536,23 +535,6 @@ try {
 }
 
 }
-=======
-exports.getNFTsbyCollection = async (req, res, next) => {
-  try {
-    const collectionId = req.body.collectionId;
-    console.log(collectionId, 'collectionId');
-    const NFTs = await NFT.aggregate([
-      {
-        $match: { collectionId: ObjectId(collectionId) },
-      },
-    ]);
-    console.log(NFTs, 'nfts');
-    res.status(200).send({ success: true, data: NFTs });
-  } catch (err) {
-    res.status(200).send({ success: false, error: err });
-  }
-};
->>>>>>> 2b76bfbe06d11ba49f6b98aa86782f0a12fc1ab9
 
 // API to delete collection
 exports.delete = async (req, res, next) => {
