@@ -407,7 +407,10 @@ exports.list = async (req, res, next) => {
     ]);
     for (const nft of nfts) {
       const findCount = await Likes.findOne().where('nftId', nft._id);
-      nft.likeCount = findCount ? findCount.count : '0';
+      nft.likeCount = 0;
+      if (findCount) {
+        nft.likeCount = findCount.count;
+      }
     }
 
     return res.send({
