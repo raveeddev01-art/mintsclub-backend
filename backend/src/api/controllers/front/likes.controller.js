@@ -109,23 +109,17 @@ exports.userNftLikes = async (req, res, next) => {
     if (!userId)
       return res
         .status(400)
-        .send({ status: false, message: 'Please Sign In First' });
+        .send({ success: false, message: 'Please Sign In First' });
 
     const likes = await LikesModal.find({}, 'nftId').where(
       'likes.userId',
       userId
     );
-    console.log('likes', likes);
-    if (likes.length > 0) {
-      return res.status(200).send({
-        status: true,
-        message: 'User NFTs likes fetched successfully',
-        data: likes,
-      });
-    }
-    return res.status(400).send({
-      status: false,
-      message: 'No data found',
+
+    return res.status(200).send({
+      success: true,
+      message: 'User NFTs likes fetched successfully',
+      data: likes,
     });
   } catch (error) {
     return next(error);

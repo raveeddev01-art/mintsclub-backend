@@ -12,7 +12,6 @@ const validation = require('../../middlewares/front/collectionValidation');
 
 // API to create collection
 exports.create = async (req, res, next) => {
-  console.log(req.body, 'req.body in collection');
   try {
     let payload = {
       userId: req.body.userId,
@@ -26,7 +25,7 @@ exports.create = async (req, res, next) => {
 
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ status: false, data: errorMsg });
+      return res.status(400).send({ success: false, data: errorMsg });
     }
 
     imagesPayload = {
@@ -50,7 +49,7 @@ exports.create = async (req, res, next) => {
 
     if (newPayload.category && !allNames.includes(newPayload.category)) {
       return res.status(400).send({
-        status: false,
+        success: false,
         message: 'Please provide valid category',
       });
     }
@@ -89,7 +88,7 @@ exports.create = async (req, res, next) => {
     }
 
     const collection = await Collection.create(newPayload);
-    return res.status(200).send({
+    return res.status(201).send({
       success: true,
       message: 'Collection created successfully',
       collection,
@@ -118,7 +117,7 @@ exports.edit = async (req, res, next) => {
 
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ status: false, data: errorMsg });
+      return res.status(400).send({ success: false, data: errorMsg });
     }
     imagesPayload = {
       logo: req.body.logo,
@@ -141,7 +140,7 @@ exports.edit = async (req, res, next) => {
 
     if (newPayload.category && !allNames.includes(newPayload.category)) {
       return res.status(400).send({
-        status: false,
+        success: false,
         message: 'Please provide valid category',
       });
     }
@@ -284,7 +283,7 @@ exports.list = async (req, res, next) => {
       );
       if (!applyFilter) {
         return res.status(400).send({
-          status: false,
+          success: false,
           message: 'Invalid Filter passed',
         });
       }
@@ -298,17 +297,15 @@ exports.list = async (req, res, next) => {
 
       total = await Collection.countDocuments({});
 
-      if (total == 0) {
-        return res.status(400).send({
-          status: false,
-          message: 'No Collections Found',
-        });
-      }
+      // if (total == 0) {
+      //   return res.status(400).send({
+      //     success: false,
+      //     message: 'No Collections Found',
+      //   });
+      // }
       if (page > Math.ceil(total / limit) && total > 0)
         page = Math.ceil(total / limit);
     }
-
-    console.log(filter, 'filter for collection');
 
     const pipeline = [
       {
@@ -325,7 +322,7 @@ exports.list = async (req, res, next) => {
       },
     ];
     const newTotal = await Collection.aggregate(pipeline);
-    console.log('user data', newTotal);
+
     const totalRecords = newTotal.length;
     if (!all) {
       pipeline.push({ $skip: limit * (page - 1) });
@@ -340,7 +337,7 @@ exports.list = async (req, res, next) => {
       success: true,
       message: 'Collections fetched successfully',
       data: {
-        collections: collections.length ? collections : null,
+        collections: collections,
 
         pagination: {
           page,
@@ -454,16 +451,9 @@ exports.myCollectionList = async (req, res, next) => {
     if (!userId)
       return res
         .status(400)
-        .send({ status: false, message: 'Please Sign In First' });
+        .send({ success: false, message: 'Please Sign In First' });
 
     const allCollection = await Collection.find({}).where('userId', userId);
-
-    if (allCollection.length == 0) {
-      return res.status(400).send({
-        status: false,
-        message: 'No collection Found',
-      });
-    }
 
     const myCollections = JSON.parse(JSON.stringify(allCollection)).map(
       (item) => {
@@ -493,7 +483,7 @@ exports.myCollectionList = async (req, res, next) => {
     data.Collections = myCollections.slice(startIndex, endIndex);
 
     return res.status(200).send({
-      status: true,
+      success: true,
       message: 'My Collections fetched successfully',
       data: {
         collections: data,
