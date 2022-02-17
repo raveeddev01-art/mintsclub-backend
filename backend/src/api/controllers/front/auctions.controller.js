@@ -23,30 +23,30 @@ exports.live = async (req, res, next) => {
             {
                 $match: filter
             },
-            {
-                $lookup: {
-                    from: 'users',
-                    foreignField: '_id',
-                    localField: 'ownerId',
-                    as: 'owner'
-                }
-            },
+            // {
+            //     $lookup: {
+            //         from: 'users',
+            //         foreignField: '_id',
+            //         localField: 'ownerId',
+            //         as: 'owner'
+            //     }
+            // },
             // {
             //     $unwind: '$owner'
             // },
             { $sort: { createdAt: -1 } },
-            { $skip: limit * (page - 1) },
-            { $limit: limit },
-            {
-                $project: {
-                    _id: 1, name: 1, image: 1, sold: 1, copies: 1, currentPrice: 1, auctionEndDate: 1,nftOwnerId:1,
-                    owner: {
-                        _id: '$owner._id',
-                        username: '$owner.username',
-                        profilePhoto: { $ifNull: ['$owner.profilePhoto', globalImgPlaceholder] }
-                    }
-                }
-            }   
+            // { $skip: limit * (page - 1) },
+            // { $limit: limit },
+            // {
+            //     $project: {
+            //         _id: 1, name: 1, image: 1, sold: 1, copies: 1, currentPrice: 1, auctionEndDate: 1,nftOwnerId:1,
+            //         owner: {
+            //             _id: '$owner._id',
+            //             username: '$owner.username',
+            //             profilePhoto: { $ifNull: ['$owner.profilePhoto', globalImgPlaceholder] }
+            //         }
+            //     }
+            // }   
         ])
    
         return res.send({
