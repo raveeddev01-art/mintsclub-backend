@@ -4,7 +4,7 @@ const User = require('../../models/users.model');
 const Collection = require('../../models/collection.model');
 const NFT = require('../../models/nfts.model');
 const NftTokens = require('../../models/nftTokens.model');
-const { addImage, addContent } = require('../../utils/upload');
+const { addImage, addContent } = require('../../utils/uploadImage');
 const ObjectId = require('mongoose').Types.ObjectId;
 const validation = require('../../middlewares/front/nftValidation');
 const Likes = require('../../models/likes.model');
@@ -18,8 +18,6 @@ const {
 exports.create = async (req, res, next) => {
   console.log(req.body, 'req.body');
   try {
-    //let payload = req.body;
-
     let payload = {
       name: req.body.name,
       description: req.body.description,
@@ -82,7 +80,6 @@ exports.create = async (req, res, next) => {
       nft: payload,
     });
   } catch (error) {
-    //console.log(error,"error while creating nft")
     return next(error);
   }
 };
@@ -101,7 +98,6 @@ exports.storeDataInDb = async (req, res, next) => {
 
     const nft = await NFT.create(createNFTPayload);
     if (nft) {
-      //req.body.data.collectionId
       let collectionRecord = await Collection.findOne({
         _id: req.body.data.collectionId,
       });
@@ -172,8 +168,6 @@ exports.update = async (req, res, next) => {
   try {
     let payload = req.body;
 
-    console.log('request', req.body);
-
     // set NFT selling config.
 
     const nft = await NFT.findByIdAndUpdate(
@@ -198,31 +192,7 @@ exports.get = async (req, res, next) => {
     let nftDetail = new Array();
     nftDetail = await NFT.findOne({ _id: nftId });
     const tokenData = await NftTokens.findOne({ nftId: nftId });
-    // console.log('token data', tokenData);
-    // nftDetail['nftToken'] = tokenData.nftToken;
-    // nftDetail['tokenStandard'] = tokenData.tokenStandard;
-    // console.log('nftDetail', nftDetail);
-    // "data": {
-    //     "copies": 100,
-    //     "status": 1,
-    //     "sold": 0,
-    //     "_id": "620231380a6afa1d184335e8",
-    //     "name": "aqsanft",
-    //     "description": "first",
-    //     "creatorId": "61b9f57ca6af441d75672977",
-    //     "ownerId": "61b9f57ca6af441d75672977",
-    //     "userId": "61b9f57ca6af441d75672977",
-    //     "collectionId": "61f3d1fd92569f54a783a07b",
-    //     "currentPrice": 50,
-    //     "ownerAddress": "0x068839af9e0A418F714AC5d52e54a4Db587605C6",
-    //     "txHash": "test",
-    //     "image": "myomae",
-    //     "sellingMethod": 1,
-    //     "metaData": "this is ipfs link",
-    //     "createdAt": "2022-02-08T09:00:40.680Z",
-    //     "updatedAt": "2022-02-08T09:00:40.680Z",
-    //     "__v": 0
-    // console.log(wholeData,"testNft===>data")
+
     // const nft = await NFT.aggregate([
     //     {
     //         $match: { _id: ObjectId(nftId) }
@@ -329,11 +299,6 @@ exports.list = async (req, res, next) => {
       highToLow,
     } = req.query;
 
-    // console.log(req.query, 'query');
-    // console.log(limit, 'limit in start');
-    // console.log(page, 'page');
-
-    // console.log(gtePrice, 'gtePrice');
     const userId = req.user;
     let filter = {
       status: { $ne: 0 },
@@ -366,7 +331,6 @@ exports.list = async (req, res, next) => {
 
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
-    //console.log(limit, 'limti testing');
 
     const total = await NFT.countDocuments(filter);
 
@@ -447,12 +411,7 @@ exports.editNft = async (req, res, next) => {
       data: updatedNft,
     });
   } catch (err) {
-    //  console.log(err,"error of ownerShip===>")
-    // res.status(400).send({
-    //     status:"failure",
-    //     err
-    // })
-    return next(error);
+    return next(err);
   }
 };
 

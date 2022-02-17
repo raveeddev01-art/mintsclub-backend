@@ -5,7 +5,7 @@ const Collection = require('../../models/collection.model');
 const Categories = require('../../models/categories.model');
 const Likes = require('../../models/likes.model');
 
-const { addImage } = require('../../utils/upload');
+const { addImage } = require('../../utils/uploadImage');
 const { checkDuplicate } = require('../../../config/errors');
 const { collectionDefaultImage } = require('../../../config/vars');
 const validation = require('../../middlewares/front/collectionValidation');
