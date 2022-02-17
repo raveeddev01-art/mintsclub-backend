@@ -315,9 +315,17 @@ exports.list = async (req, res, next) => {
         $match: filter,
       },
       { $sort: { name: 1 } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user',
+        },
+      },
     ];
     const newTotal = await Collection.aggregate(pipeline);
-
+    console.log('user data', newTotal);
     const totalRecords = newTotal.length;
     if (!all) {
       pipeline.push({ $skip: limit * (page - 1) });
@@ -325,16 +333,7 @@ exports.list = async (req, res, next) => {
     }
     const collections = await Collection.aggregate(pipeline);
     for (const collection of collections) {
-      if (collection.nft) {
-        collection.NFTCount = collection.nft.length;
-      }
-      // const findCount = await Likes.findOne().where(
-      //   'collectionId',
-      //   collection._id
-      // );
-      // if (findCount) {
-      //   collection.likeCount = findCount.count;
-      // }
+      collection.NFTCount = collection.nft ? collection.nft.length : '0';
     }
 
     return res.send({
@@ -469,9 +468,8 @@ exports.myCollectionList = async (req, res, next) => {
     const myCollections = JSON.parse(JSON.stringify(allCollection)).map(
       (item) => {
         const collection = item;
-        if (collection.nft.length > 0) {
-          collection.NFTCount = collection.nft.length;
-        }
+        collection.NFTCount = collection.nft.length;
+        collection.CreatedBy = 'You';
         return collection;
       }
     );
