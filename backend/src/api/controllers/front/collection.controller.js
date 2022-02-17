@@ -20,7 +20,7 @@ exports.create = async (req, res, next) => {
       name: req.body.name,
       url: req.body.url,
       description: req.body.description,
-      category: req.body.category,
+      //category: req.body.category,
     };
     const { error } = validation.validateCollectionSchema(payload);
 
@@ -37,32 +37,33 @@ exports.create = async (req, res, next) => {
 
     const newPayload = { ...payload, ...imagesPayload };
 
-    const List = await Categories.find({}, 'description').where(
-      'status',
-      'true'
-    );
+    // const List = await Categories.find({}, 'description').where(
+    //   'status',
+    //   'true'
+    // );
 
-    allNames = [];
-    categoryNames = List.map((value) => {
-      allNames.push(value.description);
-      return allNames;
-    });
+    // allNames = [];
+    // categoryNames = List.map((value) => {
+    //   allNames.push(value.description);
+    //   return allNames;
+    // });
 
-    if (newPayload.category && !allNames.includes(newPayload.category)) {
-      return res.status(400).send({
-        success: false,
-        message: 'Please provide valid category',
-      });
+    // if (newPayload.category && !allNames.includes(newPayload.category)) {
+    //   return res.status(400).send({
+    //     success: false,
+    //     message: 'Please provide valid category',
+    //   });
+    // }
+    // categoryId = await Categories.findOne({}, '_id').where(
+    //   'description',
+    //   newPayload.category
+    // );
+    newPayload.categoryId = null;
+    if (payload.categoryId) {
+      newPayload.categoryId = payload.categoryId;
     }
-    categoryId = await Categories.findOne({}, '_id').where(
-      'description',
-      newPayload.category
-    );
 
-    newPayload.categoryId = newPayload.category ? categoryId._id : null;
-    // collections.length ? collections : null,
     if (req.files)
-      // console.log(payload,"payload")
       for (const key in req.files) {
         const image = req.files[key][0];
         const imgData = fs.readFileSync(image.path);
@@ -111,7 +112,7 @@ exports.edit = async (req, res, next) => {
       name: req.body.name,
       url: req.body.url,
       description: req.body.description,
-      category: req.body.category,
+      // category: req.body.category,
     };
 
     const { error } = validation.validateEditCollectionSchema(payload);
@@ -128,29 +129,32 @@ exports.edit = async (req, res, next) => {
 
     const newPayload = { ...payload, ...imagesPayload };
 
-    const List = await Categories.find({}, 'description').where(
-      'status',
-      'true'
-    );
+    // const List = await Categories.find({}, 'description').where(
+    //   'status',
+    //   'true'
+    // );
 
-    allNames = [];
-    categoryNames = List.map((value) => {
-      allNames.push(value.description);
-      return allNames;
-    });
+    // allNames = [];
+    // categoryNames = List.map((value) => {
+    //   allNames.push(value.description);
+    //   return allNames;
+    // });
 
-    if (newPayload.category && !allNames.includes(newPayload.category)) {
-      return res.status(400).send({
-        success: false,
-        message: 'Please provide valid category',
-      });
+    // if (newPayload.category && !allNames.includes(newPayload.category)) {
+    //   return res.status(400).send({
+    //     success: false,
+    //     message: 'Please provide valid category',
+    //   });
+    // }
+    // categoryId = await Categories.findOne({}, '_id').where(
+    //   'description',
+    //   newPayload.category
+    // );
+
+    newPayload.categoryId = null;
+    if (payload.categoryId) {
+      newPayload.categoryId = payload.categoryId;
     }
-    categoryId = await Categories.findOne({}, '_id').where(
-      'description',
-      newPayload.category
-    );
-
-    newPayload.categoryId = categoryId._id;
 
     if (req.files)
       for (const key in req.files) {

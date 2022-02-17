@@ -7,7 +7,7 @@ const validateCollectionSchema = (data) => {
     name: Joi.string().required(),
     url: Joi.string().allow(''),
     description: Joi.string().allow(''),
-    category: Joi.string().allow(''),
+    // category: Joi.string().allow(''),
   });
   const options = {
     errors: {
@@ -26,7 +26,7 @@ const validateEditCollectionSchema = (data) => {
     name: Joi.string().required(),
     url: Joi.string().allow(''),
     description: Joi.string().allow(''),
-    category: Joi.string().allow(''),
+    // category: Joi.string().allow(''),
   });
   const options = {
     errors: {
