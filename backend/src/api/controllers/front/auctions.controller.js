@@ -13,7 +13,7 @@ exports.live = async (req, res, next) => {
 
         const filter = {
             // sellingMethod: 2, // timed auctions only
-            auctionStartDate: { $lt: new Date(moment().add(1, 'days').format('YYYY/MM/DD')) },
+            // auctionStartDate: { $lt: new Date(moment().add(1, 'days').format('YYYY/MM/DD')) },
             auctionEndDate: { $gte: new Date(moment().format('YYYY/MM/DD')) }
         }
 
