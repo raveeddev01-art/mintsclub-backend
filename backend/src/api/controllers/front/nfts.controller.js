@@ -97,7 +97,9 @@ exports.storeDataInDb = async (req, res, next) => {
     createNFTPayload.image = req.body.image;
 
     const nft = await NFT.create(createNFTPayload);
+    console.log('create nft', nft);
     if (nft) {
+      console.log('working');
       let collectionRecord = await Collection.findOne({
         _id: req.body.data.collectionId,
       });
@@ -137,16 +139,24 @@ exports.edit = async (req, res, next) => {
 
     // set NFT selling config.
     if (payload.sellingMethod && payload.sellingConfig) {
-      payload.sellingConfig = JSON.parse(payload.sellingConfig);
+      payload.sellingConfig = payload.sellingConfig;
 
       // set auction start & end date-time
       const datetimeKey =
         Number(payload.sellingMethod) === 1 ? 'listingSchedule' : 'duration';
+      console.log('datetimeKey', datetimeKey);
+      // .format('YYYY-MM-DD[T00:00:00.000Z]');
+      console.log(
+        'payload.sellingConfig[datetimeKey]',
+        payload.sellingConfig[datetimeKey]
+      );
+
       payload.auctionStartDate = payload.sellingConfig[datetimeKey]?.startDate;
       payload.auctionEndDate = payload.sellingConfig[datetimeKey]?.endDate;
       payload.auctionStartTime = payload.sellingConfig[datetimeKey]?.startTime;
       payload.auctionEndTime = payload.sellingConfig[datetimeKey]?.endTime;
     }
+    console.log('payload', payload);
 
     const nft = await NFT.findByIdAndUpdate(
       { _id: payload._id },
