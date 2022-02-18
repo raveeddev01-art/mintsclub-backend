@@ -6,7 +6,7 @@ const { globalImgPlaceholder } = require('../../../config/vars');
 // API to get live auctions
 exports.live = async (req, res, next) => {
   try {
-    let { page, limit } = req.query;
+    let { page, limit, myFilter } = req.query;
 
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
@@ -17,6 +17,7 @@ exports.live = async (req, res, next) => {
         $lt: new Date(moment().add(1, 'days').format('YYYY/MM/DD')),
       },
       auctionEndDate: { $gte: new Date(moment().format('YYYY/MM/DD')) },
+      categoryId: myFilter,
     };
 
     const total = await NFT.countDocuments(filter);
