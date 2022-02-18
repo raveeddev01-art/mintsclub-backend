@@ -1,4 +1,4 @@
-mints-backend:
+mintsclub-v2:
   stage: deploy
   before_script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
@@ -6,9 +6,27 @@ mints-backend:
     - eval $(ssh-agent -s)
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
-    - echo "Deploy to dev server"
-    - ssh-add <(echo "$ID_RSA")
+    - echo "Deploy to QA server"
+    - ssh-add <(echo "$SSH_KEY_V2")
     - rm -rf .git
-    - ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP " cd /home/mints-club/ariswap/backend; git reset --hard; git pull origin task/Integrate-MintsClubBackend; cd /home/mints-club/ariswap/backend/backend; npm install; pm2 reload 0; exit"
+    - ssh -o StrictHostKeyChecking=no $SERVER_USER_V2@$SERVER_IP "cd /home/mintsclub-v2/mintsclub-v2/backend; git reset --hard; git pull origin task/MintsClubBackend-V2; cd /home/mintsclub-v2/mintsclub-v2/backend; npm install; pm2 restart 0; exit"
   only:
-    - task/Integrate-MintsClubBackend
+    - task/MintsClubBackend-V2
+
+sonarqube-Analyze:
+  stage: test
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: ['']
+  variables:
+    SONAR_USER_HOME: '${CI_PROJECT_DIR}/.sonar'
+    GIT_DEPTH: '0'
+  cache:
+    key: '${CI_JOB_NAME}'
+    paths:
+      - .sonar/cache
+  script:
+    - sonar-scanner
+  allow_failure: true
+  only:
+    - task/MintsClubBackend-V2

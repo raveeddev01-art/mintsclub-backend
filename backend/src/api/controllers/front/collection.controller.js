@@ -3,7 +3,6 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const NFT = require('../../models/nfts.model');
 const Collection = require('../../models/collection.model');
 const Categories = require('../../models/categories.model');
-const Likes = require('../../models/likes.model');
 
 const { addImage } = require('../../utils/uploadImage');
 const { checkDuplicate } = require('../../../config/errors');
@@ -281,6 +280,7 @@ exports.list = async (req, res, next) => {
     let { page, limit, myFilter, all, userId } = req.query;
 
     let filter = {};
+
     if (req.query.myFilter) {
       const applyFilter = await Categories.findOne({}, '_id').where(
         'description',
@@ -294,6 +294,9 @@ exports.list = async (req, res, next) => {
       }
       filter = { categoryId: applyFilter._id };
     }
+    if (req.query.myFilter && req.query.myFilter == 'all') {
+      filter = {};
+    }
     let total = 0;
 
     if (!all) {
@@ -302,12 +305,6 @@ exports.list = async (req, res, next) => {
 
       total = await Collection.countDocuments({});
 
-      // if (total == 0) {
-      //   return res.status(400).send({
-      //     success: false,
-      //     message: 'No Collections Found',
-      //   });
-      // }
       if (page > Math.ceil(total / limit) && total > 0)
         page = Math.ceil(total / limit);
     }

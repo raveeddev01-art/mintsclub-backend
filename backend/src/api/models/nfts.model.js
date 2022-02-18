@@ -12,7 +12,7 @@ const NFTSchema = new mongoose.Schema(
     ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     nftOwnerId: { type: String },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    // categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
+    categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
     collectionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Collection' },
     currentPrice: { type: Number },
     ownerAddress: { type: String },
@@ -31,7 +31,7 @@ const NFTSchema = new mongoose.Schema(
     auctionEndTime: { type: String },
     metaData: { type: String }, // ipfs link
   },
-  { timestamps: true }
+  { timestamps: true, collection: 'nfts' }
 );
 
 /**
