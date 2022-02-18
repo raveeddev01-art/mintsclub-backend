@@ -11,14 +11,24 @@ exports.live = async (req, res, next) => {
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
 
-    const filter = {
-      sellingMethod: 2, // timed auctions only
-      auctionStartDate: {
-        $lt: new Date(moment().add(1, 'days').format('YYYY/MM/DD')),
-      },
-      auctionEndDate: { $gte: new Date(moment().format('YYYY/MM/DD')) },
-      categoryId: myFilter,
-    };
+    if (myFilter === '620e52bb16994980690dd5fa') {
+      const filter = {
+        sellingMethod: 2, // timed auctions only
+        auctionStartDate: {
+          $lt: new Date(moment().add(1, 'days').format('YYYY/MM/DD')),
+        },
+        auctionEndDate: { $gte: new Date(moment().format('YYYY/MM/DD')) },
+      };
+    } else {
+      const filter = {
+        sellingMethod: 2, // timed auctions only
+        auctionStartDate: {
+          $lt: new Date(moment().add(1, 'days').format('YYYY/MM/DD')),
+        },
+        auctionEndDate: { $gte: new Date(moment().format('YYYY/MM/DD')) },
+        categoryId: myFilter,
+      };
+    }
 
     const total = await NFT.countDocuments(filter);
 
