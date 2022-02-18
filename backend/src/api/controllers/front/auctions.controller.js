@@ -7,12 +7,12 @@ const { globalImgPlaceholder } = require('../../../config/vars');
 exports.live = async (req, res, next) => {
   try {
     let { page, limit, myFilter } = req.query;
-
+    let filter;
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
 
     if (myFilter === '620e52bb16994980690dd5fa') {
-      const filter = {
+      filter = {
         sellingMethod: 2, // timed auctions only
         auctionStartDate: {
           $lt: new Date(moment().add(1, 'days').format('YYYY/MM/DD')),
@@ -20,7 +20,7 @@ exports.live = async (req, res, next) => {
         auctionEndDate: { $gte: new Date(moment().format('YYYY/MM/DD')) },
       };
     } else {
-      const filter = {
+      filter = {
         sellingMethod: 2, // timed auctions only
         auctionStartDate: {
           $lt: new Date(moment().add(1, 'days').format('YYYY/MM/DD')),
