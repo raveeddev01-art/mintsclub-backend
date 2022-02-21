@@ -86,8 +86,8 @@ const validateEditNftSchema = (data) => {
 const validateNFTTimedAuctionSchema = (data) => {
   const schema = Joi.object().keys({
     _id: Joi.string().required(),
-    auctionStartDate: Joi.date().format('YYYY-MM-DD').required(),
-    auctionEndDate: Joi.date().format('YYYY-MM-DD').required(),
+    auctionStartDate: Joi.date().iso().required(),
+    auctionEndDate: Joi.date().iso().required(),
     auctionStartTime: Joi.string().required(),
     auctionEndTime: Joi.string().required(),
     sellingConfig: Joi.object().keys({

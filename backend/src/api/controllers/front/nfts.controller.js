@@ -131,31 +131,17 @@ exports.storeDataInDb = async (req, res, next) => {
 exports.edit = async (req, res, next) => {
   try {
     //let payload = req.body;
+    let startDate = new Date(req.body.auctionStartDate).toISOString();
+    let endDate = new Date(req.body.auctionEndDate).toISOString();
 
     let payload = {
       _id: req.body._id,
       // bidOption: req.body.bidOption,
-      auctionStartDate: req.body.auctionStartDate,
-      auctionEndDate: req.body.auctionEndDate,
+      auctionStartDate: startDate,
+      auctionEndDate: endDate,
       auctionStartTime: req.body.auctionStartTime,
       auctionEndTime: req.body.auctionEndTime,
       sellingConfig: req.body.sellingConfig,
-      //   // description: req.body.description,
-      //   // attributes: req.body.attributes,
-      //   // levels: req.body.levels,
-      //   ownerId: req.body.ownerId,
-      //   userId: req.body.userId,
-      //   collectionId: req.body.collectionId,
-      //   categoryId: req.body.categoryId,
-      //   currentPrice: req.body.currentPrice,
-      //   ownerAddress: req.body.ownerAddress,
-      //   // txHash: req.body.txHash,
-      //   royalty: req.body.royalty,
-      //   copies: req.body.copies,
-      //   status: req.body.status,
-      //   // sold: req.body.sold,
-      //   // sellingMethod: req.body.sellingMethod,
-      //
     };
     const { error } = validation.validateNFTTimedAuctionSchema(payload);
 
