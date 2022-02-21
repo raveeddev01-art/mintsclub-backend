@@ -103,8 +103,8 @@ const validateNFTTimedAuctionSchema = (data) => {
         endTime: Joi.string().allow(''),
       }),
       reservePrice: Joi.object().keys({
-        currency: Joi.string().allow(),
-        amount: Joi.number().allow(),
+        currency: Joi.string().allow(''),
+        amount: Joi.number().allow(''),
       }),
     }),
   });
