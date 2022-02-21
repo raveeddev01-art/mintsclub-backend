@@ -4,7 +4,7 @@ const validateNFTSchema = (data) => {
   const schema = Joi.object().keys({
     name: Joi.string().allow(''),
     description: Joi.string().required(),
-    //creatorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    creatorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     attributes: Joi.array().items({
       name: Joi.string().allow(''),
       value: Joi.string().allow(''),
@@ -17,7 +17,7 @@ const validateNFTSchema = (data) => {
     ownerId: Joi.string().required(),
     //nftOwnerId: { type: String },
     userId: Joi.string().required(),
-    // categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
+    categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
     collectionId: Joi.string().required(),
     currentPrice: Joi.number().required(),
     ownerAddress: Joi.string().allow(''),

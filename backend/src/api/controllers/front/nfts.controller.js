@@ -153,8 +153,10 @@ exports.edit = async (req, res, next) => {
       //   'payload.sellingConfig[datetimeKey]',
       //   payload.sellingConfig[datetimeKey]
       // );
+      console.log('datetimeKey', datetimeKey);
+      payload.sellingConfig[datetimeKey] = payload.auctionStartDate;
+
       console.log('payload', payload);
-      console.log('datetimeKey', payload.sellingConfig.duration);
 
       payload.auctionStartDate = payload.sellingConfig[datetimeKey]?.startDate;
       payload.auctionEndDate = payload.sellingConfig[datetimeKey]?.endDate;
