@@ -11,6 +11,7 @@ const validation = require('../../middlewares/front/collectionValidation');
 
 // API to create collection
 exports.create = async (req, res, next) => {
+  console.log(req.body,"req.body category check")
   try {
     let payload = {
       userId: req.body.userId,

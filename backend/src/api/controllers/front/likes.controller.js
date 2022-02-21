@@ -10,10 +10,14 @@ exports.likeDislike = async (req, res, next) => {
   let foundCollection = await LikesModal.find({ nftId });
 
   if (foundCollection[0]) {
-    //find if user already exist
+    // find if user already exist
     await LikesModal.findOne(
-      { likes: { $elemMatch: { userId: req.body.userId } } },
+      { 
+        likes: { $elemMatch: { userId: req.body.userId } },
+        nftId:req.body.nftId
+       },
       async function (err, user) {
+        console.log()
         //error
 
         if (err) {
