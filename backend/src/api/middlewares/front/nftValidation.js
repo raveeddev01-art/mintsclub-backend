@@ -1,8 +1,9 @@
-const Joi = require('@hapi/joi');
-
+const Joi = require('@hapi/joi').extend(require('@joi/date'));
+// const Joi = require('joi')
+// .extend(require('@joi/date'));
 const validateNFTSchema = (data) => {
   const schema = Joi.object().keys({
-    name: Joi.string().allow(''),
+    name: Joi.string().required(),
     description: Joi.string().required(),
     creatorId: Joi.string().allow(''),
     attributes: Joi.array().items({
@@ -82,7 +83,32 @@ const validateEditNftSchema = (data) => {
   return schema.validate(data, options);
 };
 
+const validateNFTTimedAuctionSchema = (data) => {
+  const schema = Joi.object().keys({
+    _id: Joi.string().required(),
+    auctionStartDate: Joi.date().format('YYYY-MM-DD').required(),
+    auctionEndDate: Joi.date().format('YYYY-MM-DD').required(),
+    auctionStartTime: Joi.string().required(),
+    auctionEndTime: Joi.string().required(),
+    sellingConfig: Joi.object().keys({
+      Price: Joi.object().keys({
+        currency: Joi.string().required(),
+        amount: Joi.number().required(),
+      }),
+    }),
+  });
+  const options = {
+    errors: {
+      wrap: {
+        label: '',
+      },
+    },
+  };
+  return schema.validate(data, options);
+};
+
 module.exports = {
   validateNFTSchema,
   validateEditNftSchema,
+  validateNFTTimedAuctionSchema,
 };

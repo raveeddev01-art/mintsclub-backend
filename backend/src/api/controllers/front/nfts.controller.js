@@ -72,8 +72,7 @@ exports.create = async (req, res, next) => {
       ownerAddress: payload.ownerAddress,
     });
 
-    // payload.ownerId = req.user;
-    // payload.creatorId = req.user;
+    payload.creatorId = payload.userId;
 
     return res.send({
       success: true,
@@ -98,9 +97,8 @@ exports.storeDataInDb = async (req, res, next) => {
     createNFTPayload.image = req.body.image;
 
     const nft = await NFT.create(createNFTPayload);
-    //console.log('create nft', nft);
+
     if (nft) {
-      //console.log('working');
       let collectionRecord = await Collection.findOne({
         _id: req.body.data.collectionId,
       });
@@ -109,7 +107,6 @@ exports.storeDataInDb = async (req, res, next) => {
       collectionRecord.save();
     }
 
-    //create nft token
     let nftTokenPayload = {
       nftToken: req.body.nftToken,
       nftId: req.body.nftId,
@@ -133,7 +130,41 @@ exports.storeDataInDb = async (req, res, next) => {
 // API to edit NFT
 exports.edit = async (req, res, next) => {
   try {
-    let payload = req.body;
+    //let payload = req.body;
+
+    let payload = {
+      _id: req.body._id,
+      // bidOption: req.body.bidOption,
+      auctionStartDate: req.body.auctionStartDate,
+      auctionEndDate: req.body.auctionEndDate,
+      auctionStartTime: req.body.auctionStartTime,
+      auctionEndTime: req.body.auctionEndTime,
+      sellingConfig: req.body.sellingConfig,
+      //   // description: req.body.description,
+      //   // attributes: req.body.attributes,
+      //   // levels: req.body.levels,
+      //   ownerId: req.body.ownerId,
+      //   userId: req.body.userId,
+      //   collectionId: req.body.collectionId,
+      //   categoryId: req.body.categoryId,
+      //   currentPrice: req.body.currentPrice,
+      //   ownerAddress: req.body.ownerAddress,
+      //   // txHash: req.body.txHash,
+      //   royalty: req.body.royalty,
+      //   copies: req.body.copies,
+      //   status: req.body.status,
+      //   // sold: req.body.sold,
+      //   // sellingMethod: req.body.sellingMethod,
+      //
+    };
+    const { error } = validation.validateNFTTimedAuctionSchema(payload);
+
+    if (error) {
+      let errorMsg = error.details[0].message;
+      return res.status(400).send({ status: false, data: errorMsg });
+    }
+    // payload.auctionStartDate =  payload.auctionStartDate Date(moment().format('YYYY/MM/DD')
+    // console.log('payload', payload);
     // if (req.files && req.files.image) {
     //   const image = req.files.image[0];
     //   const imgData = fs.readFileSync(image.path);
@@ -141,29 +172,18 @@ exports.edit = async (req, res, next) => {
     // }
 
     // set NFT selling config.
-    if (payload.sellingMethod && payload.sellingConfig) {
-      payload.sellingConfig = payload.sellingConfig;
+    // if (payload.sellingMethod && payload.sellingConfig) {
+    //   payload.sellingConfig = payload.sellingConfig;
 
-      // set auction start & end date-time
-      const datetimeKey =
-        Number(payload.sellingMethod) === 1 ? 'listingSchedule' : 'duration';
-      //console.log('datetimeKey', datetimeKey);
-      // .format('YYYY-MM-DD[T00:00:00.000Z]');
-      // console.log(
-      //   'payload.sellingConfig[datetimeKey]',
-      //   payload.sellingConfig[datetimeKey]
-      // );
-      console.log('datetimeKey', datetimeKey);
-      payload.sellingConfig[datetimeKey] = payload.auctionStartDate;
+    //   //set auction start & end date-time
+    //   const datetimeKey =
+    //     Number(payload.sellingMethod) === 1 ? 'listingSchedule' : 'duration';
 
-      console.log('payload', payload);
-
-      payload.auctionStartDate = payload.sellingConfig[datetimeKey]?.startDate;
-      payload.auctionEndDate = payload.sellingConfig[datetimeKey]?.endDate;
-      payload.auctionStartTime = payload.sellingConfig[datetimeKey]?.startTime;
-      payload.auctionEndTime = payload.sellingConfig[datetimeKey]?.endTime;
-    }
-    // console.log('payload', payload);
+    //   payload.auctionStartDate = payload.sellingConfig[datetimeKey]?.startDate;
+    //   payload.auctionEndDate = payload.sellingConfig[datetimeKey]?.endDate;
+    //   payload.auctionStartTime = payload.sellingConfig[datetimeKey]?.startTime;
+    //   payload.auctionEndTime = payload.sellingConfig[datetimeKey]?.endTime;
+    // }
 
     const nft = await NFT.findByIdAndUpdate(
       { _id: payload._id },
