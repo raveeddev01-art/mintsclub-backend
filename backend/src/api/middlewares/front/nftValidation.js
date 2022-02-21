@@ -91,9 +91,20 @@ const validateNFTTimedAuctionSchema = (data) => {
     auctionStartTime: Joi.string().required(),
     auctionEndTime: Joi.string().required(),
     sellingConfig: Joi.object().keys({
-      Price: Joi.object().keys({
+      method: Joi.number().allow(''),
+      startPrice: Joi.object().keys({
         currency: Joi.string().required(),
         amount: Joi.number().required(),
+      }),
+      duration: Joi.object().keys({
+        startDate: Joi.string().allow(''),
+        endDate: Joi.string().allow(''),
+        startTime: Joi.string().allow(''),
+        endTime: Joi.string().allow(''),
+      }),
+      reservePrice: Joi.object().keys({
+        currency: Joi.string().allow(),
+        amount: Joi.number().allow(),
       }),
     }),
   });
