@@ -16,7 +16,7 @@ const {
 
 // API to create NFT
 exports.create = async (req, res, next) => {
-  console.log(req.body, 'req.body');
+  // console.log(req.body, 'req.body');
   try {
     let payload = {
       name: req.body.name,
@@ -134,11 +134,11 @@ exports.storeDataInDb = async (req, res, next) => {
 exports.edit = async (req, res, next) => {
   try {
     let payload = req.body;
-    if (req.files && req.files.image) {
-      const image = req.files.image[0];
-      const imgData = fs.readFileSync(image.path);
-      payload.image = await addImage(imgData);
-    }
+    // if (req.files && req.files.image) {
+    //   const image = req.files.image[0];
+    //   const imgData = fs.readFileSync(image.path);
+    //   payload.image = await addImage(imgData);
+    // }
 
     // set NFT selling config.
     if (payload.sellingMethod && payload.sellingConfig) {
