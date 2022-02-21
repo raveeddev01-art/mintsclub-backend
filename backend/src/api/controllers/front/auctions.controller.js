@@ -1,6 +1,7 @@
 const moment = require('moment');
 const NFT = require('../../models/nfts.model');
 const UserModal = require('../../models/users.model');
+const Categories = require('../../models/categories.model');
 const { globalImgPlaceholder } = require('../../../config/vars');
 
 // API to get live auctions
@@ -11,7 +12,7 @@ exports.live = async (req, res, next) => {
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
 
-    if (myFilter === '620e52bb16994980690dd5fa') {
+    if (myFilter && myFilter === '620e52bb16994980690dd5fa') {
       filter = {
         sellingMethod: 2, // timed auctions only
         auctionStartDate: {

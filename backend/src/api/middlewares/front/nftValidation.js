@@ -90,6 +90,7 @@ const validateNFTTimedAuctionSchema = (data) => {
     auctionEndDate: Joi.date().iso().required(),
     auctionStartTime: Joi.string().required(),
     auctionEndTime: Joi.string().required(),
+    sellingMethod: Joi.number().required(),
     sellingConfig: Joi.object().keys({
       method: Joi.number().allow(''),
       startPrice: Joi.object().keys({
