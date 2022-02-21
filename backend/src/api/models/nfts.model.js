@@ -25,8 +25,8 @@ const NFTSchema = new mongoose.Schema(
     sold: { type: Number, default: 0 },
     sellingMethod: { type: Number }, // 1 = Fixed Price, 2 = Timed Auction
     sellingConfig: { type: Object },
-    auctionStartDate: { type: Date },
-    auctionEndDate: { type: Date },
+    auctionStartDate: { type: String },
+    auctionEndDate: { type: String },
     auctionStartTime: { type: String },
     auctionEndTime: { type: String },
     metaData: { type: String }, // ipfs link
