@@ -141,18 +141,19 @@ exports.edit = async (req, res, next) => {
       _id: req.body._id,
       // bidOption: req.body.bidOption,
       sellingMethod: req.body.sellingMethod,
-      auctionStartDate: startDate,
-      auctionEndDate: endDate,
-      auctionStartTime: req.body.auctionStartTime,
-      auctionEndTime: req.body.auctionEndTime,
+      // auctionStartDate: startDate,
+      // auctionEndDate: endDate,
+      // auctionStartTime: req.body.auctionStartTime,
+      // auctionEndTime: req.body.auctionEndTime,
       sellingConfig: sellingCnfg,
     };
-    const { error } = validation.validateNFTTimedAuctionSchema(payload);
+    // const { error } = validation.validateNFTTimedAuctionSchema(payload);
 
-    if (error) {
-      let errorMsg = error.details[0].message;
-      return res.status(400).send({ status: false, data: errorMsg });
-    }
+    // if (error) {
+    //   let errorMsg = error.details[0].message;
+    //   return res.status(400).send({ status: false, data: errorMsg });
+    // }
+
     // payload.auctionStartDate =  payload.auctionStartDate Date(moment().format('YYYY/MM/DD')
     // console.log('payload', payload);
     // if (req.files && req.files.image) {
