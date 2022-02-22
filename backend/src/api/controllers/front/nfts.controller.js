@@ -130,7 +130,7 @@ exports.storeDataInDb = async (req, res, next) => {
 // API to edit NFT
 exports.edit = async (req, res, next) => {
   try {
-    Createlet sellingCnfg = JSON.parse(req.body.sellingConfig);
+    let sellingCnfg = JSON.parse(req.body.sellingConfig);
     //let sellingCnfg = req.body.sellingConfig;
 
     //let payload = req.body;

@@ -6,9 +6,3 @@ const http = require('http');
 mongoose.connect();
 http.createServer(app).listen(port);
 module.exports = app;
-
-
-
-
-
-
