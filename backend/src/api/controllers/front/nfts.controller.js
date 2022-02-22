@@ -130,7 +130,9 @@ exports.storeDataInDb = async (req, res, next) => {
 // API to edit NFT
 exports.edit = async (req, res, next) => {
   try {
-    let sellingCnfg = JSON.parse(req.body.sellingConfig);
+    Createlet sellingCnfg = JSON.parse(req.body.sellingConfig);
+    //let sellingCnfg = req.body.sellingConfig;
+
     //let payload = req.body;
     let startDate = new Date(req.body.auctionStartDate).toISOString();
     let endDate = new Date(req.body.auctionEndDate).toISOString();
