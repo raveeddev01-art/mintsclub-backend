@@ -322,11 +322,14 @@ exports.list = async (req, res, next) => {
       lowToHigh,
       newest,
       highToLow,
+      ownerId
     } = req.query;
-
+console.log(ownerId,"ownerId")
+let ownerId1=ObjectId(ownerId)
     const userId = req.user;
     let filter = {
       status: { $ne: 0 },
+      ...(ownerId && {ownerId:ownerId1}),
       ...(gtePrice && {
         currentPrice: { $gte: Number(gtePrice), $lte: Number(ltePrice) },
       }),
