@@ -131,26 +131,55 @@ exports.storeDataInDb = async (req, res, next) => {
 exports.edit = async (req, res, next) => {
   try {
     let sellingCnfg = JSON.parse(req.body.sellingConfig);
-    //let payload = req.body;
-    let startDate = new Date(req.body.auctionStartDate).toISOString();
-    let endDate = new Date(req.body.auctionEndDate).toISOString();
+    console.log(sellingCnfg)
+    console.log(sellingCnfg.sellingMethod,"sellingCnfg.sellingMethod")
 
+    //let payload = req.body;
+    if(req.body.sellingMethod==2)
+    {
+
+      let startDate = new Date(sellingCnfg.duration.startDate).toISOString();
+      let endDate = new Date(sellingCnfg.duration.endDate).toISOString();
+      sellingCnfg.duration.startDate=startDate
+      sellingCnfg.duration.endDate=endDate
+    }else {
+      let startDate = new Date(sellingCnfg.listingSchedule.startDate).toISOString();
+      let endDate = new Date(sellingCnfg.listingSchedule.endDate).toISOString();
+      sellingCnfg.listingSchedule.startDate=startDate
+      sellingCnfg.listingSchedule.endDate=endDate
+    }
+
+    console.log(sellingCnfg,"sellingcnf")
+
+//     listingSchedule:
+// endDate: Moment {_isAMomentObject: true, _i: Array(6), _isUTC: false, _pf: {…}, _locale: Locale, …}
+// endTime: "23:59"
+// startDate: Moment {_isAMomentObject: true, _i: Array(6), _isUTC: false, _pf: {…}, _locale: Locale, …}
+// startTime: "18:13"
+// [[Prototype]]: Object
+// price: {currency: 'CELO', amount: '23'}
+// reserveFor: ""
+// [[Prototype]]: Object
+    
     let payload = {
       _id: req.body._id,
       // bidOption: req.body.bidOption,
       sellingMethod: req.body.sellingMethod,
-      auctionStartDate: startDate,
-      auctionEndDate: endDate,
-      auctionStartTime: req.body.auctionStartTime,
-      auctionEndTime: req.body.auctionEndTime,
+      // auctionStartDate: startDate,
+      // auctionEndDate: endDate,
+      // auctionStartTime: req.body.auctionStartTime,
+      // auctionEndTime: req.body.auctionEndTime,
       sellingConfig: sellingCnfg,
     };
-    const { error } = validation.validateNFTTimedAuctionSchema(payload);
+    
 
-    if (error) {
-      let errorMsg = error.details[0].message;
-      return res.status(400).send({ status: false, data: errorMsg });
-    }
+    // const { error } = validation.validateNFTTimedAuctionSchema(payload);
+
+    // if (error) {
+    //   let errorMsg = error.details[0].message;
+    //   return res.status(400).send({ status: false, data: errorMsg });
+    // }
+
     // payload.auctionStartDate =  payload.auctionStartDate Date(moment().format('YYYY/MM/DD')
     // console.log('payload', payload);
     // if (req.files && req.files.image) {
