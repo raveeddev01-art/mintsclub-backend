@@ -130,12 +130,6 @@ exports.storeDataInDb = async (req, res, next) => {
 // API to edit NFT
 exports.edit = async (req, res, next) => {
   try {
-    console.log(req.body)
-    // let sellingCnfg = JSON.parse(req.body.sellingConfig);
-    // let payload={}
-    // payload.sellingCnfg = sellingCnfg;
-    // payload.sellingMethod=req.body.sellingMethod;
-    // paylaod.id=req.body._id;
     let payload = req.body;
     if (!payload.sellingMethod) {
       return res.status(400).send({
@@ -144,10 +138,8 @@ exports.edit = async (req, res, next) => {
       });
     }
     payload.sellingConfig = JSON.parse(payload.sellingConfig);
-    console.log(typeof payload.sellingMethod)
+
     if (Number(payload.sellingMethod) === 1) {
-
-
       const { error } = validation.validateNFFixedTAuctionSchema(payload);
 
       if (error) {
@@ -166,7 +158,6 @@ exports.edit = async (req, res, next) => {
       payload.sellingConfig.listingSchedule.startDate = startDate;
       payload.sellingConfig.listingSchedule.endDate = endDate;
     } else {
-     
       //console.log('payload timed auction', payload);
       const { error } = validation.validateNFTimedTAuctionSchema(payload);
 
@@ -185,9 +176,11 @@ exports.edit = async (req, res, next) => {
 
       payload.sellingConfig.duration.startDate = startDate;
       payload.sellingConfig.duration.endDate = endDate;
+      payload.auctionStartDate = startDate;
+      payload.auctionEndDate = endDate;
+      payload.auctionStartTime = payload.sellingConfig.duration.startTime;
+      payload.auctionEndTime = payload.sellingConfig.duration.startTime;
     }
-
-  
 
     const nft = await NFT.findByIdAndUpdate(
       { _id: payload._id },
@@ -200,7 +193,7 @@ exports.edit = async (req, res, next) => {
       nft,
     });
   } catch (error) {
-    console.log(error,"error")
+    console.log(error, 'error');
     return next(error);
   }
 };
@@ -339,14 +332,14 @@ exports.list = async (req, res, next) => {
       lowToHigh,
       newest,
       highToLow,
-      ownerId
+      ownerId,
     } = req.query;
-console.log(ownerId,"ownerId")
-let ownerId1=ObjectId(ownerId)
+    console.log(ownerId, 'ownerId');
+    let ownerId1 = ObjectId(ownerId);
     const userId = req.user;
     let filter = {
       status: { $ne: 0 },
-      ...(ownerId && {ownerId:ownerId1}),
+      ...(ownerId && { ownerId: ownerId1 }),
       ...(gtePrice && {
         currentPrice: { $gte: Number(gtePrice), $lte: Number(ltePrice) },
       }),
