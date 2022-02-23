@@ -83,31 +83,71 @@ const validateEditNftSchema = (data) => {
   return schema.validate(data, options);
 };
 
-const validateNFTTimedAuctionSchema = (data) => {
+const validateNFTimedTAuctionSchema = (data) => {
   const schema = Joi.object().keys({
     _id: Joi.string().required(),
-    auctionStartDate: Joi.date().iso().required(),
-    auctionEndDate: Joi.date().iso().required(),
-    auctionStartTime: Joi.string().required(),
-    auctionEndTime: Joi.string().required(),
+    // auctionStartDate: Joi.date().iso().required(),
+    // auctionEndDate: Joi.date().iso().required(),
+    // auctionStartTime: Joi.string().required(),
+    // auctionEndTime: Joi.string().required(),
     sellingMethod: Joi.number().required(),
-    sellingConfig: Joi.object().keys({
-      method: Joi.number().allow(''),
-      startPrice: Joi.object().keys({
-        currency: Joi.string().required(),
-        amount: Joi.number().required(),
-      }),
-      duration: Joi.object().keys({
-        startDate: Joi.string().allow(''),
-        endDate: Joi.string().allow(''),
-        startTime: Joi.string().allow(''),
-        endTime: Joi.string().allow(''),
-      }),
-      reservePrice: Joi.object().keys({
-        currency: Joi.string().allow(''),
-        amount: Joi.number().allow(''),
-      }),
-    }),
+    sellingConfig: Joi.object()
+      .keys({
+        method: Joi.number().allow(''),
+        startPrice: Joi.object()
+          .keys({
+            currency: Joi.string().required(),
+            amount: Joi.number().required(),
+          })
+          .required(),
+        duration: Joi.object()
+          .keys({
+            startDate: Joi.date().required(),
+            endDate: Joi.date().required(),
+            startTime: Joi.string().allow(''),
+            endTime: Joi.string().allow(''),
+          })
+          .required(),
+        reservePrice: Joi.object().keys({
+          currency: Joi.string().allow(''),
+          amount: Joi.number().allow(''),
+        }),
+      })
+      .required(),
+  });
+  const options = {
+    errors: {
+      wrap: {
+        label: '',
+      },
+    },
+  };
+  return schema.validate(data, options);
+};
+const validateNFFixedTAuctionSchema = (data) => {
+  const schema = Joi.object().keys({
+    _id: Joi.string().required(),
+    sellingMethod: Joi.number().required(),
+    sellingConfig: Joi.object()
+      .keys({
+        method: Joi.number().allow(''),
+        listingSchedule: Joi.object()
+          .keys({
+            startDate: Joi.string().required(),
+            endDate: Joi.string().required(),
+            startTime: Joi.string().allow(''),
+            endTime: Joi.string().allow(''),
+          })
+          .required(),
+        price: Joi.object()
+          .keys({
+            currency: Joi.string().required(),
+            amount: Joi.number().required(),
+          })
+          .required(),
+        reserveFor: Joi.string().allow(''),
+      })
+      .required(),
   });
   const options = {
     errors: {
@@ -122,5 +162,6 @@ const validateNFTTimedAuctionSchema = (data) => {
 module.exports = {
   validateNFTSchema,
   validateEditNftSchema,
-  validateNFTTimedAuctionSchema,
+  validateNFTimedTAuctionSchema,
+  validateNFFixedTAuctionSchema,
 };

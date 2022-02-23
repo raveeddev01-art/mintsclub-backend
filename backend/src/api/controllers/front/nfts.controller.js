@@ -130,77 +130,64 @@ exports.storeDataInDb = async (req, res, next) => {
 // API to edit NFT
 exports.edit = async (req, res, next) => {
   try {
-    let sellingCnfg = JSON.parse(req.body.sellingConfig);
-    console.log(sellingCnfg)
-    console.log(sellingCnfg.sellingMethod,"sellingCnfg.sellingMethod")
+    console.log(req.body)
+    // let sellingCnfg = JSON.parse(req.body.sellingConfig);
+    // let payload={}
+    // payload.sellingCnfg = sellingCnfg;
+    // payload.sellingMethod=req.body.sellingMethod;
+    // paylaod.id=req.body._id;
+    let payload = req.body;
+    if (!payload.sellingMethod) {
+      return res.status(400).send({
+        success: false,
+        message: 'sellingMethod is required',
+      });
+    }
+    payload.sellingConfig = JSON.parse(payload.sellingConfig);
+    console.log(typeof payload.sellingMethod)
+    if (Number(payload.sellingMethod) === 1) {
 
-    //let payload = req.body;
-    if(req.body.sellingMethod==2)
-    {
 
-      let startDate = new Date(sellingCnfg.duration.startDate).toISOString();
-      let endDate = new Date(sellingCnfg.duration.endDate).toISOString();
-      sellingCnfg.duration.startDate=startDate
-      sellingCnfg.duration.endDate=endDate
-    }else {
-      let startDate = new Date(sellingCnfg.listingSchedule.startDate).toISOString();
-      let endDate = new Date(sellingCnfg.listingSchedule.endDate).toISOString();
-      sellingCnfg.listingSchedule.startDate=startDate
-      sellingCnfg.listingSchedule.endDate=endDate
+      const { error } = validation.validateNFFixedTAuctionSchema(payload);
+
+      if (error) {
+        let errorMsg = error.details[0].message;
+        return res.status(400).send({ status: false, data: errorMsg });
+      }
+
+      let startDate = new Date(
+        payload.sellingConfig.listingSchedule.startDate
+      ).toISOString();
+
+      let endDate = new Date(
+        payload.sellingConfig.listingSchedule.endDate
+      ).toISOString();
+
+      payload.sellingConfig.listingSchedule.startDate = startDate;
+      payload.sellingConfig.listingSchedule.endDate = endDate;
+    } else {
+     
+      //console.log('payload timed auction', payload);
+      const { error } = validation.validateNFTimedTAuctionSchema(payload);
+
+      if (error) {
+        let errorMsg = error.details[0].message;
+        return res.status(400).send({ status: false, data: errorMsg });
+      }
+
+      let startDate = new Date(
+        payload.sellingConfig.duration.startDate
+      ).toISOString();
+
+      let endDate = new Date(
+        payload.sellingConfig.duration.endDate
+      ).toISOString();
+
+      payload.sellingConfig.duration.startDate = startDate;
+      payload.sellingConfig.duration.endDate = endDate;
     }
 
-    console.log(sellingCnfg,"sellingcnf")
-
-//     listingSchedule:
-// endDate: Moment {_isAMomentObject: true, _i: Array(6), _isUTC: false, _pf: {…}, _locale: Locale, …}
-// endTime: "23:59"
-// startDate: Moment {_isAMomentObject: true, _i: Array(6), _isUTC: false, _pf: {…}, _locale: Locale, …}
-// startTime: "18:13"
-// [[Prototype]]: Object
-// price: {currency: 'CELO', amount: '23'}
-// reserveFor: ""
-// [[Prototype]]: Object
-    
-    let payload = {
-      _id: req.body._id,
-      // bidOption: req.body.bidOption,
-      sellingMethod: req.body.sellingMethod,
-      // auctionStartDate: startDate,
-      // auctionEndDate: endDate,
-      // auctionStartTime: req.body.auctionStartTime,
-      // auctionEndTime: req.body.auctionEndTime,
-      sellingConfig: sellingCnfg,
-    };
-    
-
-    // const { error } = validation.validateNFTTimedAuctionSchema(payload);
-
-    // if (error) {
-    //   let errorMsg = error.details[0].message;
-    //   return res.status(400).send({ status: false, data: errorMsg });
-    // }
-
-    // payload.auctionStartDate =  payload.auctionStartDate Date(moment().format('YYYY/MM/DD')
-    // console.log('payload', payload);
-    // if (req.files && req.files.image) {
-    //   const image = req.files.image[0];
-    //   const imgData = fs.readFileSync(image.path);
-    //   payload.image = await addImage(imgData);
-    // }
-
-    // set NFT selling config.
-    // if (payload.sellingMethod && payload.sellingConfig) {
-    //   payload.sellingConfig = payload.sellingConfig;
-
-    //   //set auction start & end date-time
-    //   const datetimeKey =
-    //     Number(payload.sellingMethod) === 1 ? 'listingSchedule' : 'duration';
-
-    //   payload.auctionStartDate = payload.sellingConfig[datetimeKey]?.startDate;
-    //   payload.auctionEndDate = payload.sellingConfig[datetimeKey]?.endDate;
-    //   payload.auctionStartTime = payload.sellingConfig[datetimeKey]?.startTime;
-    //   payload.auctionEndTime = payload.sellingConfig[datetimeKey]?.endTime;
-    // }
+  
 
     const nft = await NFT.findByIdAndUpdate(
       { _id: payload._id },
@@ -213,6 +200,7 @@ exports.edit = async (req, res, next) => {
       nft,
     });
   } catch (error) {
+    console.log(error,"error")
     return next(error);
   }
 };
