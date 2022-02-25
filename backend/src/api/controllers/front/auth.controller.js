@@ -47,7 +47,7 @@ exports.register = async (req, res, next) => {
       data: data,
     });
   } catch (error) {
-    console.log("catch",error)
+    console.log("catch1",error)
     next(error);
   }
 };
