@@ -333,18 +333,39 @@ exports.list = async (req, res, next) => {
       newest,
       highToLow,
       ownerId,
+      buy,
+      auction,
+      latest,
+      keyword,
     } = req.query;
-    console.log(ownerId, 'ownerId');
+
     let ownerId1 = ObjectId(ownerId);
     const userId = req.user;
+    let search;
+    if (keyword) {
+      search = true;
+    }
+
     let filter = {
       status: { $ne: 0 },
+      ...(latest && {
+        createdAt: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+      }),
       ...(ownerId && { ownerId: ownerId1 }),
       ...(gtePrice && {
         currentPrice: { $gte: Number(gtePrice), $lte: Number(ltePrice) },
       }),
       ...(collectionId && { collectionId }),
       ...(categoryId && { categoryId }),
+      ...(buy && { sellingMethod: { $eq: 1 } }),
+      ...(auction && { sellingMethod: { $eq: 2 } }),
+      ...(search && {
+        $or: [
+          { name: { $regex: '.*' + keyword + '.*' } },
+          { description: { $regex: '.*' + keyword + '.*' } },
+          { ownerAddress: { $regex: keyword } },
+        ],
+      }),
     };
     // get NFTs for given collection
     if (collectionId) filter.collectionId = ObjectId(collectionId);
