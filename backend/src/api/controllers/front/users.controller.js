@@ -133,7 +133,7 @@ exports.getUser = async (req, res, next) => {
     return res.send({
       status: true,
       data: user,
-      message: 'user record fetched succesfully',
+      message: 'User Record fetched succesfully',
     });
   } catch (error) {
     return next(error);
