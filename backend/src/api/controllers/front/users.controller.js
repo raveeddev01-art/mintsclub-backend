@@ -129,11 +129,11 @@ exports.getUser = async (req, res, next) => {
     let { userId } = req.params;
 
     let user = await UserModal.findOne({ _id: ObjectId(userId) });
-    user = user.transform();
+    // user = user.transform();
     return res.send({
       status: true,
       data: user,
-      message: 'Top Sellers fetched succesfully',
+      message: 'user record fetched succesfully',
     });
   } catch (error) {
     return next(error);
