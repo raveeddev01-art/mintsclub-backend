@@ -9,6 +9,7 @@ const mailchimp = require('@mailchimp/mailchimp_marketing');
 const { mailChimp, sendGrid } = require('../../../config/vars');
 const passport = require('passport');
 const localStrategy = require('passport-local').Strategy;
+const validUrl = require('valid-url');
 const {
   compilingPreperations,
   createConfiguration,
@@ -43,9 +44,6 @@ exports.updateProfile = async (req, res, next) => {
     let payload = {
       userId: req.body.userId,
       bio: req.body.bio,
-      twitterLink: req.body.twitterLink,
-      instaLink: req.body.instaLink,
-      webLink: req.body.webLink,
     };
 
     const { error } = validation.validateUserProfile(payload);
@@ -53,6 +51,29 @@ exports.updateProfile = async (req, res, next) => {
     if (error) {
       let errorMsg = error.details[0].message;
       return res.status(400).send({ status: false, data: errorMsg });
+    }
+
+    if (req.body.twitterLink && !validUrl.isUri(req.body.twitterLink)) {
+      return res
+        .status(400)
+        .send({ status: false, message: 'Enter a valid twitter Link' });
+    } else {
+      payload.twitterLink = req.body.twitterLink;
+    }
+    if (req.body.instaLink && !validUrl.isUri(req.body.instaLink)) {
+      return res
+        .status(400)
+        .send({ status: false, message: 'Enter a valid instagram Link' });
+    } else {
+      payload.instaLink = req.body.instaLink;
+    }
+
+    if (req.body.webLink && !validUrl.isUri(req.body.webLink)) {
+      return res
+        .status(400)
+        .send({ status: false, message: 'Enter a valid website Link' });
+    } else {
+      payload.webLink = req.body.webLink;
     }
 
     imagesPayload = {
