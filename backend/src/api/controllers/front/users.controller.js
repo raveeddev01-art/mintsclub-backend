@@ -128,12 +128,26 @@ exports.getUser = async (req, res, next) => {
   try {
     let { userId } = req.params;
 
-    let user = await UserModal.findOne({ _id: ObjectId(userId) });
-    user = user.transform();
+    let payload = { userId };
+
+    const { error } = validation.validateUser(payload);
+
+    if (error) {
+      let errorMsg = error.details[0].message;
+      return res.status(400).send({ status: false, data: errorMsg });
+    }
+    let user = await UserModal.findOne({ _id: ObjectId(payload.userId) });
+    if (user) {
+      user = user.transform();
+      return res.send({
+        success: true,
+        data: user,
+        message: 'user fetched successfully',
+      });
+    }
     return res.send({
-      status: true,
-      data: user,
-      message: 'Top Sellers fetched succesfully',
+      success: false,
+      message: 'User does not exist',
     });
   } catch (error) {
     return next(error);
@@ -152,7 +166,7 @@ exports.createUser = async (req, res, next) => {
       email: req.body.email,
       description: req.body.description,
     };
-    //console.log(payload, 'payload==>');
+
     const { error } = validation.validateContractSchema(payload);
 
     if (error) {
