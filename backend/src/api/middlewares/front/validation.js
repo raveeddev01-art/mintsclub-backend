@@ -103,10 +103,29 @@ const validateUser = (user) => {
   return schema.validate(user, options);
 };
 
+const validateUserProfile = (data) => {
+  const schema = Joi.object().keys({
+    userId: Joi.string().alphanum().min(12).max(24).required(),
+    bio: Joi.string().max(600).allow(''),
+    twitterLink: Joi.string().allow(''),
+    instaLink: Joi.string().allow(''),
+    webLink: Joi.string().allow(''),
+  });
+  const options = {
+    errors: {
+      wrap: {
+        label: '',
+      },
+    },
+  };
+  return schema.validate(data, options);
+};
+
 module.exports = {
   validateContractSchema,
   validateEmail,
   validateSignUpSchema,
   validateAddress,
   validateUser,
+  validateUserProfile,
 };

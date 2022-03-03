@@ -1,7 +1,7 @@
 const fs = require('fs');
 const ObjectId = require('mongoose').Types.ObjectId;
 const UserModal = require('../../models/users.model');
-const { addImage, addContent } = require('../../utils/upload');
+const { addImage, addContent } = require('../../utils/uploadImage');
 const validation = require('../../middlewares/front/validation');
 const Web3 = require('web3'); // https://www.npmjs.com/package/web3
 const path = require('path');
@@ -38,40 +38,51 @@ exports.create = async (req, res, next) => {
     return next(error);
   }
 };
-exports.update = async (req, res, next) => {
+exports.updateProfile = async (req, res, next) => {
   try {
-    let payload = req.body;
-    const _id = payload.userId;
-    console.log('_id', _id);
-    if (!payload.userId) {
-      return res.send({
-        status: false,
-        message: 'Please fill all required fields',
-      });
+    let payload = {
+      userId: req.body.userId,
+      bio: req.body.bio,
+      twitterLink: req.body.twitterLink,
+      instaLink: req.body.instaLink,
+      webLink: req.body.webLink,
+    };
+
+    const { error } = validation.validateUserProfile(payload);
+
+    if (error) {
+      let errorMsg = error.details[0].message;
+      return res.status(400).send({ status: false, data: errorMsg });
     }
+
+    imagesPayload = {
+      profileImage: req.body.profileImage,
+      bannerImage: req.body.bannerImage,
+    };
+
+    const newPayload = { ...payload, ...imagesPayload };
+
     if (req.file) {
       const imgData = fs.readFileSync(req.file.path);
-      payload.profileImage = await addImage(imgData);
+      newPayload.profileImage = await addImage(imgData);
     }
+
     if (req.files) {
       for (const key in req.files) {
         const image = req.files[key][0];
         const imgData = fs.readFileSync(image.path);
-        payload[key] = await addImage(imgData);
+        newPayload[key] = await addImage(imgData);
       }
     }
-
     let user = await UserModal.findByIdAndUpdate(
-      { _id },
-      { $set: payload },
+      { _id: ObjectId(newPayload.userId) },
+      { $set: newPayload },
       { new: true }
     );
-    console.log(user);
-    let data = user.transform();
     return res.send({
       status: true,
-      data,
-      message: 'Your profile is updated successfully.',
+      user,
+      message: 'User profile updated successfully.',
     });
   } catch (error) {
     return next(error);
@@ -137,8 +148,8 @@ exports.getUser = async (req, res, next) => {
       return res.status(400).send({ status: false, data: errorMsg });
     }
     let user = await UserModal.findOne({ _id: ObjectId(payload.userId) });
+
     if (user) {
-      user = user.transform();
       return res.send({
         success: true,
         data: user,
