@@ -5,7 +5,7 @@ const { profileUpload, uploadSingle } = require('../../../utils/uploadImage');
 const passport = require('passport');
 const localStrategy = require('passport-local').Strategy;
 router.route('/').post(controller.create);
-router.route('/update').put(profileUpload, controller.updateProfile);
+router.route('/updateProfile').put(profileUpload, controller.updateProfile);
 router.route('/creators').post(controller.getCreators);
 router.route('/top-sellers').post(controller.topSellers);
 router.route('/:userId').get(controller.getUser);
