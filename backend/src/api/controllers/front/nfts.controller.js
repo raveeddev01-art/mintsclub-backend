@@ -90,7 +90,7 @@ exports.storeDataInDb = async (req, res, next) => {
       });
     }
     let createNFTPayload = req.body.data;
-    // createNFTPayload.image = req.body.image;
+    createNFTPayload.image = req.body.image;
 
     const nft = await NFT.create(createNFTPayload);
 
@@ -220,9 +220,24 @@ exports.update = async (req, res, next) => {
 exports.get = async (req, res, next) => {
   try {
     const { nftId } = req.params;
-    let nftDetail = new Array();
-    nftDetail = await NFT.findOne({ _id: nftId });
+    if (!nftId) {
+      return res.send({
+        success: false,
+        message: 'Please enter NFT Id',
+      });
+    }
+
+    const nftDetail = await NFT.findOne({ _id: nftId });
+    if (!nftDetail) {
+      return res.send({
+        success: false,
+        message: 'No data found for this nft id',
+      });
+    }
+
     const tokenData = await NftTokens.findOne({ nftId: nftId });
+    returnData = JSON.parse(JSON.stringify(nftDetail));
+    returnData.nftToken = tokenData['nftToken'];
 
     // const nft = await NFT.aggregate([
     //     {
@@ -295,18 +310,12 @@ exports.get = async (req, res, next) => {
     //     }
     // ])
 
-    if (!nftDetail && !tokenData) {
-      return res.send({
-        success: false,
-        message: 'No data found for this id',
-      });
-    }
     return res.send({
       success: true,
       message: 'Item retrieved successfully',
       //   nft: nft.length ? nft[0] : null ,
-      data: nftDetail,
-      NFTDetail: tokenData,
+      data: returnData,
+      // NFTDetail: tokenData,
     });
   } catch (error) {
     return next(error);
