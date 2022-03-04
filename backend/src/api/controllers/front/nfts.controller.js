@@ -4,7 +4,7 @@ const User = require('../../models/users.model');
 const Collection = require('../../models/collection.model');
 const NFT = require('../../models/nfts.model');
 const NftTokens = require('../../models/nftTokens.model');
-const { addImage, addContent } = require('../../utils/uploadImage');
+const { addImage, addContent } = require('../../utils/upload');
 const ObjectId = require('mongoose').Types.ObjectId;
 const validation = require('../../middlewares/front/nftValidation');
 const Likes = require('../../models/likes.model');
@@ -23,6 +23,7 @@ exports.create = async (req, res, next) => {
       description: req.body.description,
       // attributes: req.body.attributes,
       // levels: req.body.levels,
+      fileType: req.body.fileType,
       ownerId: req.body.ownerId,
       userId: req.body.userId,
       collectionId: req.body.collectionId,
@@ -34,11 +35,6 @@ exports.create = async (req, res, next) => {
       copies: req.body.copies,
       status: req.body.status,
       // sold: req.body.sold,
-      // sellingMethod: req.body.sellingMethod,
-      // auctionStartDate: req.body.auctionStartDate,
-      // auctionEndDate: req.body.auctionEndDate,
-      // auctionStartTime: req.body.auctionStartTime,
-      // auctionEndTime: req.body.auctionEndTime,
     };
     const { error } = validation.validateNFTSchema(payload);
 
@@ -56,7 +52,7 @@ exports.create = async (req, res, next) => {
     if (!payload.image) {
       return res.send({
         status: false,
-        message: 'image field is required',
+        message: 'image field of type(image/video/audio) is required',
       });
     }
 
@@ -94,7 +90,7 @@ exports.storeDataInDb = async (req, res, next) => {
       });
     }
     let createNFTPayload = req.body.data;
-    createNFTPayload.image = req.body.image;
+    // createNFTPayload.image = req.body.image;
 
     const nft = await NFT.create(createNFTPayload);
 
@@ -482,6 +478,7 @@ exports.updateNft = async (req, res, next) => {
       description: req.body.description,
       attributes: req.body.attributes,
       levels: req.body.levels,
+      fileType: req.body.fileType,
       userId: req.body.userId,
       ownerAddress: req.body.ownerAddress,
       collectionId: req.body.collectionId,

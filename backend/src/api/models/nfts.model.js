@@ -18,6 +18,7 @@ const NFTSchema = new mongoose.Schema(
     ownerAddress: { type: String },
     txHash: { type: String },
     image: { type: String },
+    fileType: { type: String },
     royalty: { type: String },
     //size: { type: String },
     copies: { type: Number, default: 0 },

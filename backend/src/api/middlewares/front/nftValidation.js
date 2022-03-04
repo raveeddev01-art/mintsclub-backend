@@ -15,6 +15,7 @@ const validateNFTSchema = (data) => {
       value: Joi.number().allow(''),
       total: Joi.number().allow(''),
     }),
+    fileType: Joi.string().valid('image', 'audio', 'video').required(),
     ownerId: Joi.string().required(),
     //nftOwnerId: { type: String },
     userId: Joi.string().required(),
@@ -36,13 +37,6 @@ const validateNFTSchema = (data) => {
     auctionStartTime: Joi.string().allow(''),
     auctionEndTime: Joi.string().allow(''),
     //metaData: { type: String }, // ipfs link
-
-    // userId: Joi.string().required(),
-    // categoryId: Joi.string().allow(''),
-    // name: Joi.string().required(),
-    // url: Joi.string().allow(''),
-    // description: Joi.string().allow(''),
-    // category: Joi.string().allow(''),
   });
   const options = {
     errors: {
@@ -59,6 +53,7 @@ const validateEditNftSchema = (data) => {
     userId: Joi.string().required(),
     name: Joi.string().required(),
     description: Joi.string().required(),
+    fileType: Joi.string().valid('image', 'audio', 'video').required(),
     attributes: Joi.array().items({
       name: Joi.string().allow(''),
       value: Joi.string().allow(''),
