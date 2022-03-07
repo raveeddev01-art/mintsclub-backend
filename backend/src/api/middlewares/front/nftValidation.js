@@ -154,9 +154,24 @@ const validateNFFixedTAuctionSchema = (data) => {
   return schema.validate(data, options);
 };
 
+const validateNftId = (nftId) => {
+  const schema = Joi.object().keys({
+    nftId: Joi.string().alphanum().min(12).max(24).required(),
+  });
+  const options = {
+    errors: {
+      wrap: {
+        label: '',
+      },
+    },
+  };
+  return schema.validate(nftId, options);
+};
+
 module.exports = {
   validateNFTSchema,
   validateEditNftSchema,
   validateNFTimedTAuctionSchema,
   validateNFFixedTAuctionSchema,
+  validateNftId,
 };

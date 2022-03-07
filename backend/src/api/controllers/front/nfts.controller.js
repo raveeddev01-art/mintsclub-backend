@@ -89,8 +89,9 @@ exports.storeDataInDb = async (req, res, next) => {
         message: 'please provide data',
       });
     }
+
     let createNFTPayload = req.body.data;
-    createNFTPayload.image = req.body.image;
+    //createNFTPayload.image = req.body.image;
 
     const nft = await NFT.create(createNFTPayload);
 
@@ -105,9 +106,10 @@ exports.storeDataInDb = async (req, res, next) => {
 
     let nftTokenPayload = {
       nftToken: req.body.nftToken,
-      nftId: req.body.nftId,
+      nftId: nft._id,
       tokenStandard: req.body.tokenStandard,
     };
+
     if (!nftTokenPayload.tokenStandard) {
       nftTokenPayload.tokenStandard = 'erc-721';
     }
@@ -220,11 +222,14 @@ exports.update = async (req, res, next) => {
 exports.get = async (req, res, next) => {
   try {
     const { nftId } = req.params;
-    if (!nftId) {
-      return res.send({
-        success: false,
-        message: 'Please enter NFT Id',
-      });
+    let payload = {
+      nftId: nftId,
+    };
+    const { error } = validation.validateNftId(payload);
+
+    if (error) {
+      let errorMsg = error.details[0].message;
+      return res.status(400).send({ status: false, data: errorMsg });
     }
 
     const nftDetail = await NFT.findOne({ _id: nftId });
@@ -237,7 +242,9 @@ exports.get = async (req, res, next) => {
 
     const tokenData = await NftTokens.findOne({ nftId: nftId });
     returnData = JSON.parse(JSON.stringify(nftDetail));
-    returnData.nftToken = tokenData['nftToken'];
+    if (tokenData['nftToken']) {
+      returnData.nftToken = tokenData['nftToken'];
+    }
 
     // const nft = await NFT.aggregate([
     //     {
@@ -313,9 +320,7 @@ exports.get = async (req, res, next) => {
     return res.send({
       success: true,
       message: 'Item retrieved successfully',
-      //   nft: nft.length ? nft[0] : null ,
       data: returnData,
-      // NFTDetail: tokenData,
     });
   } catch (error) {
     return next(error);
