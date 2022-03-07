@@ -4,15 +4,25 @@ const Bid = require('../../models/bids.model');
 const Nft = require('../../models/nfts.model');
 const ObjectId = require('mongoose').Types.ObjectId;
 const { globalImgPlaceholder } = require('../../../config/vars');
+const validation = require('../../middlewares/front/bidValidation');
 
 // API to create bid
 exports.create = async (req, res, next) => {
   try {
-    let payload = req.body;
-    console.log(req.body, 'req.body==>');
-    // console.log(req.user,"checking req.user")
-    payload.bidBy = req.body.bidBy;
-    console.log(payload, 'payload to create bid');
+    let payload = {
+      bidBy: req.body.bidBy,
+      ownerId: req.body.ownerId,
+      nftId: req.body.nftId,
+      bidAmount: req.body.bidAmount,
+      isAccepted: req.body.isAccepted,
+    };
+
+    const { error } = validation.validateCreateBid(payload);
+
+    if (error) {
+      let errorMsg = error.details[0].message;
+      return res.status(400).send({ status: false, data: errorMsg });
+    }
     const bid = await Bid.create(payload);
     return res.send({
       success: true,
