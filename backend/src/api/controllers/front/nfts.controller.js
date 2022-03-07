@@ -91,7 +91,7 @@ exports.storeDataInDb = async (req, res, next) => {
     }
 
     let createNFTPayload = req.body.data;
-    //createNFTPayload.image = req.body.image;
+    createNFTPayload.image = req.body.image;
 
     const nft = await NFT.create(createNFTPayload);
 
