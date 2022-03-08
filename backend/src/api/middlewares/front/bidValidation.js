@@ -18,6 +18,21 @@ const validateCreateBid = (data) => {
   return schema.validate(data, options);
 };
 
+const validateBidId = (bidId) => {
+  const schema = Joi.object().keys({
+    bidId: Joi.string().alphanum().min(12).max(24).required(),
+  });
+  const options = {
+    errors: {
+      wrap: {
+        label: '',
+      },
+    },
+  };
+  return schema.validate(bidId, options);
+};
+
 module.exports = {
   validateCreateBid,
+  validateBidId,
 };
