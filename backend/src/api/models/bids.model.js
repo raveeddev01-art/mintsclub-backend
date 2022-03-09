@@ -11,7 +11,7 @@ const BidSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
-    //bidById: { type: String },
+    // bidByAddress: { type: String },
     ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     // auctionIdnftOwnerId: { type: String },
     nftId: { type: mongoose.Schema.Types.ObjectId, ref: 'NFT' },
@@ -37,7 +37,7 @@ const BidSchema = new mongoose.Schema(
     isAccepted: { type: Boolean, default: false },
     // isClaimable: { type: Boolean, default: false },
     // isclaimed: { type: Boolean, default: false },
-    //expiryDate: { type: Date, required: true },
+    expiryDate: { type: Date, required: true },
   },
   { timestamps: true }
 );

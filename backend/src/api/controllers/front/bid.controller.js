@@ -15,6 +15,9 @@ exports.create = async (req, res, next) => {
       nftId: req.body.nftId,
       bidAmount: req.body.bidAmount,
       isAccepted: req.body.isAccepted,
+      expiryDate: req.body.expiryDate,
+      fromAddress: req.body.fromAddress,
+      toAddress: req.body.toAddress,
     };
 
     const { error } = validation.validateCreateBid(payload);
