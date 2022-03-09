@@ -35,7 +35,7 @@ exports.create = async (req, res, next) => {
 
       const nftUpdate = await Nft.findByIdAndUpdate(
         { _id: payload.nftId },
-        { $set: payload }
+        { $set: newPayload }
       );
     }
     return res.send({
