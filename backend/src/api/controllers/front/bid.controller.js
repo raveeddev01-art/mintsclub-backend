@@ -5,8 +5,9 @@ const Nft = require('../../models/nfts.model');
 const ObjectId = require('mongoose').Types.ObjectId;
 const { globalImgPlaceholder } = require('../../../config/vars');
 const validation = require('../../middlewares/front/bidValidation');
+const nftValidation = require('../../middlewares/front/nftValidation');
 
-// API to create bid
+// API to create bid validateNftId
 exports.create = async (req, res, next) => {
   try {
     let payload = {
@@ -115,104 +116,97 @@ exports.claimableListbyUserId = async (req, res, next) => {
 // API to get bids list
 exports.list = async (req, res, next) => {
   try {
-    // let { page, limit, nftId } = req.query
-    // let filter = { isExpired: false, isAccepted: false }
+    let { page, limit } = req.query;
 
-    // if (nftId)
-    //     filter.nftId = ObjectId(nftId)
+    page = page !== undefined && page !== '' ? parseInt(page) : 1;
+    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
 
-    // page = page !== undefined && page !== '' ? parseInt(page) : 1
-    // limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
 
-    // const total = await Bid.countDocuments(filter)
-    //let allBids = await Bid.find();
-    //  allBids=JSON.stringify(allBids)
-    // console.log(allBids, 'gettin gdata');
-    //  allBids=allBids.toJSON()
-    //  console.log(,"allBids==>")
-    // const bids = await Bid.aggregate([
-    //     { $match: filter },
-    //     { $sort: { createdAt: -1 } },
-    //     { $skip: limit * (page - 1) },
-    //     { $limit: limit },
-    //     {
-    //         $lookup: {
-    //             from: 'users',
-    //             foreignField: '_id',
-    //             localField: 'bidBy',
-    //             as: 'bidBy'
-    //         }
-    //     },
-    //     // {
-    //     //     $unwind: '$bidBy'
-    //     // },
-    //     {
-    //         $project: {
-    //             // bidBy: {
-    //             //     _id: '$bidBy._id',
-    //             //     // username: '$bidBy.username',
-    //             //     // profilePhoto: { $ifNull: ['$bidBy.profilePhoto', globalImgPlaceholder] }
-    //             // },
-    //             price: 1, expiryDate: 1, createdAt: 1
-    //         }
-    //     }
-    // ])
+    allBids = await Bid.find();
 
-    // console.log(bids,"foundBids==>")
-    // const highestBid = await Bid.find({ nftId }, 'price').sort('-price.amount').limit(1)
+    let data = {};
 
-    // return res.status(200).send({
-    //   success: true,
-    //   message: 'Bids fetched successfully',
-    //   data: {
-    //     allBids,
-    // pagination: {
-    //     page, limit, total,
-    //     pages: Math.ceil(total / limit) <= 0 ? 1 : Math.ceil(total / limit)
-    // },
-    //   },
-    // });
+    data.totalRecords = allBids.length;
 
-    try {
-      let { page, limit } = req.query;
-
-      let total = 0;
-
-      page = page !== undefined && page !== '' ? parseInt(page) : 1;
-      limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
-
-      total = await Bid.countDocuments({});
-
-      if (page > Math.ceil(total / limit) && total > 0)
-        page = Math.ceil(total / limit);
-
-      allBids = await Bid.find();
-
-      const totalRecords = allBids.length;
-
-      // allBids.push({ $skip: limit * (page - 1) });
-      // allBids.push({ $limit: limit });
-
-      return res.send({
-        success: true,
-        message: 'Bids fetched successfully',
-        data: {
-          bids: allBids,
-
-          pagination: {
-            page,
-            limit,
-            totalRecords,
-            pages:
-              Math.ceil(totalRecords / limit) <= 0
-                ? 1
-                : Math.ceil(totalRecords / limit),
-          },
-        },
-      });
-    } catch (error) {
-      return next(error);
+    if (endIndex < allBids.length) {
+      data.next = {
+        page: page + 1,
+        limit: limit,
+      };
     }
+    if (startIndex > 0) {
+      data.previous = {
+        page: page - 1,
+        limit: limit,
+      };
+    }
+
+    data.Bids = allBids.slice(startIndex, endIndex);
+
+    return res.status(200).send({
+      status: true,
+      message: 'Bids fetched successfully',
+      data,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+// API to get bids list by NFT Id
+exports.claimableBidListbyNftId = async (req, res, next) => {
+  try {
+    let { nftId, page, limit } = req.query;
+
+    if (!nftId)
+      return res
+        .status(400)
+        .send({ status: false, message: 'Please enter nftId' });
+
+    let payload = {
+      nftId: nftId,
+    };
+
+    const { error } = nftValidation.validateNftId(payload);
+
+    if (error) {
+      let errorMsg = error.details[0].message;
+      return res.status(400).send({ status: false, data: errorMsg });
+    }
+    page = page !== undefined && page !== '' ? parseInt(page) : 1;
+    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
+
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+
+    bidsByNftId = await Bid.find({ nftId: payload.nftId });
+
+    let data = {};
+
+    data.totalRecords = bidsByNftId.length;
+
+    if (endIndex < bidsByNftId.length) {
+      data.next = {
+        page: page + 1,
+        limit: limit,
+      };
+    }
+    if (startIndex > 0) {
+      data.previous = {
+        page: page - 1,
+        limit: limit,
+      };
+    }
+
+    data.Bids = bidsByNftId.slice(startIndex, endIndex);
+
+    return res.status(200).send({
+      status: true,
+      message: 'Bids by NFT Id fetched successfully',
+      data,
+    });
   } catch (error) {
     return next(error);
   }
