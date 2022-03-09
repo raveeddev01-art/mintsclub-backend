@@ -232,7 +232,7 @@ exports.get = async (req, res, next) => {
       return res.status(400).send({ status: false, data: errorMsg });
     }
 
-    const nftDetail = await NFT.findOne({ _id: nftId });
+    const nftDetail = await NFT.findOne({ _id: payload.nftId });
     if (!nftDetail) {
       return res.send({
         success: false,
@@ -240,10 +240,15 @@ exports.get = async (req, res, next) => {
       });
     }
 
-    const tokenData = await NftTokens.findOne({ nftId: nftId });
+    const tokenData = await NftTokens.findOne({ nftId: payload.nftId });
+
+    const nftLikes = await Likes.findOne({ nftId: payload.nftId });
     returnData = JSON.parse(JSON.stringify(nftDetail));
     if (tokenData['nftToken']) {
       returnData.nftToken = tokenData['nftToken'];
+    }
+    if (nftLikes['count']) {
+      returnData.likesCount = nftLikes['count'];
     }
 
     // const nft = await NFT.aggregate([

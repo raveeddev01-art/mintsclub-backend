@@ -15,6 +15,9 @@ exports.create = async (req, res, next) => {
       nftId: req.body.nftId,
       bidAmount: req.body.bidAmount,
       isAccepted: req.body.isAccepted,
+      expiryDate: req.body.expiryDate,
+      fromAddress: req.body.fromAddress,
+      toAddress: req.body.toAddress,
     };
 
     const { error } = validation.validateCreateBid(payload);
@@ -38,21 +41,27 @@ exports.create = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
   try {
     const { bidId } = req.params;
-    if (bidId) {
-      const bid = await Bid.deleteOne({ _id: bidId });
-      if (bid && bid.deletedCount)
-        return res.send({
-          success: true,
-          message: 'Your bid has been cancelled successfully',
-        });
-      else
-        return res
-          .status(400)
-          .send({ success: false, message: 'Bid not found for given Id' });
-    } else
+    let payload = {
+      bidId: bidId,
+    };
+    const { error } = validation.validateBidId(payload);
+
+    if (error) {
+      let errorMsg = error.details[0].message;
+      return res.status(400).send({ status: false, data: errorMsg });
+    }
+
+    const bid = await Bid.deleteOne({ _id: payload.bidId });
+
+    if (bid && bid.deletedCount === 1)
+      return res.send({
+        success: true,
+        message: 'Your bid has been cancelled successfully',
+      });
+    else
       return res
         .status(400)
-        .send({ success: false, message: 'Bid Id is required' });
+        .send({ success: false, message: 'Bid not found for given Id' });
   } catch (error) {
     return next(error);
   }
@@ -116,9 +125,9 @@ exports.list = async (req, res, next) => {
     // limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
 
     // const total = await Bid.countDocuments(filter)
-    let allBids = await Bid.find();
+    //let allBids = await Bid.find();
     //  allBids=JSON.stringify(allBids)
-    console.log(allBids, 'gettin gdata');
+    // console.log(allBids, 'gettin gdata');
     //  allBids=allBids.toJSON()
     //  console.log(,"allBids==>")
     // const bids = await Bid.aggregate([
@@ -152,19 +161,59 @@ exports.list = async (req, res, next) => {
     // console.log(bids,"foundBids==>")
     // const highestBid = await Bid.find({ nftId }, 'price').sort('-price.amount').limit(1)
 
-    return res.status(200).send({
-      success: true,
-      message: 'Bids fetched successfully',
-      data: {
-        allBids,
-        // pagination: {
-        //     page, limit, total,
-        //     pages: Math.ceil(total / limit) <= 0 ? 1 : Math.ceil(total / limit)
-        // },
-      },
-    });
+    // return res.status(200).send({
+    //   success: true,
+    //   message: 'Bids fetched successfully',
+    //   data: {
+    //     allBids,
+    // pagination: {
+    //     page, limit, total,
+    //     pages: Math.ceil(total / limit) <= 0 ? 1 : Math.ceil(total / limit)
+    // },
+    //   },
+    // });
+
+    try {
+      let { page, limit } = req.query;
+
+      let total = 0;
+
+      page = page !== undefined && page !== '' ? parseInt(page) : 1;
+      limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
+
+      total = await Bid.countDocuments({});
+
+      if (page > Math.ceil(total / limit) && total > 0)
+        page = Math.ceil(total / limit);
+
+      allBids = await Bid.find();
+
+      const totalRecords = allBids.length;
+
+      // allBids.push({ $skip: limit * (page - 1) });
+      // allBids.push({ $limit: limit });
+
+      return res.send({
+        success: true,
+        message: 'Bids fetched successfully',
+        data: {
+          bids: allBids,
+
+          pagination: {
+            page,
+            limit,
+            totalRecords,
+            pages:
+              Math.ceil(totalRecords / limit) <= 0
+                ? 1
+                : Math.ceil(totalRecords / limit),
+          },
+        },
+      });
+    } catch (error) {
+      return next(error);
+    }
   } catch (error) {
-    // console.log(error,"error==>")
     return next(error);
   }
 };
