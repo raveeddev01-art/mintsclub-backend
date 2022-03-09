@@ -28,6 +28,16 @@ exports.create = async (req, res, next) => {
       return res.status(400).send({ status: false, data: errorMsg });
     }
     const bid = await Bid.create(payload);
+    if (bid) {
+      let newPayload = {
+        highestBid: payload.bidAmount,
+      };
+
+      const nftUpdate = await Nft.findByIdAndUpdate(
+        { _id: payload.nftId },
+        { $set: payload }
+      );
+    }
     return res.send({
       success: true,
       message: 'You have placed bid successfully',
@@ -146,7 +156,7 @@ exports.list = async (req, res, next) => {
     data.Bids = allBids.slice(startIndex, endIndex);
 
     return res.status(200).send({
-      status: true,
+      success: true,
       message: 'Bids fetched successfully',
       data,
     });

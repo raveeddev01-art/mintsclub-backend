@@ -92,7 +92,7 @@ exports.storeDataInDb = async (req, res, next) => {
 
     let createNFTPayload = req.body.data;
     createNFTPayload.image = req.body.image;
-
+    createNFTPayload.highestBid = 0;
     const nft = await NFT.create(createNFTPayload);
 
     if (nft) {
