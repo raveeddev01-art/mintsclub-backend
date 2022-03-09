@@ -8,5 +8,8 @@ router.route('/list').get(controller.list);
 router.route('/claimableListbyUserId').get(controller.claimableListbyUserId);
 router.route('/claimedBid').put(controller.claimedBid);
 router.route('/accept').put(controller.accept);
+router
+  .route('/claimableBidListbyNftId')
+  .get(controller.claimableBidListbyNftId);
 
 module.exports = router;

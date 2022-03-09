@@ -37,7 +37,7 @@ const BidSchema = new mongoose.Schema(
     isAccepted: { type: Boolean, default: false },
     // isClaimable: { type: Boolean, default: false },
     // isclaimed: { type: Boolean, default: false },
-    expiryDate: { type: Date},
+    expiryDate: { type: Date },
   },
   { timestamps: true }
 );
