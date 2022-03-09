@@ -244,10 +244,11 @@ exports.get = async (req, res, next) => {
 
     const nftLikes = await Likes.findOne({ nftId: payload.nftId });
     returnData = JSON.parse(JSON.stringify(nftDetail));
-    if (tokenData['nftToken']) {
+    if (tokenData) {
       returnData.nftToken = tokenData['nftToken'];
     }
-    if (nftLikes['count']) {
+    returnData.likesCount = 0;
+    if (nftLikes) {
       returnData.likesCount = nftLikes['count'];
     }
 
