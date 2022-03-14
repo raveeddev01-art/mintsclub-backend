@@ -28,8 +28,8 @@ const NFTSchema = new mongoose.Schema(
     sellingConfig: { type: Object },
     auctionStartDate: { type: Date },
     auctionEndDate: { type: Date },
-    auctionStartTime: { type: String },
-    auctionEndTime: { type: String },
+    // auctionStartTime: { type: String },
+    // auctionEndTime: { type: String },
     metaData: { type: String }, // ipfs link
     highestBid: { type: Number },
   },

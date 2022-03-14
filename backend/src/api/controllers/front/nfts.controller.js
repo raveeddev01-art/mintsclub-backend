@@ -176,8 +176,8 @@ exports.edit = async (req, res, next) => {
       payload.sellingConfig.duration.endDate = endDate;
       payload.auctionStartDate = startDate;
       payload.auctionEndDate = endDate;
-      payload.auctionStartTime = payload.sellingConfig.duration.startTime;
-      payload.auctionEndTime = payload.sellingConfig.duration.startTime;
+      // payload.auctionStartTime = payload.sellingConfig.duration.startTime;
+      // payload.auctionEndTime = payload.sellingConfig.duration.startTime;
     }
 
     const nft = await NFT.findByIdAndUpdate(

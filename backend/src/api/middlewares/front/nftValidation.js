@@ -88,7 +88,7 @@ const validateNFTimedTAuctionSchema = (data) => {
     sellingMethod: Joi.number().required(),
     sellingConfig: Joi.object()
       .keys({
-        method: Joi.number().allow(''),
+        // method: Joi.number().allow(''),
         startPrice: Joi.object()
           .keys({
             currency: Joi.string().required(),
@@ -99,8 +99,8 @@ const validateNFTimedTAuctionSchema = (data) => {
           .keys({
             startDate: Joi.date().required(),
             endDate: Joi.date().required(),
-            startTime: Joi.string().allow(''),
-            endTime: Joi.string().allow(''),
+            // startTime: Joi.string().allow(''),
+            // endTime: Joi.string().allow(''),
           })
           .required(),
         reservePrice: Joi.object().keys({
@@ -125,13 +125,13 @@ const validateNFFixedTAuctionSchema = (data) => {
     sellingMethod: Joi.number().required(),
     sellingConfig: Joi.object()
       .keys({
-        method: Joi.number().allow(''),
+        // method: Joi.number().allow(''),
         listingSchedule: Joi.object()
           .keys({
             startDate: Joi.string().required(),
             endDate: Joi.string().required(),
-            startTime: Joi.string().allow(''),
-            endTime: Joi.string().allow(''),
+            // startTime: Joi.string().allow(''),
+            // endTime: Joi.string().allow(''),
           })
           .required(),
         price: Joi.object()
