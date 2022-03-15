@@ -34,6 +34,7 @@ exports.create = async (req, res, next) => {
       royalty: req.body.royalty,
       copies: req.body.copies,
       status: req.body.status,
+      royalty: req.body.royalty,
       // sold: req.body.sold,
     };
     const { error } = validation.validateNFTSchema(payload);
@@ -243,85 +244,27 @@ exports.get = async (req, res, next) => {
     const tokenData = await NftTokens.findOne({ nftId: payload.nftId });
 
     const nftLikes = await Likes.findOne({ nftId: payload.nftId });
+
     returnData = JSON.parse(JSON.stringify(nftDetail));
+
+    lowestInCollection = await NFT.find({
+      collectionId: nftDetail.collectionId,
+    })
+      .sort({ currentPrice: 1 })
+      .limit(1);
+
+    if (lowestInCollection) {
+      returnData.lowestNftPrice = lowestInCollection[0]['currentPrice'];
+    }
+
     if (tokenData) {
       returnData.nftToken = tokenData['nftToken'];
     }
+
     returnData.likesCount = 0;
     if (nftLikes) {
       returnData.likesCount = nftLikes['count'];
     }
-
-    // const nft = await NFT.aggregate([
-    //     {
-    //         $match: { _id: ObjectId(nftId) }
-    //     },
-    //     {
-    //         $lookup: {
-    //             from: 'users',
-    //             foreignField: '_id',
-    //             localField: 'creatorId',
-    //             as: 'creator'
-    //         }
-    //     },
-    //     // {
-    //     //     $unwind: '$creator'
-    //     // },
-    //     {
-    //         $lookup: {
-    //             from: 'users',
-    //             foreignField: '_id',
-    //             localField: 'ownerId',
-    //             as: 'owner'
-    //         }
-    //     },
-    //     // {
-    //     //     $unwind: '$owner'
-    //     // },
-    //     {
-    //         $lookup: {
-    //             from: 'collections',
-    //             foreignField: '_id',
-    //             localField: 'collectionId',
-    //             as: 'collection'
-    //         }
-    //     },
-    //     {
-    //         $unwind: '$collection'
-    //     },
-    //     // {collection
-    //     //         from: 'bids',
-    //     //         foreignField: 'nftId',
-    //     //         localField: '_id',
-    //     //         as: 'bids'
-    //     //     }
-    //     // },
-    //     {
-    //         $project: {
-    //             _id: 1, name: 1, description: 1, image: 1, createdAt: 1, sellingMethod: 1,nftOwnerId:1,
-    //             size: { $ifNull: ['$size', 'N/A'] },
-    //             sold: 1, copies: 1, currentPrice: 1,
-    //             auctionEndDate: 1,
-    //             // creator: {
-    //             //     _id: '$creator._id',
-    //             //     username: '$creator.username',
-    //             //     profilePhoto: { $ifNull: ['$creator.profilePhoto', userDefaultImage] }
-    //             // },
-    //             // owner: {
-    //             //     _id: '$owner._id',
-    //             //     username: '$owner.username',
-    //             //     profilePhoto: { $ifNull: ['$owner.profilePhoto', userDefaultImage] }
-    //             // },
-    //             collection: {
-    //                 _id: '$collection._id',
-    //                 name: '$collection.name',
-    //                 image: { $ifNull: ['$collection.featuredImg', collectionDefaultImage] },
-    //                 userId: '$collection.userId'
-    //             },
-    //             // highestBidAmt: { $max: '$bids.price.amount' }
-    //         },
-    //     }
-    // ])
 
     return res.send({
       success: true,
@@ -500,6 +443,7 @@ exports.updateNft = async (req, res, next) => {
       levels: req.body.levels,
       fileType: req.body.fileType,
       userId: req.body.userId,
+      royalty: req.body.royalty,
       ownerAddress: req.body.ownerAddress,
       collectionId: req.body.collectionId,
       currentPrice: req.body.currentPrice,
