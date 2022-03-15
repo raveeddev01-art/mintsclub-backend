@@ -15,13 +15,14 @@ const validateNFTSchema = (data) => {
       value: Joi.number().allow(''),
       total: Joi.number().allow(''),
     }),
+    royalty: Joi.string().allow(''),
     fileType: Joi.string().valid('image', 'audio', 'video').required(),
     ownerId: Joi.string().required(),
     //nftOwnerId: { type: String },
     userId: Joi.string().required(),
     categoryId: Joi.string().allow(''),
     collectionId: Joi.string().required(),
-    currentPrice: Joi.number().allow(''),
+    currentPrice: Joi.number().required(),
     ownerAddress: Joi.string().allow(''),
     // txHash: Joi.string().allow(''),
     //image: { type: String },
@@ -63,6 +64,7 @@ const validateEditNftSchema = (data) => {
       value: Joi.number().allow(''),
       total: Joi.number().allow(''),
     }),
+    royalty: Joi.string().allow(''),
     collectionId: Joi.string().required(),
     currentPrice: Joi.number().required(),
     ownerAddress: Joi.string().allow(''),
@@ -88,7 +90,7 @@ const validateNFTimedTAuctionSchema = (data) => {
     sellingMethod: Joi.number().required(),
     sellingConfig: Joi.object()
       .keys({
-        method: Joi.number().allow(''),
+        // method: Joi.number().allow(''),
         startPrice: Joi.object()
           .keys({
             currency: Joi.string().required(),
@@ -99,8 +101,8 @@ const validateNFTimedTAuctionSchema = (data) => {
           .keys({
             startDate: Joi.date().required(),
             endDate: Joi.date().required(),
-            startTime: Joi.string().allow(''),
-            endTime: Joi.string().allow(''),
+            // startTime: Joi.string().allow(''),
+            // endTime: Joi.string().allow(''),
           })
           .required(),
         reservePrice: Joi.object().keys({
@@ -125,13 +127,13 @@ const validateNFFixedTAuctionSchema = (data) => {
     sellingMethod: Joi.number().required(),
     sellingConfig: Joi.object()
       .keys({
-        method: Joi.number().allow(''),
+        // method: Joi.number().allow(''),
         listingSchedule: Joi.object()
           .keys({
             startDate: Joi.string().required(),
             endDate: Joi.string().required(),
-            startTime: Joi.string().allow(''),
-            endTime: Joi.string().allow(''),
+            // startTime: Joi.string().allow(''),
+            // endTime: Joi.string().allow(''),
           })
           .required(),
         price: Joi.object()
