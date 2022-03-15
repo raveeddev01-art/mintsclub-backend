@@ -118,6 +118,19 @@ const validateUserProfile = (data) => {
   return schema.validate(data, options);
 };
 
+const validateId = (id) => {
+  const schema = Joi.object().keys({
+    id: Joi.string().alphanum().min(12).max(24).required(),
+  });
+  const options = {
+    errors: {
+      wrap: {
+        label: '',
+      },
+    },
+  };
+  return schema.validate(id, options);
+};
 module.exports = {
   validateContractSchema,
   validateEmail,
@@ -125,4 +138,5 @@ module.exports = {
   validateAddress,
   validateUser,
   validateUserProfile,
+  validateId
 };

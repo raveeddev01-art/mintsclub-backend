@@ -593,3 +593,30 @@ exports.myNftListing = async (req, res, next) => {
     return next(error);
   }
 };
+exports.buyNow=async (req,res)=>{
+  try{
+
+    let payload=req.body
+    payload.sellingMethod=null;
+    payload.ownerId=req.body.userId;
+    payload.userId=req.body.userId;
+    payload.auctionEndDate=null;
+    payload.auctionStartDate=null;
+    payload.sellingConfig=null;
+    payload.nftId=req.body.nftId;
+    payload.ownerAddress=req.body.userAddress;
+    payload.highestBid=null;
+    payload.currentPrice=null;
+    const { error } = validation.vailidateBuyNowSchema(payload);
+
+    if (error) {
+      let errorMsg = error.details[0].message;
+      return res.status(400).send({ status: false, data: errorMsg });
+    }
+   let nft=await NFT.findByIdAndUpdate({ _id: payload.nftId }, { $set: payload }, { new: true })
+   res.status(200).send({success:true,message:"NFT updated successfully",data:nft})
+  }catch(error){
+
+    return next(error);
+  }
+}

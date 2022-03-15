@@ -5,23 +5,13 @@ const mongoose = require('mongoose');
  * @private
  */
 const OfferSchema = new mongoose.Schema({
-    offerBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User',},
-    offerById:{type:String},
+    fromAddress: { type:String},
+    toAddress:{type:String},
+    offerBy:{type:String},
     ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // owner at time of offer
     nftId: { type: mongoose.Schema.Types.ObjectId, ref: 'NFT', required: true },
-    price: {
-        type: Object,
-        default: {
-            currency: {
-                type: String, default: ''
-            },
-            amount: {
-                type: Number, default: 0
-            }
-        },
-        required: true
-    },
-    expiryDate: { type: Date, required: true },
+    price:{type:Number,required:true},
+    expiryDate: { type: Date },
     isAccepted: { type: Boolean, default: false, required: true },
     isExpired: { type: Boolean, default: false, required: true }
 }, { timestamps: true }
