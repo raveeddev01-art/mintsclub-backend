@@ -72,6 +72,7 @@ exports.likeDislike = async (req, res, next) => {
       }
     );
   }
+  
   //if collecton not found
   else {
     console.log('colleciton not found inserting one');
