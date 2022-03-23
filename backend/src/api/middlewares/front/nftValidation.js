@@ -160,7 +160,7 @@ const vailidateBuyNowSchema = (data) => {
   const schema = Joi.object().keys({
     userId: Joi.string().alphanum().min(12).max(24).required(),
     nftId:Joi.string().alphanum().min(12).max(24).required(),
-    userAddress:Joi.string().required(),
+    ownerAddress:Joi.string().required(),
   });
   const options = {
     errors: {
