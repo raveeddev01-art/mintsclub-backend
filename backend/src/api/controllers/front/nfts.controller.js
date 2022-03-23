@@ -598,7 +598,7 @@ exports.buyNow = async (req, res) => {
     let payload = req.body;
     payload.userId = req.body.userId;
     payload.nftId = req.body.nftId;
-    payload.ownerAddress = req.body.userAddress;
+
     const { error } = validation.vailidateBuyNowSchema(payload);
     
     if (error) {
