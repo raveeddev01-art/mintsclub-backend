@@ -135,7 +135,17 @@ exports.getCreators = async (req, res, next) => {
 };
 exports.topSellers = async (req, res, next) => {
   try {
-    let users = await UserModal.aggregate([
+    let { page, limit } = req.query;
+
+    page = page !== undefined && page !== '' ? parseInt(page) : 1;
+    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
+
+    total = await UserModal.countDocuments({});
+
+    if (page > Math.ceil(total / limit) && total > 0)
+      page = Math.ceil(total / limit);
+
+    const pipeline = [
       {
         $match: {},
       },
@@ -146,11 +156,31 @@ exports.topSellers = async (req, res, next) => {
           address: 1,
         },
       },
-    ]);
+    ];
+    const newTotal = await UserModal.aggregate(pipeline);
+
+    const totalRecords = newTotal.length;
+
+    pipeline.push({ $skip: limit * (page - 1) });
+    pipeline.push({ $limit: limit });
+
+    let users = await UserModal.aggregate(pipeline);
+
     return res.send({
-      status: true,
-      data: users,
-      message: 'Top Sellers fetched succesfully',
+      success: true,
+      message: 'Top Sellers fetched successfully',
+      data: {
+        topSellers: users,
+        pagination: {
+          page,
+          limit,
+          totalRecords,
+          pages:
+            Math.ceil(totalRecords / limit) <= 0
+              ? 1
+              : Math.ceil(totalRecords / limit),
+        },
+      },
     });
   } catch (error) {
     return next(error);
