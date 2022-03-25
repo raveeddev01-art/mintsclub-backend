@@ -23,6 +23,7 @@ module.exports.startCron = () => {
             bid = await Bid.find({ nftId: auctionEndNft._id });
             console.log('bid', bid);
             bidData = bid[0];
+            
             let payload = {
               ownerId: bidData.bidBy,
               ownerAddress: bidData.fromAddress,

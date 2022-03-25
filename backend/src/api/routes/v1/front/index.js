@@ -13,7 +13,8 @@ const contactRoutes = require('./contact.route');
 const nftTokenRoutes = require('./nftTokens.route');
 const fixedPriceTokens = require('./fixedPriceTokens.route');
 const verificationRoute = require('./otp-verification.route.js');
-const likesRoutes=require('./likes.route')
+const likesRoutes=require('./likes.route');
+const activityRoute=require('./item-activity.route')
 const router = express.Router();
 /**
  * GET v1/status
@@ -33,4 +34,5 @@ router.use('/nftTokens', nftTokenRoutes);
 router.use('/nftFixedTokens', fixedPriceTokens);
 router.use('/otpVerification', verificationRoute);
 router.use('/nftLikes', likesRoutes);
+router.use('/activity', activityRoute);
 module.exports = router;

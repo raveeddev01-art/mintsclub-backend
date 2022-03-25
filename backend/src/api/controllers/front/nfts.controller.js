@@ -8,7 +8,7 @@ const { addImage, addContent } = require("../../utils/upload");
 const ObjectId = require("mongoose").Types.ObjectId;
 const validation = require("../../middlewares/front/nftValidation");
 const Likes = require("../../models/likes.model");
-
+const ActivityModal = require("../../models/item-activity.modal");
 const {
   userDefaultImage,
   collectionDefaultImage,
@@ -114,7 +114,20 @@ exports.storeDataInDb = async (req, res, next) => {
     if (!nftTokenPayload.tokenStandard) {
       nftTokenPayload.tokenStandard = "erc-721";
     }
+
     let nftToken = await NftTokens.create(nftTokenPayload);
+
+    //add activity
+    let activityPayload={
+     ownerId:nft.ownerId,
+     toAddress:nft.ownerAddress,
+     nftId:nft._id,
+     activityType:"Mint"
+    }
+    
+
+
+        await  ActivityModal.create(activityPayload)
 
     return res.send({
       success: true,
@@ -146,16 +159,16 @@ exports.edit = async (req, res, next) => {
         return res.status(400).send({ status: false, data: errorMsg });
       }
 
-      let startDate = new Date(
-        payload.sellingConfig.listingSchedule.startDate
-      ).toISOString();
+      // let startDate = new Date(
+      //   payload.sellingConfig.listingSchedule.startDate
+      // ).toISOString();
 
-      let endDate = new Date(
-        payload.sellingConfig.listingSchedule.endDate
-      ).toISOString();
+      // let endDate = new Date(
+      //   payload.sellingConfig.listingSchedule.endDate
+      // ).toISOString();
 
-      payload.sellingConfig.listingSchedule.startDate = startDate;
-      payload.sellingConfig.listingSchedule.endDate = endDate;
+      // payload.sellingConfig.listingSchedule.startDate = startDate;
+      // payload.sellingConfig.listingSchedule.endDate = endDate;
     } else {
       //console.log('payload timed auction', payload);
       const { error } = validation.validateNFTimedTAuctionSchema(payload);
