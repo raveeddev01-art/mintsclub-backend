@@ -130,14 +130,14 @@ const validateNFFixedTAuctionSchema = (data) => {
     sellingConfig: Joi.object()
       .keys({
         // method: Joi.number().allow(''),
-        listingSchedule: Joi.object()
-          .keys({
-            startDate: Joi.string().required(),
-            endDate: Joi.string().required(),
-            // startTime: Joi.string().allow(''),
-            // endTime: Joi.string().allow(''),
-          })
-          .required(),
+        // listingSchedule: Joi.object()
+        //   .keys({
+        //     startDate: Joi.string().required(),
+        //     endDate: Joi.string().required(),
+        //     // startTime: Joi.string().allow(''),
+        //     // endTime: Joi.string().allow(''),
+        //   })
+        //   .required(),
         price: Joi.object()
           .keys({
             currency: Joi.string().required(),
