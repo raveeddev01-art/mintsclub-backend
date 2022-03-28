@@ -14,16 +14,16 @@ module.exports.startCron = () => {
       if (auctionEndNftsList.length > 0) {
         auctionEndNftsList.forEach(async (auctionEndNft) => {
           let endDate = moment(auctionEndNft.auctionEndDate).utc(false);
-          //console.log('endDate', endDate);
           let currentDateTime = new moment();
-          // console.log('currentDateTime', currentDateTime);
+          //console.log('datestime', endDate, currentDateTime);
 
           //var endData = "2022-03-11T00:00:00.000+00:00";
           //let duration = currentDateTime - auctionEndNft.auctionEndDate;
-          const duration = moment.duration(endDate.diff(currentDateTime));
-          const time = duration.asMinutes();
 
-          if (time <= 0) {
+          // const duration = moment.duration(endDate.diff(currentDateTime));
+          // const time = duration.asMinutes();
+
+          if (currentDateTime.diff(endDate) <= 0) {
             bid = await Bid.find(
               { nftId: auctionEndNft._id },
               { isAccepted: false }
@@ -104,7 +104,7 @@ module.exports.startCron = () => {
                   { new: true }
                 );
               } else {
-                console.log('else is working');
+                //console.log('else is working');
                 let payload = {
                   ownerId: bidData.bidBy,
                   ownerAddress: bidData.fromAddress,

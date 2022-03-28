@@ -129,7 +129,7 @@ exports.list = async (req, res, next) => {
     let { page, limit } = req.query;
 
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
-    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
+    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 100;
 
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
