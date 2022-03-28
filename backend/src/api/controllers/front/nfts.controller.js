@@ -147,7 +147,7 @@ exports.edit = async (req, res, next) => {
         message: 'sellingMethod is required',
       });
     }
-    payload.sellingConfig = payload.sellingConfig;
+    payload.sellingConfig = JSON.parse(payload.sellingConfig);
     let getNFT = await NFT.findOne({
       _id: payload._id,
     });
@@ -165,17 +165,17 @@ exports.edit = async (req, res, next) => {
         let errorMsg = error.details[0].message;
         return res.status(400).send({ status: false, data: errorMsg });
       }
-      let startDate = moment(
-        new Date(payload.sellingConfig.listingSchedule.startDate)
-      )
-        .utc(true)
-        .toISOString();
+      // let startDate = moment(
+      //   new Date(payload.sellingConfig.listingSchedule.startDate)
+      // )
+      //   .utc(true)
+      //   .toISOString();
 
-      let endDate = moment(
-        new Date(payload.sellingConfig.listingSchedule.endDate)
-      )
-        .utc(true)
-        .toISOString();
+      // let endDate = moment(
+      //   new Date(payload.sellingConfig.listingSchedule.endDate)
+      // )
+      //   .utc(true)
+      //   .toISOString();
 
       // payload.sellingConfig.listingSchedule.startDate = startDate;
       // payload.sellingConfig.listingSchedule.endDate = endDate;
@@ -703,7 +703,7 @@ exports.buyNow = async (req, res, next) => {
               startTime: null,
               endTime: null,
             },
-            reservePrice: {
+            price: {
               currency: null,
               amount: 0,
             },

@@ -6,16 +6,24 @@ const Collection = require('../api/models/collection.model');
 const NftTokens = require('../api/models/nftTokens.model');
 module.exports.startCron = () => {
   try {
-    cron.schedule('*/1 * * * * ', async () => {
+    cron.schedule('*/2 * * * * ', async () => {
       const auctionEndNftsList = await nft.find({
         auctionEndDate: { $exists: true, $nin: null },
       });
-
+      //console.log('auctionEndNftsList', auctionEndNftsList);
       if (auctionEndNftsList.length > 0) {
+        // console.log(
+        //   'auctionEndNftsList.length',
+        //   auctionEndNftsList.length,
+        //   auctionEndNftsList
+        // );
         auctionEndNftsList.forEach(async (auctionEndNft) => {
           // const isExpire = auctionEndNft.auctionEndDate.diff(moment());
-          let endDate = new moment(auctionEndNft.auctionEndDate);
+          let endDate = moment(auctionEndNft.auctionEndDate).utc(false);
+          console.log('endDate', endDate);
           let currentDateTime = new moment();
+          // console.log('currentDateTime', currentDateTime);
+
           //var endData = "2022-03-11T00:00:00.000+00:00";
           //let duration = currentDateTime - auctionEndNft.auctionEndDate;
           const duration = moment.duration(endDate.diff(currentDateTime));
@@ -25,14 +33,15 @@ module.exports.startCron = () => {
           //   auctionEndNft.copies,
           //   auctionEndNft.copiesForAuction
           // );
-
+          console.log('time', time);
           if (time <= 0) {
+            //console.log('cron run time');
             bid = await Bid.find({ nftId: auctionEndNft._id });
-            console.log('bid', bid);
+            //console.log('bid', bid);
             bidData = bid[0];
 
             if (auctionEndNft.copies > auctionEndNft.copiesForAuction) {
-              //console.log('you have to add new data');
+              console.log('you have to add new data');
 
               let payload = {
                 ownerId: bidData.bidBy,
@@ -47,18 +56,18 @@ module.exports.startCron = () => {
                 currentPrice: auctionEndNft.currentPrice,
                 metaData: auctionEndNft.metaData,
                 image: auctionEndNft.image,
-                // royalty: 0,
                 highestBid: 0,
-                //nftToken: auctionEndNft.nftToken,
               };
 
               const NFT = await nft.create(payload);
+              console.log('NFT', NFT);
               if (NFT) {
                 let collectionRecord = await Collection.findOne({
                   _id: auctionEndNft.collectionId,
                 });
+                console.log('collectionRecord', collectionRecord);
 
-                collectionRecord.NFT.push(NFT._id);
+                collectionRecord.nft.push(NFT._id);
                 collectionRecord.save();
               }
 
@@ -88,12 +97,14 @@ module.exports.startCron = () => {
                 { new: true }
               );
             } else {
+              console.log('else is working');
               let payload = {
                 ownerId: bidData.bidBy,
                 ownerAddress: bidData.fromAddress,
                 auctionEndDate: null,
                 auctionStartDate: null,
                 sellingMethod: 0,
+                copies: 0,
                 copiesForAuction: 0,
                 highestBid: 0,
                 sellingConfig: {
@@ -112,6 +123,8 @@ module.exports.startCron = () => {
                 { $set: payload },
                 { new: true }
               );
+              //console.log('after updating current record', nftUpdate);
+
               //console.log('sara data null kar do jesay hai abhi');
             }
           }
