@@ -424,6 +424,8 @@ exports.list = async (req, res, next) => {
       }
     }
 
+    
+
     return res.send({
       success: true,
       message: 'NFTs fetched successfully',
