@@ -1,6 +1,7 @@
 const fs = require('fs');
 const moment = require('moment');
-const User = require('../../models/users.model');
+
+const Users = require('../../models/users.model');
 const Collection = require('../../models/collection.model');
 const NFT = require('../../models/nfts.model');
 const NftTokens = require('../../models/nftTokens.model');
@@ -698,7 +699,7 @@ exports.buyNow = async (req, res, next) => {
           // { new: true }
         );
         if (nftUpdate) {
-          let findUserDetail = Users.findOne({
+          let findUserDetail = await Users.findOne({
             _id: nftUpdate.ownerId,
           });
 
@@ -740,7 +741,7 @@ exports.buyNow = async (req, res, next) => {
           // { new: true }
         );
         if (nftUpdate) {
-          let findUserDetail = Users.findOne({
+          let findUserDetail = await Users.findOne({
             _id: nftUpdate.ownerId,
           });
 

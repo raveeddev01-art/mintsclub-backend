@@ -109,7 +109,7 @@ module.exports.startCron = () => {
                   // { new: true }
                 );
                 if (nftUpdate) {
-                  let findUserDetail = Users.findOne({
+                  let findUserDetail = await Users.findOne({
                     _id: nftUpdate.ownerId,
                   });
 
@@ -156,7 +156,7 @@ module.exports.startCron = () => {
                   // { new: true }
                 );
                 if (nftUpdate) {
-                  let findUserDetail = Users.findOne({
+                  let findUserDetail = await Users.findOne({
                     _id: nftUpdate.ownerId,
                   });
 
