@@ -12,18 +12,27 @@ module.exports.startCron = () => {
       });
 
       if (auctionEndNftsList.length > 0) {
-        auctionEndNftsList.forEach(async (auctionEndNft) => {
+        for (const auctionEndNft of auctionEndNftsList) {
+          // auctionEndNftsList.forEach(async (auctionEndNft) => {
+
           let endDate = moment(auctionEndNft.auctionEndDate).utc(false);
-          let currentDateTime = new moment();
+          let currentDateTime = new moment().utc(true);
           //console.log('datestime', endDate, currentDateTime);
 
           //var endData = "2022-03-11T00:00:00.000+00:00";
           //let duration = currentDateTime - auctionEndNft.auctionEndDate;
 
-          // const duration = moment.duration(endDate.diff(currentDateTime));
+          // const duration = moment.duration(endDate.diff(currentDsateTime));
           // const time = duration.asMinutes();
+          // console.log(
+          //   'testing',
+          //   endDate,
+          //   currentDateTime,
+          //   endDate.diff(currentDateTime)
+          // );
 
-          if (currentDateTime.diff(endDate) <= 0) {
+          if (endDate.diff(currentDateTime) <= 0) {
+            // auctionEndNftsListconsole.log('its time to run it');
             bid = await Bid.find(
               { nftId: auctionEndNft._id },
               { isAccepted: false }
@@ -43,17 +52,21 @@ module.exports.startCron = () => {
                   creatorId: auctionEndNft.creatorId,
                   collectionId: auctionEndNft.collectionId,
                   categoryId: auctionEndNft.categoryId,
-                  currentPrice: auctionEndNft.currentPrice,
+                  currentPrice: bidData.bidAmount,
                   metaData: auctionEndNft.metaData,
                   image: auctionEndNft.image,
                   highestBid: 0,
                 };
 
                 const NFT = await nft.create(payload);
-                // console.log('creating new NFT', NFT, NFT.length);
-                // console.log('NFT._id', NFT._id);
+                //console.log('creating new NFT', NFT, NFT._id);
 
-                // deleteNFT = await nft.delete({ _id: NFT._id });
+                // let updateCollection = await Collection.updateOne(
+                //   { _id: nftDetail[0]['collectionId'] },
+                //   { $pull: { nft: nftId } }
+                // );
+
+                //deleteNFT = await nft.deleteOne({ _id: NFT._id });
 
                 if (NFT) {
                   let collectionRecord = await Collection.findOne({
@@ -66,11 +79,13 @@ module.exports.startCron = () => {
                 nftTokenDetail = await NftTokens.findOne({
                   nftId: auctionEndNft._id,
                 });
+
                 let nftTokenPayload = {
                   nftToken: nftTokenDetail.nftToken,
                   nftId: NFT._id,
                   tokenStandard: nftTokenDetail.tokenStandard,
                 };
+
                 let nftToken = await NftTokens.create(nftTokenPayload);
                 const remainingCopies =
                   auctionEndNft.copies - auctionEndNft.copiesForAuction;
@@ -113,6 +128,7 @@ module.exports.startCron = () => {
                   sellingMethod: 0,
                   copies: 0,
                   copiesForAuction: 0,
+                  currentPrice: bidData.bidAmount,
                   highestBid: 0,
                   sellingConfig: {
                     startPrice: {
@@ -127,13 +143,13 @@ module.exports.startCron = () => {
                 };
                 nftUpdate = await nft.findByIdAndUpdate(
                   { _id: auctionEndNft._id },
-                  { $set: payload },
-                  { new: true }
+                  { $set: payload }
+                  // { new: true }
                 );
               }
             }
           }
-        });
+        }
       }
     });
   } catch (err) {

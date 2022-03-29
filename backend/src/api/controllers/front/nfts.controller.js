@@ -32,7 +32,7 @@ exports.create = async (req, res, next) => {
       ownerAddress: req.body.ownerAddress,
       // txHash: req.body.txHash,
       royalty: req.body.royalty,
-      copies: req.body.copies,
+      copies: 0,
       status: req.body.status,
       royalty: req.body.royalty,
       // sold: req.body.sold,
@@ -94,6 +94,7 @@ exports.storeDataInDb = async (req, res, next) => {
     let createNFTPayload = req.body.data;
     createNFTPayload.image = req.body.image;
     createNFTPayload.highestBid = 0;
+    //console.log('one log');
     const nft = await NFT.create(createNFTPayload);
 
     if (nft) {
@@ -209,8 +210,8 @@ exports.edit = async (req, res, next) => {
 
     const nft = await NFT.findByIdAndUpdate(
       { _id: payload._id },
-      { $set: payload },
-      { new: true }
+      { $set: payload }
+      // { new: true }
     );
     return res.send({
       success: true,
@@ -232,8 +233,8 @@ exports.update = async (req, res, next) => {
 
     const nft = await NFT.findByIdAndUpdate(
       { _id: payload._id },
-      { $set: payload },
-      { new: true }
+      { $set: payload }
+      // { new: true }
     );
     console.log('nft after update');
     return res.send({
@@ -537,14 +538,22 @@ exports.getNFTsbyCollection = async (req, res, next) => {
   }
 };
 
-// API to delete collection
+// API to delete nft
 exports.delete = async (req, res, next) => {
   try {
     const { nftId } = req.params;
     if (nftId) {
+      const nftDetail = await NFT.find({ _id: nftId });
+
       const nft = await NFT.deleteOne({ _id: nftId });
       if (nft.deletedCount) {
         const nftToken = await NftTokens.deleteOne({ nftId: nftId });
+
+        let updateCollection = await Collection.updateOne(
+          { _id: nftDetail[0]['collectionId'] },
+          { $pull: { nft: nftId } }
+        );
+
         if (nftToken) {
           return res.send({
             status: true,
@@ -649,6 +658,7 @@ exports.buyNow = async (req, res, next) => {
           metaData: buyNftDetail.metaData,
           image: buyNftDetail.image,
         };
+        //console.log('two log');
 
         const nft = await NFT.create(newPayload);
         if (nft) {
@@ -682,8 +692,8 @@ exports.buyNow = async (req, res, next) => {
 
         nftUpdate = await NFT.findByIdAndUpdate(
           { _id: buyNftDetail._id },
-          { $set: newPayloadCopies },
-          { new: true }
+          { $set: newPayloadCopies }
+          // { new: true }
         );
         if (nftUpdate) {
           return res.status(200).send({
@@ -712,8 +722,8 @@ exports.buyNow = async (req, res, next) => {
 
         nftUpdate = await NFT.findByIdAndUpdate(
           { _id: buyNftDetail._id },
-          { $set: newPayload },
-          { new: true }
+          { $set: newPayload }
+          // { new: true }
         );
         if (nftUpdate) {
           return res.status(200).send({
