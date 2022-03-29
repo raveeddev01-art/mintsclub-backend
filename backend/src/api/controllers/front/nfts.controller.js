@@ -16,7 +16,7 @@ const {
 
 // API to create NFT
 exports.create = async (req, res, next) => {
-  // console.log(req.body, 'req.body');
+  console.log(req.body, 'req.body');
   try {
     let payload = {
       name: req.body.name,
@@ -28,7 +28,6 @@ exports.create = async (req, res, next) => {
       userId: req.body.userId,
       collectionId: req.body.collectionId,
       categoryId: req.body.categoryId,
-      currentPrice: req.body.currentPrice,
       ownerAddress: req.body.ownerAddress,
       // txHash: req.body.txHash,
       royalty: req.body.royalty,
@@ -38,11 +37,12 @@ exports.create = async (req, res, next) => {
       // sold: req.body.sold,
     };
     const { error } = validation.validateNFTSchema(payload);
-
+    
     if (error) {
       let errorMsg = error.details[0].message;
       return res.status(400).send({ status: false, data: errorMsg });
     }
+  
 
     if (req.files && req.files.image) {
       const image = req.files.image[0];
@@ -94,6 +94,7 @@ exports.storeDataInDb = async (req, res, next) => {
     let createNFTPayload = req.body.data;
     createNFTPayload.image = req.body.image;
     createNFTPayload.highestBid = 0;
+    createNFTPayload.currentPrice=0;
     //console.log('one log');
     const nft = await NFT.create(createNFTPayload);
 
@@ -166,6 +167,7 @@ exports.edit = async (req, res, next) => {
         let errorMsg = error.details[0].message;
         return res.status(400).send({ status: false, data: errorMsg });
       }
+      payload.currentPrice=Number(payload.sellingConfig.price.amount)
       // let startDate = moment(
       //   new Date(payload.sellingConfig.listingSchedule.startDate)
       // )
@@ -187,7 +189,7 @@ exports.edit = async (req, res, next) => {
         let errorMsg = error.details[0].message;
         return res.status(400).send({ status: false, data: errorMsg });
       }
-
+      payload.currentPrice=Number(payload.sellingConfig.startPrice.amount);
       let startDate = moment(new Date(payload.sellingConfig.duration.startDate))
         .utc(true)
         .toISOString();
@@ -207,7 +209,7 @@ exports.edit = async (req, res, next) => {
       // payload.auctionStartTime = payload.sellingConfig.duration.startTime;
       // payload.auctionEndTime = payload.sellingConfig.duration.startTime;
     }
-
+    console.log(payload,"payload")
     const nft = await NFT.findByIdAndUpdate(
       { _id: payload._id },
       { $set: payload }
@@ -443,8 +445,6 @@ exports.list = async (req, res, next) => {
 exports.editNft = async (req, res, next) => {
   try {
     const filter = { _id: req.body.nftOwnerId };
-    console.log(req.body.currentUserId, 'req.body.currentUserId');
-    console.log(req.body.ownerId, 'req.body.ownerId');
     let update = {
       nftOwnerId: req.body.currentUserId,
     };

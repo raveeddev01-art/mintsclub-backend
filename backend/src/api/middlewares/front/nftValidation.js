@@ -22,7 +22,6 @@ const validateNFTSchema = (data) => {
     userId: Joi.string().required(),
     categoryId: Joi.string().allow(''),
     collectionId: Joi.string().required(),
-    currentPrice: Joi.number().required(),
     ownerAddress: Joi.string().allow(''),
     // txHash: Joi.string().allow(''),
     //image: { type: String },
