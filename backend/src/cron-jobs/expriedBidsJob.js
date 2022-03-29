@@ -4,6 +4,8 @@ const Bid = require('../api/models/bids.model');
 const nft = require('../api/models/nfts.model');
 const Collection = require('../api/models/collection.model');
 const NftTokens = require('../api/models/nftTokens.model');
+const Users = require('../api/models/users.model');
+
 module.exports.startCron = () => {
   try {
     cron.schedule('*/1 * * * * ', async () => {
@@ -32,7 +34,6 @@ module.exports.startCron = () => {
           // );
 
           if (endDate.diff(currentDateTime) <= 0) {
-            // auctionEndNftsListconsole.log('its time to run it');
             bid = await Bid.find(
               { nftId: auctionEndNft._id },
               { isAccepted: false }
@@ -59,14 +60,6 @@ module.exports.startCron = () => {
                 };
 
                 const NFT = await nft.create(payload);
-                //console.log('creating new NFT', NFT, NFT._id);
-
-                // let updateCollection = await Collection.updateOne(
-                //   { _id: nftDetail[0]['collectionId'] },
-                //   { $pull: { nft: nftId } }
-                // );
-
-                //deleteNFT = await nft.deleteOne({ _id: NFT._id });
 
                 if (NFT) {
                   let collectionRecord = await Collection.findOne({
@@ -87,11 +80,14 @@ module.exports.startCron = () => {
                 };
 
                 let nftToken = await NftTokens.create(nftTokenPayload);
+
                 const remainingCopies =
                   auctionEndNft.copies - auctionEndNft.copiesForAuction;
+
                 let newPayload = {
                   copiesForAuction: 0,
-                  copies: remainingCopies,
+                  remainingCopies: remainingCopies,
+                  // copies: remainingCopies,
                   auctionEndDate: null,
                   auctionStartDate: null,
                   sellingMethod: 0,
@@ -109,9 +105,21 @@ module.exports.startCron = () => {
 
                 nftUpdate = await nft.findByIdAndUpdate(
                   { _id: auctionEndNft._id },
-                  { $set: newPayload },
-                  { new: true }
+                  { $set: newPayload }
+                  // { new: true }
                 );
+                if (nftUpdate) {
+                  let findUserDetail = await Users.findOne({
+                    _id: nftUpdate.ownerId,
+                  });
+
+                  let newTotalETH = findUserDetail.totalETH + bidData.bidAmount;
+
+                  userUpdate = await Users.findByIdAndUpdate(
+                    { _id: nftUpdate.ownerId },
+                    { $set: { totalETH: newTotalETH } }
+                  );
+                }
 
                 updateBid = await Bid.findByIdAndUpdate(
                   { _id: bidData._id },
@@ -126,7 +134,8 @@ module.exports.startCron = () => {
                   auctionEndDate: null,
                   auctionStartDate: null,
                   sellingMethod: 0,
-                  copies: 0,
+                  copies: auctionEndNft.copiesForAuction,
+                  remainingCopies: 0,
                   copiesForAuction: 0,
                   currentPrice: bidData.bidAmount,
                   highestBid: 0,
@@ -146,6 +155,18 @@ module.exports.startCron = () => {
                   { $set: payload }
                   // { new: true }
                 );
+                if (nftUpdate) {
+                  let findUserDetail = await Users.findOne({
+                    _id: nftUpdate.ownerId,
+                  });
+
+                  let newTotalETH = findUserDetail.totalETH + bidData.bidAmount;
+
+                  userUpdate = await Users.findByIdAndUpdate(
+                    { _id: nftUpdate.ownerId },
+                    { $set: { totalETH: newTotalETH } }
+                  );
+                }
               }
             }
           }

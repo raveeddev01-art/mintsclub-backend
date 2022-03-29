@@ -26,6 +26,7 @@ const UserSchema = new mongoose.Schema(
     twitterLink: { type: String },
     instaLink: { type: String },
     webLink: { type: String },
+    totalETH: { type: Number },
     // gPlusLink: { type: String },
     // vineLink: { type: String },
     // password: {

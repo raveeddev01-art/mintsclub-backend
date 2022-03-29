@@ -33,6 +33,7 @@ const NFTSchema = new mongoose.Schema(
     metaData: { type: String }, // ipfs link
     highestBid: { type: Number },
     copiesForAuction: { type: Number },
+    remainingCopies: { type: Number },
   },
   { timestamps: true, collection: 'nfts' }
 );
