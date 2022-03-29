@@ -153,7 +153,7 @@ exports.edit = async (req, res, next) => {
       _id: payload._id,
     });
 
-    if (getNFT.copies < payload.copiesForAuction) {
+    if (getNFT.remainingCopies < payload.copiesForAuction) {
       return res.send({
         success: false,
         message: '"copies for auction" must be equal or less than "copies"',
@@ -643,7 +643,7 @@ exports.buyNow = async (req, res, next) => {
     });
 
     if (buyNftDetail) {
-      if (buyNftDetail.copies > buyNftDetail.copiesForAuction) {
+      if (buyNftDetail.remainingCopies > buyNftDetail.copiesForAuction) {
         let newPayload = {
           ownerId: payload.userId,
           ownerAddress: payload.ownerAddress,
@@ -657,6 +657,7 @@ exports.buyNow = async (req, res, next) => {
           currentPrice: buyNftDetail.currentPrice,
           metaData: buyNftDetail.metaData,
           image: buyNftDetail.image,
+          remainingCopies: 0,
         };
         //console.log('two log');
 
@@ -687,7 +688,8 @@ exports.buyNow = async (req, res, next) => {
 
         let newPayloadCopies = {
           copiesForAuction: 0,
-          copies: remainingCopies,
+          // copies: remainingCopies,
+          remainingCopies: remainingCopies,
         };
 
         nftUpdate = await NFT.findByIdAndUpdate(
@@ -696,6 +698,17 @@ exports.buyNow = async (req, res, next) => {
           // { new: true }
         );
         if (nftUpdate) {
+          let findUserDetail = Users.findOne({
+            _id: nftUpdate.ownerId,
+          });
+
+          let newTotalETH = findUserDetail.totalETH + buyNftDetail.currentPrice;
+
+          userUpdate = await Users.findByIdAndUpdate(
+            { _id: nftUpdate.ownerId },
+            { $set: { totalETH: newTotalETH } }
+          );
+
           return res.status(200).send({
             success: true,
             message: 'Owner ship transferred successfully',
@@ -705,7 +718,8 @@ exports.buyNow = async (req, res, next) => {
         let newPayload = {
           ownerId: payload.userId,
           ownerAddress: payload.ownerAddress,
-          copies: 0,
+          copies: buyNftDetail.copiesForAuction,
+          remainingCopies: 0,
           copiesForAuction: 0,
           sellingMethod: 0,
           sellingConfig: {
@@ -726,6 +740,17 @@ exports.buyNow = async (req, res, next) => {
           // { new: true }
         );
         if (nftUpdate) {
+          let findUserDetail = Users.findOne({
+            _id: nftUpdate.ownerId,
+          });
+
+          let newTotalETH = findUserDetail.totalETH + buyNftDetail.currentPrice;
+
+          userUpdate = await Users.findByIdAndUpdate(
+            { _id: nftUpdate.ownerId },
+            { $set: { totalETH: newTotalETH } }
+          );
+
           return res.status(200).send({
             success: true,
             message: 'Owner ship transferred successfully',

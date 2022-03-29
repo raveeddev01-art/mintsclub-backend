@@ -150,11 +150,13 @@ exports.topSellers = async (req, res, next) => {
         $match: {},
       },
       {
-        $project: {
-          profileImage: 1,
-          username: 1,
-          address: 1,
-        },
+        // $project: {
+        //   profileImage: 1,
+        //   username: 1,
+        //   address: 1,
+        //   totalETH: 1,
+        // },
+        $sort: { totalETH: -1 },
       },
     ];
     const newTotal = await UserModal.aggregate(pipeline);

@@ -11,10 +11,10 @@ exports.register = async (req, res, next) => {
       email: req.body.email,
     };
 
-    console.log(payload,"payload")
+    //console.log(payload,"payload")
 
     const { error } = validation.validateSignUpSchema(payload);
-    console.log(error,"error")
+    //console.log(error,"error")
 
     if (error) {
       let errorMsg = error.details[0].message;
@@ -24,6 +24,7 @@ exports.register = async (req, res, next) => {
     const email = payload.email.toLowerCase();
     const address = payload.address;
     const username = payload.username;
+    const totalETH = 0;
 
     let user = await User.findOne({ address });
     if (user) {
@@ -32,7 +33,7 @@ exports.register = async (req, res, next) => {
         .send({ status: false, message: 'Wallet already exists' });
     }
 
-    user = await User.create({ address, username, email });
+    user = await User.create({ address, username, email, totalETH });
 
     var accessToken = await user.token();
     user = user.transform();
@@ -47,7 +48,7 @@ exports.register = async (req, res, next) => {
       data: data,
     });
   } catch (error) {
-    console.log("catch1",error)
+    //console.log("catch1",error)
     next(error);
   }
 };
@@ -57,7 +58,7 @@ exports.register = async (req, res, next) => {
  * @public
  */
 exports.login = async (req, res, next) => {
-  console.log(req.body,"req.body login==>")
+  console.log(req.body, 'req.body login==>');
   try {
     let payload = {
       address: req.body.address,
