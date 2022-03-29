@@ -24,127 +24,130 @@ module.exports.startCron = () => {
 
           // const duration = moment.duration(endDate.diff(currentDsateTime));
           // const time = duration.asMinutes();
-          console.log(
-            'testing',
-            endDate,
-            currentDateTime,
-            endDate.diff(currentDateTime)
-          );
+          // console.log(
+          //   'testing',
+          //   endDate,
+          //   currentDateTime,
+          //   endDate.diff(currentDateTime)
+          // );
 
           if (endDate.diff(currentDateTime) <= 0) {
-            console.log('its time to run it');
-            // bid = await Bid.find(
-            //   { nftId: auctionEndNft._id },
-            //   { isAccepted: false }
-            // );
+            // auctionEndNftsListconsole.log('its time to run it');
+            bid = await Bid.find(
+              { nftId: auctionEndNft._id },
+              { isAccepted: false }
+            );
 
-            // if (bid.length > 0) {
-            //   let bidData = bid[0];
+            if (bid.length > 0) {
+              let bidData = bid[0];
 
-            //   if (auctionEndNft.copies > auctionEndNft.copiesForAuction) {
-            //     let payload = {
-            //       ownerId: bidData.bidBy,
-            //       ownerAddress: bidData.fromAddress,
-            //       copies: auctionEndNft.copiesForAuction,
-            //       name: auctionEndNft.name,
-            //       description: auctionEndNft.description,
-            //       fileType: auctionEndNft.fileType,
-            //       creatorId: auctionEndNft.creatorId,
-            //       collectionId: auctionEndNft.collectionId,
-            //       categoryId: auctionEndNft.categoryId,
-            //       currentPrice: auctionEndNft.currentPrice,
-            //       metaData: auctionEndNft.metaData,
-            //       image: auctionEndNft.image,
-            //       highestBid: 0,
-            //     };
+              if (auctionEndNft.copies > auctionEndNft.copiesForAuction) {
+                let payload = {
+                  ownerId: bidData.bidBy,
+                  ownerAddress: bidData.fromAddress,
+                  copies: auctionEndNft.copiesForAuction,
+                  name: auctionEndNft.name,
+                  description: auctionEndNft.description,
+                  fileType: auctionEndNft.fileType,
+                  creatorId: auctionEndNft.creatorId,
+                  collectionId: auctionEndNft.collectionId,
+                  categoryId: auctionEndNft.categoryId,
+                  currentPrice: bidData.bidAmount,
+                  metaData: auctionEndNft.metaData,
+                  image: auctionEndNft.image,
+                  highestBid: 0,
+                };
 
-            //     const NFT = await nft.create(payload);
-            //     console.log('creating new NFT', NFT, NFT._id);
+                const NFT = await nft.create(payload);
+                //console.log('creating new NFT', NFT, NFT._id);
 
-            //     // let updateCollection = await Collection.updateOne(
-            //     //   { _id: nftDetail[0]['collectionId'] },
-            //     //   { $pull: { nft: nftId } }
-            //     // );
+                // let updateCollection = await Collection.updateOne(
+                //   { _id: nftDetail[0]['collectionId'] },
+                //   { $pull: { nft: nftId } }
+                // );
 
-            //     //deleteNFT = await nft.deleteOne({ _id: NFT._id });
+                //deleteNFT = await nft.deleteOne({ _id: NFT._id });
 
-            //     if (NFT) {
-            //       let collectionRecord = await Collection.findOne({
-            //         _id: auctionEndNft.collectionId,
-            //       });
+                if (NFT) {
+                  let collectionRecord = await Collection.findOne({
+                    _id: auctionEndNft.collectionId,
+                  });
 
-            //       collectionRecord.nft.push(NFT._id);
-            //       collectionRecord.save();
-            //     }
-            //     nftTokenDetail = await NftTokens.findOne({
-            //       nftId: auctionEndNft._id,
-            //     });
-            //     let nftTokenPayload = {
-            //       nftToken: nftTokenDetail.nftToken,
-            //       nftId: NFT._id,
-            //       tokenStandard: nftTokenDetail.tokenStandard,
-            //     };
-            //     let nftToken = await NftTokens.create(nftTokenPayload);
-            //     const remainingCopies =
-            //       auctionEndNft.copies - auctionEndNft.copiesForAuction;
-            //     let newPayload = {
-            //       copiesForAuction: 0,
-            //       copies: remainingCopies,
-            //       auctionEndDate: null,
-            //       auctionStartDate: null,
-            //       sellingMethod: 0,
-            //       sellingConfig: {
-            //         startPrice: {
-            //           currency: null,
-            //           amount: 0,
-            //         },
-            //         duration: {
-            //           startTime: null,
-            //           endTime: null,
-            //         },
-            //       },
-            //     };
+                  collectionRecord.nft.push(NFT._id);
+                  collectionRecord.save();
+                }
+                nftTokenDetail = await NftTokens.findOne({
+                  nftId: auctionEndNft._id,
+                });
 
-            //     nftUpdate = await nft.findByIdAndUpdate(
-            //       { _id: auctionEndNft._id },
-            //       { $set: newPayload },
-            //       { new: true }
-            //     );
+                let nftTokenPayload = {
+                  nftToken: nftTokenDetail.nftToken,
+                  nftId: NFT._id,
+                  tokenStandard: nftTokenDetail.tokenStandard,
+                };
 
-            //     updateBid = await Bid.findByIdAndUpdate(
-            //       { _id: bidData._id },
-            //       { $set: { isAccepted: true } },
-            //       { new: true }
-            //     );
-            //   } else {
-            //     //console.log('else is working');
-            //     let payload = {
-            //       ownerId: bidData.bidBy,
-            //       ownerAddress: bidData.fromAddress,
-            //       auctionEndDate: null,
-            //       auctionStartDate: null,
-            //       sellingMethod: 0,
-            //       copies: 0,
-            //       copiesForAuction: 0,
-            //       highestBid: 0,
-            //       sellingConfig: {
-            //         startPrice: {
-            //           currency: null,
-            //           amount: 0,
-            //         },
-            //         duration: {
-            //           startTime: null,
-            //           endTime: null,
-            //         },
-            //       },
-            //     };
-            //     nftUpdate = await nft.findByIdAndUpdate(
-            //       { _id: auctionEndNft._id },
-            //       { $set: payload },
-            //       { new: true }
-            //     );
-            //   }
-            // }
+                let nftToken = await NftTokens.create(nftTokenPayload);
+                const remainingCopies =
+                  auctionEndNft.copies - auctionEndNft.copiesForAuction;
+                let newPayload = {
+                  copiesForAuction: 0,
+                  copies: remainingCopies,
+                  auctionEndDate: null,
+                  auctionStartDate: null,
+                  sellingMethod: 0,
+                  sellingConfig: {
+                    startPrice: {
+                      currency: null,
+                      amount: 0,
+                    },
+                    duration: {
+                      startTime: null,
+                      endTime: null,
+                    },
+                  },
+                };
+
+                nftUpdate = await nft.findByIdAndUpdate(
+                  { _id: auctionEndNft._id },
+                  { $set: newPayload },
+                  { new: true }
+                );
+
+                updateBid = await Bid.findByIdAndUpdate(
+                  { _id: bidData._id },
+                  { $set: { isAccepted: true } },
+                  { new: true }
+                );
+              } else {
+                //console.log('else is working');
+                let payload = {
+                  ownerId: bidData.bidBy,
+                  ownerAddress: bidData.fromAddress,
+                  auctionEndDate: null,
+                  auctionStartDate: null,
+                  sellingMethod: 0,
+                  copies: 0,
+                  copiesForAuction: 0,
+                  currentPrice: bidData.bidAmount,
+                  highestBid: 0,
+                  sellingConfig: {
+                    startPrice: {
+                      currency: null,
+                      amount: 0,
+                    },
+                    duration: {
+                      startTime: null,
+                      endTime: null,
+                    },
+                  },
+                };
+                nftUpdate = await nft.findByIdAndUpdate(
+                  { _id: auctionEndNft._id },
+                  { $set: payload }
+                  // { new: true }
+                );
+              }
+            }
           }
         }
       }

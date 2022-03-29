@@ -32,7 +32,7 @@ exports.create = async (req, res, next) => {
       ownerAddress: req.body.ownerAddress,
       // txHash: req.body.txHash,
       royalty: req.body.royalty,
-      copies: req.body.copies,
+      copies: 0,
       status: req.body.status,
       royalty: req.body.royalty,
       // sold: req.body.sold,
