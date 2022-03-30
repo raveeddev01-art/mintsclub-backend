@@ -294,9 +294,11 @@ exports.list = async (req, res, next) => {
       }
       filter = { categoryId: applyFilter._id };
     }
+
     if (req.query.myFilter && req.query.myFilter == 'all') {
       filter = {};
     }
+
     let total = 0;
 
     if (!all) {
@@ -323,13 +325,16 @@ exports.list = async (req, res, next) => {
         },
       },
     ];
+
     const newTotal = await Collection.aggregate(pipeline);
 
     const totalRecords = newTotal.length;
+
     if (!all) {
       pipeline.push({ $skip: limit * (page - 1) });
       pipeline.push({ $limit: limit });
     }
+
     const collections = await Collection.aggregate(pipeline);
     for (const collection of collections) {
       collection.NFTCount = collection.nft ? collection.nft.length : '0';
@@ -511,7 +516,43 @@ exports.myCollections = async (req, res, next) => {
 
 exports.popular = async (req, res, next) => {
   try {
-    const collectionsList = await Collection.aggregate([
+    let { page, limit, myFilter } = req.query;
+
+    let filter = {};
+
+    if (myFilter) {
+      const applyFilter = await Categories.findOne({}, '_id').where(
+        'description',
+        myFilter
+      );
+      if (!applyFilter) {
+        return res.status(400).send({
+          success: false,
+          message: 'Invalid Filter passed',
+        });
+      }
+
+      filter = { categoryId: applyFilter._id };
+    }
+
+    if (myFilter && myFilter == 'all') {
+      filter = {};
+    }
+
+    let total = 0;
+
+    page = page !== undefined && page !== '' ? parseInt(page) : 1;
+    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
+
+    total = await Collection.countDocuments({});
+    console.log('total', total);
+    if (page > Math.ceil(total / limit) && total > 0)
+      page = Math.ceil(total / limit);
+
+    const pipeline = [
+      {
+        $match: filter,
+      },
       {
         $lookup: {
           from: 'likesschemas',
@@ -551,14 +592,31 @@ exports.popular = async (req, res, next) => {
           },
         },
       },
-    ]);
+    ];
+
+    const newTotal = await Collection.aggregate(pipeline);
+
+    const totalRecords = newTotal.length;
+
+    pipeline.push({ $skip: limit * (page - 1) });
+    pipeline.push({ $limit: limit });
+
+    const collectionsList = await Collection.aggregate(pipeline);
 
     return res.status(200).send({
       success: true,
       message: 'popular collection fetched successfully',
       data: {
         collectionsList: collectionsList,
-        totalRecords: collectionsList.length,
+        pagination: {
+          page,
+          limit,
+          totalRecords,
+          pages:
+            Math.ceil(totalRecords / limit) <= 0
+              ? 1
+              : Math.ceil(totalRecords / limit),
+        },
       },
     });
   } catch (error) {

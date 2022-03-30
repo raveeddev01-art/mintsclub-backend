@@ -28,7 +28,7 @@ exports.live = async (req, res, next) => {
     }
 
     if (myFilter && myFilter != 'all') {
-      console.log('this is if');
+      //console.log('this is if');
       filter = {
         sellingMethod: 2, // timed auctions only
         auctionStartDate: {
@@ -38,7 +38,7 @@ exports.live = async (req, res, next) => {
         categoryId: ObjectId(newFilter),
       };
     } else {
-      console.log('this is else');
+      ///console.log('this is else');
       filter = {
         sellingMethod: 2, // timed auctions only
         auctionStartDate: {
