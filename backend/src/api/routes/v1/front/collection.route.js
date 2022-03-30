@@ -9,5 +9,6 @@ router.route('/delete/:collectionId').delete(controller.delete);
 router.route('/get/:collectionId').get(controller.get);
 router.route('/list').get(controller.list);
 router.route('/myCollectionList').get(controller.myCollectionList);
+router.route('/popular').get(controller.popular);
 
 module.exports = router;

@@ -29,11 +29,11 @@ exports.create = async (req, res, next) => {
       userId: req.body.userId,
       collectionId: req.body.collectionId,
       categoryId: req.body.categoryId,
-      currentPrice: req.body.currentPrice,
+      currentPrice: 0,
       ownerAddress: req.body.ownerAddress,
       // txHash: req.body.txHash,
       royalty: req.body.royalty,
-      copies: 0,
+      copies: req.body.copies,
       status: req.body.status,
       royalty: req.body.royalty,
       // sold: req.body.sold,
@@ -71,6 +71,7 @@ exports.create = async (req, res, next) => {
     });
 
     payload.creatorId = payload.userId;
+    payload.remainingCopies = payload.copies;
 
     return res.send({
       success: true,

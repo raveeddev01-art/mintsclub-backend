@@ -11,7 +11,7 @@ const validation = require('../../middlewares/front/collectionValidation');
 
 // API to create collection
 exports.create = async (req, res, next) => {
-  console.log(req.body,"req.body category check")
+  console.log(req.body, 'req.body category check');
   try {
     let payload = {
       userId: req.body.userId,
@@ -506,5 +506,62 @@ exports.myCollections = async (req, res, next) => {
     res.status(200).send({ success: true, data: myCollections });
   } catch (err) {
     res.status(200).send(err);
+  }
+};
+
+exports.popular = async (req, res, next) => {
+  try {
+    const collectionsList = await Collection.aggregate([
+      {
+        $lookup: {
+          from: 'likesschemas',
+          foreignField: 'nftId',
+          localField: 'nft',
+          as: 'likesschemas',
+        },
+      },
+      {
+        $lookup: {
+          from: 'nfts',
+          foreignField: '_id',
+          localField: 'nft',
+          as: 'nft',
+        },
+      },
+      {
+        $unwind: {
+          path: '$nft',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $group: {
+          _id: '$_id',
+          likesCount: { $first: '$likesschemas.count' },
+          userId: { $first: '$userId' },
+          categoryId: { $first: '$categoryId' },
+          name: { $first: '$name' },
+          logo: { $first: '$logo' },
+          featuredImg: { $first: '$featuredImg' },
+          soldCopies: {
+            $push: {
+              $subtract: ['$nft.copies', '$nft.remainingCopies'],
+            },
+          },
+        },
+      },
+    ]);
+
+    return res.status(200).send({
+      success: true,
+      message: 'popular collection fetched successfully',
+      data: {
+        collectionsList: collectionsList,
+        totalRecords: collectionsList.length,
+      },
+    });
+  } catch (error) {
+    return next(error);
   }
 };
