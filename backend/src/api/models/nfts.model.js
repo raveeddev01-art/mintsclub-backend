@@ -38,6 +38,8 @@ const NFTSchema = new mongoose.Schema(
   { timestamps: true, collection: 'nfts' }
 );
 
+
+
 /**
  * @typedef NFT
  */
