@@ -545,7 +545,7 @@ exports.popular = async (req, res, next) => {
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
 
     total = await Collection.countDocuments({});
-    console.log('total', total);
+
     if (page > Math.ceil(total / limit) && total > 0)
       page = Math.ceil(total / limit);
 
@@ -559,6 +559,14 @@ exports.popular = async (req, res, next) => {
           foreignField: 'nftId',
           localField: 'nft',
           as: 'likesschemas',
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user',
         },
       },
       {
@@ -580,6 +588,9 @@ exports.popular = async (req, res, next) => {
         $group: {
           _id: '$_id',
           likesCount: { $first: '$likesschemas.count' },
+          nfts: {
+            $push: '$nft.image',
+          },
           userId: { $first: '$userId' },
           categoryId: { $first: '$categoryId' },
           name: { $first: '$name' },
@@ -590,6 +601,8 @@ exports.popular = async (req, res, next) => {
               $subtract: ['$nft.copies', '$nft.remainingCopies'],
             },
           },
+          username: { $first: '$user.username' },
+          profileImage: { $first: '$user.profileImage' },
         },
       },
     ];
