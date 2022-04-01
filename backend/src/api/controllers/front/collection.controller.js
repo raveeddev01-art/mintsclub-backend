@@ -11,7 +11,7 @@ const validation = require('../../middlewares/front/collectionValidation');
 
 // API to create collection
 exports.create = async (req, res, next) => {
-  console.log(req.body,"req.body category check")
+  console.log(req.body, 'req.body category check');
   try {
     let payload = {
       userId: req.body.userId,
@@ -294,9 +294,11 @@ exports.list = async (req, res, next) => {
       }
       filter = { categoryId: applyFilter._id };
     }
+
     if (req.query.myFilter && req.query.myFilter == 'all') {
       filter = {};
     }
+
     let total = 0;
 
     if (!all) {
@@ -323,13 +325,16 @@ exports.list = async (req, res, next) => {
         },
       },
     ];
+
     const newTotal = await Collection.aggregate(pipeline);
 
     const totalRecords = newTotal.length;
+
     if (!all) {
       pipeline.push({ $skip: limit * (page - 1) });
       pipeline.push({ $limit: limit });
     }
+
     const collections = await Collection.aggregate(pipeline);
     for (const collection of collections) {
       collection.NFTCount = collection.nft ? collection.nft.length : '0';
@@ -506,5 +511,128 @@ exports.myCollections = async (req, res, next) => {
     res.status(200).send({ success: true, data: myCollections });
   } catch (err) {
     res.status(200).send(err);
+  }
+};
+
+exports.popular = async (req, res, next) => {
+  try {
+    let { page, limit, myFilter } = req.query;
+
+    let filter = {};
+
+    if (myFilter) {
+      const applyFilter = await Categories.findOne({}, '_id').where(
+        'description',
+        myFilter
+      );
+      if (!applyFilter) {
+        return res.status(400).send({
+          success: false,
+          message: 'Invalid Filter passed',
+        });
+      }
+
+      filter = { categoryId: applyFilter._id };
+    }
+
+    if (myFilter && myFilter == 'all') {
+      filter = {};
+    }
+
+    let total = 0;
+
+    page = page !== undefined && page !== '' ? parseInt(page) : 1;
+    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
+
+    total = await Collection.countDocuments({});
+
+    if (page > Math.ceil(total / limit) && total > 0)
+      page = Math.ceil(total / limit);
+
+    const pipeline = [
+      {
+        $match: filter,
+      },
+      {
+        $lookup: {
+          from: 'likesschemas',
+          foreignField: 'nftId',
+          localField: 'nft',
+          as: 'likesschemas',
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user',
+        },
+      },
+      {
+        $lookup: {
+          from: 'nfts',
+          foreignField: '_id',
+          localField: 'nft',
+          as: 'nft',
+        },
+      },
+      {
+        $unwind: {
+          path: '$nft',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $group: {
+          _id: '$_id',
+          likesCount: { $first: '$likesschemas.count' },
+          nfts: {
+            $push: '$nft.image',
+          },
+          userId: { $first: '$userId' },
+          categoryId: { $first: '$categoryId' },
+          name: { $first: '$name' },
+          logo: { $first: '$logo' },
+          featuredImg: { $first: '$featuredImg' },
+          soldCopies: {
+            $push: {
+              $subtract: ['$nft.copies', '$nft.remainingCopies'],
+            },
+          },
+          username: { $first: '$user.username' },
+          profileImage: { $first: '$user.profileImage' },
+        },
+      },
+    ];
+
+    const newTotal = await Collection.aggregate(pipeline);
+
+    const totalRecords = newTotal.length;
+
+    pipeline.push({ $skip: limit * (page - 1) });
+    pipeline.push({ $limit: limit });
+
+    const collectionsList = await Collection.aggregate(pipeline);
+
+    return res.status(200).send({
+      success: true,
+      message: 'popular collection fetched successfully',
+      data: {
+        collectionsList: collectionsList,
+        pagination: {
+          page,
+          limit,
+          totalRecords,
+          pages:
+            Math.ceil(totalRecords / limit) <= 0
+              ? 1
+              : Math.ceil(totalRecords / limit),
+        },
+      },
+    });
+  } catch (error) {
+    return next(error);
   }
 };

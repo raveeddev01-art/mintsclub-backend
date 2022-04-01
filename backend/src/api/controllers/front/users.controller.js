@@ -147,7 +147,8 @@ exports.topSellers = async (req, res, next) => {
 
     const pipeline = [
       {
-        $match: {},
+        // { $match: { mydate: { $lte: new Date('12/01/1998') } } },
+        $match: { totalETH: { $ne: 0 } },
       },
       {
         // $project: {
