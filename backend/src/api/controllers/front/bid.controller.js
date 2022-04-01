@@ -126,15 +126,21 @@ exports.claimableListbyUserId = async (req, res, next) => {
 // API to get bids list
 exports.list = async (req, res, next) => {
   try {
-    let { page, limit } = req.query;
+    let { page, limit,nftId } = req.query;
 
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 100;
-
+    let filter={}
+    if (nftId) filter.nftId = ObjectId(nftId);
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
 
-    allBids = await Bid.find();
+    // allBids = await Bid.find();
+    const allBids = await Bid.aggregate([
+      { $match: filter },
+      { $sort: { createdAt: -1 } },
+    
+    ]);
 
     let data = {};
 

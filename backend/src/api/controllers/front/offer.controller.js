@@ -73,46 +73,20 @@ exports.list = async (req, res, next) => {
     limit = limit !== undefined && limit !== "" ? parseInt(limit) : 10;
 
     const total = await Offer.countDocuments(filter);
-    const allOffers = await Offer.find();
-    console.log(allOffers, "allOffers==");
+    // const allOffers = await Offer.find();
+    // console.log(allOffers, "allOffers==");
 
-    // const offers = await Offer.aggregate([
-    //   { $match: filter },
-    //   { $sort: { createdAt: -1 } },
-    //   { $skip: limit * (page - 1) },
-    //   { $limit: limit },
-    //   {
-    //     $lookup: {
-    //       from: "users",
-    //       foreignField: "_id",
-    //       localField: "offerBy",
-    //       as: "offerBy",
-    //     },
-    //   },
-    //   {
-    //     $unwind: "$offerBy",
-    //   },
-    //   {
-    //     $project: {
-    //       offerBy: {
-    //         _id: "$offerBy._id",
-    //         username: "$offerBy.username",
-    //         profilePhoto: {
-    //           $ifNull: ["$offerBy.profilePhoto", globalImgPlaceholder],
-    //         },
-    //       },
-    //       price: 1,
-    //       expiryDate: 1,
-    //       createdAt: 1,
-    //     },
-    //   },
-    // ]);
+    const offers = await Offer.aggregate([
+      { $match: filter },
+      { $sort: { createdAt: -1 } },
+    
+    ]);
 
     return res.send({
       success: true,
       message: "Offers fetched successfully",
       data: {
-        offers: allOffers,
+        offers: offers,
         pagination: {
           page,
           limit,

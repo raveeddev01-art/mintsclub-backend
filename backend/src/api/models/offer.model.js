@@ -11,7 +11,7 @@ const OfferSchema = new mongoose.Schema({
     ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // owner at time of offer
     nftId: { type: mongoose.Schema.Types.ObjectId, ref: 'NFT', required: true },
     price:{type:Number,required:true},
-    expiryDate: { type: Date },
+    // expiryDate: { type: Date },
     isAccepted: { type: Boolean, default: false, required: true },
     isExpired: { type: Boolean, default: false, required: true }
 }, { timestamps: true }
