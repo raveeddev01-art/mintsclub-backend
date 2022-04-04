@@ -18,6 +18,7 @@ const validateNFTSchema = (data) => {
     royalty: Joi.string().allow(''),
     fileType: Joi.string().valid('image', 'audio', 'video').required(),
     ownerId: Joi.string().required(),
+    currentPrice: Joi.number().allow(),
     //nftOwnerId: { type: String },
     userId: Joi.string().required(),
     categoryId: Joi.string().allow(''),
