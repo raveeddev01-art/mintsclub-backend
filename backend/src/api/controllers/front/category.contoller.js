@@ -11,6 +11,14 @@ exports.list = async (req, res, next) => {
     let total = 0;
 
     total = categories.length;
+
+    if (total == 0) {
+      return res.send({
+        success: false,
+        message: 'No Categories found',
+      });
+    }
+
     return res.status(200).send({
       status: true,
       message: 'Categories fetched successfully',

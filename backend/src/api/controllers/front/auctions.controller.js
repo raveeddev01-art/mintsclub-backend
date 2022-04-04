@@ -92,6 +92,13 @@ exports.live = async (req, res, next) => {
       },
     ]);
 
+    if (auctions.length == 0) {
+      return res.send({
+        success: false,
+        message: 'No live auctions found',
+      });
+    }
+
     return res.send({
       success: true,
       message: 'Live auctions retrieved successfully',

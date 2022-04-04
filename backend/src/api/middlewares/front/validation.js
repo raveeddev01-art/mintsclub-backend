@@ -36,7 +36,10 @@ const validateContractSchema = (contract) => {
 
 const validateSignUpSchema = (data) => {
   const schema = Joi.object().keys({
-    address: Joi.string().max(600).required(),
+    //Joi.string().regex(/^0x[a-fA-F0-9]{40}$/)
+    address: Joi.string()
+      .regex(/^0x[a-fA-F0-9]{40}$/)
+      .required(),
     email: Joi.string()
       .strict()
       .trim()
@@ -45,7 +48,7 @@ const validateSignUpSchema = (data) => {
         tlds: { allow: ['com', 'net'] },
       })
       .required(),
-    username: Joi.string().max(50).required(),
+    username: Joi.string().min(3).max(40).required(),
   });
   const options = {
     errors: {
@@ -58,7 +61,9 @@ const validateSignUpSchema = (data) => {
 };
 const validateAddress = (address) => {
   const schema = Joi.object().keys({
-    address: Joi.string().max(600).required(),
+    address: Joi.string()
+      .regex(/^0x[a-fA-F0-9]{40}$/)
+      .required(),
   });
   const options = {
     errors: {
@@ -106,7 +111,7 @@ const validateUser = (user) => {
 const validateUserProfile = (data) => {
   const schema = Joi.object().keys({
     userId: Joi.string().alphanum().min(12).max(24).required(),
-    bio: Joi.string().max(600).allow(''),
+    bio: Joi.string().max(300).allow(''),
   });
   const options = {
     errors: {
@@ -138,5 +143,5 @@ module.exports = {
   validateAddress,
   validateUser,
   validateUserProfile,
-  validateId
+  validateId,
 };

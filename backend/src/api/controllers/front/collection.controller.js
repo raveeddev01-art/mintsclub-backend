@@ -299,13 +299,20 @@ exports.list = async (req, res, next) => {
       filter = {};
     }
 
-    let total = 0;
+    //let total = 0;
 
     if (!all) {
       page = page !== undefined && page !== '' ? parseInt(page) : 1;
       limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
 
-      total = await Collection.countDocuments({});
+      const total = await Collection.countDocuments({});
+
+      if (total == 0) {
+        return res.send({
+          success: false,
+          message: 'No Collections found',
+        });
+      }
 
       if (page > Math.ceil(total / limit) && total > 0)
         page = Math.ceil(total / limit);
@@ -461,6 +468,13 @@ exports.myCollectionList = async (req, res, next) => {
         .send({ success: false, message: 'Please Sign In First' });
 
     const allCollection = await Collection.find({}).where('userId', userId);
+
+    if (allCollection.length == 0) {
+      return res.send({
+        success: false,
+        message: 'No user collections found',
+      });
+    }
 
     const myCollections = JSON.parse(JSON.stringify(allCollection)).map(
       (item) => {

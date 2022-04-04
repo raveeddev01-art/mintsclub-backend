@@ -136,6 +136,13 @@ exports.list = async (req, res, next) => {
 
     allBids = await Bid.find();
 
+    if (allBids.length == 0) {
+      return res.send({
+        success: false,
+        message: 'No Bids found',
+      });
+    }
+
     let data = {};
 
     data.totalRecords = allBids.length;

@@ -224,8 +224,8 @@ exports.createUser = async (req, res, next) => {
   try {
     let payload = {
       name: req.body.name,
-      attributes: JSON.parse(req.body.attributes),
-      levels: JSON.parse(req.body.levels),
+      attributes: req.body.attributes,
+      levels: req.body.levels,
       symbol: req.body.symbol,
       externalLink: req.body.externalLink,
       email: req.body.email,

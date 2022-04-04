@@ -32,10 +32,10 @@ exports.create = async (req, res, next) => {
       currentPrice: 0,
       ownerAddress: req.body.ownerAddress,
       // txHash: req.body.txHash,
-      royalty: req.body.royalty,
+      // royalty: req.body.royalty,
       copies: req.body.copies,
-      status: req.body.status,
-      royalty: req.body.royalty,
+      // status: req.body.status,
+      // royalty: req.body.royalty,
       // sold: req.body.sold,
     };
     const { error } = validation.validateNFTSchema(payload);
@@ -151,7 +151,7 @@ exports.edit = async (req, res, next) => {
         message: 'sellingMethod is required',
       });
     }
-    payload.sellingConfig = JSON.parse(payload.sellingConfig);
+    payload.sellingConfig = payload.sellingConfig;
     let getNFT = await NFT.findOne({
       _id: payload._id,
     });
@@ -382,7 +382,12 @@ exports.list = async (req, res, next) => {
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
 
     const total = await NFT.countDocuments(filter);
-
+    if (total == 0) {
+      return res.send({
+        success: false,
+        message: 'No NFTs found',
+      });
+    }
     const nfts = await NFT.aggregate([
       { $match: filter },
       {
@@ -472,7 +477,7 @@ exports.updateNft = async (req, res, next) => {
       levels: req.body.levels,
       fileType: req.body.fileType,
       userId: req.body.userId,
-      royalty: req.body.royalty,
+      // royalty: req.body.royalty,
       ownerAddress: req.body.ownerAddress,
       collectionId: req.body.collectionId,
       currentPrice: req.body.currentPrice,
@@ -599,7 +604,7 @@ exports.myNftListing = async (req, res, next) => {
     if (myNfts.length == 0) {
       return res.status(400).send({
         status: false,
-        message: 'No NFT Found',
+        message: 'No my NFT Found',
       });
     }
 
