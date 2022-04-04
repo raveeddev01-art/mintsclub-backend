@@ -72,12 +72,50 @@ exports.create = async (req, res, next) => {
 
     payload.creatorId = payload.userId;
     payload.remainingCopies = payload.copies;
+    payload.highestBid = 0;
+
+    const nft = await NFT.create(payload);
+
+    if (nft) {
+      let collectionRecord = await Collection.findOne({
+        _id: req.body.data.collectionId,
+      });
+
+      collectionRecord.nft.push(nft._id);
+      collectionRecord.save();
+    }
+
+    let nftTokenPayload = {
+      nftToken: req.body.nftToken,
+      nftId: nft._id,
+      tokenStandard: req.body.tokenStandard,
+    };
+
+    if (!nftTokenPayload.tokenStandard) {
+      nftTokenPayload.tokenStandard = 'ERC-1155';
+    }
+
+    let nftToken = await NftTokens.create(nftTokenPayload);
+
+    let activityPayload = {
+      ownerId: nft.ownerId,
+      toAddress: nft.ownerAddress,
+      nftId: nft._id,
+      activityType: 'Mint',
+    };
+
+    await ActivityModal.create(activityPayload);
 
     return res.send({
       success: true,
-      message: 'Uploaded data on IPFS successfully',
-      nft: payload,
+      message: 'Item created successfully',
+      nft,
     });
+    // return res.send({
+    //   success: true,
+    //   message: 'Uploaded data on IPFS successfully',
+    //   nft: payload,
+    // });
   } catch (error) {
     return next(error);
   }
