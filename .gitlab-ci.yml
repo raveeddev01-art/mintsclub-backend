@@ -14,7 +14,7 @@ sonarqube-Analyze:
     - sonar-scanner
   allow_failure: true
   only:
-    - task/MintsClubBackend-V2
+    - restFullApis
     
 mintsclub-v2:
   stage: deploy
@@ -27,8 +27,6 @@ mintsclub-v2:
     - echo "Deploy to QA server"
     - ssh-add <(echo "$SSH_KEY_V2")
     - rm -rf .git
-    - ssh -o StrictHostKeyChecking=no $SERVER_USER_V2@$SERVER_IP "cd /home/mintsclub-v2/mintsclub-v2/backend; git reset --hard; git pull origin task/MintsClubBackend-V2; cd /home/mintsclub-v2/mintsclub-v2/backend/backend; npm install; pm2 restart 0; exit"
+    - ssh -o StrictHostKeyChecking=no $SERVER_USER_V2@$SERVER_IP "cd /home/mintsclub-v2/mintsclub-v2-api/backend-v2; git reset --hard; git pull origin restFullApis; cd /home/mintsclub-v2/mintsclub-v2-api/backend-v2/backend; npm install; pm2 restart 1; exit"
   only:
-    - task/MintsClubBackend-V2
-
-
+    - restFullApis
