@@ -20,32 +20,19 @@ module.exports.startCron = () => {
           let endDate = moment(auctionEndNft.auctionEndDate).utc(false);
           let currentDateTime = new moment().utc(true);
 
-          //console.log('datestime', endDate, currentDateTime);
-
-          //var endData = "2022-03-11T00:00:00.000+00:00";
-          //let duration = currentDateTime - auctionEndNft.auctionEndDate;
-
-          // const duration = moment.duration(endDate.diff(currentDsateTime));
-          // const time = duration.asMinutes();
-          // console.log(
-          //   'testing',
-          //   endDate,
-          //   currentDateTime,
-          //   endDate.diff(currentDateTime)
-          // );
-
           if (endDate.diff(currentDateTime) <= 0) {
             bid = await Bid.find(
               { nftId: auctionEndNft._id },
               { isAccepted: false }
             );
 
-            if (bid.length > 0 && auctionEndNft.copiesForAuction > 0) {
+            if (bid.length > 0) {
               let bidData = bid[0];
 
               if (
                 auctionEndNft.remainingCopies > auctionEndNft.copiesForAuction
               ) {
+                console.log('its if statemnet');
                 let payload = {
                   ownerId: bidData.bidBy,
                   ownerAddress: bidData.fromAddress,
@@ -65,14 +52,13 @@ module.exports.startCron = () => {
 
                 const NFT = await nft.create(payload);
 
-                if (NFT) {
-                  let collectionRecord = await Collection.findOne({
-                    _id: auctionEndNft.collectionId,
-                  });
+                let collectionRecord = await Collection.findOne({
+                  _id: auctionEndNft.collectionId,
+                });
 
-                  collectionRecord.nft.push(NFT._id);
-                  collectionRecord.save();
-                }
+                collectionRecord.nft.push(NFT._id);
+                collectionRecord.save();
+
                 nftTokenDetail = await NftTokens.findOne({
                   nftId: auctionEndNft._id,
                 });
@@ -130,22 +116,22 @@ module.exports.startCron = () => {
                   { new: true }
                 );
 
-                const nftToDelete = await nft.find({
-                  remainingCopies: { $exists: false },
-                });
-                for (const ids of nftToDelete) {
-                  deleteNft = await nft.deleteOne({ _id: ids['_id'] });
-                  if (deleteNft.deletedCount) {
-                    const nftToken = await NftTokens.deleteOne({
-                      nftId: ids['_id'],
-                    });
+                // const nftToDelete = await nft.find({
+                //   remainingCopies: { $exists: false },
+                // });
+                // for (const ids of nftToDelete) {
+                //   deleteNft = await nft.deleteOne({ _id: ids['_id'] });
+                //   if (deleteNft.deletedCount) {
+                //     const nftToken = await NftTokens.deleteOne({
+                //       nftId: ids['_id'],
+                //     });
 
-                    let updateCollection = await Collection.updateOne(
-                      { _id: auctionEndNft.collectionId },
-                      { $pull: { nft: ids['_id'] } }
-                    );
-                  }
-                }
+                //     let updateCollection = await Collection.updateOne(
+                //       { _id: auctionEndNft.collectionId },
+                //       { $pull: { nft: ids['_id'] } }
+                //     );
+                //   }
+                // }
               } else {
                 let payload = {
                   ownerId: bidData.bidBy,
