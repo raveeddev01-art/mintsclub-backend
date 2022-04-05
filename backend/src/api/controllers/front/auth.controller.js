@@ -2,6 +2,7 @@ const User = require('../../models/users.model');
 const validation = require('../../middlewares/front/validation');
 const passport = require('passport');
 const localStrategy = require('passport-local').Strategy;
+const Approval=require('../../models/approvals.model')
 
 exports.register = async (req, res, next) => {
   try {
@@ -34,6 +35,13 @@ exports.register = async (req, res, next) => {
     }
 
     user = await User.create({ address, username, email, totalETH });
+
+    let approvalPayload={
+      userId:user._id,
+      isApproved:false,
+    }
+   console.log(approvalPayload,"approvalPaylaod")
+    await Approval.create(approvalPayload)
 
     var accessToken = await user.token();
     user = user.transform();
@@ -73,6 +81,7 @@ exports.login = async (req, res, next) => {
     const address = payload.address;
     let user = await User.findOne({ address });
     if (!user) {
+
       return res.status(200).send({
         status: false,
         message:

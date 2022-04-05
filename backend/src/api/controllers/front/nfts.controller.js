@@ -97,7 +97,8 @@ exports.storeDataInDb = async (req, res, next) => {
     createNFTPayload.image = req.body.image;
     createNFTPayload.highestBid = 0;
     createNFTPayload.currentPrice = 0;
-    //console.log('one log');
+    console.log(createNFTPayload,"createNFTPayload")
+  
     const nft = await NFT.create(createNFTPayload);
 
     if (nft) {
