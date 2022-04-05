@@ -76,10 +76,10 @@ exports.live = async (req, res, next) => {
           _id: 1,
           name: 1,
           image: 1,
-          sold: 1,
           copies: 1,
           currentPrice: 1,
           auctionEndDate: 1,
+          fileType: 1,
           nftOwnerId: 1,
           owner: {
             _id: '$owner._id',
