@@ -19,6 +19,8 @@ const validateNFTSchema = (data) => {
     fileType: Joi.string().valid('image', 'audio', 'video').required(),
     ownerId: Joi.string().alphanum().min(12).max(24).required(),
     //nftOwnerId: { type: String },
+    currentPrice: Joi.number().min(1).max(999).required(),
+
     userId: Joi.string().alphanum().min(12).max(24).required(),
     categoryId: Joi.string().alphanum().min(12).max(24).allow(''),
     collectionId: Joi.string().alphanum().min(12).max(24).required(),
@@ -67,7 +69,7 @@ const validateEditNftSchema = (data) => {
     }),
     // royalty: Joi.string().allow(''),
     collectionId: Joi.string().alphanum().min(12).max(24).required(),
-    currentPrice: Joi.number().min(1).max(50).required(),
+    currentPrice: Joi.number().min(1).max(999).required(),
     ownerAddress: Joi.string()
       .regex(/^0x[a-fA-F0-9]{40}$/)
       .allow(''),
@@ -98,7 +100,7 @@ const validateNFTimedTAuctionSchema = (data) => {
         startPrice: Joi.object()
           .keys({
             currency: Joi.string().valid('ETH').required(),
-            amount: Joi.number().min(1).max(999).required(),
+            amount: Joi.number().max(999).invalid(0).required(),
           })
           .required(),
         duration: Joi.object()
@@ -144,7 +146,7 @@ const validateNFFixedTAuctionSchema = (data) => {
         price: Joi.object()
           .keys({
             currency: Joi.string().valid('ETH').required(),
-            amount: Joi.number().min(1).max(999).required(),
+            amount: Joi.number().max(999).invalid(0).required(),
           })
           .required(),
         reserveFor: Joi.string().allow(''),
