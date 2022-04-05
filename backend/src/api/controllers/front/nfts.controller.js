@@ -32,10 +32,10 @@ exports.create = async (req, res, next) => {
       currentPrice: 0,
       ownerAddress: req.body.ownerAddress,
       // txHash: req.body.txHash,
-      royalty: req.body.royalty,
+      // royalty: req.body.royalty,
       copies: req.body.copies,
-      status: req.body.status,
-      royalty: req.body.royalty,
+      // status: req.body.status,
+      // royalty: req.body.royalty,
       // sold: req.body.sold,
     };
     const { error } = validation.validateNFTSchema(payload);
@@ -151,7 +151,7 @@ exports.edit = async (req, res, next) => {
         message: 'sellingMethod is required',
       });
     }
-    payload.sellingConfig = JSON.parse(payload.sellingConfig);
+    payload.sellingConfig = payload.sellingConfig;
     let getNFT = await NFT.findOne({
       _id: payload._id,
     });
@@ -211,7 +211,7 @@ exports.edit = async (req, res, next) => {
       // payload.auctionStartTime = payload.sellingConfig.duration.startTime;
       // payload.auctionEndTime = payload.sellingConfig.duration.startTime;
     }
-    console.log(payload, 'payload');
+    // console.log(payload, 'payload');
     const nft = await NFT.findByIdAndUpdate(
       { _id: payload._id },
       { $set: payload }
@@ -240,7 +240,7 @@ exports.update = async (req, res, next) => {
       { $set: payload }
       // { new: true }
     );
-    console.log('nft after update');
+    // console.log('nft after update');
     return res.send({
       success: false,
       message: 'Sorry! You rejected wallet processing',
@@ -472,7 +472,7 @@ exports.updateNft = async (req, res, next) => {
       levels: req.body.levels,
       fileType: req.body.fileType,
       userId: req.body.userId,
-      royalty: req.body.royalty,
+      // royalty: req.body.royalty,
       ownerAddress: req.body.ownerAddress,
       collectionId: req.body.collectionId,
       currentPrice: req.body.currentPrice,
@@ -640,11 +640,12 @@ exports.buyNow = async (req, res, next) => {
       let errorMsg = error.details[0].message;
       return res.status(400).send({ status: false, data: errorMsg });
     }
+
     const buyNftDetail = await NFT.findOne({
       _id: payload.nftId,
     });
 
-    if (buyNftDetail) {
+    if (buyNftDetail && buyNftDetail.copiesForAuction > 0) {
       if (buyNftDetail.remainingCopies > buyNftDetail.copiesForAuction) {
         let newPayload = {
           ownerId: payload.userId,
@@ -659,9 +660,8 @@ exports.buyNow = async (req, res, next) => {
           currentPrice: buyNftDetail.currentPrice,
           metaData: buyNftDetail.metaData,
           image: buyNftDetail.image,
-          remainingCopies: 0,
+          remainingCopies: buyNftDetail.copiesForAuction,
         };
-        //console.log('two log');
 
         const nft = await NFT.create(newPayload);
         if (nft) {
@@ -690,7 +690,6 @@ exports.buyNow = async (req, res, next) => {
 
         let newPayloadCopies = {
           copiesForAuction: 0,
-          // copies: remainingCopies,
           remainingCopies: remainingCopies,
         };
 
@@ -713,7 +712,7 @@ exports.buyNow = async (req, res, next) => {
 
           return res.status(200).send({
             success: true,
-            message: 'Owner ship transferred successfully',
+            message: 'Ownership transferred successfully',
           });
         }
       } else {
@@ -721,7 +720,7 @@ exports.buyNow = async (req, res, next) => {
           ownerId: payload.userId,
           ownerAddress: payload.ownerAddress,
           copies: buyNftDetail.copiesForAuction,
-          remainingCopies: 0,
+          remainingCopies: buyNftDetail.copiesForAuction,
           copiesForAuction: 0,
           sellingMethod: 0,
           sellingConfig: {
@@ -760,7 +759,10 @@ exports.buyNow = async (req, res, next) => {
         }
       }
     } else {
-      return res.send({ success: false, message: 'No NFT found for this ID' });
+      return res.send({
+        success: false,
+        message: 'NFT is not for sale of this ID',
+      });
     }
   } catch (error) {
     return next(error);
