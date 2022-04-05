@@ -4,7 +4,7 @@ const Joi = require('@hapi/joi').extend(require('@joi/date'));
 const validateNFTSchema = (data) => {
   const schema = Joi.object().keys({
     name: Joi.string().min(1).max(100).required(),
-    description: Joi.string().min(1).max(300).required(),
+    description: Joi.string().min(1).max(150).required(),
     creatorId: Joi.string().alphanum().min(12).max(24).allow(''),
     attributes: Joi.array().items({
       name: Joi.string().allow(''),
@@ -19,6 +19,8 @@ const validateNFTSchema = (data) => {
     fileType: Joi.string().valid('image', 'audio', 'video').required(),
     ownerId: Joi.string().alphanum().min(12).max(24).required(),
     //nftOwnerId: { type: String },
+    currentPrice: Joi.number().min(0).max(999).required(),
+
     userId: Joi.string().alphanum().min(12).max(24).required(),
     categoryId: Joi.string().alphanum().min(12).max(24).allow(''),
     collectionId: Joi.string().alphanum().min(12).max(24).required(),
@@ -54,7 +56,7 @@ const validateEditNftSchema = (data) => {
     nftId: Joi.string().alphanum().min(12).max(24).required(),
     userId: Joi.string().alphanum().min(12).max(24).required(),
     name: Joi.string().min(1).max(100).required(),
-    description: Joi.string().min(1).max(300).required(),
+    description: Joi.string().min(1).max(150).required(),
     fileType: Joi.string().valid('image', 'audio', 'video').required(),
     attributes: Joi.array().items({
       name: Joi.string().allow(''),
@@ -67,7 +69,7 @@ const validateEditNftSchema = (data) => {
     }),
     // royalty: Joi.string().allow(''),
     collectionId: Joi.string().alphanum().min(12).max(24).required(),
-    currentPrice: Joi.number().min(1).max(50).required(),
+    currentPrice: Joi.number().min(1).max(999).required(),
     ownerAddress: Joi.string()
       .regex(/^0x[a-fA-F0-9]{40}$/)
       .allow(''),
@@ -91,14 +93,14 @@ const validateNFTimedTAuctionSchema = (data) => {
     copiesForAuction: Joi.number().min(1).max(999).required(),
     // auctionStartTime: Joi.string().allow(''),
     // auctionEndTime: Joi.string().allow(''),
-    sellingMethod: Joi.number().valid('1', '2').required(),
+    sellingMethod: Joi.number().valid(1, 2).required(),
     sellingConfig: Joi.object()
       .keys({
         // method: Joi.number().allow(''),
         startPrice: Joi.object()
           .keys({
-            currency: Joi.string().required(),
-            amount: Joi.number().min(1).max(50).required(),
+            currency: Joi.string().valid('ETH').required(),
+            amount: Joi.number().max(999).invalid(0).required(),
           })
           .required(),
         duration: Joi.object()
@@ -129,7 +131,7 @@ const validateNFFixedTAuctionSchema = (data) => {
   const schema = Joi.object().keys({
     _id: Joi.string().alphanum().min(12).max(24).required(),
     copiesForAuction: Joi.number().min(1).max(999).required(),
-    sellingMethod: Joi.number().valid('1', '2').required(),
+    sellingMethod: Joi.number().valid(1, 2).required(),
     sellingConfig: Joi.object()
       .keys({
         // method: Joi.number().allow(''),
@@ -143,8 +145,8 @@ const validateNFFixedTAuctionSchema = (data) => {
         //   .required(),
         price: Joi.object()
           .keys({
-            currency: Joi.string().required(),
-            amount: Joi.number().required(),
+            currency: Joi.string().valid('ETH').required(),
+            amount: Joi.number().max(999).invalid(0).required(),
           })
           .required(),
         reserveFor: Joi.string().allow(''),

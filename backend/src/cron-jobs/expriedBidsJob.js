@@ -19,19 +19,6 @@ module.exports.startCron = () => {
 
           let endDate = moment(auctionEndNft.auctionEndDate).utc(false);
           let currentDateTime = new moment().utc(true);
-          //console.log('datestime', endDate, currentDateTime);
-
-          //var endData = "2022-03-11T00:00:00.000+00:00";
-          //let duration = currentDateTime - auctionEndNft.auctionEndDate;
-
-          // const duration = moment.duration(endDate.diff(currentDsateTime));
-          // const time = duration.asMinutes();
-          // console.log(
-          //   'testing',
-          //   endDate,
-          //   currentDateTime,
-          //   endDate.diff(currentDateTime)
-          // );
 
           if (endDate.diff(currentDateTime) <= 0) {
             bid = await Bid.find(
@@ -42,7 +29,10 @@ module.exports.startCron = () => {
             if (bid.length > 0) {
               let bidData = bid[0];
 
-              if (auctionEndNft.copies > auctionEndNft.copiesForAuction) {
+              if (
+                auctionEndNft.remainingCopies > auctionEndNft.copiesForAuction
+              ) {
+                console.log('its if statemnet');
                 let payload = {
                   ownerId: bidData.bidBy,
                   ownerAddress: bidData.fromAddress,
@@ -57,18 +47,18 @@ module.exports.startCron = () => {
                   metaData: auctionEndNft.metaData,
                   image: auctionEndNft.image,
                   highestBid: 0,
+                  remainingCopies: auctionEndNft.copiesForAuction,
                 };
 
                 const NFT = await nft.create(payload);
 
-                if (NFT) {
-                  let collectionRecord = await Collection.findOne({
-                    _id: auctionEndNft.collectionId,
-                  });
+                let collectionRecord = await Collection.findOne({
+                  _id: auctionEndNft.collectionId,
+                });
 
-                  collectionRecord.nft.push(NFT._id);
-                  collectionRecord.save();
-                }
+                collectionRecord.nft.push(NFT._id);
+                collectionRecord.save();
+
                 nftTokenDetail = await NftTokens.findOne({
                   nftId: auctionEndNft._id,
                 });
@@ -87,7 +77,6 @@ module.exports.startCron = () => {
                 let newPayload = {
                   copiesForAuction: 0,
                   remainingCopies: remainingCopies,
-                  // copies: remainingCopies,
                   auctionEndDate: null,
                   auctionStartDate: null,
                   sellingMethod: 0,
@@ -126,8 +115,24 @@ module.exports.startCron = () => {
                   { $set: { isAccepted: true } },
                   { new: true }
                 );
+
+                // const nftToDelete = await nft.find({
+                //   remainingCopies: { $exists: false },
+                // });
+                // for (const ids of nftToDelete) {
+                //   deleteNft = await nft.deleteOne({ _id: ids['_id'] });
+                //   if (deleteNft.deletedCount) {
+                //     const nftToken = await NftTokens.deleteOne({
+                //       nftId: ids['_id'],
+                //     });
+
+                //     let updateCollection = await Collection.updateOne(
+                //       { _id: auctionEndNft.collectionId },
+                //       { $pull: { nft: ids['_id'] } }
+                //     );
+                //   }
+                // }
               } else {
-                //console.log('else is working');
                 let payload = {
                   ownerId: bidData.bidBy,
                   ownerAddress: bidData.fromAddress,
@@ -135,9 +140,9 @@ module.exports.startCron = () => {
                   auctionStartDate: null,
                   sellingMethod: 0,
                   copies: auctionEndNft.copiesForAuction,
-                  remainingCopies: 0,
+                  remainingCopies: auctionEndNft.copiesForAuction,
                   copiesForAuction: 0,
-                  currentPrice: bidData.bidAmount,
+                  currentPrice: auctionEndNft.highestBid,
                   highestBid: 0,
                   sellingConfig: {
                     startPrice: {

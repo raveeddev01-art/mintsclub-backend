@@ -673,6 +673,7 @@ exports.myNftListing = async (req, res, next) => {
     return next(error);
   }
 };
+
 exports.buyNow = async (req, res, next) => {
   try {
     let payload = req.body;
@@ -683,11 +684,12 @@ exports.buyNow = async (req, res, next) => {
       let errorMsg = error.details[0].message;
       return res.status(400).send({ status: false, data: errorMsg });
     }
+
     const buyNftDetail = await NFT.findOne({
       _id: payload.nftId,
     });
 
-    if (buyNftDetail) {
+    if (buyNftDetail && buyNftDetail.copiesForAuction > 0) {
       if (buyNftDetail.remainingCopies > buyNftDetail.copiesForAuction) {
         let newPayload = {
           ownerId: payload.userId,
@@ -702,9 +704,8 @@ exports.buyNow = async (req, res, next) => {
           currentPrice: buyNftDetail.currentPrice,
           metaData: buyNftDetail.metaData,
           image: buyNftDetail.image,
-          remainingCopies: 0,
+          remainingCopies: buyNftDetail.copiesForAuction,
         };
-        //console.log('two log');
 
         const nft = await NFT.create(newPayload);
         if (nft) {
@@ -733,7 +734,6 @@ exports.buyNow = async (req, res, next) => {
 
         let newPayloadCopies = {
           copiesForAuction: 0,
-          // copies: remainingCopies,
           remainingCopies: remainingCopies,
         };
 
@@ -756,7 +756,7 @@ exports.buyNow = async (req, res, next) => {
 
           return res.status(200).send({
             success: true,
-            message: 'Owner ship transferred successfully',
+            message: 'Ownership transferred successfully',
           });
         }
       } else {
@@ -764,7 +764,7 @@ exports.buyNow = async (req, res, next) => {
           ownerId: payload.userId,
           ownerAddress: payload.ownerAddress,
           copies: buyNftDetail.copiesForAuction,
-          remainingCopies: 0,
+          remainingCopies: buyNftDetail.copiesForAuction,
           copiesForAuction: 0,
           sellingMethod: 0,
           sellingConfig: {
@@ -803,7 +803,10 @@ exports.buyNow = async (req, res, next) => {
         }
       }
     } else {
-      return res.send({ success: false, message: 'No NFT found for this ID' });
+      return res.send({
+        success: false,
+        message: 'NFT is not for sale of this ID',
+      });
     }
   } catch (error) {
     return next(error);
