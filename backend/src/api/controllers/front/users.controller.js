@@ -64,7 +64,7 @@ exports.updateProfile = async (req, res, next) => {
   next(err)
    }
  }
-  let isApproved =(req.body.isApproved==="true")
+
   let payload='';
   try {
 

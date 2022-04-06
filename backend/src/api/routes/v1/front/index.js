@@ -15,6 +15,7 @@ const fixedPriceTokens = require('./fixedPriceTokens.route');
 const verificationRoute = require('./otp-verification.route.js');
 const likesRoutes=require('./likes.route');
 const activityRoute=require('./item-activity.route')
+const itemsListingRoute=require('./itemsListing.route')
 const router = express.Router();
 /**
  * GET v1/status
@@ -35,4 +36,5 @@ router.use('/nftFixedTokens', fixedPriceTokens);
 router.use('/otpVerification', verificationRoute);
 router.use('/nftLikes', likesRoutes);
 router.use('/activity', activityRoute);
+router.use('/itemsListing', itemsListingRoute);
 module.exports = router;
