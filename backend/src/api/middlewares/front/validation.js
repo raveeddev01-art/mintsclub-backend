@@ -46,6 +46,7 @@ const validateSignUpSchema = (data) => {
       })
       .required(),
     username: Joi.string().max(50).required(),
+    isApproved:Joi.boolean(),
   });
   const options = {
     errors: {

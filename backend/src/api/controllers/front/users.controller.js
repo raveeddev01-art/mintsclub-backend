@@ -40,6 +40,7 @@ exports.create = async (req, res, next) => {
   }
 };
 exports.updateProfile = async (req, res, next) => {
+  
   try {
     let payload = {
       userId: req.body.userId,

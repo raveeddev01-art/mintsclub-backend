@@ -5,14 +5,16 @@ const localStrategy = require('passport-local').Strategy;
 const Approval=require('../../models/approvals.model')
 
 exports.register = async (req, res, next) => {
+  console.log(req.body,"req.body")
   try {
     let payload = {
       address: req.body.address,
       username: req.body.username,
       email: req.body.email,
+      isApproved:req.body.isApproved
     };
 
-    //console.log(payload,"payload")
+    console.log(payload,"payload")
 
     const { error } = validation.validateSignUpSchema(payload);
     //console.log(error,"error")
@@ -25,6 +27,7 @@ exports.register = async (req, res, next) => {
     const email = payload.email.toLowerCase();
     const address = payload.address;
     const username = payload.username;
+    const isApproved=payload.isApproved;
     const totalETH = 0;
 
     let user = await User.findOne({ address });
@@ -34,7 +37,7 @@ exports.register = async (req, res, next) => {
         .send({ status: false, message: 'Wallet already exists' });
     }
 
-    user = await User.create({ address, username, email, totalETH });
+    user = await User.create({ address, username, email, totalETH ,isApproved});
 
     let approvalPayload={
       userId:user._id,

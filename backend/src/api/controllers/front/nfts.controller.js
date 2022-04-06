@@ -264,8 +264,39 @@ exports.get = async (req, res, next) => {
       let errorMsg = error.details[0].message;
       return res.status(400).send({ status: false, data: errorMsg });
     }
+    /////////////////////
+   
+    let pipeline=[
+    {
+        $match:{ _id: ObjectId(payload.nftId) },
+    },
+    {
+      $lookup: {
+        from: 'users',
+        foreignField: '_id',
+        localField: 'userId',
+        as: 'user',
+      },
+    },
+      {
+        $unwind: {
+          path: '$user',
+        
+        },
+      },
+      // {
+      //   $project: {         
+      //     _id: '$_id', collectionId:1,       
+      //     // username: { $first: '$user.username' },
+      //     username: '$user.username' ,
+          
+      //   },
+      // },
 
-    const nftDetail = await NFT.findOne({ _id: payload.nftId });
+]
+ let nftDetail=await NFT.aggregate(pipeline)
+  ///////////////////// 
+    nftDetail=nftDetail[0]
     if (!nftDetail) {
       return res.send({
         success: false,

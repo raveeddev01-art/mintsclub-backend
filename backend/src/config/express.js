@@ -82,6 +82,6 @@ app.use(error.notFound);
 app.use(error.handler);
 
 //start cron jobs
-job.startCron();
+// job.startCron();
 
 module.exports = app;
