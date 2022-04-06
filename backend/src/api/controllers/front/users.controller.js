@@ -40,12 +40,42 @@ exports.create = async (req, res, next) => {
   }
 };
 exports.updateProfile = async (req, res, next) => {
+
+ if(req.body.isApproved){
+   let payload={userId:req.body.userId};
+   if(req.body.isApproved==="false"){
+     payload.isApproved=false
+   }else {
+    payload.isApproved=true
+   }
+   try{
   
+    let user = await UserModal.findByIdAndUpdate(
+      { _id: ObjectId(payload.userId) },
+      { $set: payload },
+      { new: true }
+    );
+    return res.send({
+      status: true,
+      user,
+      message: 'User profile updated successfully.',
+    });
+   }catch(err){
+  next(err)
+   }
+ }
+  let isApproved =(req.body.isApproved==="true")
+  let payload='';
   try {
-    let payload = {
-      userId: req.body.userId,
-      bio: req.body.bio,
-    };
+
+
+      payload = {
+        userId: req.body.userId,
+        bio: req.body.bio,
+        
+        
+      };
+  
 
     const { error } = validation.validateUserProfile(payload);
 
@@ -77,10 +107,12 @@ exports.updateProfile = async (req, res, next) => {
       payload.webLink = req.body.webLink;
     }
 
-    imagesPayload = {
-      profileImage: req.body.profileImage,
-      bannerImage: req.body.bannerImage,
-    };
+
+  imagesPayload = {
+    profileImage: req.body.profileImage,
+    bannerImage: req.body.bannerImage,
+  };
+
 
     const newPayload = { ...payload, ...imagesPayload };
 
@@ -96,6 +128,7 @@ exports.updateProfile = async (req, res, next) => {
         newPayload[key] = await addImage(imgData);
       }
     }
+    console.log(newPayload,"newPayload1")
     let user = await UserModal.findByIdAndUpdate(
       { _id: ObjectId(newPayload.userId) },
       { $set: newPayload },
