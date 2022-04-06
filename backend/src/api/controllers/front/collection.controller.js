@@ -589,7 +589,7 @@ exports.popular = async (req, res, next) => {
           _id: '$_id',
           likesCount: { $first: '$likesschemas.count' },
           nfts: {
-            $push: '$nft.image',
+            $push: { image: '$nft.image', fileType: '$nft.fileType' },
           },
           userId: { $first: '$userId' },
           categoryId: { $first: '$categoryId' },
