@@ -15,8 +15,6 @@ module.exports.startCron = () => {
 
       if (auctionEndNftsList.length > 0) {
         for (const auctionEndNft of auctionEndNftsList) {
-          // auctionEndNftsList.forEach(async (auctionEndNft) => {
-
           let endDate = moment(auctionEndNft.auctionEndDate).utc(false);
           let currentDateTime = new moment().utc(true);
 
@@ -32,7 +30,6 @@ module.exports.startCron = () => {
               if (
                 auctionEndNft.remainingCopies > auctionEndNft.copiesForAuction
               ) {
-                console.log('its if statemnet');
                 let payload = {
                   ownerId: bidData.bidBy,
                   ownerAddress: bidData.fromAddress,
@@ -95,7 +92,6 @@ module.exports.startCron = () => {
                 nftUpdate = await nft.findByIdAndUpdate(
                   { _id: auctionEndNft._id },
                   { $set: newPayload }
-                  // { new: true }
                 );
                 if (nftUpdate) {
                   let findUserDetail = await Users.findOne({
@@ -115,23 +111,6 @@ module.exports.startCron = () => {
                   { $set: { isAccepted: true } },
                   { new: true }
                 );
-
-                // const nftToDelete = await nft.find({
-                //   remainingCopies: { $exists: false },
-                // });
-                // for (const ids of nftToDelete) {
-                //   deleteNft = await nft.deleteOne({ _id: ids['_id'] });
-                //   if (deleteNft.deletedCount) {
-                //     const nftToken = await NftTokens.deleteOne({
-                //       nftId: ids['_id'],
-                //     });
-
-                //     let updateCollection = await Collection.updateOne(
-                //       { _id: auctionEndNft.collectionId },
-                //       { $pull: { nft: ids['_id'] } }
-                //     );
-                //   }
-                // }
               } else {
                 let payload = {
                   ownerId: bidData.bidBy,
@@ -158,7 +137,6 @@ module.exports.startCron = () => {
                 nftUpdate = await nft.findByIdAndUpdate(
                   { _id: auctionEndNft._id },
                   { $set: payload }
-                  // { new: true }
                 );
                 if (nftUpdate) {
                   let findUserDetail = await Users.findOne({
