@@ -11,7 +11,7 @@ const BidSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
-    // bidByAddress: { type: String },
+    bidByProfile: { type: String },
     ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     // auctionIdnftOwnerId: { type: String },
     nftId: { type: mongoose.Schema.Types.ObjectId, ref: 'NFT' },

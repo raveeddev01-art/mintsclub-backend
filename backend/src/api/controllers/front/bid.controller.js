@@ -2,6 +2,7 @@ const fs = require('fs');
 const moment = require('moment');
 const Bid = require('../../models/bids.model');
 const Nft = require('../../models/nfts.model');
+const User = require('../../models/users.model');
 const ObjectId = require('mongoose').Types.ObjectId;
 const { globalImgPlaceholder } = require('../../../config/vars');
 const validation = require('../../middlewares/front/bidValidation');
@@ -27,7 +28,13 @@ exports.create = async (req, res, next) => {
       let errorMsg = error.details[0].message;
       return res.status(400).send({ status: false, data: errorMsg });
     }
+
+    bidUser = await User.findOne({ _id: payload.bidBy });
+
+    payload.bidByProfile = bidUser.profileImage;
+
     const bid = await Bid.create(payload);
+
     if (bid) {
       let newPayload = {
         highestBid: payload.bidAmount,
@@ -126,11 +133,11 @@ exports.claimableListbyUserId = async (req, res, next) => {
 // API to get bids list
 exports.list = async (req, res, next) => {
   try {
-    let { page, limit,nftId } = req.query;
+    let { page, limit, nftId } = req.query;
 
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 100;
-    let filter={}
+    let filter = {};
     if (nftId) filter.nftId = ObjectId(nftId);
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
@@ -139,7 +146,6 @@ exports.list = async (req, res, next) => {
     const allBids = await Bid.aggregate([
       { $match: filter },
       { $sort: { createdAt: -1 } },
-    
     ]);
 
     let data = {};
