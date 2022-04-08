@@ -1,6 +1,5 @@
 const fs = require('fs');
 const moment = require('moment');
-
 const Users = require('../../models/users.model');
 const Collection = require('../../models/collection.model');
 const NFT = require('../../models/nfts.model');
@@ -17,7 +16,6 @@ const {
 
 // API to create NFT
 exports.create = async (req, res, next) => {
-  //console.log(req.body, 'req.body');
   try {
     let payload = {
       name: req.body.name,
@@ -34,9 +32,6 @@ exports.create = async (req, res, next) => {
       // txHash: req.body.txHash,
       // royalty: req.body.royalty,
       copies: req.body.copies,
-      // status: req.body.status,
-      // royalty: req.body.royalty,
-      // sold: req.body.sold,
     };
     const { error } = validation.validateNFTSchema(payload);
 
@@ -97,8 +92,8 @@ exports.storeDataInDb = async (req, res, next) => {
     createNFTPayload.image = req.body.image;
     createNFTPayload.highestBid = 0;
     createNFTPayload.currentPrice = 0;
-    console.log(createNFTPayload,"createNFTPayload")
-  
+    console.log(createNFTPayload, 'createNFTPayload');
+
     const nft = await NFT.create(createNFTPayload);
 
     if (nft) {
@@ -171,20 +166,6 @@ exports.edit = async (req, res, next) => {
         return res.status(400).send({ status: false, data: errorMsg });
       }
       payload.currentPrice = Number(payload.sellingConfig.price.amount);
-      // let startDate = moment(
-      //   new Date(payload.sellingConfig.listingSchedule.startDate)
-      // )
-      //   .utc(true)
-      //   .toISOString();
-
-      // let endDate = moment(
-      //   new Date(payload.sellingConfig.listingSchedule.endDate)
-      // )
-      //   .utc(true)
-      //   .toISOString();
-
-      // payload.sellingConfig.listingSchedule.startDate = startDate;
-      // payload.sellingConfig.listingSchedule.endDate = endDate;
     } else {
       const { error } = validation.validateNFTimedTAuctionSchema(payload);
 
@@ -201,18 +182,12 @@ exports.edit = async (req, res, next) => {
         .utc(true)
         .toISOString();
 
-      // let endDate = new Date(
-      //   payload.sellingConfig.duration.endDate
-      // ).toISOString();
-
       payload.sellingConfig.duration.startDate = startDate;
       payload.sellingConfig.duration.endDate = endDate;
       payload.auctionStartDate = startDate;
       payload.auctionEndDate = endDate;
-      // payload.auctionStartTime = payload.sellingConfig.duration.startTime;
-      // payload.auctionEndTime = payload.sellingConfig.duration.startTime;
     }
-    // console.log(payload, 'payload');
+
     const nft = await NFT.findByIdAndUpdate(
       { _id: payload._id },
       { $set: payload }
@@ -230,27 +205,23 @@ exports.edit = async (req, res, next) => {
 };
 
 // API to edit status NFT
-exports.update = async (req, res, next) => {
-  try {
-    let payload = req.body;
+// exports.update = async (req, res, next) => {
+//   try {
+//     let payload = req.body;
 
-    // set NFT selling config.
-
-    const nft = await NFT.findByIdAndUpdate(
-      { _id: payload._id },
-      { $set: payload }
-      // { new: true }
-    );
-    // console.log('nft after update');
-    return res.send({
-      success: false,
-      message: 'Sorry! You rejected wallet processing',
-      nft,
-    });
-  } catch (error) {
-    return next(error);
-  }
-};
+//     const nft = await NFT.findByIdAndUpdate(
+//       { _id: payload._id },
+//       { $set: payload }
+//     );
+//     return res.send({
+//       success: false,
+//       message: 'Sorry! You rejected wallet processing',
+//       nft,
+//     });
+//   } catch (error) {
+//     return next(error);
+//   }
+// };
 // API to get a NFT
 exports.get = async (req, res, next) => {
   try {
@@ -264,39 +235,36 @@ exports.get = async (req, res, next) => {
       let errorMsg = error.details[0].message;
       return res.status(400).send({ status: false, data: errorMsg });
     }
-    /////////////////////
-   
-    let pipeline=[
-    {
-        $match:{ _id: ObjectId(payload.nftId) },
-    },
-    {
-      $lookup: {
-        from: 'users',
-        foreignField: '_id',
-        localField: 'userId',
-        as: 'user',
+
+    let pipeline = [
+      {
+        $match: { _id: ObjectId(payload.nftId) },
       },
-    },
+      {
+        $lookup: {
+          from: 'users',
+          foreignField: '_id',
+          localField: 'userId',
+          as: 'user',
+        },
+      },
       {
         $unwind: {
           path: '$user',
-        
         },
       },
       // {
-      //   $project: {         
-      //     _id: '$_id', collectionId:1,       
+      //   $project: {
+      //     _id: '$_id', collectionId:1,
       //     // username: { $first: '$user.username' },
       //     username: '$user.username' ,
-          
+
       //   },
       // },
+    ];
+    let nftDetail = await NFT.aggregate(pipeline);
 
-]
- let nftDetail=await NFT.aggregate(pipeline)
-  ///////////////////// 
-    nftDetail=nftDetail[0]
+    nftDetail = nftDetail[0];
     if (!nftDetail) {
       return res.send({
         success: false,
@@ -346,7 +314,6 @@ exports.list = async (req, res, next) => {
       page,
       limit,
       collectionId,
-      explore,
       gtePrice,
       ltePrice,
       categoryId,
@@ -428,27 +395,59 @@ exports.list = async (req, res, next) => {
       },
       { $skip: limit * (page - 1) },
       { $limit: limit },
-      // {
-      //     $lookup: {
-      //         from: 'users',
-      //         foreignField: '_id',
-      //         localField: 'ownerId',
-      //         as: 'owner'
-      //     }
-      // },
-      // {
-      //     $unwind: '$owner'
-      // },
-      // {
-      //     $project: {
-      //         name: 1, image: 1, sold: 1, copies: 1, currentPrice: 1,collectionId:1,currentPrice:1,description:1,royalty:1,size:1,userId,
-      //         owner: {
-      //             _id: '$owner._id',
-      //             username: '$owner.username',
-      //             profilePhoto: { $ifNull: ['$owner.profilePhoto', userDefaultImage] }
-      //         }
-      //     }
-      // }
+      {
+        $lookup: {
+          from: 'users',
+          foreignField: '_id',
+          localField: 'ownerId',
+          as: 'owner',
+        },
+      },
+      {
+        $unwind: {
+          path: '$owner',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'bids',
+          foreignField: 'nftId',
+          localField: '_id',
+          as: 'bids',
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          image: 1,
+          description: 1,
+          fileType: 1,
+          copies: 1,
+          currentPrice: 1,
+          collectionId: 1,
+          currentPrice: 1,
+          description: 1,
+          ownerId: 1,
+          highestBid: 1,
+          userId,
+          auctionEndDate: 1,
+          copiesForAuction: 1,
+          sellingMethod: 1,
+          owner: {
+            _id: '$owner._id',
+            username: '$owner.username',
+            profilePhoto: {
+              $ifNull: ['$owner.profileImage', userDefaultImage],
+            },
+          },
+          bidInfo: {
+            bidBy: '$bids.bidBy',
+            bidByProfile: '$bids.bidByProfile',
+          },
+        },
+      },
     ]);
     for (const nft of nfts) {
       const findCount = await Likes.findOne().where('nftId', nft._id);
@@ -499,12 +498,11 @@ exports.updateNft = async (req, res, next) => {
     let payload = {
       nftId: req.body.nftId,
       name: req.body.name,
-      description: req.body.description,
-      attributes: req.body.attributes,
+      // description: req.body.description,
+      // attributes: req.body.attributes,
       levels: req.body.levels,
       fileType: req.body.fileType,
       userId: req.body.userId,
-      // royalty: req.body.royalty,
       ownerAddress: req.body.ownerAddress,
       collectionId: req.body.collectionId,
       currentPrice: req.body.currentPrice,
@@ -556,21 +554,21 @@ exports.updateNft = async (req, res, next) => {
   }
 };
 
-exports.getNFTsbyCollection = async (req, res, next) => {
-  try {
-    const collectionId = req.body.collectionId;
-    console.log(req.body, 'collectionId');
-    const NFTs = await NFT.aggregate([
-      {
-        $match: { collectionId: ObjectId(collectionId) },
-      },
-    ]);
-    console.log(NFTs, 'nfts');
-    res.status(200).send({ success: true, data: NFTs });
-  } catch (err) {
-    res.status(200).send({ success: false, error: err });
-  }
-};
+// exports.getNFTsbyCollection = async (req, res, next) => {
+//   try {
+//     const collectionId = req.body.collectionId;
+
+//     const NFTs = await NFT.aggregate([
+//       {
+//         $match: { collectionId: ObjectId(collectionId) },
+//       },
+//     ]);
+
+//     res.status(200).send({ success: true, data: NFTs });
+//   } catch (err) {
+//     res.status(200).send({ success: false, error: err });
+//   }
+// };
 
 // API to delete nft
 exports.delete = async (req, res, next) => {
@@ -682,6 +680,7 @@ exports.buyNow = async (req, res, next) => {
         let newPayload = {
           ownerId: payload.userId,
           ownerAddress: payload.ownerAddress,
+          userId: payload.userId,
           copies: buyNftDetail.copiesForAuction,
           name: buyNftDetail.name,
           description: buyNftDetail.description,
@@ -751,6 +750,7 @@ exports.buyNow = async (req, res, next) => {
         let newPayload = {
           ownerId: payload.userId,
           ownerAddress: payload.ownerAddress,
+          userId: payload.userId,
           copies: buyNftDetail.copiesForAuction,
           remainingCopies: buyNftDetail.copiesForAuction,
           copiesForAuction: 0,

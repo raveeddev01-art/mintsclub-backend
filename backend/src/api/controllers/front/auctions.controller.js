@@ -87,12 +87,12 @@ exports.live = async (req, res, next) => {
           currentPrice: 1,
           auctionEndDate: 1,
           fileType: 1,
-          nftOwnerId: 1,
+          ownerId: 1,
           owner: {
             _id: '$owner._id',
             username: '$owner.username',
             profilePhoto: {
-              $ifNull: ['$owner.profilePhoto', globalImgPlaceholder],
+              $ifNull: ['$owner.profileImage', globalImgPlaceholder],
             },
           },
           bidInfo: {

@@ -36,6 +36,7 @@ module.exports.startCron = () => {
                 let payload = {
                   ownerId: bidData.bidBy,
                   ownerAddress: bidData.fromAddress,
+                  userId: bidData.bidBy,
                   copies: auctionEndNft.copiesForAuction,
                   name: auctionEndNft.name,
                   description: auctionEndNft.description,
@@ -128,27 +129,11 @@ module.exports.startCron = () => {
                 const createActivity = await ItemActivity.create(
                   activityPayload
                 );
-
-                // const nftToDelete = await nft.find({
-                //   remainingCopies: { $exists: false },
-                // });
-                // for (const ids of nftToDelete) {
-                //   deleteNft = await nft.deleteOne({ _id: ids['_id'] });
-                //   if (deleteNft.deletedCount) {
-                //     const nftToken = await NftTokens.deleteOne({
-                //       nftId: ids['_id'],
-                //     });
-
-                //     let updateCollection = await Collection.updateOne(
-                //       { _id: auctionEndNft.collectionId },
-                //       { $pull: { nft: ids['_id'] } }
-                //     );
-                //   }
-                // }
               } else {
                 let payload = {
                   ownerId: bidData.bidBy,
                   ownerAddress: bidData.fromAddress,
+                  userId: bidData.bidBy,
                   auctionEndDate: null,
                   auctionStartDate: null,
                   sellingMethod: 0,
