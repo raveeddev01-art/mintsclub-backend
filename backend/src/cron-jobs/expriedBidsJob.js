@@ -35,6 +35,7 @@ module.exports.startCron = () => {
                 console.log('its if statemnet');
                 let payload = {
                   ownerId: bidData.bidBy,
+                  userId:bidData.bidBy,
                   ownerAddress: bidData.fromAddress,
                   copies: auctionEndNft.copiesForAuction,
                   name: auctionEndNft.name,
@@ -135,6 +136,7 @@ module.exports.startCron = () => {
               } else {
                 let payload = {
                   ownerId: bidData.bidBy,
+                  userId:bidData.bidBy,
                   ownerAddress: bidData.fromAddress,
                   auctionEndDate: null,
                   auctionStartDate: null,
