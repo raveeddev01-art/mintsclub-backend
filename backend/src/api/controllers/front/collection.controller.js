@@ -11,7 +11,6 @@ const validation = require('../../middlewares/front/collectionValidation');
 
 // API to create collection
 exports.create = async (req, res, next) => {
-  console.log(req.body, 'req.body category check');
   try {
     let payload = {
       userId: req.body.userId,
@@ -28,7 +27,7 @@ exports.create = async (req, res, next) => {
       return res.status(400).send({ success: false, data: errorMsg });
     }
 
-    imagesPayload = {
+    let imagesPayload = {
       logo: req.body.logo,
       featuredImg: req.body.featuredImgUrl,
       banner: req.body.bannerUrl,

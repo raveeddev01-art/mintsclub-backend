@@ -2,22 +2,18 @@ const User = require('../../models/users.model');
 const validation = require('../../middlewares/front/validation');
 const passport = require('passport');
 const localStrategy = require('passport-local').Strategy;
-const Approval=require('../../models/approvals.model')
+const Approval = require('../../models/approvals.model');
 
 exports.register = async (req, res, next) => {
-  console.log(req.body,"req.body")
   try {
     let payload = {
       address: req.body.address,
       username: req.body.username,
       email: req.body.email,
-      isApproved:req.body.isApproved
+      isApproved: req.body.isApproved,
     };
 
-    console.log(payload,"payload")
-
     const { error } = validation.validateSignUpSchema(payload);
-    //console.log(error,"error")
 
     if (error) {
       let errorMsg = error.details[0].message;
@@ -27,7 +23,7 @@ exports.register = async (req, res, next) => {
     const email = payload.email.toLowerCase();
     const address = payload.address;
     const username = payload.username;
-    const isApproved=payload.isApproved;
+    const isApproved = payload.isApproved;
     const totalETH = 0;
 
     let user = await User.findOne({ address });
@@ -37,14 +33,20 @@ exports.register = async (req, res, next) => {
         .send({ status: false, message: 'Wallet already exists' });
     }
 
-    user = await User.create({ address, username, email, totalETH ,isApproved});
+    user = await User.create({
+      address,
+      username,
+      email,
+      totalETH,
+      isApproved,
+    });
 
-    let approvalPayload={
-      userId:user._id,
-      isApproved:false,
-    }
-   console.log(approvalPayload,"approvalPaylaod")
-    await Approval.create(approvalPayload)
+    let approvalPayload = {
+      userId: user._id,
+      isApproved: false,
+    };
+
+    await Approval.create(approvalPayload);
 
     var accessToken = await user.token();
     user = user.transform();
@@ -59,7 +61,6 @@ exports.register = async (req, res, next) => {
       data: data,
     });
   } catch (error) {
-    //console.log("catch1",error)
     next(error);
   }
 };
@@ -84,7 +85,6 @@ exports.login = async (req, res, next) => {
     const address = payload.address;
     let user = await User.findOne({ address });
     if (!user) {
-
       return res.status(200).send({
         status: false,
         message:

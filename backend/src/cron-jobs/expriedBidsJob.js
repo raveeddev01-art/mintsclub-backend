@@ -5,6 +5,7 @@ const nft = require('../api/models/nfts.model');
 const Collection = require('../api/models/collection.model');
 const NftTokens = require('../api/models/nftTokens.model');
 const Users = require('../api/models/users.model');
+const ItemActivity = require('../api/models/item-activity.modal');
 
 module.exports.startCron = () => {
   try {
@@ -21,7 +22,7 @@ module.exports.startCron = () => {
           let currentDateTime = new moment().utc(true);
 
           if (endDate.diff(currentDateTime) <= 0) {
-            bid = await Bid.find(
+            const bid = await Bid.find(
               { nftId: auctionEndNft._id },
               { isAccepted: false }
             );
@@ -32,11 +33,11 @@ module.exports.startCron = () => {
               if (
                 auctionEndNft.remainingCopies > auctionEndNft.copiesForAuction
               ) {
-                console.log('its if statemnet');
                 let payload = {
                   ownerId: bidData.bidBy,
                   userId:bidData.bidBy,
                   ownerAddress: bidData.fromAddress,
+                  userId: bidData.bidBy,
                   copies: auctionEndNft.copiesForAuction,
                   name: auctionEndNft.name,
                   description: auctionEndNft.description,
@@ -60,7 +61,7 @@ module.exports.startCron = () => {
                 collectionRecord.nft.push(NFT._id);
                 collectionRecord.save();
 
-                nftTokenDetail = await NftTokens.findOne({
+                let nftTokenDetail = await NftTokens.findOne({
                   nftId: auctionEndNft._id,
                 });
 
@@ -93,7 +94,7 @@ module.exports.startCron = () => {
                   },
                 };
 
-                nftUpdate = await nft.findByIdAndUpdate(
+                let nftUpdate = await nft.findByIdAndUpdate(
                   { _id: auctionEndNft._id },
                   { $set: newPayload }
                   // { new: true }
@@ -105,39 +106,36 @@ module.exports.startCron = () => {
 
                   let newTotalETH = findUserDetail.totalETH + bidData.bidAmount;
 
-                  userUpdate = await Users.findByIdAndUpdate(
+                  let userUpdate = await Users.findByIdAndUpdate(
                     { _id: nftUpdate.ownerId },
                     { $set: { totalETH: newTotalETH } }
                   );
                 }
 
-                updateBid = await Bid.findByIdAndUpdate(
+                let updateBid = await Bid.findByIdAndUpdate(
                   { _id: bidData._id },
                   { $set: { isAccepted: true } },
                   { new: true }
                 );
 
-                // const nftToDelete = await nft.find({
-                //   remainingCopies: { $exists: false },
-                // });
-                // for (const ids of nftToDelete) {
-                //   deleteNft = await nft.deleteOne({ _id: ids['_id'] });
-                //   if (deleteNft.deletedCount) {
-                //     const nftToken = await NftTokens.deleteOne({
-                //       nftId: ids['_id'],
-                //     });
+                let activityPayload = {
+                  nftId: auctionEndNft._id,
+                  ownerId: auctionEndNft.ownerId,
+                  fromAddress: auctionEndNft.ownerAddress,
+                  activityType: 'Transfer',
+                  toAddress: bidData.fromAddress,
+                  price: bidData.bidAmount,
+                };
 
-                //     let updateCollection = await Collection.updateOne(
-                //       { _id: auctionEndNft.collectionId },
-                //       { $pull: { nft: ids['_id'] } }
-                //     );
-                //   }
-                // }
+                const createActivity = await ItemActivity.create(
+                  activityPayload
+                );
               } else {
                 let payload = {
                   ownerId: bidData.bidBy,
                   userId:bidData.bidBy,
                   ownerAddress: bidData.fromAddress,
+                  userId: bidData.bidBy,
                   auctionEndDate: null,
                   auctionStartDate: null,
                   sellingMethod: 0,
@@ -169,9 +167,22 @@ module.exports.startCron = () => {
 
                   let newTotalETH = findUserDetail.totalETH + bidData.bidAmount;
 
-                  userUpdate = await Users.findByIdAndUpdate(
+                  let userUpdate = await Users.findByIdAndUpdate(
                     { _id: nftUpdate.ownerId },
                     { $set: { totalETH: newTotalETH } }
+                  );
+
+                  let activityPayload = {
+                    nftId: auctionEndNft._id,
+                    ownerId: auctionEndNft.ownerId,
+                    fromAddress: auctionEndNft.ownerAddress,
+                    activityType: 'Transfer',
+                    toAddress: bidData.fromAddress,
+                    price: bidData.bidAmount,
+                  };
+
+                  const createActivity = await ItemActivity.create(
+                    activityPayload
                   );
                 }
               }
