@@ -737,7 +737,7 @@ exports.buyNow = async (req, res, next) => {
           },
         };
 
-        nftUpdate = await NFT.findByIdAndUpdate(
+        const nftUpdate = await NFT.findByIdAndUpdate(
           { _id: buyNftDetail._id },
           { $set: newPayload }
           // { new: true }
@@ -749,7 +749,7 @@ exports.buyNow = async (req, res, next) => {
 
           let newTotalETH = findUserDetail.totalETH + buyNftDetail.currentPrice;
 
-          userUpdate = await Users.findByIdAndUpdate(
+          const userUpdate = await Users.findByIdAndUpdate(
             { _id: nftUpdate.ownerId },
             { $set: { totalETH: newTotalETH } }
           );

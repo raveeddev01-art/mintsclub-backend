@@ -153,7 +153,8 @@ module.exports.startCron = () => {
                     },
                   },
                 };
-                nftUpdate = await nft.findByIdAndUpdate(
+
+                let nftUpdate = await nft.findByIdAndUpdate(
                   { _id: auctionEndNft._id },
                   { $set: payload }
                   // { new: true }

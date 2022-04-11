@@ -9,7 +9,7 @@ const { globalImgPlaceholder } = require('../../../config/vars');
 exports.live = async (req, res, next) => {
   try {
     let { page, limit, myFilter } = req.query;
-    let filter;
+    let filter, newFilter;
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
 
@@ -21,7 +21,6 @@ exports.live = async (req, res, next) => {
       if (!applyFilter) {
         return res.status(400).send({
           success: false,
-          message: 'Invalid Filter passed',
         });
       }
       newFilter = applyFilter._id;
