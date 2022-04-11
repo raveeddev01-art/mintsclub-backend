@@ -147,7 +147,7 @@ exports.edit = async (req, res, next) => {
         message: 'sellingMethod is required',
       });
     }
-    payload.sellingConfig = payload.sellingConfig;
+    payload.sellingConfig = JSON.parse(payload.sellingConfig);
     let getNFT = await NFT.findOne({
       _id: payload._id,
     });

@@ -12,7 +12,6 @@ const validation = require('../../middlewares/front/collectionValidation');
 // API to create collection
 exports.create = async (req, res, next) => {
   try {
-    let imagesPayload;
     let payload = {
       userId: req.body.userId,
       categoryId: req.body.categoryId,
@@ -28,7 +27,7 @@ exports.create = async (req, res, next) => {
       return res.status(400).send({ success: false, data: errorMsg });
     }
 
-    imagesPayload = {
+    let imagesPayload = {
       logo: req.body.logo,
       featuredImg: req.body.featuredImgUrl,
       banner: req.body.bannerUrl,
@@ -54,7 +53,7 @@ exports.create = async (req, res, next) => {
         message: 'logo image is required',
       });
     }
-    // check user existing collection
+
     const existingCollection = await Collection.findOne({
       name: new RegExp(newPayload.name, 'gi'),
       userId: newPayload.userId,
@@ -90,7 +89,6 @@ exports.edit = async (req, res, next) => {
       name: req.body.name,
       url: req.body.url,
       description: req.body.description,
-      // category: req.body.category,
     };
 
     const { error } = validation.validateEditCollectionSchema(payload);
