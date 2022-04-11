@@ -44,11 +44,18 @@ exports.create = async (req, res, next) => {
         { _id: payload.nftId },
         { $set: newPayload }
       );
+
+      if (nftUpdate) {
+        return res.send({
+          success: true,
+          message: 'You have placed bid successfully',
+          bid,
+        });
+      }
     }
     return res.send({
-      success: true,
-      message: 'You have placed bid successfully',
-      bid,
+      success: false,
+      message: 'Something went wrong, Please try again',
     });
   } catch (error) {
     return next(error);
@@ -237,19 +244,15 @@ exports.claimableBidListbyNftId = async (req, res, next) => {
 // API to accept bid
 exports.accept = async (req, res, next) => {
   try {
-    console.log('acept', req.body);
-
-    // const { bidId } = req.params
     const { bidId } = req.body;
 
     if (bidId) {
-      // accept bid
       const bid = await Bid.findByIdAndUpdate(
         { _id: bidId },
         { isAccepted: true },
         { new: true }
       );
-      console.log('acceptenace for ', bid);
+
       if (bid) {
         // expire other bids
         console.log('bids for single bid', bid);
@@ -257,11 +260,9 @@ exports.accept = async (req, res, next) => {
           { _id: { $ne: ObjectId(bidId) }, nftId: bid.nftId },
           { $set: { isClaimable: true, isExpired: true } }
         );
-        console.log('compiled');
-        console.log('bid object', bid.nftId);
+
         const nft = await Nft.findById({ _id: bid.nftId });
 
-        // console.log('sold', nft)
         await Nft.updateOne(
           { _id: bid.nftId },
           {
@@ -276,7 +277,6 @@ exports.accept = async (req, res, next) => {
             $set: {
               ownerId: bid.bidBy,
               nftOwnerId: bid.bidBy,
-              // sold:nft.sold +1
             },
           }
         );

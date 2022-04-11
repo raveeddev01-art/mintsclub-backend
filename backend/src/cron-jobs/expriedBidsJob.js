@@ -35,7 +35,7 @@ module.exports.startCron = () => {
               ) {
                 let payload = {
                   ownerId: bidData.bidBy,
-                  userId:bidData.bidBy,
+                  userId: bidData.bidBy,
                   ownerAddress: bidData.fromAddress,
                   userId: bidData.bidBy,
                   copies: auctionEndNft.copiesForAuction,
@@ -71,7 +71,7 @@ module.exports.startCron = () => {
                   tokenStandard: nftTokenDetail.tokenStandard,
                 };
 
-                let nftToken = await NftTokens.create(nftTokenPayload);
+                await NftTokens.create(nftTokenPayload);
 
                 const remainingCopies =
                   auctionEndNft.copies - auctionEndNft.copiesForAuction;
@@ -106,13 +106,13 @@ module.exports.startCron = () => {
 
                   let newTotalETH = findUserDetail.totalETH + bidData.bidAmount;
 
-                  let userUpdate = await Users.findByIdAndUpdate(
+                  await Users.findByIdAndUpdate(
                     { _id: nftUpdate.ownerId },
                     { $set: { totalETH: newTotalETH } }
                   );
                 }
 
-                let updateBid = await Bid.findByIdAndUpdate(
+                await Bid.findByIdAndUpdate(
                   { _id: bidData._id },
                   { $set: { isAccepted: true } },
                   { new: true }
@@ -127,13 +127,11 @@ module.exports.startCron = () => {
                   price: bidData.bidAmount,
                 };
 
-                const createActivity = await ItemActivity.create(
-                  activityPayload
-                );
+                await ItemActivity.create(activityPayload);
               } else {
                 let payload = {
                   ownerId: bidData.bidBy,
-                  userId:bidData.bidBy,
+                  userId: bidData.bidBy,
                   ownerAddress: bidData.fromAddress,
                   userId: bidData.bidBy,
                   auctionEndDate: null,
@@ -168,7 +166,7 @@ module.exports.startCron = () => {
 
                   let newTotalETH = findUserDetail.totalETH + bidData.bidAmount;
 
-                  let userUpdate = await Users.findByIdAndUpdate(
+                  await Users.findByIdAndUpdate(
                     { _id: nftUpdate.ownerId },
                     { $set: { totalETH: newTotalETH } }
                   );
@@ -182,9 +180,7 @@ module.exports.startCron = () => {
                     price: bidData.bidAmount,
                   };
 
-                  const createActivity = await ItemActivity.create(
-                    activityPayload
-                  );
+                  await ItemActivity.create(activityPayload);
                 }
               }
             }

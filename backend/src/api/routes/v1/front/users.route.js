@@ -9,7 +9,5 @@ router.route('/updateProfile').put(profileUpload, controller.updateProfile);
 router.route('/creators').post(controller.getCreators);
 router.route('/top-sellers').get(controller.topSellers);
 router.route('/:userId').get(controller.getUser);
-router.route('/createUser').post(uploadSingle, controller.createUser);
-router.route('/addEmail').post(controller.addEmail);
 
 module.exports = router;

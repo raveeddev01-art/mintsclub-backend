@@ -86,11 +86,11 @@ exports.sendEmail = async (req, res, next) => {
       sg.API(request, async (error, response) => {
         if (!error) {
           let result = OtpModal.find({ userEmail });
-          //    if(result){
-          let email = userEmail;
-          let deletedCode = await OtpModal.deleteMany({ email });
-          console.log(deletedCode, 'deletedCode');
-          //    }
+          if (result) {
+            let email = userEmail;
+            let deletedCode = await OtpModal.deleteMany({ email });
+            console.log(deletedCode, 'deletedCode');
+          }
           let userVerification = await OtpModal.create(payload);
 
           res.send({ userVerification });

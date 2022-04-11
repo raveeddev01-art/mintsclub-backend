@@ -92,9 +92,9 @@ exports.storeDataInDb = async (req, res, next) => {
     createNFTPayload.image = req.body.image;
     createNFTPayload.highestBid = 0;
     createNFTPayload.currentPrice = 0;
-    createNFTPayload.tokenId=Number(req.body.nftToken)
-    console.log(createNFTPayload,"createNFTPayload")
-  
+    createNFTPayload.tokenId = Number(req.body.nftToken);
+    console.log(createNFTPayload, 'createNFTPayload');
+
     const nft = await NFT.create(createNFTPayload);
 
     if (nft) {
@@ -116,7 +116,7 @@ exports.storeDataInDb = async (req, res, next) => {
       nftTokenPayload.tokenStandard = 'ERC-1155';
     }
 
-    let nftToken = await NftTokens.create(nftTokenPayload);
+    const nftToken = await NftTokens.create(nftTokenPayload);
 
     //add activity
     let activityPayload = {
@@ -127,12 +127,13 @@ exports.storeDataInDb = async (req, res, next) => {
     };
 
     await ActivityModal.create(activityPayload);
-
-    return res.send({
-      success: true,
-      message: 'Item created successfully',
-      nft,
-    });
+    if (nftToken) {
+      return res.send({
+        success: true,
+        message: 'Item created successfully',
+        nft,
+      });
+    }
   } catch (error) {
     return next(error);
   }
@@ -552,12 +553,12 @@ exports.delete = async (req, res, next) => {
       if (nft.deletedCount) {
         const nftToken = await NftTokens.deleteOne({ nftId: nftId });
 
-        let updateCollection = await Collection.updateOne(
+        const updateCollection = await Collection.updateOne(
           { _id: nftDetail[0]['collectionId'] },
           { $pull: { nft: nftId } }
         );
 
-        if (nftToken) {
+        if (nftToken && updateCollection) {
           return res.send({
             status: true,
             message: 'NFT deleted successfully',
@@ -632,7 +633,6 @@ exports.myNftListing = async (req, res, next) => {
   }
 };
 exports.buyNow = async (req, res, next) => {
-  console.log("buy now called========>")
   try {
     let payload = req.body;
 
@@ -651,7 +651,7 @@ exports.buyNow = async (req, res, next) => {
       if (buyNftDetail.remainingCopies > buyNftDetail.copiesForAuction) {
         let newPayload = {
           ownerId: payload.userId,
-          userId:payload.userId,
+          userId: payload.userId,
           ownerAddress: payload.ownerAddress,
           userId: payload.userId,
           copies: buyNftDetail.copiesForAuction,
@@ -687,7 +687,7 @@ exports.buyNow = async (req, res, next) => {
           tokenStandard: nftTokenDetail.tokenStandard,
         };
 
-        let nftToken = await NftTokens.create(nftTokenPayload);
+        await NftTokens.create(nftTokenPayload);
 
         const remainingCopies =
           buyNftDetail.copies - buyNftDetail.copiesForAuction;
@@ -709,7 +709,7 @@ exports.buyNow = async (req, res, next) => {
 
           let newTotalETH = findUserDetail.totalETH + buyNftDetail.currentPrice;
 
-          const userUpdate = await Users.findByIdAndUpdate(
+          await Users.findByIdAndUpdate(
             { _id: nftUpdate.ownerId },
             { $set: { totalETH: newTotalETH } }
           );
@@ -752,7 +752,7 @@ exports.buyNow = async (req, res, next) => {
 
           let newTotalETH = findUserDetail.totalETH + buyNftDetail.currentPrice;
 
-          const userUpdate = await Users.findByIdAndUpdate(
+          await Users.findByIdAndUpdate(
             { _id: nftUpdate.ownerId },
             { $set: { totalETH: newTotalETH } }
           );

@@ -97,7 +97,7 @@ exports.edit = async (req, res, next) => {
       let errorMsg = error.details[0].message;
       return res.status(400).send({ success: false, data: errorMsg });
     }
-    imagesPayload = {
+    let imagesPayload = {
       logo: req.body.logo,
       featuredImg: req.body.featuredImgUrl,
       banner: req.body.bannerUrl,
