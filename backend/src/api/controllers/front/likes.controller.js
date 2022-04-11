@@ -12,12 +12,12 @@ exports.likeDislike = async (req, res, next) => {
   if (foundCollection[0]) {
     // find if user already exist
     await LikesModal.findOne(
-      { 
+      {
         likes: { $elemMatch: { userId: req.body.userId } },
-        nftId:req.body.nftId
-       },
+        nftId: req.body.nftId,
+      },
       async function (err, user) {
-        console.log()
+        console.log();
         //error
 
         if (err) {
@@ -65,14 +65,14 @@ exports.likeDislike = async (req, res, next) => {
               message: 'record updated successfully',
               result: insertedLike,
             });
-          } catch (err) {
-            res.status(200).send(err);
+          } catch (error) {
+            return next(error);
           }
         }
       }
     );
   }
-  
+
   //if collecton not found
   else {
     console.log('colleciton not found inserting one');

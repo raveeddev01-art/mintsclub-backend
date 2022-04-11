@@ -343,24 +343,6 @@ exports.list = async (req, res, next) => {
     // get NFTs for given collection
     if (collectionId) filter.collectionId = ObjectId(collectionId);
 
-    // COMMENTED TEMP.
-    // explore exclusive assets
-    // if (explore) {
-    //     filter = {
-    //         $or: [
-    //             { creatorId: ObjectId(userId) },
-    //             {
-    //                 $or: [
-    //                     { sellingMethod: 1 },
-    //                     { sellingMethod: 2 }
-    //                 ],
-    //                 auctionStartDate: { $lt: new Date(moment().add(1, 'days').format('YYYY/MM/DD')) },
-    //                 auctionEndDate: { $gte: new Date(moment().format('YYYY/MM/DD')) }
-    //             }
-    //         ]
-    //     }
-    // }
-
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
 
@@ -403,8 +385,6 @@ exports.list = async (req, res, next) => {
           copies: 1,
           currentPrice: 1,
           collectionId: 1,
-          currentPrice: 1,
-          description: 1,
           ownerId: 1,
           highestBid: 1,
           userId,
@@ -653,7 +633,6 @@ exports.buyNow = async (req, res, next) => {
           ownerId: payload.userId,
           userId: payload.userId,
           ownerAddress: payload.ownerAddress,
-          userId: payload.userId,
           copies: buyNftDetail.copiesForAuction,
           name: buyNftDetail.name,
           description: buyNftDetail.description,

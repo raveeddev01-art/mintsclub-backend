@@ -92,51 +92,6 @@ exports.delete = async (req, res, next) => {
   }
 };
 
-// API to get claimed bids by bidId
-exports.claimedBid = async (req, res, next) => {
-  try {
-    const { bidId } = req.query;
-
-    const bid = await Bid.findByIdAndUpdate(
-      { _id: bidId },
-      { isClaimable: false, isclaimed: true }
-    );
-
-    return res.status(200).send({
-      success: true,
-      message: 'Bid claimed successfully',
-      data: {},
-    });
-  } catch (error) {
-    // console.log(error,"error==>")
-    return next(error);
-  }
-};
-// API to get claimable bids list by userid
-exports.claimableListbyUserId = async (req, res, next) => {
-  try {
-    const { userId } = req.query;
-    console.log('userId', userId);
-    let allBids = await Bid.find({ bidBy: userId, isClaimable: true });
-    // let allBids = await Bid.find({bidBy: userId, isClaimable: false});
-    return res.status(200).send({
-      success: true,
-      message: 'Bids fetched successfully',
-      data: {
-        allBids,
-        // pagination: {
-        //     page, limit, total,
-        //     pages: Math.ceil(total / limit) <= 0 ? 1 : Math.ceil(total / limit)
-        // },
-        // highestBidAmt: highestBid.length ? highestBid[0].price.amount : null
-      },
-    });
-  } catch (error) {
-    // console.log(error,"error==>")
-    return next(error);
-  }
-};
-
 // API to get bids list
 exports.list = async (req, res, next) => {
   try {
@@ -149,7 +104,6 @@ exports.list = async (req, res, next) => {
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
 
-    // allBids = await Bid.find();
     const allBids = await Bid.aggregate([
       { $match: filter },
       { $sort: { createdAt: -1 } },
@@ -261,7 +215,7 @@ exports.accept = async (req, res, next) => {
           { $set: { isClaimable: true, isExpired: true } }
         );
 
-        const nft = await Nft.findById({ _id: bid.nftId });
+        await Nft.findById({ _id: bid.nftId });
 
         await Nft.updateOne(
           { _id: bid.nftId },

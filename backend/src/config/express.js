@@ -51,12 +51,6 @@ app.use((req, res, next) => {
 // mount admin api v1 routes
 app.use('/v1/admin', adminRoutes);
 
-// // authentication middleware to enforce authnetication and authorization
-// app.use(frontAuth.userValidation);
-
-// // authentication middleware to get token
-// app.use(frontAuth.authenticate);
-
 // mount admin api v1 routes
 app.use('/v1/front', frontRoutes);
 
@@ -65,12 +59,6 @@ app.use('/admin/', express.static(path.join(__dirname, '../../admin')));
 app.get('/admin/*', function (req, res) {
   res.sendFile(path.join(__dirname, '../../admin', 'index.html'));
 });
-
-// Front Site Build Path
-// app.use('/', express.static(path.join(__dirname, '../../build')));
-// app.get('/*', function (req, res) {
-//   res.sendFile(path.join(__dirname, '../../build', 'index.html'));
-// });
 
 // if error is not an instanceOf APIError, convert it.
 app.use(error.converter);

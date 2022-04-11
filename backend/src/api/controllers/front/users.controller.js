@@ -17,7 +17,7 @@ exports.create = async (req, res, next) => {
 };
 exports.updateProfile = async (req, res, next) => {
   if (req.body.isApproved) {
-    let payload = { userId: req.body.userId };
+    payload = { userId: req.body.userId };
     if (req.body.isApproved === 'false') {
       payload.isApproved = false;
     } else {

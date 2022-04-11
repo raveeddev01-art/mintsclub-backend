@@ -56,10 +56,12 @@ exports.delete = async (req, res, next) => {
     let nftId = req.body.nftId;
     nftId = mongoose.Types.ObjectId(nftId);
     let result = await ItemActivity.deleteMany({ nftId: nftId });
-    res.status(200).send({
-      success: true,
-      message: 'NFT Deleted Successfully',
-    });
+    if (result) {
+      res.status(200).send({
+        success: true,
+        message: 'NFT Deleted Successfully',
+      });
+    }
   } catch (error) {
     console.log(error);
     return next(error);

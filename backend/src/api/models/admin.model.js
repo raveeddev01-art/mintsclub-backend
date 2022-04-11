@@ -31,11 +31,6 @@ AdminSchema.methods.verifyPassword = function (password) {
   return bcrypt.compareSync(password, this.password);
 };
 
-AdminSchema.methods.getPasswordHash = async function (password) {
-  const rounds = pwdSaltRounds ? parseInt(pwdSaltRounds) : 10;
-  return (hash = await bcrypt.hash(password, rounds));
-};
-
 /**
  * Methods
  */

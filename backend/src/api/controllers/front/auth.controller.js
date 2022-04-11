@@ -103,61 +103,6 @@ exports.login = async (req, res, next) => {
       message: 'User logged in successfully',
       data,
     });
-
-    // passport.use(
-    //   new localStrategy(
-    //     { usernameField: 'address' },
-    //     async (username, password, done) => {
-    //       let user = await User.findOne(
-    //         { address: username },
-    //         'address email password'
-    //       );
-    //       if (!user) {
-    //         return done(null, false, {
-    //           status: false,
-    //           message:
-    //             'There is no account linked to that address, Please signup first',
-    //           notExist: 1,
-    //         });
-    //       } else if (!user.verifyPassword(password)) {
-    //         return done(null, false, {
-    //           status: false,
-    //           message: 'Incorrect Password 123',
-    //         });
-    //       }
-    //       return done(null, user);
-    //     }
-    //   )
-    // );
-
-    // passport.authenticate('local', async (err, user, info) => {
-    //   if (err)
-    //     return res.status(200).send({
-    //       err,
-    //       status: false,
-    //       message: 'Oops! Something went wrong while authenticating',
-    //     });
-    //   //else if (user) {
-    //   //{
-    //   var accessToken = await user.token();
-    //   user = user.transform();
-    //   let data = {
-    //     ...user,
-    //     accessToken,
-    //   };
-    //   // delete data.password;
-
-    //   return res.status(200).send({
-    //     status: true,
-    //     message: 'User logged in successfully',
-    //     data,
-    //   });
-    //   //   }
-    //   // } else
-    //   //   return res
-    //   //     .status(200)
-    //   //     .send({ status: false, message: 'Incorrect Password234' });
-    // })(req, res);
   } catch (error) {
     return next(error);
   }
