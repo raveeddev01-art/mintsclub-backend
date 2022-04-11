@@ -29,9 +29,9 @@ exports.create = async (req, res, next) => {
       return res.status(400).send({ status: false, data: errorMsg });
     }
 
-    bidUser = await User.findOne({ _id: payload.bidBy });
+    const bidUser = await User.findOne({ _id: payload.bidBy });
 
-    payload.bidByProfile = bidUser.profileImage;
+    payload.bidByProfile = bidUser.profileImage ? bidUser.profileImage : null;
 
     const bid = await Bid.create(payload);
 
@@ -136,7 +136,7 @@ exports.list = async (req, res, next) => {
     let { page, limit, nftId } = req.query;
 
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
-    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 100;
+    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
     let filter = {};
     if (nftId) filter.nftId = ObjectId(nftId);
     const startIndex = (page - 1) * limit;
@@ -203,7 +203,7 @@ exports.claimableBidListbyNftId = async (req, res, next) => {
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
 
-    bidsByNftId = await Bid.find({ nftId: payload.nftId });
+    const bidsByNftId = await Bid.find({ nftId: payload.nftId });
 
     let data = {};
 

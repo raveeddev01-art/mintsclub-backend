@@ -7,8 +7,6 @@ const Web3 = require('web3'); // https://www.npmjs.com/package/web3
 const path = require('path');
 const mailchimp = require('@mailchimp/mailchimp_marketing');
 const { mailChimp, sendGrid } = require('../../../config/vars');
-const passport = require('passport');
-const localStrategy = require('passport-local').Strategy;
 const validUrl = require('valid-url');
 const {
   compilingPreperations,
@@ -40,42 +38,35 @@ exports.create = async (req, res, next) => {
   }
 };
 exports.updateProfile = async (req, res, next) => {
+  if (req.body.isApproved) {
+    let payload = { userId: req.body.userId };
+    if (req.body.isApproved === 'false') {
+      payload.isApproved = false;
+    } else {
+      payload.isApproved = true;
+    }
+    try {
+      let user = await UserModal.findByIdAndUpdate(
+        { _id: ObjectId(payload.userId) },
+        { $set: payload },
+        { new: true }
+      );
+      return res.send({
+        status: true,
+        user,
+        message: 'User profile updated successfully.',
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
 
- if(req.body.isApproved){
-   let payload={userId:req.body.userId};
-   if(req.body.isApproved==="false"){
-     payload.isApproved=false
-   }else {
-    payload.isApproved=true
-   }
-   try{
-  
-    let user = await UserModal.findByIdAndUpdate(
-      { _id: ObjectId(payload.userId) },
-      { $set: payload },
-      { new: true }
-    );
-    return res.send({
-      status: true,
-      user,
-      message: 'User profile updated successfully.',
-    });
-   }catch(err){
-  next(err)
-   }
- }
-
-  let payload='';
+  let payload = '';
   try {
-
-
-      payload = {
-        userId: req.body.userId,
-        bio: req.body.bio,
-        
-        
-      };
-  
+    payload = {
+      userId: req.body.userId,
+      bio: req.body.bio,
+    };
 
     const { error } = validation.validateUserProfile(payload);
 
@@ -107,12 +98,10 @@ exports.updateProfile = async (req, res, next) => {
       payload.webLink = req.body.webLink;
     }
 
-
-  imagesPayload = {
-    profileImage: req.body.profileImage,
-    bannerImage: req.body.bannerImage,
-  };
-
+    let imagesPayload = {
+      profileImage: req.body.profileImage,
+      bannerImage: req.body.bannerImage,
+    };
 
     const newPayload = { ...payload, ...imagesPayload };
 
@@ -128,7 +117,7 @@ exports.updateProfile = async (req, res, next) => {
         newPayload[key] = await addImage(imgData);
       }
     }
-    console.log(newPayload,"newPayload1")
+
     let user = await UserModal.findByIdAndUpdate(
       { _id: ObjectId(newPayload.userId) },
       { $set: newPayload },
@@ -157,11 +146,11 @@ exports.getCreators = async (req, res, next) => {
         },
       },
     ]);
-    // console.log(users,"users===>")
+
     return res.send({
       status: true,
       data: users,
-      message: 'Authors fetched succesfully',
+      message: 'Authors fetched succeSsfully',
     });
   } catch (error) {
     return next(error);
@@ -174,23 +163,16 @@ exports.topSellers = async (req, res, next) => {
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
 
-    total = await UserModal.countDocuments({});
+    const total = await UserModal.countDocuments({});
 
     if (page > Math.ceil(total / limit) && total > 0)
       page = Math.ceil(total / limit);
 
     const pipeline = [
       {
-        // { $match: { mydate: { $lte: new Date('12/01/1998') } } },
         $match: { totalETH: { $ne: 0 } },
       },
       {
-        // $project: {
-        //   profileImage: 1,
-        //   username: 1,
-        //   address: 1,
-        //   totalETH: 1,
-        // },
         $sort: { totalETH: -1 },
       },
     ];
@@ -254,7 +236,6 @@ exports.getUser = async (req, res, next) => {
 };
 
 exports.createUser = async (req, res, next) => {
-  //console.log(req.body, 'req.body');
   try {
     let payload = {
       name: req.body.name,
@@ -286,34 +267,10 @@ exports.createUser = async (req, res, next) => {
     });
     payload.ownerId = req.user;
     payload.creatorId = req.user;
-    const { abi, bytecode, buildFile } = this.getAbi();
+    const { abi, bytecode } = this.getAbi();
     payload.abi = abi;
     payload.bytecode = bytecode;
     return res.send({ status: true, data: payload });
-
-    // const user = await UserModal.findOne({
-    //   email: payload.email,
-    // });
-    // if (!user) {
-    //   payload.count = 1;
-    //   const newUser = await UserModal.create(payload);
-    //   const email = await emailToOne(payload.email);
-    //   const addedContact = await addContact(payload.email);
-    //   return res.send({ status: true, data: payload });
-    // }
-    // if (user && user.count > 5) {
-    //   return res.send({
-    //     status: false,
-    //     data: 'You have reached the maximum deployment limit',
-    //   });
-    // let newCount = user.count;
-    // newCount++;
-    // const update = await UserModal.findOneAndUpdate(
-    //   { _id: mongoose.Types.ObjectId(user._id) },
-    //   { $set: { count: newCount } }
-    // );
-    // return res.send({ status: true, data: payload });
-    // }
   } catch (error) {
     return next(error);
   }
@@ -328,9 +285,6 @@ exports.getAbi = () => {
 };
 
 exports.deployContract = async () => {
-  // Library Imports
-  // console.log('i m called');
-  // Connection Initialization
   // const ethereumUri = 'http://localhost:8545';
 
   let web3 = new Web3();
@@ -338,47 +292,25 @@ exports.deployContract = async () => {
   const address = web3.utils.toChecksumAddress(
     '0xe39f1f2151eD4153CB6bc45107d6232cf9761EE2'
   ); // user
-  // if (!web3.isConnected()) {
-  //   throw new Error(`unable to connect to ethereum node at ${ethereumUri}`);
-  // } else {
-  console.log(`connected to ehterum node at ${ethereumUri}`);
-  console.log('address', address);
-  // // let { coinbase } = web3.eth;
-  // // console.log(`coinbase:${coinbase}`);
-  // // let balance = web3.eth.getBalance(coinbase);
-  // console.log(`balance:${web3.fromWei(balance, 'ether')} ETH`);
-  // let { accounts } = web3.eth;
-  // console.log('accunts', accounts);
 
-  // if (web3.personal.unlockAccount(address, 'user')) {
-  //   console.log(`${address} is unlocked`);
-  // } else {
-  //   console.log(`unlock failed, ${address}`);
-  // }
-  // }
   const ganacheAccounts = await web3.eth.getAccounts();
   console.log('ganacheAccounts', ganacheAccounts);
   const myWalletAddress = ganacheAccounts[0];
   /*
    * Compile Contract and Fetch ABI
    */
-  // console.log('deployment', this.deploymemt());
-  const { abi, bytecode, buildFile } = this.getAbi();
 
-  // code for compile
+  const { abi, bytecode } = this.getAbi();
 
-  // console.log('compiling contract...', abi);
   /*
    * deploy contract
    */
   let gasEstimate = web3.eth.estimateGas({ data: `0x${bytecode}` });
-  // console.log(`gasEstimate = ${gasEstimate}`);
-  // let MyContract = web3.eth.contract(abi);
-  // console.log('deploying contract...', abi);
+
   const deployAddr = '0xe39f1f2151eD4153CB6bc45107d6232cf9761EE2';
   const contractByteCode = `0x${bytecode}`;
   const contractAbi = abi;
-  // const gasEstimate = web3.eth.estimateGas({ data: contractByteCode });
+
   const gasPrice = '20000000000';
   const initialSupply = 10000000000;
   const tokenName = 'LLT';
@@ -407,58 +339,10 @@ exports.deployContract = async () => {
       );
     });
   return 1;
-  // console.log(
-  //   `Your contract is being deployed in transaction at http://testnet.etherscan.io/tx/${contract.transactionHash}`
-  // );
-  // console.log(`Your contract is being deployed in ${contract.address}`);
-  // let rec = web3.eth
-  //   .getTransactionReceipt(`${contract.transactionHash}`)
-  //   .then(console.log('hello world'));
-  // http://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep
-
-  // let myContractReturned = MyContract.new(
-  //   {
-  //     from: address,
-  //     data: `0x${bytecode}`,
-  //     gas: gasEstimate + 50000,
-  //   },
-  //   (err, myContract) => {
-  //     if (!err) {
-  //       // NOTE: The callback will fire twice!
-  //       // Once the contract has the transactionHash property set and once its deployed on an address.
-
-  //       // e.g. check tx hash on the first call (transaction send)
-  //       if (!myContract.address) {
-  //         console.log(
-  //           `myContract.transactionHash = ${myContract.transactionHash}`
-  //         ); // The hash of the transaction, which deploys the contract
-
-  //         // check address on the second call (contract deployed)
-  //       } else {
-  //         console.log(`myContract.address = ${myContract.address}`); // the contract address
-  //         return myContract.address;
-  //         // global.contractAddress = myContract.address;
-  //         // contract = myContract.address;
-  //         // return contract;
-  //       }
-  //       // console.log('address', contract);
-
-  //       return contract;
-  //       // Note that the returned "myContractReturned" === "myContract",
-  //       // so the returned "myContractReturned" object will also get the address set.
-  //     }
-  //     console.log(err);
-  //   }
-  // );
-  // // (function wait() {
-  // //   setTimeout(wait, 1000);
-  // // })();
-
-  // return contract;
 };
 
 exports.tester = async () => {
-  const { abi, bytecode, buildFile } = this.getAbi();
+  const { abi, bytecode } = this.getAbi();
 
   const deployAddr = '0xe39f1f2151eD4153CB6bc45107d6232cf9761EE2';
   const contractByteCode = `0x${bytecode}`;
@@ -482,7 +366,7 @@ exports.tester = async () => {
     from: web3.eth.accounts.wallet[0].address,
     gas: 4600000,
   });
-  console.log('contract', contract);
+
   return contract
     .deploy()
     .send({
@@ -507,26 +391,12 @@ exports.tester = async () => {
         })
         .then((res) => {
           console.log(res, 'res of createNFT===>');
-
-          // if (update) {
-          //   console.log('in the update block', payload);
-          //   return res.send({ status: true, data: payload });
-          // }
         });
     });
-  // ==============================================================
-  // const myContract = new web3.eth.Contract(contractAbi, {
-  //   from: deployAddr,
-  //   gas: '15000000',
-  //   gasPrice,
-  // });
-  // let bytecodeWithParam = myContract.new.getData(initialSupply, tokenName, {
-  //   data: contractByteCode,
-  // });
 };
 
 exports.minting = () => {
-  const { abi, bytecode, buildFile } = this.getAbi();
+  const { abi } = this.getAbi();
   const deployAddr = '0xe39f1f2151eD4153CB6bc45107d6232cf9761EE2';
   const privateKey =
     '6c883a6487c77ad7000670c2759bf7564eda304002d77bdf5fd1cacadd28990d';
@@ -543,13 +413,7 @@ exports.minting = () => {
       from: contractAddress,
       gas: 3000000,
     })
-    .then((res) => {
-      console.log(res, 'res of createNFT===>');
-      // if (update) {
-      //   console.log('in the update block', payload);
-      //   return res.send({ status: true, data: payload });
-      // }
-    });
+    .then((res) => {});
 };
 
 exports.addEmail = async (req, res, next) => {

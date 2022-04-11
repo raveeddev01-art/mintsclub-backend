@@ -147,7 +147,7 @@ exports.edit = async (req, res, next) => {
         message: 'sellingMethod is required',
       });
     }
-    payload.sellingConfig = JSON.parse(payload.sellingConfig);
+    payload.sellingConfig = payload.sellingConfig;
     let getNFT = await NFT.findOne({
       _id: payload._id,
     });
@@ -204,24 +204,6 @@ exports.edit = async (req, res, next) => {
   }
 };
 
-// API to edit status NFT
-// exports.update = async (req, res, next) => {
-//   try {
-//     let payload = req.body;
-
-//     const nft = await NFT.findByIdAndUpdate(
-//       { _id: payload._id },
-//       { $set: payload }
-//     );
-//     return res.send({
-//       success: false,
-//       message: 'Sorry! You rejected wallet processing',
-//       nft,
-//     });
-//   } catch (error) {
-//     return next(error);
-//   }
-// };
 // API to get a NFT
 exports.get = async (req, res, next) => {
   try {
@@ -276,9 +258,9 @@ exports.get = async (req, res, next) => {
 
     const nftLikes = await Likes.findOne({ nftId: payload.nftId });
 
-    returnData = JSON.parse(JSON.stringify(nftDetail));
+    let returnData = JSON.parse(JSON.stringify(nftDetail));
 
-    lowestInCollection = await NFT.find({
+    const lowestInCollection = await NFT.find({
       collectionId: nftDetail.collectionId,
     })
       .sort({ currentPrice: 1 })
@@ -410,14 +392,6 @@ exports.list = async (req, res, next) => {
         },
       },
       {
-        $lookup: {
-          from: 'bids',
-          foreignField: 'nftId',
-          localField: '_id',
-          as: 'bids',
-        },
-      },
-      {
         $project: {
           _id: 1,
           name: 1,
@@ -441,10 +415,6 @@ exports.list = async (req, res, next) => {
             profilePhoto: {
               $ifNull: ['$owner.profileImage', userDefaultImage],
             },
-          },
-          bidInfo: {
-            bidBy: '$bids.bidBy',
-            bidByProfile: '$bids.bidByProfile',
           },
         },
       },
@@ -554,21 +524,21 @@ exports.updateNft = async (req, res, next) => {
   }
 };
 
-// exports.getNFTsbyCollection = async (req, res, next) => {
-//   try {
-//     const collectionId = req.body.collectionId;
+exports.getNFTsbyCollection = async (req, res, next) => {
+  try {
+    const collectionId = req.body.collectionId;
 
-//     const NFTs = await NFT.aggregate([
-//       {
-//         $match: { collectionId: ObjectId(collectionId) },
-//       },
-//     ]);
+    const NFTs = await NFT.aggregate([
+      {
+        $match: { collectionId: ObjectId(collectionId) },
+      },
+    ]);
 
-//     res.status(200).send({ success: true, data: NFTs });
-//   } catch (err) {
-//     res.status(200).send({ success: false, error: err });
-//   }
-// };
+    res.status(200).send({ success: true, data: NFTs });
+  } catch (err) {
+    res.status(200).send({ success: false, error: err });
+  }
+};
 
 // API to delete nft
 exports.delete = async (req, res, next) => {
@@ -704,7 +674,7 @@ exports.buyNow = async (req, res, next) => {
           collectionRecord.save();
         }
 
-        nftTokenDetail = await NftTokens.findOne({
+        const nftTokenDetail = await NftTokens.findOne({
           nftId: payload.nftId,
         });
 
@@ -724,7 +694,7 @@ exports.buyNow = async (req, res, next) => {
           remainingCopies: remainingCopies,
         };
 
-        nftUpdate = await NFT.findByIdAndUpdate(
+        const nftUpdate = await NFT.findByIdAndUpdate(
           { _id: buyNftDetail._id },
           { $set: newPayloadCopies }
           // { new: true }
@@ -736,7 +706,7 @@ exports.buyNow = async (req, res, next) => {
 
           let newTotalETH = findUserDetail.totalETH + buyNftDetail.currentPrice;
 
-          userUpdate = await Users.findByIdAndUpdate(
+          const userUpdate = await Users.findByIdAndUpdate(
             { _id: nftUpdate.ownerId },
             { $set: { totalETH: newTotalETH } }
           );

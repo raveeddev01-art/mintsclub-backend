@@ -22,7 +22,7 @@ module.exports.startCron = () => {
           let currentDateTime = new moment().utc(true);
 
           if (endDate.diff(currentDateTime) <= 0) {
-            bid = await Bid.find(
+            const bid = await Bid.find(
               { nftId: auctionEndNft._id },
               { isAccepted: false }
             );
@@ -60,7 +60,7 @@ module.exports.startCron = () => {
                 collectionRecord.nft.push(NFT._id);
                 collectionRecord.save();
 
-                nftTokenDetail = await NftTokens.findOne({
+                let nftTokenDetail = await NftTokens.findOne({
                   nftId: auctionEndNft._id,
                 });
 
@@ -165,7 +165,7 @@ module.exports.startCron = () => {
 
                   let newTotalETH = findUserDetail.totalETH + bidData.bidAmount;
 
-                  userUpdate = await Users.findByIdAndUpdate(
+                  let userUpdate = await Users.findByIdAndUpdate(
                     { _id: nftUpdate.ownerId },
                     { $set: { totalETH: newTotalETH } }
                   );
