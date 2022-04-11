@@ -12,6 +12,7 @@ const validation = require('../../middlewares/front/collectionValidation');
 // API to create collection
 exports.create = async (req, res, next) => {
   try {
+    let imagesPayload;
     let payload = {
       userId: req.body.userId,
       categoryId: req.body.categoryId,
@@ -27,7 +28,7 @@ exports.create = async (req, res, next) => {
       return res.status(400).send({ success: false, data: errorMsg });
     }
 
-    let imagesPayload = {
+    imagesPayload = {
       logo: req.body.logo,
       featuredImg: req.body.featuredImgUrl,
       banner: req.body.bannerUrl,
@@ -35,27 +36,6 @@ exports.create = async (req, res, next) => {
 
     const newPayload = { ...payload, ...imagesPayload };
 
-    // const List = await Categories.find({}, 'description').where(
-    //   'status',
-    //   'true'
-    // );
-
-    // allNames = [];
-    // categoryNames = List.map((value) => {
-    //   allNames.push(value.description);
-    //   return allNames;
-    // });
-
-    // if (newPayload.category && !allNames.includes(newPayload.category)) {
-    //   return res.status(400).send({
-    //     success: false,
-    //     message: 'Please provide valid category',
-    //   });
-    // }
-    // categoryId = await Categories.findOne({}, '_id').where(
-    //   'description',
-    //   newPayload.category
-    // );
     newPayload.categoryId = null;
     if (payload.categoryId) {
       newPayload.categoryId = payload.categoryId;
@@ -127,28 +107,6 @@ exports.edit = async (req, res, next) => {
 
     const newPayload = { ...payload, ...imagesPayload };
 
-    // const List = await Categories.find({}, 'description').where(
-    //   'status',
-    //   'true'
-    // );
-
-    // allNames = [];
-    // categoryNames = List.map((value) => {
-    //   allNames.push(value.description);
-    //   return allNames;
-    // });
-
-    // if (newPayload.category && !allNames.includes(newPayload.category)) {
-    //   return res.status(400).send({
-    //     success: false,
-    //     message: 'Please provide valid category',
-    //   });
-    // }
-    // categoryId = await Categories.findOne({}, '_id').where(
-    //   'description',
-    //   newPayload.category
-    // );
-
     newPayload.categoryId = null;
     if (payload.categoryId) {
       newPayload.categoryId = payload.categoryId;
@@ -167,10 +125,6 @@ exports.edit = async (req, res, next) => {
         message: 'logo image is required',
       });
     }
-    // TEMP appending userId
-    // payload.userId = '61408000cef27850fdea272b'
-
-    // if name is given then check user existing collection
 
     if (newPayload.name) {
       const existingCollection = await Collection.findOne({
@@ -276,14 +230,14 @@ exports.get = async (req, res, next) => {
 // API to get collection list
 exports.list = async (req, res, next) => {
   try {
-    let { page, limit, myFilter, all, userId } = req.query;
+    let { page, limit, myFilter, all } = req.query;
 
     let filter = {};
 
-    if (req.query.myFilter) {
+    if (myFilter) {
       const applyFilter = await Categories.findOne({}, '_id').where(
         'description',
-        req.query.myFilter
+        myFilter
       );
       if (!applyFilter) {
         return res.status(400).send({
@@ -294,7 +248,7 @@ exports.list = async (req, res, next) => {
       filter = { categoryId: applyFilter._id };
     }
 
-    if (req.query.myFilter && req.query.myFilter == 'all') {
+    if (myFilter && myFilter == 'all') {
       filter = {};
     }
 
@@ -361,88 +315,6 @@ exports.list = async (req, res, next) => {
   }
 };
 
-exports.all = async (req, res, next) => {
-  console.log('all');
-  try {
-    let { page, limit, categoryId, all, userId } = req.query;
-    // if (!userId)
-    //     return res.status(400).send({ success: false, message: 'Please Sign In First' })
-
-    const filter = {};
-
-    // if (userId)
-    //     filter.userId = ObjectId(userId)
-
-    if (categoryId) filter.categoryId = ObjectId(categoryId);
-
-    let total = 0;
-
-    // if (!all) {
-    //     page = page !== undefined && page !== '' ? parseInt(page) : 1
-    //     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
-
-    //     total = await Collection.countDocuments(filter)
-
-    //     if (page > Math.ceil(total / limit) && total > 0)
-    //         page = Math.ceil(total / limit)
-
-    // }
-
-    const pipeline = [
-      {
-        $match: filter,
-      },
-      { $sort: { name: 1 } },
-      {
-        $lookup: {
-          from: 'categories',
-          foreignField: '_id',
-          localField: 'categoryId',
-          as: 'category',
-        },
-      },
-      {
-        $unwind: '$category',
-      },
-      {
-        $project: {
-          _id: 1,
-          name: 1,
-          logo: 1,
-          userId: 1,
-          featuredImg: { $ifNull: ['$featuredImg', collectionDefaultImage] },
-          category: {
-            _id: '$category._id',
-            name: '$category.name',
-          },
-        },
-      },
-    ];
-
-    // if (!all) {
-    //     pipeline.push({ $skip: limit * (page - 1) })
-    //     pipeline.push({ $limit: limit })
-    // }
-
-    const collections = await Collection.aggregate(pipeline);
-    // console.log("collections.....@@@", collections);
-
-    return res.send({
-      success: true,
-      message: 'Collections fetched successfully',
-      data: {
-        collections: collections.length ? collections : null,
-        // pagination: {
-        //     page, limit, total,
-        //     pages: Math.ceil(total / limit) <= 0 ? 1 : Math.ceil(total / limit)
-        // }
-      },
-    });
-  } catch (error) {
-    return next(error);
-  }
-};
-
 // API to get my collections list
 exports.myCollectionList = async (req, res, next) => {
   try {
@@ -497,19 +369,6 @@ exports.myCollectionList = async (req, res, next) => {
     });
   } catch (error) {
     return next(error);
-  }
-};
-
-exports.myCollections = async (req, res, next) => {
-  let { userId } = req.query;
-  try {
-    let myCollections = await Collection.aggregate([
-      { $match: { userId: ObjectId(userId) } },
-    ]);
-
-    res.status(200).send({ success: true, data: myCollections });
-  } catch (err) {
-    res.status(200).send(err);
   }
 };
 
