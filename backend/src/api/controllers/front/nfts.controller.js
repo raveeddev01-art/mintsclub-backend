@@ -92,8 +92,9 @@ exports.storeDataInDb = async (req, res, next) => {
     createNFTPayload.image = req.body.image;
     createNFTPayload.highestBid = 0;
     createNFTPayload.currentPrice = 0;
-    console.log(createNFTPayload, 'createNFTPayload');
-
+    createNFTPayload.tokenId=Number(req.body.nftToken)
+    console.log(createNFTPayload,"createNFTPayload")
+  
     const nft = await NFT.create(createNFTPayload);
 
     if (nft) {
@@ -631,6 +632,7 @@ exports.myNftListing = async (req, res, next) => {
   }
 };
 exports.buyNow = async (req, res, next) => {
+  console.log("buy now called========>")
   try {
     let payload = req.body;
 
@@ -649,6 +651,7 @@ exports.buyNow = async (req, res, next) => {
       if (buyNftDetail.remainingCopies > buyNftDetail.copiesForAuction) {
         let newPayload = {
           ownerId: payload.userId,
+          userId:payload.userId,
           ownerAddress: payload.ownerAddress,
           userId: payload.userId,
           copies: buyNftDetail.copiesForAuction,

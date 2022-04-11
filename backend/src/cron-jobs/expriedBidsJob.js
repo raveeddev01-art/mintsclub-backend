@@ -35,6 +35,7 @@ module.exports.startCron = () => {
               ) {
                 let payload = {
                   ownerId: bidData.bidBy,
+                  userId:bidData.bidBy,
                   ownerAddress: bidData.fromAddress,
                   userId: bidData.bidBy,
                   copies: auctionEndNft.copiesForAuction,
@@ -132,6 +133,7 @@ module.exports.startCron = () => {
               } else {
                 let payload = {
                   ownerId: bidData.bidBy,
+                  userId:bidData.bidBy,
                   ownerAddress: bidData.fromAddress,
                   userId: bidData.bidBy,
                   auctionEndDate: null,

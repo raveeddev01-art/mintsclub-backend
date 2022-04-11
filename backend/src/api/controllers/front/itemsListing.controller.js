@@ -3,6 +3,7 @@ const NFT = require('../../models/nfts.model');
 const ObjectId = require('mongoose').Types.ObjectId;
 const Categories = require('../../models/categories.model');
 const { globalImgPlaceholder } = require('../../../config/vars');
+const NftTokens = require('../../models/nftTokens.model');
 const moment = require('moment');
 
 exports.get=async (req,res,next)=>{
@@ -18,6 +19,7 @@ exports.get=async (req,res,next)=>{
               $match: filter,
             },           
           ]);
+        //   const tokenData = await NftTokens.findOne({ nftId: payload.nftId });
           res.status(200).send({
               success:true,
               data:itemsListing,
