@@ -275,6 +275,42 @@ exports.list = async (req, res, next) => {
           as: 'user',
         },
       },
+      {
+        $lookup: {
+          from: 'nfts',
+          foreignField: '_id',
+          localField: 'nft',
+          as: 'nfts',
+        },
+      },
+      {
+        $unwind: {
+          path: '$nfts',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $group: {
+          _id: '$_id',
+          nftDetail: {
+            $push: { image: '$nfts.image', fileType: '$nfts.fileType' },
+          },
+          userId: { $first: '$userId' },
+          categoryId: { $first: '$categoryId' },
+          name: { $first: '$name' },
+          description: { $first: '$description' },
+          logo: { $first: '$logo' },
+          featuredImg: { $first: '$featuredImg' },
+          banner: { $first: '$banner' },
+          username: { $first: '$user.username' },
+          // totalETH: { $first: '$user.totalETH' },
+          // userAddress: { $first: '$user.address' },
+          // userBannerImage: { $first: '$user.bannerImage' },
+          // userEmail: { $first: '$user.email' },
+          profileImage: { $first: '$user.profileImage' },
+        },
+      },
     ];
 
     const newTotal = await Collection.aggregate(pipeline);
@@ -287,9 +323,11 @@ exports.list = async (req, res, next) => {
     }
 
     const collections = await Collection.aggregate(pipeline);
-    for (const collection of collections) {
-      collection.NFTCount = collection.nft ? collection.nft.length : '0';
-    }
+    // for (const collection of collections) {
+    //   collection.NFTCount = collection.nftsList
+    //     ? collection.nftsList.length
+    //     : '0';
+    // }
 
     return res.send({
       success: true,
@@ -450,8 +488,10 @@ exports.popular = async (req, res, next) => {
           userId: { $first: '$userId' },
           categoryId: { $first: '$categoryId' },
           name: { $first: '$name' },
+          description: { $first: '$description' },
           logo: { $first: '$logo' },
           featuredImg: { $first: '$featuredImg' },
+          banner: { $first: '$banner' },
           soldCopies: {
             $push: {
               $subtract: ['$nft.copies', '$nft.remainingCopies'],

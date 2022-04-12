@@ -20,8 +20,9 @@ exports.create = async (req, res, next) => {
     let payload = {
       name: req.body.name,
       description: req.body.description,
-      // attributes: req.body.attributes,
-      // levels: req.body.levels,
+      // attributes: JSON.parse(req.body.attributes),
+      // levels: JSON.parse(req.body.levels),
+      // stats: JSON.parse(req.body.stats),
       fileType: req.body.fileType,
       ownerId: req.body.ownerId,
       userId: req.body.userId,
@@ -29,8 +30,6 @@ exports.create = async (req, res, next) => {
       categoryId: req.body.categoryId,
       currentPrice: 0,
       ownerAddress: req.body.ownerAddress,
-      // txHash: req.body.txHash,
-      // royalty: req.body.royalty,
       copies: req.body.copies,
     };
     const { error } = validation.validateNFTSchema(payload);
@@ -53,14 +52,17 @@ exports.create = async (req, res, next) => {
       });
     }
 
+    // let payloadProperties = {
+    //   attributes: payload.attributes,
+    //   levels: payload.levels,
+    //   stats: payload.stats,
+    // };
+
     payload.metaData = await addContent({
       name: payload.name,
       description: payload.description,
       image: payload.image,
-      //   properties: {
-      //     size: newPayload.size || '',
-      //   },
-      properties: payload.attributes,
+      // properties: payloadProperties,
       nftOwnerId: payload.ownerId,
       ownerAddress: payload.ownerAddress,
     });
@@ -237,14 +239,6 @@ exports.get = async (req, res, next) => {
           path: '$user',
         },
       },
-      // {
-      //   $project: {
-      //     _id: '$_id', collectionId:1,
-      //     // username: { $first: '$user.username' },
-      //     username: '$user.username' ,
-
-      //   },
-      // },
     ];
     let nftDetail = await NFT.aggregate(pipeline);
 
@@ -450,9 +444,10 @@ exports.updateNft = async (req, res, next) => {
     let payload = {
       nftId: req.body.nftId,
       name: req.body.name,
-      // description: req.body.description,
-      // attributes: req.body.attributes,
-      levels: req.body.levels,
+      description: req.body.description,
+      // attributes: JSON.parse(req.body.attributes),
+      // levels: JSON.parse(req.body.levels),
+      // stats: JSON.parse(req.body.stats),
       fileType: req.body.fileType,
       userId: req.body.userId,
       ownerAddress: req.body.ownerAddress,
@@ -479,14 +474,18 @@ exports.updateNft = async (req, res, next) => {
       });
     }
     const ownerId = payload.userId;
+
+    // let payloadProperties = {
+    //   attributes: payload.attributes,
+    //   levels: payload.levels,
+    //   stats: payload.stats,
+    // };
+
     payload.metaData = await addContent({
       name: payload.name,
       description: payload.description,
       image: payload.image,
-      //   properties: {
-      //     size: newPayload.size || '',
-      //   },
-      properties: payload.attributes,
+      // properties: payloadProperties,
       nftOwnerId: ownerId,
       ownerAddress: payload.ownerAddress,
     });

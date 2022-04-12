@@ -5,16 +5,20 @@ const validateNFTSchema = (data) => {
     name: Joi.string().min(1).max(100).required(),
     description: Joi.string().min(1).max(150).required(),
     creatorId: Joi.string().alphanum().min(12).max(24).allow(''),
-    attributes: Joi.array().items({
-      name: Joi.string().allow(''),
-      value: Joi.string().allow(''),
-    }),
-    levels: Joi.array().items({
-      name: Joi.string().allow(''),
-      value: Joi.number().allow(''),
-      total: Joi.number().allow(''),
-    }),
-
+    // attributes: Joi.array().items({
+    //   name: Joi.string().max(30).allow(''),
+    //   value: Joi.string().allow(''),
+    // }),
+    // levels: Joi.array().items({
+    //   name: Joi.string().max(30).allow(''),
+    //   value: Joi.number().allow(''),
+    //   total: Joi.number().min(1).max(5).allow(''),
+    // }),
+    // stats: Joi.array().items({
+    //   name: Joi.string().max(30).allow(''),
+    //   value: Joi.number().allow(''),
+    //   total: Joi.number().min(1).max(5).allow(''),
+    // }),
     fileType: Joi.string().valid('image', 'audio', 'video').required(),
     ownerId: Joi.string().alphanum().min(12).max(24).required(),
 
@@ -45,15 +49,20 @@ const validateEditNftSchema = (data) => {
     name: Joi.string().min(1).max(100).required(),
     description: Joi.string().min(1).max(150).required(),
     fileType: Joi.string().valid('image', 'audio', 'video').required(),
-    attributes: Joi.array().items({
-      name: Joi.string().allow(''),
-      value: Joi.string().allow(''),
-    }),
-    levels: Joi.array().items({
-      name: Joi.string().allow(''),
-      value: Joi.number().allow(''),
-      total: Joi.number().allow(''),
-    }),
+    // attributes: Joi.array().items({
+    //   name: Joi.string().max(30).allow(''),
+    //   value: Joi.string().allow(''),
+    // }),
+    // levels: Joi.array().items({
+    //   name: Joi.string().max(30).allow(''),
+    //   value: Joi.number().allow(''),
+    //   total: Joi.number().min(1).max(5).allow(''),
+    // }),
+    // stats: Joi.array().items({
+    //   name: Joi.string().max(30).allow(''),
+    //   value: Joi.number().allow(''),
+    //   total: Joi.number().min(1).max(5).allow(''),
+    // }),
 
     collectionId: Joi.string().alphanum().min(12).max(24).required(),
     currentPrice: Joi.number().min(1).max(999).required(),
