@@ -304,10 +304,6 @@ exports.list = async (req, res, next) => {
           featuredImg: { $first: '$featuredImg' },
           banner: { $first: '$banner' },
           username: { $first: '$user.username' },
-          // totalETH: { $first: '$user.totalETH' },
-          // userAddress: { $first: '$user.address' },
-          // userBannerImage: { $first: '$user.bannerImage' },
-          // userEmail: { $first: '$user.email' },
           profileImage: { $first: '$user.profileImage' },
         },
       },
@@ -323,11 +319,6 @@ exports.list = async (req, res, next) => {
     }
 
     const collections = await Collection.aggregate(pipeline);
-    // for (const collection of collections) {
-    //   collection.NFTCount = collection.nftsList
-    //     ? collection.nftsList.length
-    //     : '0';
-    // }
 
     return res.send({
       success: true,
