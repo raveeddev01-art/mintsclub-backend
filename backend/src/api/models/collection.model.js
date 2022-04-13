@@ -19,12 +19,12 @@ const CollectionSchema = new mongoose.Schema(
     banner: { type: String },
     url: { type: String },
     description: { type: String },
-    // nft: [
-    //   {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: NFT,
-    //   },
-    // ],
+    nft: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: NFT,
+      },
+    ],
   },
   { timestamps: true }
 );

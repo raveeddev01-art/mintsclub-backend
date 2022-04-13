@@ -99,14 +99,14 @@ exports.storeDataInDb = async (req, res, next) => {
 
     const nft = await NFT.create(createNFTPayload);
 
-    // if (nft) {
-    //   let collectionRecord = await Collection.findOne({
-    //     _id: req.body.data.collectionId,
-    //   });
+    if (nft) {
+      let collectionRecord = await Collection.findOne({
+        _id: req.body.data.collectionId,
+      });
 
-    //   collectionRecord.nft.push(nft._id);
-    //   collectionRecord.save();
-    // }
+      collectionRecord.nft.push(nft._id);
+      collectionRecord.save();
+    }
 
     let nftTokenPayload = {
       nftToken: req.body.nftToken,
@@ -532,12 +532,12 @@ exports.delete = async (req, res, next) => {
       if (nft.deletedCount) {
         const nftToken = await NftTokens.deleteOne({ nftId: nftId });
 
-        // const updateCollection = await Collection.updateOne(
-        //   { _id: nftDetail[0]['collectionId'] },
-        //   { $pull: { nft: nftId } }
-        // );
+        const updateCollection = await Collection.updateOne(
+          { _id: nftDetail[0]['collectionId'] },
+          { $pull: { nft: nftId } }
+        );
 
-        if (nftToken) {
+        if (nftToken && updateCollection) {
           return res.send({
             status: true,
             message: 'NFT deleted successfully',
@@ -646,14 +646,14 @@ exports.buyNow = async (req, res, next) => {
         };
 
         const nft = await NFT.create(newPayload);
-        // if (nft) {
-        //   let collectionRecord = await Collection.findOne({
-        //     _id: buyNftDetail.collectionId,
-        //   });
+        if (nft) {
+          let collectionRecord = await Collection.findOne({
+            _id: buyNftDetail.collectionId,
+          });
 
-        //   collectionRecord.nft.push(nft._id);
-        //   collectionRecord.save();
-        // }
+          collectionRecord.nft.push(nft._id);
+          collectionRecord.save();
+        }
 
         const nftTokenDetail = await NftTokens.findOne({
           nftId: payload.nftId,

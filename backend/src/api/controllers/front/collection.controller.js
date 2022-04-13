@@ -319,6 +319,11 @@ exports.list = async (req, res, next) => {
     }
 
     const collections = await Collection.aggregate(pipeline);
+    // for (const collection of collections) {
+    //   collection.NFTCount = collection.nftsList
+    //     ? collection.nftsList.length
+    //     : '0';
+    // }
 
     return res.send({
       success: true,
