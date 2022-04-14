@@ -50,7 +50,7 @@ exports.updateProfile = async (req, res, next) => {
 
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ status: false, data: errorMsg });
+      return res.status(400).send({ status: false, message: errorMsg });
     }
 
     if (req.body.twitterLink && !validUrl.isUri(req.body.twitterLink)) {

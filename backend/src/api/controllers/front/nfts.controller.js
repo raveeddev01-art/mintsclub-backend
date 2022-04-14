@@ -14,6 +14,7 @@ const {
   collectionDefaultImage,
 } = require('../../../config/vars');
 
+
 // API to create NFT
 exports.create = async (req, res, next) => {
   try {
@@ -36,7 +37,7 @@ exports.create = async (req, res, next) => {
 
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ status: false, data: errorMsg });
+      return res.status(400).send({ status: false, message: errorMsg });
     }
 
     if (req.files && req.files.image) {
@@ -167,7 +168,7 @@ exports.edit = async (req, res, next) => {
 
       if (error) {
         let errorMsg = error.details[0].message;
-        return res.status(400).send({ status: false, data: errorMsg });
+        return res.status(400).send({ status: false, message: errorMsg });
       }
       payload.currentPrice = Number(payload.sellingConfig.price.amount);
     } else {
@@ -219,7 +220,7 @@ exports.get = async (req, res, next) => {
 
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ status: false, data: errorMsg });
+      return res.status(400).send({ status: false, message: errorMsg });
     }
 
     let pipeline = [
@@ -459,7 +460,7 @@ exports.updateNft = async (req, res, next) => {
 
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ status: false, data: errorMsg });
+      return res.status(400).send({ status: false, message: errorMsg });
     }
     if (req.files && req.files.image) {
       const image = req.files.image[0];
@@ -619,7 +620,7 @@ exports.buyNow = async (req, res, next) => {
 
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ status: false, data: errorMsg });
+      return res.status(400).send({ status: false, message: errorMsg });
     }
 
     const buyNftDetail = await NFT.findOne({
