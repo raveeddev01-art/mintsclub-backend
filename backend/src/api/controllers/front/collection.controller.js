@@ -3,6 +3,7 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const NFT = require('../../models/nfts.model');
 const Collection = require('../../models/collection.model');
 const Categories = require('../../models/categories.model');
+const User = require('../../models/users.model');
 
 const { addImage } = require('../../utils/uploadImage');
 const { checkDuplicate } = require('../../../config/errors');
@@ -353,52 +354,98 @@ exports.myCollectionList = async (req, res, next) => {
   try {
     let { userId, page, limit } = req.query;
 
-    page = page !== undefined && page !== '' ? parseInt(page) : 1;
-    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
-
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
-
     if (!userId)
       return res
         .status(400)
         .send({ success: false, message: 'Please Sign In First' });
 
-    const allCollection = await Collection.find({}).where('userId', userId);
+    const findUser = await User.findOne({ _id: userId });
 
-    const myCollections = JSON.parse(JSON.stringify(allCollection)).map(
-      (item) => {
-        const collection = item;
-        collection.NFTCount = collection.nft.length;
-        collection.CreatedBy = 'You';
-        return collection;
-      }
-    );
+    if (findUser) {
+      let total = 0;
 
-    let data = {};
+      page = page !== undefined && page !== '' ? parseInt(page) : 1;
+      limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
 
-    data.totalRecords = myCollections.length;
+      total = await Collection.find({}).where('userId', userId);
 
-    if (endIndex < myCollections.length) {
-      data.next = {
-        page: page + 1,
-        limit: limit,
-      };
+      if (page > Math.ceil(total / limit) && total > 0)
+        page = Math.ceil(total / limit);
+
+      const pipeline = [
+        {
+          $match: { userId: ObjectId(userId) },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userId',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        {
+          $lookup: {
+            from: 'nfts',
+            foreignField: '_id',
+            localField: 'nft',
+            as: 'nfts',
+          },
+        },
+        {
+          $unwind: {
+            path: '$nfts',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $group: {
+            _id: '$_id',
+            nftDetail: {
+              $push: { image: '$nfts.image', fileType: '$nfts.fileType' },
+            },
+            userId: { $first: '$userId' },
+            categoryId: { $first: '$categoryId' },
+            name: { $first: '$name' },
+            description: { $first: '$description' },
+            logo: { $first: '$logo' },
+            featuredImg: { $first: '$featuredImg' },
+            banner: { $first: '$banner' },
+            username: { $first: '$user.username' },
+            profileImage: { $first: '$user.profileImage' },
+          },
+        },
+      ];
+
+      const newTotal = await Collection.aggregate(pipeline);
+
+      const totalRecords = newTotal.length;
+
+      pipeline.push({ $skip: limit * (page - 1) });
+      pipeline.push({ $limit: limit });
+
+      const Collections = await Collection.aggregate(pipeline);
+
+      return res.status(200).send({
+        success: true,
+        message: 'My collections fetched successfully',
+        data: {
+          collections: { totalRecords: totalRecords, Collections: Collections },
+          pagination: {
+            page,
+            limit,
+            totalRecords,
+            pages:
+              Math.ceil(totalRecords / limit) <= 0
+                ? 1
+                : Math.ceil(totalRecords / limit),
+          },
+        },
+      });
     }
-    if (startIndex > 0) {
-      data.previous = {
-        page: page - 1,
-        limit: limit,
-      };
-    }
-    data.Collections = myCollections.slice(startIndex, endIndex);
-
     return res.status(200).send({
-      success: true,
-      message: 'My Collections fetched successfully',
-      data: {
-        collections: data,
-      },
+      success: false,
+      message: 'UserId not found',
     });
   } catch (error) {
     return next(error);
