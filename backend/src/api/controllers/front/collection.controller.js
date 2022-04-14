@@ -423,13 +423,13 @@ exports.myCollectionList = async (req, res, next) => {
       pipeline.push({ $skip: limit * (page - 1) });
       pipeline.push({ $limit: limit });
 
-      const collectionsList = await Collection.aggregate(pipeline);
+      const Collections = await Collection.aggregate(pipeline);
 
       return res.status(200).send({
         success: true,
         message: 'My collections fetched successfully',
         data: {
-          collectionsList: collectionsList,
+          collections: { totalRecords: totalRecords, Collections: Collections },
           pagination: {
             page,
             limit,
