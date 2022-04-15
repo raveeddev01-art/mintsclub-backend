@@ -182,6 +182,28 @@ module.exports.startCron = () => {
                 }
               }
             }
+            let payload = {
+              auctionEndDate: null,
+              auctionStartDate: null,
+              sellingMethod: 0,
+              copiesForAuction: 0,
+              sellingConfig: {
+                startPrice: {
+                  currency: null,
+                  amount: 0,
+                },
+                duration: {
+                  startTime: null,
+                  endTime: null,
+                },
+              },
+            };
+
+            await nft.findByIdAndUpdate(
+              { _id: auctionEndNft._id },
+              { $set: payload }
+              // { new: true }
+            );
           }
         }
       }

@@ -186,10 +186,7 @@ exports.get = async (req, res, next) => {
   try {
     const { collectionId } = req.params;
     if (collectionId) {
-      let collection = await Collection.findOne(
-        { _id: collectionId },
-        { __v: 0, createdAt: 0, updatedAt: 0 }
-      )
+      let collection = await Collection.findOne({ _id: collectionId })
         .populate([
           { path: 'userId', select: '_id username email profilePhoto' },
           { path: 'categoryId', select: '_id name image' },
