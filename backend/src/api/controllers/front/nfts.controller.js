@@ -14,7 +14,6 @@ const {
   collectionDefaultImage,
 } = require('../../../config/vars');
 
-
 // API to create NFT
 exports.create = async (req, res, next) => {
   try {
@@ -200,7 +199,7 @@ exports.edit = async (req, res, next) => {
     );
     return res.send({
       success: true,
-      message: 'NFT updated successfully',
+      message: 'successfully put on sell',
       nft,
     });
   } catch (error) {
