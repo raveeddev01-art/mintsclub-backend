@@ -21,11 +21,12 @@ exports.create = async (req, res, next) => {
       description: req.body.description,
       //category: req.body.category,
     };
+
     const { error } = validation.validateCollectionSchema(payload);
 
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ success: false, data: errorMsg });
+      return res.status(400).send({ success: false, message: errorMsg });
     }
 
     let imagesPayload = {
@@ -96,7 +97,7 @@ exports.edit = async (req, res, next) => {
 
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ success: false, data: errorMsg });
+      return res.status(400).send({ success: false, message: errorMsg });
     }
     let imagesPayload = {
       logo: req.body.logo,

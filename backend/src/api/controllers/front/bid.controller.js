@@ -26,7 +26,7 @@ exports.create = async (req, res, next) => {
 
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ status: false, data: errorMsg });
+      return res.status(400).send({ status: false, message: errorMsg });
     }
 
     const bidUser = await User.findOne({ _id: payload.bidBy });
@@ -73,7 +73,7 @@ exports.delete = async (req, res, next) => {
 
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ status: false, data: errorMsg });
+      return res.status(400).send({ status: false, message: errorMsg });
     }
 
     const bid = await Bid.deleteOne({ _id: payload.bidId });
@@ -156,7 +156,7 @@ exports.claimableBidListbyNftId = async (req, res, next) => {
 
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ status: false, data: errorMsg });
+      return res.status(400).send({ status: false, message: errorMsg });
     }
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
