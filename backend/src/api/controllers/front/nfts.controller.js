@@ -179,11 +179,11 @@ exports.edit = async (req, res, next) => {
       }
       payload.currentPrice = Number(payload.sellingConfig.startPrice.amount);
       let startDate = moment(new Date(payload.sellingConfig.duration.startDate))
-        .utc(true)
+        .utc(false)
         .toISOString();
 
       let endDate = moment(new Date(payload.sellingConfig.duration.endDate))
-        .utc(true)
+        .utc(false)
         .toISOString();
 
       payload.sellingConfig.duration.startDate = startDate;

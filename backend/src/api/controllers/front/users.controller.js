@@ -15,9 +15,10 @@ exports.create = async (req, res, next) => {
     return next(error);
   }
 };
+
 exports.updateProfile = async (req, res, next) => {
   if (req.body.isApproved) {
-    payload = { userId: req.body.userId };
+   let payload = { userId: req.body.userId };
     if (req.body.isApproved === 'false') {
       payload.isApproved = false;
     } else {
@@ -39,7 +40,7 @@ exports.updateProfile = async (req, res, next) => {
     }
   }
 
-  let payload = '';
+   payload = '';
   try {
     payload = {
       userId: req.body.userId,
