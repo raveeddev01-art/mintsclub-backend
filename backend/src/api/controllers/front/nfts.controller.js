@@ -165,6 +165,7 @@ exports.edit = async (req, res, next) => {
     if (Number(payload.sellingMethod) === 1) {
       const { error } = validation.validateNFFixedTAuctionSchema(payload);
 
+      
       if (error) {
         let errorMsg = error.details[0].message;
         return res.status(400).send({ status: false, message: errorMsg });
