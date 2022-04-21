@@ -9,7 +9,7 @@ const ItemActivity = require('../api/models/item-activity.modal');
 
 module.exports.startCron = () => {
   try {
-    cron.schedule('*/1 * * * * ', async () => {
+    cron.schedule('*/30 * * * * * ', async () => {
       const auctionEndNftsList = await nft.find({
         auctionEndDate: { $exists: true, $nin: null },
       });
@@ -18,18 +18,17 @@ module.exports.startCron = () => {
         for (const auctionEndNft of auctionEndNftsList) {
           // auctionEndNftsList.forEach(async (auctionEndNft) => {
 
-          let endDate = moment(auctionEndNft.auctionEndDate).utc(true);
+          let endDate = moment(auctionEndNft.auctionEndDate).utc(false);
           let currentDateTime = new moment().utc(true);
 
           if (endDate.diff(currentDateTime) <= 0) {
-            const bid = await Bid.find(
-              { nftId: auctionEndNft._id },
-              { isAccepted: false }
-            );
+            const bid = await Bid.find({
+              nftId: auctionEndNft._id,
+              bidAmount: auctionEndNft.highestBid,
+            });
 
             if (bid.length > 0) {
               let bidData = bid[0];
-
               if (
                 auctionEndNft.remainingCopies > auctionEndNft.copiesForAuction
               ) {
@@ -113,8 +112,8 @@ module.exports.startCron = () => {
 
                 await Bid.findByIdAndUpdate(
                   { _id: bidData._id },
-                  { $set: { isAccepted: true } },
-                  { new: true }
+                  { $set: { isAccepted: true } }
+                  // { new: true }
                 );
 
                 let activityPayload = {

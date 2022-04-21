@@ -165,7 +165,6 @@ exports.edit = async (req, res, next) => {
     if (Number(payload.sellingMethod) === 1) {
       const { error } = validation.validateNFFixedTAuctionSchema(payload);
 
-
       if (error) {
         let errorMsg = error.details[0].message;
         return res.status(400).send({ status: false, message: errorMsg });
@@ -180,11 +179,11 @@ exports.edit = async (req, res, next) => {
       }
       payload.currentPrice = Number(payload.sellingConfig.startPrice.amount);
       let startDate = moment(new Date(payload.sellingConfig.duration.startDate))
-        .utc(false)
+        .utc(true)
         .toISOString();
 
       let endDate = moment(new Date(payload.sellingConfig.duration.endDate))
-        .utc(false)
+        .utc(true)
         .toISOString();
 
       payload.sellingConfig.duration.startDate = startDate;
