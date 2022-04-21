@@ -165,7 +165,7 @@ exports.edit = async (req, res, next) => {
     if (Number(payload.sellingMethod) === 1) {
       const { error } = validation.validateNFFixedTAuctionSchema(payload);
 
-      
+
       if (error) {
         let errorMsg = error.details[0].message;
         return res.status(400).send({ status: false, message: errorMsg });
@@ -347,8 +347,8 @@ exports.list = async (req, res, next) => {
       { $match: filter },
       {
         $sort: {
-          ...(newest && { createdAt: 1 }),
-          ...(oldest && { createdAt: -1 }),
+          ...(newest && { createdAt: -1 }),
+          ...(oldest && { createdAt: 1 }),
           ...(lowToHigh && { currentPrice: 1 }),
           ...(highToLow && { currentPrice: -1 }),
           name: 1,
