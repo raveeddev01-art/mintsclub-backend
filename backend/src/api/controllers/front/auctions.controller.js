@@ -12,6 +12,7 @@ exports.live = async (req, res, next) => {
     let filter, newFilter;
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
+    let currentDateTime = new Date();
 
     if (myFilter) {
       const applyFilter = await Categories.findOne({}, '_id').where(
@@ -30,18 +31,18 @@ exports.live = async (req, res, next) => {
       filter = {
         sellingMethod: 2, // timed auctions only
         auctionStartDate: {
-          $lt: new Date(moment().add(1, 'days').format('YYYY/MM/DD')),
+          $lt: currentDateTime,
         },
-        auctionEndDate: { $gte: new Date(moment().format('YYYY/MM/DD')) },
+        auctionEndDate: { $gte: currentDateTime },
         categoryId: ObjectId(newFilter),
       };
     } else {
       filter = {
         sellingMethod: 2, // timed auctions only
         auctionStartDate: {
-          $lt: new Date(moment().add(1, 'days').format('YYYY/MM/DD')),
+          $lt: currentDateTime,
         },
-        auctionEndDate: { $gte: new Date(moment().format('YYYY/MM/DD')) },
+        auctionEndDate: { $gte: currentDateTime },
       };
     }
 
