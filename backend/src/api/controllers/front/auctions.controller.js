@@ -28,24 +28,25 @@ exports.live = async (req, res, next) => {
     }
 
     if (myFilter && myFilter != 'all') {
+      //console.log('this is if');
       filter = {
         sellingMethod: 2, // timed auctions only
         auctionStartDate: {
-          $lt: currentDateTime,
+          $lt: new Date(moment().format('YYYY/MM/DD')),
         },
-        auctionEndDate: { $gte: currentDateTime },
+        auctionEndDate: { $gte: new Date(moment().format('YYYY/MM/DD')) },
         categoryId: ObjectId(newFilter),
       };
     } else {
+      ///console.log('this is else');
       filter = {
         sellingMethod: 2, // timed auctions only
         auctionStartDate: {
-          $lt: currentDateTime,
+          $lt: new Date(moment().format('YYYY/MM/DD')),
         },
-        auctionEndDate: { $gte: currentDateTime },
+        auctionEndDate: { $gte: new Date(moment().format('YYYY/MM/DD')) },
       };
     }
-
     const total = await NFT.countDocuments(filter);
 
     const auctions = await NFT.aggregate([
