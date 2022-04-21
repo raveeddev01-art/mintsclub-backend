@@ -13,7 +13,7 @@ exports.live = async (req, res, next) => {
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
 
-    var dateTime = new Date(moment().utc(true));
+    var dateTime = new Date(moment());
 
     if (myFilter) {
       const applyFilter = await Categories.findOne({}, '_id').where(
