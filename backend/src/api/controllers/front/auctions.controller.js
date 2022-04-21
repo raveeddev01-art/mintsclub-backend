@@ -12,7 +12,8 @@ exports.live = async (req, res, next) => {
     let filter, newFilter;
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
-    let currentDateTime = new Date();
+
+    var dateTime = new Date(moment().utc(true));
 
     if (myFilter) {
       const applyFilter = await Categories.findOne({}, '_id').where(
@@ -28,23 +29,21 @@ exports.live = async (req, res, next) => {
     }
 
     if (myFilter && myFilter != 'all') {
-      //console.log('this is if');
       filter = {
         sellingMethod: 2, // timed auctions only
         auctionStartDate: {
-          $lt: new Date(moment().format('YYYY/MM/DD')),
+          $lt: dateTime,
         },
-        auctionEndDate: { $gte: new Date(moment().format('YYYY/MM/DD')) },
+        auctionEndDate: { $gte: dateTime },
         categoryId: ObjectId(newFilter),
       };
     } else {
-      ///console.log('this is else');
       filter = {
         sellingMethod: 2, // timed auctions only
         auctionStartDate: {
-          $lt: new Date(moment().format('YYYY/MM/DD')),
+          $lt: dateTime,
         },
-        auctionEndDate: { $gte: new Date(moment().format('YYYY/MM/DD')) },
+        auctionEndDate: { $gte: dateTime },
       };
     }
     const total = await NFT.countDocuments(filter);
