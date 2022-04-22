@@ -52,12 +52,12 @@ module.exports.startCron = () => {
 
                 const NFT = await nft.create(payload);
 
-                // let collectionRecord = await Collection.findOne({
-                //   _id: auctionEndNft.collectionId,
-                // });
+                let collectionRecord = await Collection.findOne({
+                  _id: auctionEndNft.collectionId,
+                });
 
-                // collectionRecord.nft.push(NFT._id);
-                // collectionRecord.save();
+                collectionRecord.nft.push(NFT._id);
+                collectionRecord.save();
 
                 let nftTokenDetail = await NftTokens.findOne({
                   nftId: auctionEndNft._id,
