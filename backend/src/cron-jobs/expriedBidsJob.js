@@ -18,7 +18,7 @@ module.exports.startCron = () => {
         for (const auctionEndNft of auctionEndNftsList) {
           // auctionEndNftsList.forEach(async (auctionEndNft) => {
 
-          let endDate = moment(auctionEndNft.auctionEndDate).utc(false);
+          let endDate = moment(auctionEndNft.auctionEndDate).utc(true);
           let currentDateTime = new moment().utc(true);
 
           if (endDate.diff(currentDateTime) <= 0) {
