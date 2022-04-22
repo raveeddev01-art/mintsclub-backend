@@ -307,7 +307,6 @@ exports.list = async (req, res, next) => {
     } = req.query;
 
     let ownerId1 = ObjectId(ownerId);
-    const userId = req.user;
     let search;
     if (keyword) {
       search = true;
@@ -381,7 +380,7 @@ exports.list = async (req, res, next) => {
           collectionId: 1,
           ownerId: 1,
           highestBid: 1,
-          userId,
+          userId: 1,
           auctionEndDate: 1,
           copiesForAuction: 1,
           sellingMethod: 1,
