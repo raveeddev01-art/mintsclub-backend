@@ -1,27 +1,27 @@
-const fs = require("fs");
-const moment = require("moment");
-const NFT = require("../../models/nfts.model");
-const Offer = require("../../models/offer.model");
-const ObjectId = require("mongoose").Types.ObjectId;
-const { globalImgPlaceholder } = require("../../../config/vars");
-const validation = require("../../middlewares/front/offerValidation");
-const validator = require("../../middlewares/front/validation");
+const fs = require('fs');
+const moment = require('moment');
+const NFT = require('../../models/nfts.model');
+const Offer = require('../../models/offer.model');
+const ObjectId = require('mongoose').Types.ObjectId;
+const { globalImgPlaceholder } = require('../../../config/vars');
+const validation = require('../../middlewares/front/offerValidation');
+const validator = require('../../middlewares/front/validation');
 // API to create offer
 exports.create = async (req, res, next) => {
   try {
     let payload = req.body;
 
     const { error } = validation.validateOfferSchema(payload);
-    console.log(error, "error");
+
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ status: false, data: errorMsg });
+      return res.status(400).send({ status: false, message: errorMsg });
     }
     const offer = await Offer.create(payload);
 
     return res.send({
       success: true,
-      message: "You have made offer successfully",
+      message: 'You have made offer successfully',
       offer,
     });
   } catch (error) {
@@ -33,29 +33,29 @@ exports.create = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
   try {
     const { offerId } = req.params;
-    let payload={
-        id:offerId
-    }
+    let payload = {
+      id: offerId,
+    };
     const { error } = validator.validateId(payload);
     if (error) {
-        let errorMsg = error.details[0].message;
-        return res.status(400).send({ status: false, data: errorMsg });
-      }
+      let errorMsg = error.details[0].message;
+      return res.status(400).send({ status: false, message: errorMsg });
+    }
     if (offerId) {
       const offer = await Offer.deleteOne({ _id: offerId });
       if (offer && offer.deletedCount)
         return res.send({
           success: true,
-          message: "Your Offer has been cancelled successfully",
+          message: 'Your Offer has been cancelled successfully',
         });
       else
         return res
           .status(400)
-          .send({ success: false, message: "Offer not found for given Id" });
+          .send({ success: false, message: 'Offer not found for given Id' });
     } else
       return res
         .status(400)
-        .send({ success: false, message: "Offer Id is required" });
+        .send({ success: false, message: 'Offer Id is required' });
   } catch (error) {
     return next(error);
   }
@@ -69,50 +69,21 @@ exports.list = async (req, res, next) => {
 
     if (nftId) filter.nftId = ObjectId(nftId);
 
-    page = page !== undefined && page !== "" ? parseInt(page) : 1;
-    limit = limit !== undefined && limit !== "" ? parseInt(limit) : 10;
+    page = page !== undefined && page !== '' ? parseInt(page) : 1;
+    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
 
     const total = await Offer.countDocuments(filter);
-    const allOffers = await Offer.find();
-    console.log(allOffers, "allOffers==");
 
-    // const offers = await Offer.aggregate([
-    //   { $match: filter },
-    //   { $sort: { createdAt: -1 } },
-    //   { $skip: limit * (page - 1) },
-    //   { $limit: limit },
-    //   {
-    //     $lookup: {
-    //       from: "users",
-    //       foreignField: "_id",
-    //       localField: "offerBy",
-    //       as: "offerBy",
-    //     },
-    //   },
-    //   {
-    //     $unwind: "$offerBy",
-    //   },
-    //   {
-    //     $project: {
-    //       offerBy: {
-    //         _id: "$offerBy._id",
-    //         username: "$offerBy.username",
-    //         profilePhoto: {
-    //           $ifNull: ["$offerBy.profilePhoto", globalImgPlaceholder],
-    //         },
-    //       },
-    //       price: 1,
-    //       expiryDate: 1,
-    //       createdAt: 1,
-    //     },
-    //   },
-    // ]);
+    const offers = await Offer.aggregate([
+      { $match: filter },
+      { $sort: { createdAt: -1 } },
+    ]);
 
     return res.send({
       success: true,
-      message: "Offers fetched successfully",
+      message: 'Offers fetched successfully',
       data: {
-        offers: allOffers,
+        offers: offers,
         pagination: {
           page,
           limit,
@@ -165,16 +136,16 @@ exports.accept = async (req, res, next) => {
 
         return res.send({
           success: true,
-          message: "Offer has been accepted successfully",
+          message: 'Offer has been accepted successfully',
         });
       } else
         return res
           .status(400)
-          .send({ success: false, message: "Offer not found for given Id" });
+          .send({ success: false, message: 'Offer not found for given Id' });
     } else
       return res
         .status(400)
-        .send({ success: false, message: "Offer Id is required" });
+        .send({ success: false, message: 'Offer Id is required' });
   } catch (error) {
     return next(error);
   }

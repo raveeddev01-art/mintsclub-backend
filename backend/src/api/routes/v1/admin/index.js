@@ -10,6 +10,7 @@ const emailRoutes = require('./email.route');
 const settingsRoutes = require('./settings.route');
 const faqRoutes = require('./faq.route');
 const contactRoutes = require('./contact.route');
+const approvalsRoutes=require('./approvals.route')
 const router = express.Router();
 
 /**
@@ -26,5 +27,6 @@ router.use('/email', emailRoutes);
 router.use('/settings', settingsRoutes);
 router.use('/faq', faqRoutes);
 router.use('/contacts', contactRoutes);
+router.use('/approvals', approvalsRoutes);
 
 module.exports = router;

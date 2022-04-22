@@ -1,9 +1,5 @@
-// multer
 const fs = require('fs');
 const multer = require('multer');
-
-// const uploadsDir = './src/api/v1/';
-// const imagesDir = `${uploadsDir}images`;
 
 const uploadsDir = './src/uploads/';
 const imagesDir = `${uploadsDir}images`;

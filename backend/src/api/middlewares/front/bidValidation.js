@@ -5,7 +5,7 @@ const validateCreateBid = (data) => {
     bidBy: Joi.string().alphanum().min(12).max(24).required(),
     ownerId: Joi.string().alphanum().min(12).max(24).required(),
     nftId: Joi.string().alphanum().min(12).max(24).required(),
-    bidAmount: Joi.number().min(1).max(999).required(),
+    bidAmount: Joi.number().max(999).invalid(0).required(),
     isAccepted: Joi.boolean().default(false),
     expiryDate: Joi.date().allow(''),
     fromAddress: Joi.string()

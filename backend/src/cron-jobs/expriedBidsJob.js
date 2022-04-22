@@ -5,33 +5,36 @@ const nft = require('../api/models/nfts.model');
 const Collection = require('../api/models/collection.model');
 const NftTokens = require('../api/models/nftTokens.model');
 const Users = require('../api/models/users.model');
+const ItemActivity = require('../api/models/item-activity.modal');
 
 module.exports.startCron = () => {
   try {
-    cron.schedule('*/1 * * * * ', async () => {
+    cron.schedule('*/30 * * * * * ', async () => {
       const auctionEndNftsList = await nft.find({
         auctionEndDate: { $exists: true, $nin: null },
       });
 
       if (auctionEndNftsList.length > 0) {
         for (const auctionEndNft of auctionEndNftsList) {
-          let endDate = moment(auctionEndNft.auctionEndDate).utc(false);
+          // auctionEndNftsList.forEach(async (auctionEndNft) => {
+
+          let endDate = moment(auctionEndNft.auctionEndDate).utc(true);
           let currentDateTime = new moment().utc(true);
 
           if (endDate.diff(currentDateTime) <= 0) {
-            bid = await Bid.find(
-              { nftId: auctionEndNft._id },
-              { isAccepted: false }
-            );
+            const bid = await Bid.find({
+              nftId: auctionEndNft._id,
+              bidAmount: auctionEndNft.highestBid,
+            });
 
             if (bid.length > 0) {
               let bidData = bid[0];
-
               if (
                 auctionEndNft.remainingCopies > auctionEndNft.copiesForAuction
               ) {
                 let payload = {
                   ownerId: bidData.bidBy,
+                  userId: bidData.bidBy,
                   ownerAddress: bidData.fromAddress,
                   copies: auctionEndNft.copiesForAuction,
                   name: auctionEndNft.name,
@@ -56,7 +59,7 @@ module.exports.startCron = () => {
                 collectionRecord.nft.push(NFT._id);
                 collectionRecord.save();
 
-                nftTokenDetail = await NftTokens.findOne({
+                let nftTokenDetail = await NftTokens.findOne({
                   nftId: auctionEndNft._id,
                 });
 
@@ -66,7 +69,7 @@ module.exports.startCron = () => {
                   tokenStandard: nftTokenDetail.tokenStandard,
                 };
 
-                let nftToken = await NftTokens.create(nftTokenPayload);
+                await NftTokens.create(nftTokenPayload);
 
                 const remainingCopies =
                   auctionEndNft.copies - auctionEndNft.copiesForAuction;
@@ -89,7 +92,7 @@ module.exports.startCron = () => {
                   },
                 };
 
-                nftUpdate = await nft.findByIdAndUpdate(
+                let nftUpdate = await nft.findByIdAndUpdate(
                   { _id: auctionEndNft._id },
                   { $set: newPayload }
                 );
@@ -100,20 +103,32 @@ module.exports.startCron = () => {
 
                   let newTotalETH = findUserDetail.totalETH + bidData.bidAmount;
 
-                  userUpdate = await Users.findByIdAndUpdate(
+                  await Users.findByIdAndUpdate(
                     { _id: nftUpdate.ownerId },
                     { $set: { totalETH: newTotalETH } }
                   );
                 }
 
-                updateBid = await Bid.findByIdAndUpdate(
+                await Bid.findByIdAndUpdate(
                   { _id: bidData._id },
-                  { $set: { isAccepted: true } },
-                  { new: true }
+                  { $set: { isAccepted: true } }
+                  // { new: true }
                 );
+
+                let activityPayload = {
+                  nftId: auctionEndNft._id,
+                  ownerId: auctionEndNft.ownerId,
+                  fromAddress: auctionEndNft.ownerAddress,
+                  activityType: 'Transfer',
+                  toAddress: bidData.fromAddress,
+                  price: bidData.bidAmount,
+                };
+
+                await ItemActivity.create(activityPayload);
               } else {
                 let payload = {
                   ownerId: bidData.bidBy,
+                  userId: bidData.bidBy,
                   ownerAddress: bidData.fromAddress,
                   auctionEndDate: null,
                   auctionStartDate: null,
@@ -134,7 +149,8 @@ module.exports.startCron = () => {
                     },
                   },
                 };
-                nftUpdate = await nft.findByIdAndUpdate(
+
+                let nftUpdate = await nft.findByIdAndUpdate(
                   { _id: auctionEndNft._id },
                   { $set: payload }
                 );
@@ -145,13 +161,46 @@ module.exports.startCron = () => {
 
                   let newTotalETH = findUserDetail.totalETH + bidData.bidAmount;
 
-                  userUpdate = await Users.findByIdAndUpdate(
+                  await Users.findByIdAndUpdate(
                     { _id: nftUpdate.ownerId },
                     { $set: { totalETH: newTotalETH } }
                   );
+
+                  let activityPayload = {
+                    nftId: auctionEndNft._id,
+                    ownerId: auctionEndNft.ownerId,
+                    fromAddress: auctionEndNft.ownerAddress,
+                    activityType: 'Transfer',
+                    toAddress: bidData.fromAddress,
+                    price: bidData.bidAmount,
+                  };
+
+                  await ItemActivity.create(activityPayload);
                 }
               }
             }
+            let payload = {
+              auctionEndDate: null,
+              auctionStartDate: null,
+              sellingMethod: 0,
+              copiesForAuction: 0,
+              sellingConfig: {
+                startPrice: {
+                  currency: null,
+                  amount: 0,
+                },
+                duration: {
+                  startTime: null,
+                  endTime: null,
+                },
+              },
+            };
+
+            await nft.findByIdAndUpdate(
+              { _id: auctionEndNft._id },
+              { $set: payload }
+              // { new: true }
+            );
           }
         }
       }

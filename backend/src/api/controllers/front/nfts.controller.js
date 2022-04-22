@@ -1,6 +1,5 @@
 const fs = require('fs');
 const moment = require('moment');
-
 const Users = require('../../models/users.model');
 const Collection = require('../../models/collection.model');
 const NFT = require('../../models/nfts.model');
@@ -17,13 +16,13 @@ const {
 
 // API to create NFT
 exports.create = async (req, res, next) => {
-  //console.log(req.body, 'req.body');
   try {
     let payload = {
       name: req.body.name,
       description: req.body.description,
-      // attributes: req.body.attributes,
-      // levels: req.body.levels,
+      // attributes: JSON.parse(req.body.attributes),
+      // levels: JSON.parse(req.body.levels),
+      // stats: JSON.parse(req.body.stats),
       fileType: req.body.fileType,
       ownerId: req.body.ownerId,
       userId: req.body.userId,
@@ -31,18 +30,13 @@ exports.create = async (req, res, next) => {
       categoryId: req.body.categoryId,
       currentPrice: 0,
       ownerAddress: req.body.ownerAddress,
-      // txHash: req.body.txHash,
-      // royalty: req.body.royalty,
       copies: req.body.copies,
-      // status: req.body.status,
-      // royalty: req.body.royalty,
-      // sold: req.body.sold,
     };
     const { error } = validation.validateNFTSchema(payload);
 
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ status: false, data: errorMsg });
+      return res.status(400).send({ status: false, message: errorMsg });
     }
 
     if (req.files && req.files.image) {
@@ -58,14 +52,17 @@ exports.create = async (req, res, next) => {
       });
     }
 
+    // let payloadProperties = {
+    //   attributes: payload.attributes,
+    //   levels: payload.levels,
+    //   stats: payload.stats,
+    // };
+
     payload.metaData = await addContent({
       name: payload.name,
       description: payload.description,
       image: payload.image,
-      //   properties: {
-      //     size: newPayload.size || '',
-      //   },
-      properties: payload.attributes,
+      // properties: payloadProperties,
       nftOwnerId: payload.ownerId,
       ownerAddress: payload.ownerAddress,
     });
@@ -135,7 +132,9 @@ exports.storeDataInDb = async (req, res, next) => {
     createNFTPayload.image = req.body.image;
     createNFTPayload.highestBid = 0;
     createNFTPayload.currentPrice = 0;
-    //console.log('one log');
+    createNFTPayload.tokenId = Number(req.body.nftToken);
+    console.log(createNFTPayload, 'createNFTPayload');
+
     const nft = await NFT.create(createNFTPayload);
 
     if (nft) {
@@ -157,7 +156,7 @@ exports.storeDataInDb = async (req, res, next) => {
       nftTokenPayload.tokenStandard = 'ERC-1155';
     }
 
-    let nftToken = await NftTokens.create(nftTokenPayload);
+    const nftToken = await NftTokens.create(nftTokenPayload);
 
     //add activity
     let activityPayload = {
@@ -168,12 +167,13 @@ exports.storeDataInDb = async (req, res, next) => {
     };
 
     await ActivityModal.create(activityPayload);
-
-    return res.send({
-      success: true,
-      message: 'Item created successfully',
-      nft,
-    });
+    if (nftToken) {
+      return res.send({
+        success: true,
+        message: 'Item created successfully',
+        nft,
+      });
+    }
   } catch (error) {
     return next(error);
   }
@@ -205,23 +205,9 @@ exports.edit = async (req, res, next) => {
 
       if (error) {
         let errorMsg = error.details[0].message;
-        return res.status(400).send({ status: false, data: errorMsg });
+        return res.status(400).send({ status: false, message: errorMsg });
       }
       payload.currentPrice = Number(payload.sellingConfig.price.amount);
-      // let startDate = moment(
-      //   new Date(payload.sellingConfig.listingSchedule.startDate)
-      // )
-      //   .utc(true)
-      //   .toISOString();
-
-      // let endDate = moment(
-      //   new Date(payload.sellingConfig.listingSchedule.endDate)
-      // )
-      //   .utc(true)
-      //   .toISOString();
-
-      // payload.sellingConfig.listingSchedule.startDate = startDate;
-      // payload.sellingConfig.listingSchedule.endDate = endDate;
     } else {
       const { error } = validation.validateNFTimedTAuctionSchema(payload);
 
@@ -231,25 +217,19 @@ exports.edit = async (req, res, next) => {
       }
       payload.currentPrice = Number(payload.sellingConfig.startPrice.amount);
       let startDate = moment(new Date(payload.sellingConfig.duration.startDate))
-        .utc(true)
+        .utc(false)
         .toISOString();
 
       let endDate = moment(new Date(payload.sellingConfig.duration.endDate))
-        .utc(true)
+        .utc(false)
         .toISOString();
-
-      // let endDate = new Date(
-      //   payload.sellingConfig.duration.endDate
-      // ).toISOString();
 
       payload.sellingConfig.duration.startDate = startDate;
       payload.sellingConfig.duration.endDate = endDate;
       payload.auctionStartDate = startDate;
       payload.auctionEndDate = endDate;
-      // payload.auctionStartTime = payload.sellingConfig.duration.startTime;
-      // payload.auctionEndTime = payload.sellingConfig.duration.startTime;
     }
-    console.log(payload, 'payload');
+
     const nft = await NFT.findByIdAndUpdate(
       { _id: payload._id },
       { $set: payload }
@@ -257,7 +237,7 @@ exports.edit = async (req, res, next) => {
     );
     return res.send({
       success: true,
-      message: 'NFT updated successfully',
+      message: 'successfully put on sell',
       nft,
     });
   } catch (error) {
@@ -266,28 +246,6 @@ exports.edit = async (req, res, next) => {
   }
 };
 
-// API to edit status NFT
-exports.update = async (req, res, next) => {
-  try {
-    let payload = req.body;
-
-    // set NFT selling config.
-
-    const nft = await NFT.findByIdAndUpdate(
-      { _id: payload._id },
-      { $set: payload }
-      // { new: true }
-    );
-    console.log('nft after update');
-    return res.send({
-      success: false,
-      message: 'Sorry! You rejected wallet processing',
-      nft,
-    });
-  } catch (error) {
-    return next(error);
-  }
-};
 // API to get a NFT
 exports.get = async (req, res, next) => {
   try {
@@ -299,10 +257,30 @@ exports.get = async (req, res, next) => {
 
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ status: false, data: errorMsg });
+      return res.status(400).send({ status: false, message: errorMsg });
     }
 
-    const nftDetail = await NFT.findOne({ _id: payload.nftId });
+    let pipeline = [
+      {
+        $match: { _id: ObjectId(payload.nftId) },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          foreignField: '_id',
+          localField: 'userId',
+          as: 'user',
+        },
+      },
+      {
+        $unwind: {
+          path: '$user',
+        },
+      },
+    ];
+    let nftDetail = await NFT.aggregate(pipeline);
+
+    nftDetail = nftDetail[0];
     if (!nftDetail) {
       return res.send({
         success: false,
@@ -314,9 +292,9 @@ exports.get = async (req, res, next) => {
 
     const nftLikes = await Likes.findOne({ nftId: payload.nftId });
 
-    returnData = JSON.parse(JSON.stringify(nftDetail));
+    let returnData = JSON.parse(JSON.stringify(nftDetail));
 
-    lowestInCollection = await NFT.find({
+    const lowestInCollection = await NFT.find({
       collectionId: nftDetail.collectionId,
     })
       .sort({ currentPrice: 1 })
@@ -352,7 +330,6 @@ exports.list = async (req, res, next) => {
       page,
       limit,
       collectionId,
-      explore,
       gtePrice,
       ltePrice,
       categoryId,
@@ -398,24 +375,6 @@ exports.list = async (req, res, next) => {
     // get NFTs for given collection
     if (collectionId) filter.collectionId = ObjectId(collectionId);
 
-    // COMMENTED TEMP.
-    // explore exclusive assets
-    // if (explore) {
-    //     filter = {
-    //         $or: [
-    //             { creatorId: ObjectId(userId) },
-    //             {
-    //                 $or: [
-    //                     { sellingMethod: 1 },
-    //                     { sellingMethod: 2 }
-    //                 ],
-    //                 auctionStartDate: { $lt: new Date(moment().add(1, 'days').format('YYYY/MM/DD')) },
-    //                 auctionEndDate: { $gte: new Date(moment().format('YYYY/MM/DD')) }
-    //             }
-    //         ]
-    //     }
-    // }
-
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
 
@@ -430,8 +389,8 @@ exports.list = async (req, res, next) => {
       { $match: filter },
       {
         $sort: {
-          ...(newest && { createdAt: 1 }),
-          ...(oldest && { createdAt: -1 }),
+          ...(newest && { createdAt: -1 }),
+          ...(oldest && { createdAt: 1 }),
           ...(lowToHigh && { currentPrice: 1 }),
           ...(highToLow && { currentPrice: -1 }),
           name: 1,
@@ -439,27 +398,45 @@ exports.list = async (req, res, next) => {
       },
       { $skip: limit * (page - 1) },
       { $limit: limit },
-      // {
-      //     $lookup: {
-      //         from: 'users',
-      //         foreignField: '_id',
-      //         localField: 'ownerId',
-      //         as: 'owner'
-      //     }
-      // },
-      // {
-      //     $unwind: '$owner'
-      // },
-      // {
-      //     $project: {
-      //         name: 1, image: 1, sold: 1, copies: 1, currentPrice: 1,collectionId:1,currentPrice:1,description:1,royalty:1,size:1,userId,
-      //         owner: {
-      //             _id: '$owner._id',
-      //             username: '$owner.username',
-      //             profilePhoto: { $ifNull: ['$owner.profilePhoto', userDefaultImage] }
-      //         }
-      //     }
-      // }
+      {
+        $lookup: {
+          from: 'users',
+          foreignField: '_id',
+          localField: 'ownerId',
+          as: 'owner',
+        },
+      },
+      {
+        $unwind: {
+          path: '$owner',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          image: 1,
+          description: 1,
+          fileType: 1,
+          copies: 1,
+          currentPrice: 1,
+          collectionId: 1,
+          ownerId: 1,
+          highestBid: 1,
+          userId,
+          auctionEndDate: 1,
+          copiesForAuction: 1,
+          sellingMethod: 1,
+          owner: {
+            _id: '$owner._id',
+            username: '$owner.username',
+            profilePhoto: {
+              $ifNull: ['$owner.profileImage', userDefaultImage],
+            },
+          },
+        },
+      },
     ]);
     for (const nft of nfts) {
       const findCount = await Likes.findOne().where('nftId', nft._id);
@@ -511,11 +488,11 @@ exports.updateNft = async (req, res, next) => {
       nftId: req.body.nftId,
       name: req.body.name,
       description: req.body.description,
-      attributes: req.body.attributes,
-      levels: req.body.levels,
+      // attributes: JSON.parse(req.body.attributes),
+      // levels: JSON.parse(req.body.levels),
+      // stats: JSON.parse(req.body.stats),
       fileType: req.body.fileType,
       userId: req.body.userId,
-      // royalty: req.body.royalty,
       ownerAddress: req.body.ownerAddress,
       collectionId: req.body.collectionId,
       currentPrice: req.body.currentPrice,
@@ -525,7 +502,7 @@ exports.updateNft = async (req, res, next) => {
 
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ status: false, data: errorMsg });
+      return res.status(400).send({ status: false, message: errorMsg });
     }
     if (req.files && req.files.image) {
       const image = req.files.image[0];
@@ -540,14 +517,18 @@ exports.updateNft = async (req, res, next) => {
       });
     }
     const ownerId = payload.userId;
+
+    // let payloadProperties = {
+    //   attributes: payload.attributes,
+    //   levels: payload.levels,
+    //   stats: payload.stats,
+    // };
+
     payload.metaData = await addContent({
       name: payload.name,
       description: payload.description,
       image: payload.image,
-      //   properties: {
-      //     size: newPayload.size || '',
-      //   },
-      properties: payload.attributes,
+      // properties: payloadProperties,
       nftOwnerId: ownerId,
       ownerAddress: payload.ownerAddress,
     });
@@ -570,13 +551,13 @@ exports.updateNft = async (req, res, next) => {
 exports.getNFTsbyCollection = async (req, res, next) => {
   try {
     const collectionId = req.body.collectionId;
-    console.log(req.body, 'collectionId');
+
     const NFTs = await NFT.aggregate([
       {
         $match: { collectionId: ObjectId(collectionId) },
       },
     ]);
-    console.log(NFTs, 'nfts');
+
     res.status(200).send({ success: true, data: NFTs });
   } catch (err) {
     res.status(200).send({ success: false, error: err });
@@ -594,12 +575,12 @@ exports.delete = async (req, res, next) => {
       if (nft.deletedCount) {
         const nftToken = await NftTokens.deleteOne({ nftId: nftId });
 
-        let updateCollection = await Collection.updateOne(
+        const updateCollection = await Collection.updateOne(
           { _id: nftDetail[0]['collectionId'] },
           { $pull: { nft: nftId } }
         );
 
-        if (nftToken) {
+        if (nftToken && updateCollection) {
           return res.send({
             status: true,
             message: 'NFT deleted successfully',
@@ -682,7 +663,7 @@ exports.buyNow = async (req, res, next) => {
 
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ status: false, data: errorMsg });
+      return res.status(400).send({ status: false, message: errorMsg });
     }
 
     const buyNftDetail = await NFT.findOne({
@@ -693,6 +674,7 @@ exports.buyNow = async (req, res, next) => {
       if (buyNftDetail.remainingCopies > buyNftDetail.copiesForAuction) {
         let newPayload = {
           ownerId: payload.userId,
+          userId: payload.userId,
           ownerAddress: payload.ownerAddress,
           copies: buyNftDetail.copiesForAuction,
           name: buyNftDetail.name,
@@ -717,7 +699,7 @@ exports.buyNow = async (req, res, next) => {
           collectionRecord.save();
         }
 
-        nftTokenDetail = await NftTokens.findOne({
+        const nftTokenDetail = await NftTokens.findOne({
           nftId: payload.nftId,
         });
 
@@ -727,7 +709,7 @@ exports.buyNow = async (req, res, next) => {
           tokenStandard: nftTokenDetail.tokenStandard,
         };
 
-        let nftToken = await NftTokens.create(nftTokenPayload);
+        await NftTokens.create(nftTokenPayload);
 
         const remainingCopies =
           buyNftDetail.copies - buyNftDetail.copiesForAuction;
@@ -735,9 +717,17 @@ exports.buyNow = async (req, res, next) => {
         let newPayloadCopies = {
           copiesForAuction: 0,
           remainingCopies: remainingCopies,
+          sellingMethod: 0,
+          sellingConfig: {
+            price: {
+              currency: null,
+              amount: 0,
+            },
+            reserveFor: 0,
+          },
         };
 
-        nftUpdate = await NFT.findByIdAndUpdate(
+        const nftUpdate = await NFT.findByIdAndUpdate(
           { _id: buyNftDetail._id },
           { $set: newPayloadCopies }
           // { new: true }
@@ -749,7 +739,7 @@ exports.buyNow = async (req, res, next) => {
 
           let newTotalETH = findUserDetail.totalETH + buyNftDetail.currentPrice;
 
-          userUpdate = await Users.findByIdAndUpdate(
+          await Users.findByIdAndUpdate(
             { _id: nftUpdate.ownerId },
             { $set: { totalETH: newTotalETH } }
           );
@@ -763,6 +753,7 @@ exports.buyNow = async (req, res, next) => {
         let newPayload = {
           ownerId: payload.userId,
           ownerAddress: payload.ownerAddress,
+          userId: payload.userId,
           copies: buyNftDetail.copiesForAuction,
           remainingCopies: buyNftDetail.copiesForAuction,
           copiesForAuction: 0,
@@ -779,7 +770,7 @@ exports.buyNow = async (req, res, next) => {
           },
         };
 
-        nftUpdate = await NFT.findByIdAndUpdate(
+        const nftUpdate = await NFT.findByIdAndUpdate(
           { _id: buyNftDetail._id },
           { $set: newPayload }
           // { new: true }
@@ -791,7 +782,7 @@ exports.buyNow = async (req, res, next) => {
 
           let newTotalETH = findUserDetail.totalETH + buyNftDetail.currentPrice;
 
-          userUpdate = await Users.findByIdAndUpdate(
+          await Users.findByIdAndUpdate(
             { _id: nftUpdate.ownerId },
             { $set: { totalETH: newTotalETH } }
           );

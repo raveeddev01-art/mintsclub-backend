@@ -2,6 +2,7 @@ const fs = require('fs');
 const moment = require('moment');
 const Bid = require('../../models/bids.model');
 const Nft = require('../../models/nfts.model');
+const User = require('../../models/users.model');
 const ObjectId = require('mongoose').Types.ObjectId;
 const { globalImgPlaceholder } = require('../../../config/vars');
 const validation = require('../../middlewares/front/bidValidation');
@@ -25,9 +26,15 @@ exports.create = async (req, res, next) => {
 
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ status: false, data: errorMsg });
+      return res.status(400).send({ status: false, message: errorMsg });
     }
+
+    const bidUser = await User.findOne({ _id: payload.bidBy });
+
+    payload.bidByProfile = bidUser.profileImage ? bidUser.profileImage : null;
+
     const bid = await Bid.create(payload);
+
     if (bid) {
       let newPayload = {
         highestBid: payload.bidAmount,
@@ -37,11 +44,18 @@ exports.create = async (req, res, next) => {
         { _id: payload.nftId },
         { $set: newPayload }
       );
+
+      if (nftUpdate) {
+        return res.send({
+          success: true,
+          message: 'You have placed bid successfully',
+          bid,
+        });
+      }
     }
     return res.send({
-      success: true,
-      message: 'You have placed bid successfully',
-      bid,
+      success: false,
+      message: 'Something went wrong, Please try again',
     });
   } catch (error) {
     return next(error);
@@ -59,7 +73,7 @@ exports.delete = async (req, res, next) => {
 
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ status: false, data: errorMsg });
+      return res.status(400).send({ status: false, message: errorMsg });
     }
 
     const bid = await Bid.deleteOne({ _id: payload.bidId });
@@ -78,63 +92,22 @@ exports.delete = async (req, res, next) => {
   }
 };
 
-// API to get claimed bids by bidId
-exports.claimedBid = async (req, res, next) => {
-  try {
-    const { bidId } = req.query;
-
-    const bid = await Bid.findByIdAndUpdate(
-      { _id: bidId },
-      { isClaimable: false, isclaimed: true }
-    );
-
-    return res.status(200).send({
-      success: true,
-      message: 'Bid claimed successfully',
-      data: {},
-    });
-  } catch (error) {
-    // console.log(error,"error==>")
-    return next(error);
-  }
-};
-// API to get claimable bids list by userid
-exports.claimableListbyUserId = async (req, res, next) => {
-  try {
-    const { userId } = req.query;
-    console.log('userId', userId);
-    let allBids = await Bid.find({ bidBy: userId, isClaimable: true });
-    // let allBids = await Bid.find({bidBy: userId, isClaimable: false});
-    return res.status(200).send({
-      success: true,
-      message: 'Bids fetched successfully',
-      data: {
-        allBids,
-        // pagination: {
-        //     page, limit, total,
-        //     pages: Math.ceil(total / limit) <= 0 ? 1 : Math.ceil(total / limit)
-        // },
-        // highestBidAmt: highestBid.length ? highestBid[0].price.amount : null
-      },
-    });
-  } catch (error) {
-    // console.log(error,"error==>")
-    return next(error);
-  }
-};
-
 // API to get bids list
 exports.list = async (req, res, next) => {
   try {
-    let { page, limit } = req.query;
+    let { page, limit, nftId } = req.query;
 
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
-    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 100;
-
+    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
+    let filter = {};
+    if (nftId) filter.nftId = ObjectId(nftId);
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
 
-    allBids = await Bid.find();
+    const allBids = await Bid.aggregate([
+      { $match: filter },
+      { $sort: { createdAt: -1 } },
+    ]);
 
     if (allBids.length == 0) {
       return res.send({
@@ -190,7 +163,7 @@ exports.claimableBidListbyNftId = async (req, res, next) => {
 
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ status: false, data: errorMsg });
+      return res.status(400).send({ status: false, message: errorMsg });
     }
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
@@ -198,7 +171,7 @@ exports.claimableBidListbyNftId = async (req, res, next) => {
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
 
-    bidsByNftId = await Bid.find({ nftId: payload.nftId });
+    const bidsByNftId = await Bid.find({ nftId: payload.nftId });
 
     let data = {};
 
@@ -232,19 +205,15 @@ exports.claimableBidListbyNftId = async (req, res, next) => {
 // API to accept bid
 exports.accept = async (req, res, next) => {
   try {
-    console.log('acept', req.body);
-
-    // const { bidId } = req.params
     const { bidId } = req.body;
 
     if (bidId) {
-      // accept bid
       const bid = await Bid.findByIdAndUpdate(
         { _id: bidId },
         { isAccepted: true },
         { new: true }
       );
-      console.log('acceptenace for ', bid);
+
       if (bid) {
         // expire other bids
         console.log('bids for single bid', bid);
@@ -252,11 +221,9 @@ exports.accept = async (req, res, next) => {
           { _id: { $ne: ObjectId(bidId) }, nftId: bid.nftId },
           { $set: { isClaimable: true, isExpired: true } }
         );
-        console.log('compiled');
-        console.log('bid object', bid.nftId);
-        const nft = await Nft.findById({ _id: bid.nftId });
 
-        // console.log('sold', nft)
+        await Nft.findById({ _id: bid.nftId });
+
         await Nft.updateOne(
           { _id: bid.nftId },
           {
@@ -271,7 +238,6 @@ exports.accept = async (req, res, next) => {
             $set: {
               ownerId: bid.bidBy,
               nftOwnerId: bid.bidBy,
-              // sold:nft.sold +1
             },
           }
         );

@@ -17,26 +17,19 @@ const UserSchema = new mongoose.Schema(
     // type: { type: Number }, // 1 = Creator, 2 = User or Buyer or Owner
     username: { type: String },
     email: { type: String },
-    // emailVerified: { type: Boolean },
     bio: { type: String },
+    isApproved:{type:Boolean},
     profileImage: { type: String },
     bannerImage: { type: String },
     address: { type: String },
-    // facebookLink: { type: String },
     twitterLink: { type: String },
     instaLink: { type: String },
     webLink: { type: String },
     totalETH: { type: Number },
-    // gPlusLink: { type: String },
-    // vineLink: { type: String },
-    // password: {
-    //   type: String,
-    //   required: true,
-    // },
-    // signature: { type: String },
   },
   { timestamps: true }
 );
+
 
 UserSchema.methods.verifyPassword = function (password) {
   return bcrypt.compareSync(password, this.password);

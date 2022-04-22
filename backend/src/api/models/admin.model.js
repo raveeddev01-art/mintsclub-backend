@@ -28,17 +28,7 @@ const AdminSchema = new mongoose.Schema(
 );
 
 AdminSchema.methods.verifyPassword = function (password) {
-  // console.log("Verifying Admin Password");
-  // console.log(password);
-  // console.log(this);
-  // console.log(this.password);
   return bcrypt.compareSync(password, this.password);
-};
-
-AdminSchema.methods.getPasswordHash = async function (password) {
-  const rounds = pwdSaltRounds ? parseInt(pwdSaltRounds) : 10;
-  const hash = await bcrypt.hash(password, rounds);
-  return hash;
 };
 
 /**

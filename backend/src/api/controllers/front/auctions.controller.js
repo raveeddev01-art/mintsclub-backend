@@ -9,9 +9,11 @@ const { globalImgPlaceholder } = require('../../../config/vars');
 exports.live = async (req, res, next) => {
   try {
     let { page, limit, myFilter } = req.query;
-    let filter;
+    let filter, newFilter;
     page = page !== undefined && page !== '' ? parseInt(page) : 1;
     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
+
+    var dateTime = new Date(moment().utc(false).toISOString());
 
     if (myFilter) {
       const applyFilter = await Categories.findOne({}, '_id').where(
@@ -21,36 +23,29 @@ exports.live = async (req, res, next) => {
       if (!applyFilter) {
         return res.status(400).send({
           success: false,
-          message: 'Invalid Filter passed',
         });
       }
       newFilter = applyFilter._id;
     }
 
     if (myFilter && myFilter != 'all') {
-      //console.log('this is if');
       filter = {
         sellingMethod: 2, // timed auctions only
         auctionStartDate: {
-          $lt: new Date(moment().add(1, 'days').format('YYYY/MM/DD')),
+          $lt: dateTime,
         },
-        auctionEndDate: { $gte: new Date(moment().format('YYYY/MM/DD')) },
+        auctionEndDate: { $gte: dateTime },
         categoryId: ObjectId(newFilter),
       };
     } else {
-      ///console.log('this is else');
       filter = {
         sellingMethod: 2, // timed auctions only
         auctionStartDate: {
-          $lt: new Date(moment().add(1, 'days').format('YYYY/MM/DD')),
+          $lt: dateTime,
         },
-        auctionEndDate: { $gte: new Date(moment().format('YYYY/MM/DD')) },
+        auctionEndDate: { $gte: dateTime },
       };
     }
-
-    //console.log('filter', filter);
-    // }
-
     const total = await NFT.countDocuments(filter);
 
     const auctions = await NFT.aggregate([
@@ -66,8 +61,20 @@ exports.live = async (req, res, next) => {
         },
       },
       {
-        $unwind: '$owner',
+        $unwind: {
+          path: '$owner',
+          preserveNullAndEmptyArrays: true,
+        },
       },
+      {
+        $lookup: {
+          from: 'bids',
+          foreignField: 'nftId',
+          localField: '_id',
+          as: 'bids',
+        },
+      },
+
       { $sort: { createdAt: -1 } },
       { $skip: limit * (page - 1) },
       { $limit: limit },
@@ -76,17 +83,22 @@ exports.live = async (req, res, next) => {
           _id: 1,
           name: 1,
           image: 1,
-          sold: 1,
           copies: 1,
           currentPrice: 1,
           auctionEndDate: 1,
-          nftOwnerId: 1,
+          fileType: 1,
+          ownerId: 1,
+          highestBid: 1,
           owner: {
             _id: '$owner._id',
             username: '$owner.username',
             profilePhoto: {
-              $ifNull: ['$owner.profilePhoto', globalImgPlaceholder],
+              $ifNull: ['$owner.profileImage', globalImgPlaceholder],
             },
+          },
+          bidInfo: {
+            bidBy: '$bids.bidBy',
+            bidByProfile: '$bids.bidByProfile',
           },
         },
       },

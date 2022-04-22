@@ -3,6 +3,7 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const NFT = require('../../models/nfts.model');
 const Collection = require('../../models/collection.model');
 const Categories = require('../../models/categories.model');
+const User = require('../../models/users.model');
 
 const { addImage } = require('../../utils/uploadImage');
 const { checkDuplicate } = require('../../../config/errors');
@@ -11,7 +12,6 @@ const validation = require('../../middlewares/front/collectionValidation');
 
 // API to create collection
 exports.create = async (req, res, next) => {
-  console.log(req.body, 'req.body category check');
   try {
     let payload = {
       userId: req.body.userId,
@@ -21,14 +21,15 @@ exports.create = async (req, res, next) => {
       description: req.body.description,
       //category: req.body.category,
     };
+
     const { error } = validation.validateCollectionSchema(payload);
 
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ success: false, data: errorMsg });
+      return res.status(400).send({ success: false, message: errorMsg });
     }
 
-    imagesPayload = {
+    let imagesPayload = {
       logo: req.body.logo,
       featuredImg: req.body.featuredImgUrl,
       banner: req.body.bannerUrl,
@@ -36,27 +37,6 @@ exports.create = async (req, res, next) => {
 
     const newPayload = { ...payload, ...imagesPayload };
 
-    // const List = await Categories.find({}, 'description').where(
-    //   'status',
-    //   'true'
-    // );
-
-    // allNames = [];
-    // categoryNames = List.map((value) => {
-    //   allNames.push(value.description);
-    //   return allNames;
-    // });
-
-    // if (newPayload.category && !allNames.includes(newPayload.category)) {
-    //   return res.status(400).send({
-    //     success: false,
-    //     message: 'Please provide valid category',
-    //   });
-    // }
-    // categoryId = await Categories.findOne({}, '_id').where(
-    //   'description',
-    //   newPayload.category
-    // );
     newPayload.categoryId = null;
     if (payload.categoryId) {
       newPayload.categoryId = payload.categoryId;
@@ -75,7 +55,7 @@ exports.create = async (req, res, next) => {
         message: 'logo image is required',
       });
     }
-    // check user existing collection
+
     const existingCollection = await Collection.findOne({
       name: new RegExp(newPayload.name, 'gi'),
       userId: newPayload.userId,
@@ -111,44 +91,21 @@ exports.edit = async (req, res, next) => {
       name: req.body.name,
       url: req.body.url,
       description: req.body.description,
-      // category: req.body.category,
     };
 
     const { error } = validation.validateEditCollectionSchema(payload);
 
     if (error) {
       let errorMsg = error.details[0].message;
-      return res.status(400).send({ success: false, data: errorMsg });
+      return res.status(400).send({ success: false, message: errorMsg });
     }
-    imagesPayload = {
+    let imagesPayload = {
       logo: req.body.logo,
       featuredImg: req.body.featuredImgUrl,
       banner: req.body.bannerUrl,
     };
 
     const newPayload = { ...payload, ...imagesPayload };
-
-    // const List = await Categories.find({}, 'description').where(
-    //   'status',
-    //   'true'
-    // );
-
-    // allNames = [];
-    // categoryNames = List.map((value) => {
-    //   allNames.push(value.description);
-    //   return allNames;
-    // });
-
-    // if (newPayload.category && !allNames.includes(newPayload.category)) {
-    //   return res.status(400).send({
-    //     success: false,
-    //     message: 'Please provide valid category',
-    //   });
-    // }
-    // categoryId = await Categories.findOne({}, '_id').where(
-    //   'description',
-    //   newPayload.category
-    // );
 
     newPayload.categoryId = null;
     if (payload.categoryId) {
@@ -168,10 +125,6 @@ exports.edit = async (req, res, next) => {
         message: 'logo image is required',
       });
     }
-    // TEMP appending userId
-    // payload.userId = '61408000cef27850fdea272b'
-
-    // if name is given then check user existing collection
 
     if (newPayload.name) {
       const existingCollection = await Collection.findOne({
@@ -234,10 +187,7 @@ exports.get = async (req, res, next) => {
   try {
     const { collectionId } = req.params;
     if (collectionId) {
-      let collection = await Collection.findOne(
-        { _id: collectionId },
-        { __v: 0, createdAt: 0, updatedAt: 0 }
-      )
+      let collection = await Collection.findOne({ _id: collectionId })
         .populate([
           { path: 'userId', select: '_id username email profilePhoto' },
           { path: 'categoryId', select: '_id name image' },
@@ -277,14 +227,14 @@ exports.get = async (req, res, next) => {
 // API to get collection list
 exports.list = async (req, res, next) => {
   try {
-    let { page, limit, myFilter, all, userId } = req.query;
+    let { page, limit, myFilter, all } = req.query;
 
     let filter = {};
 
-    if (req.query.myFilter) {
+    if (myFilter) {
       const applyFilter = await Categories.findOne({}, '_id').where(
         'description',
-        req.query.myFilter
+        myFilter
       );
       if (!applyFilter) {
         return res.status(400).send({
@@ -295,7 +245,7 @@ exports.list = async (req, res, next) => {
       filter = { categoryId: applyFilter._id };
     }
 
-    if (req.query.myFilter && req.query.myFilter == 'all') {
+    if (myFilter && myFilter == 'all') {
       filter = {};
     }
 
@@ -331,6 +281,38 @@ exports.list = async (req, res, next) => {
           as: 'user',
         },
       },
+      {
+        $lookup: {
+          from: 'nfts',
+          foreignField: '_id',
+          localField: 'nft',
+          as: 'nfts',
+        },
+      },
+      {
+        $unwind: {
+          path: '$nfts',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $group: {
+          _id: '$_id',
+          nftDetail: {
+            $push: { image: '$nfts.image', fileType: '$nfts.fileType' },
+          },
+          userId: { $first: '$userId' },
+          categoryId: { $first: '$categoryId' },
+          name: { $first: '$name' },
+          description: { $first: '$description' },
+          logo: { $first: '$logo' },
+          featuredImg: { $first: '$featuredImg' },
+          banner: { $first: '$banner' },
+          username: { $first: '$user.username' },
+          profileImage: { $first: '$user.profileImage' },
+        },
+      },
     ];
 
     const newTotal = await Collection.aggregate(pipeline);
@@ -343,9 +325,11 @@ exports.list = async (req, res, next) => {
     }
 
     const collections = await Collection.aggregate(pipeline);
-    for (const collection of collections) {
-      collection.NFTCount = collection.nft ? collection.nft.length : '0';
-    }
+    // for (const collection of collections) {
+    //   collection.NFTCount = collection.nftsList
+    //     ? collection.nftsList.length
+    //     : '0';
+    // }
 
     return res.send({
       success: true,
@@ -369,162 +353,113 @@ exports.list = async (req, res, next) => {
   }
 };
 
-exports.all = async (req, res, next) => {
-  console.log('all');
-  try {
-    let { page, limit, categoryId, all, userId } = req.query;
-    // if (!userId)
-    //     return res.status(400).send({ success: false, message: 'Please Sign In First' })
-
-    const filter = {};
-
-    // if (userId)
-    //     filter.userId = ObjectId(userId)
-
-    if (categoryId) filter.categoryId = ObjectId(categoryId);
-
-    let total = 0;
-
-    // if (!all) {
-    //     page = page !== undefined && page !== '' ? parseInt(page) : 1
-    //     limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
-
-    //     total = await Collection.countDocuments(filter)
-
-    //     if (page > Math.ceil(total / limit) && total > 0)
-    //         page = Math.ceil(total / limit)
-
-    // }
-
-    const pipeline = [
-      {
-        $match: filter,
-      },
-      { $sort: { name: 1 } },
-      {
-        $lookup: {
-          from: 'categories',
-          foreignField: '_id',
-          localField: 'categoryId',
-          as: 'category',
-        },
-      },
-      {
-        $unwind: '$category',
-      },
-      {
-        $project: {
-          _id: 1,
-          name: 1,
-          logo: 1,
-          userId: 1,
-          featuredImg: { $ifNull: ['$featuredImg', collectionDefaultImage] },
-          category: {
-            _id: '$category._id',
-            name: '$category.name',
-          },
-        },
-      },
-    ];
-
-    // if (!all) {
-    //     pipeline.push({ $skip: limit * (page - 1) })
-    //     pipeline.push({ $limit: limit })
-    // }
-
-    const collections = await Collection.aggregate(pipeline);
-    // console.log("collections.....@@@", collections);
-
-    return res.send({
-      success: true,
-      message: 'Collections fetched successfully',
-      data: {
-        collections: collections.length ? collections : null,
-        // pagination: {
-        //     page, limit, total,
-        //     pages: Math.ceil(total / limit) <= 0 ? 1 : Math.ceil(total / limit)
-        // }
-      },
-    });
-  } catch (error) {
-    return next(error);
-  }
-};
-
 // API to get my collections list
 exports.myCollectionList = async (req, res, next) => {
   try {
     let { userId, page, limit } = req.query;
-
-    page = page !== undefined && page !== '' ? parseInt(page) : 1;
-    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
-
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
 
     if (!userId)
       return res
         .status(400)
         .send({ success: false, message: 'Please Sign In First' });
 
-    const allCollection = await Collection.find({}).where('userId', userId);
+    const findUser = await User.findOne({ _id: userId });
 
-    if (allCollection.length == 0) {
-      return res.send({
-        success: false,
-        message: 'No user collections found',
+    if (findUser) {
+      let total = 0;
+
+      page = page !== undefined && page !== '' ? parseInt(page) : 1;
+      limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
+
+      total = await Collection.find({}).where('userId', userId);
+
+      if (total.length == 0) {
+        return res.send({
+          success: false,
+          message: 'No collections found for this user',
+        });
+      }
+
+      if (page > Math.ceil(total / limit) && total > 0)
+        page = Math.ceil(total / limit);
+
+      const pipeline = [
+        {
+          $match: { userId: ObjectId(userId) },
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userId',
+            foreignField: '_id',
+            as: 'user',
+          },
+        },
+        {
+          $lookup: {
+            from: 'nfts',
+            foreignField: '_id',
+            localField: 'nft',
+            as: 'nfts',
+          },
+        },
+        {
+          $unwind: {
+            path: '$nfts',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $group: {
+            _id: '$_id',
+            nftDetail: {
+              $push: { image: '$nfts.image', fileType: '$nfts.fileType' },
+            },
+            userId: { $first: '$userId' },
+            categoryId: { $first: '$categoryId' },
+            name: { $first: '$name' },
+            description: { $first: '$description' },
+            logo: { $first: '$logo' },
+            featuredImg: { $first: '$featuredImg' },
+            banner: { $first: '$banner' },
+            username: { $first: '$user.username' },
+            profileImage: { $first: '$user.profileImage' },
+          },
+        },
+      ];
+
+      const newTotal = await Collection.aggregate(pipeline);
+
+      const totalRecords = newTotal.length;
+
+      pipeline.push({ $skip: limit * (page - 1) });
+      pipeline.push({ $limit: limit });
+
+      const Collections = await Collection.aggregate(pipeline);
+
+      return res.status(200).send({
+        success: true,
+        message: 'My collections fetched successfully',
+        data: {
+          collections: { totalRecords: totalRecords, Collections: Collections },
+          pagination: {
+            page,
+            limit,
+            totalRecords,
+            pages:
+              Math.ceil(totalRecords / limit) <= 0
+                ? 1
+                : Math.ceil(totalRecords / limit),
+          },
+        },
       });
     }
-
-    const myCollections = JSON.parse(JSON.stringify(allCollection)).map(
-      (item) => {
-        const collection = item;
-        collection.NFTCount = collection.nft.length;
-        collection.CreatedBy = 'You';
-        return collection;
-      }
-    );
-
-    let data = {};
-
-    data.totalRecords = myCollections.length;
-
-    if (endIndex < myCollections.length) {
-      data.next = {
-        page: page + 1,
-        limit: limit,
-      };
-    }
-    if (startIndex > 0) {
-      data.previous = {
-        page: page - 1,
-        limit: limit,
-      };
-    }
-    data.Collections = myCollections.slice(startIndex, endIndex);
-
     return res.status(200).send({
-      success: true,
-      message: 'My Collections fetched successfully',
-      data: {
-        collections: data,
-      },
+      success: false,
+      message: 'UserId not found',
     });
   } catch (error) {
     return next(error);
-  }
-};
-
-exports.myCollections = async (req, res, next) => {
-  let { userId } = req.query;
-  try {
-    let myCollections = await Collection.aggregate([
-      { $match: { userId: ObjectId(userId) } },
-    ]);
-
-    res.status(200).send({ success: true, data: myCollections });
-  } catch (err) {
-    res.status(200).send(err);
   }
 };
 
@@ -603,13 +538,15 @@ exports.popular = async (req, res, next) => {
           _id: '$_id',
           likesCount: { $first: '$likesschemas.count' },
           nfts: {
-            $push: '$nft.image',
+            $push: { image: '$nft.image', fileType: '$nft.fileType' },
           },
           userId: { $first: '$userId' },
           categoryId: { $first: '$categoryId' },
           name: { $first: '$name' },
+          description: { $first: '$description' },
           logo: { $first: '$logo' },
           featuredImg: { $first: '$featuredImg' },
+          banner: { $first: '$banner' },
           soldCopies: {
             $push: {
               $subtract: ['$nft.copies', '$nft.remainingCopies'],

@@ -48,7 +48,8 @@ const validateSignUpSchema = (data) => {
         tlds: { allow: ['com', 'net'] },
       })
       .required(),
-    username: Joi.string().min(3).max(40).required(),
+    username: Joi.string().max(50).required(),
+    isApproved: Joi.boolean(),
   });
   const options = {
     errors: {

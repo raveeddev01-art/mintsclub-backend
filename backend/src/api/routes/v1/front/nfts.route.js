@@ -7,7 +7,6 @@ router.route('/create').post(cpUpload, controller.create);
 router.route('/edit').put(cpUpload, controller.edit);
 router.route('/get/:nftId').get(controller.get);
 router.route('/list').get(controller.list);
-router.route('/update').post(controller.update);
 router.route('/editNft').patch(controller.editNft);
 router.route('/storeNFTData').post(cpUpload, controller.storeDataInDb);
 router.route('/updateNft').put(cpUpload, controller.updateNft);

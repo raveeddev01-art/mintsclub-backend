@@ -1,9 +1,5 @@
-// multer
 const fs = require('fs');
 const multer = require('multer');
-
-// const uploadsDir = './src/api/v1/';
-// const imagesDir = `${uploadsDir}images`;
 
 const uploadsDir = './src/uploads/';
 const imagesDir = `${uploadsDir}images`;
@@ -52,7 +48,6 @@ exports.addImage = async (data) => {
   const fileAdded = await ipfs.add(data);
   const imgHash = fileAdded.cid.toString();
   return `${ipfsBaseUrl}${imgHash}`;
-  //return `${'ipfs/'}${imgHash}`;
 };
 
 exports.addContent = async (data) => {
