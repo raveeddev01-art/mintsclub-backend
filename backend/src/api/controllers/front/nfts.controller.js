@@ -55,17 +55,17 @@ exports.create = async (req, res, next) => {
 
 
 
-    // let payloadProperties = {
-    //   attributes: payload.attributes,
-    //   levels: payload.levels,
-    //   stats: payload.stats,
-    // };
+    let payloadProperties = {
+      properties: payload.properties,
+      levels: payload.levels,
+      stats: payload.stats,
+    };
 
     payload.metaData = await addContent({
       name: payload.name,
       description: payload.description,
       image: payload.image,
-      // properties: payloadProperties,
+      properties: payloadProperties,
       nftOwnerId: payload.ownerId,
       ownerAddress: payload.ownerAddress,
     });
