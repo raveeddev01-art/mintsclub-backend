@@ -673,6 +673,14 @@ exports.buyNow = async (req, res, next) => {
         let newPayloadCopies = {
           copiesForAuction: 0,
           remainingCopies: remainingCopies,
+          sellingMethod: 0,
+          sellingConfig: {
+            price: {
+              currency: null,
+              amount: 0,
+            },
+            reserveFor: 0,
+          },
         };
 
         const nftUpdate = await NFT.findByIdAndUpdate(
