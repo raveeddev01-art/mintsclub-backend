@@ -5,20 +5,20 @@ const validateNFTSchema = (data) => {
     name: Joi.string().min(1).max(100).required(),
     description: Joi.string().min(1).max(150).required(),
     creatorId: Joi.string().alphanum().min(12).max(24).allow(''),
-    // attributes: Joi.array().items({
-    //   name: Joi.string().max(30).allow(''),
-    //   value: Joi.string().allow(''),
-    // }),
-    // levels: Joi.array().items({
-    //   name: Joi.string().max(30).allow(''),
-    //   value: Joi.number().allow(''),
-    //   total: Joi.number().min(1).max(5).allow(''),
-    // }),
-    // stats: Joi.array().items({
-    //   name: Joi.string().max(30).allow(''),
-    //   value: Joi.number().allow(''),
-    //   total: Joi.number().min(1).max(5).allow(''),
-    // }),
+     properties: Joi.array().items({
+       name: Joi.string().max(40).required(),
+       type: Joi.string().required(),
+     }),
+     levels: Joi.array().items({
+       name: Joi.string().max(40).required(),
+       value: Joi.string().required(),
+       total: Joi.string().min(1).max(5).required(),
+     }),
+     stats: Joi.array().items({
+       name: Joi.string().max(40).required(),
+       value: Joi.string().required(),
+       total: Joi.string().required(),
+     }),
     fileType: Joi.string().valid('image', 'audio', 'video').required(),
     ownerId: Joi.string().alphanum().min(12).max(24).required(),
 

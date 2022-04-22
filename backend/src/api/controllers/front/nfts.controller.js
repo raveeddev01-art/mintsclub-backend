@@ -16,13 +16,14 @@ const {
 
 // API to create NFT
 exports.create = async (req, res, next) => {
+  console.log(req.body,"req.body")
   try {
     let payload = {
       name: req.body.name,
       description: req.body.description,
-      // attributes: JSON.parse(req.body.attributes),
-      // levels: JSON.parse(req.body.levels),
-      // stats: JSON.parse(req.body.stats),
+      properties: JSON.parse(req.body.properties),
+      levels: JSON.parse(req.body.levels),
+      stats: JSON.parse(req.body.stats),
       fileType: req.body.fileType,
       ownerId: req.body.ownerId,
       userId: req.body.userId,
@@ -52,6 +53,8 @@ exports.create = async (req, res, next) => {
       });
     }
 
+
+
     // let payloadProperties = {
     //   attributes: payload.attributes,
     //   levels: payload.levels,
@@ -76,6 +79,7 @@ exports.create = async (req, res, next) => {
       nft: payload,
     });
   } catch (error) {
+    console.log(error)
     return next(error);
   }
 };
@@ -89,6 +93,7 @@ exports.storeDataInDb = async (req, res, next) => {
         message: 'please provide data',
       });
     }
+    console.log(req.body,"req.body while storing data")
 
     let createNFTPayload = req.body.data;
     createNFTPayload.image = req.body.image;

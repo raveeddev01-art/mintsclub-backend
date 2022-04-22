@@ -21,6 +21,9 @@ const NFTSchema = new mongoose.Schema(
     image: { type: String },
     fileType: { type: String },
     royalty: { type: String },
+    properties:{type:Array},
+    levels:{type:Array},
+    stats:{type:Array},
     //size: { type: String },
     copies: { type: Number, default: 0 },
     status: { type: Number, default: 1 }, // 1 = Put on Sale, 2 = Instant Sale Price, 3 = Unlock Purchased
