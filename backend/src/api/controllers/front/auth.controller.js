@@ -23,6 +23,7 @@ exports.register = async (req, res, next) => {
     const email = payload.email.toLowerCase();
     const address = payload.address;
     const username = payload.username;
+    const profileImage = null;
     const isApproved = payload.isApproved;
     const totalETH = 0;
 
