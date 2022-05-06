@@ -20,9 +20,9 @@ exports.create = async (req, res, next) => {
     let payload = {
       name: req.body.name,
       description: req.body.description,
-      properties: JSON.parse(req.body.properties),
-      levels: JSON.parse(req.body.levels),
-      stats: JSON.parse(req.body.stats),
+      properties: req.body.properties,
+      levels: req.body.levels,
+      stats: req.body.stats,
       fileType: req.body.fileType,
       ownerId: req.body.ownerId,
       userId: req.body.userId,

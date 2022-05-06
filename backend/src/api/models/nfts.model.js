@@ -17,7 +17,7 @@ const NFTSchema = new mongoose.Schema(
     currentPrice: { type: Number },
     ownerAddress: { type: String },
     txHash: { type: String },
-    tokenId:{type:Number},
+    tokenId: { type: Number },
     image: { type: String },
     fileType: { type: String },
     royalty: { type: String },
@@ -35,11 +35,24 @@ const NFTSchema = new mongoose.Schema(
     highestBid: { type: Number },
     copiesForAuction: { type: Number },
     remainingCopies: { type: Number },
+    properties: [
+      {
+        type: Object,
+      },
+    ],
+    levels: [
+      {
+        type: Object,
+      },
+    ],
+    stats: [
+      {
+        type: Object,
+      },
+    ],
   },
   { timestamps: true, collection: 'nfts' }
 );
-
-
 
 /**
  * @typedef NFT
