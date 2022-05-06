@@ -239,6 +239,19 @@ exports.get = async (req, res, next) => {
           path: '$user',
         },
       },
+      {
+        $lookup: {
+          from: 'collections',
+          foreignField: '_id',
+          localField: 'collectionId',
+          as: 'collection',
+        },
+      },
+      {
+        $unwind: {
+          path: '$collection',
+        },
+      },
     ];
     let nftDetail = await NFT.aggregate(pipeline);
 
