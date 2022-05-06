@@ -388,6 +388,7 @@ exports.list = async (req, res, next) => {
           userId: 1,
           auctionEndDate: 1,
           copiesForAuction: 1,
+          remainingCopies: 1,
           sellingMethod: 1,
           owner: {
             _id: '$owner._id',
