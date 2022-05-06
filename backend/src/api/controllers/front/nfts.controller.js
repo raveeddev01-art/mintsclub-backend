@@ -20,9 +20,9 @@ exports.create = async (req, res, next) => {
     let payload = {
       name: req.body.name,
       description: req.body.description,
-      // attributes: JSON.parse(req.body.attributes),
-      // levels: JSON.parse(req.body.levels),
-      // stats: JSON.parse(req.body.stats),
+      properties: JSON.parse(req.body.properties),
+      levels: JSON.parse(req.body.levels),
+      stats: JSON.parse(req.body.stats),
       fileType: req.body.fileType,
       ownerId: req.body.ownerId,
       userId: req.body.userId,
@@ -52,17 +52,17 @@ exports.create = async (req, res, next) => {
       });
     }
 
-    // let payloadProperties = {
-    //   attributes: payload.attributes,
-    //   levels: payload.levels,
-    //   stats: payload.stats,
-    // };
+    let payloadProperties = {
+      properties: payload.properties,
+      levels: payload.levels,
+      stats: payload.stats,
+    };
 
     payload.metaData = await addContent({
       name: payload.name,
       description: payload.description,
       image: payload.image,
-      // properties: payloadProperties,
+      properties: payloadProperties,
       nftOwnerId: payload.ownerId,
       ownerAddress: payload.ownerAddress,
     });
