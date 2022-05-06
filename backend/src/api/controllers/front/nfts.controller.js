@@ -513,6 +513,14 @@ exports.getNFTsbyCollection = async (req, res, next) => {
       {
         $match: { collectionId: ObjectId(collectionId) },
       },
+      {
+        $lookup: {
+          from: 'users',
+          foreignField: '_id',
+          localField: 'ownerId',
+          as: 'owner',
+        },
+      },
     ]);
 
     res.status(200).send({ success: true, data: NFTs });
