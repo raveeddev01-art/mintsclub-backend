@@ -15,3 +15,4 @@ router.route('/myNftListing').get(controller.myNftListing);
 router.route('/getNFTsByCollection').post(controller.getNFTsbyCollection);
 router.route('/buyNft').post(controller.buyNow);
 module.exports = router;
+

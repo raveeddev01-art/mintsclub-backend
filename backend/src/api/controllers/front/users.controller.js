@@ -1,11 +1,11 @@
-const fs = require('fs');
-const ObjectId = require('mongoose').Types.ObjectId;
-const UserModal = require('../../models/users.model');
-const { addImage, addContent } = require('../../utils/uploadImage');
-const validation = require('../../middlewares/front/validation');
-const Web3 = require('web3'); // https://www.npmjs.com/package/web3
-const path = require('path');
-const validUrl = require('valid-url');
+const fs = require("fs");
+const ObjectId = require("mongoose").Types.ObjectId;
+const UserModal = require("../../models/users.model");
+const { addImage, addContent } = require("../../utils/uploadImage");
+const validation = require("../../middlewares/front/validation");
+const Web3 = require("web3"); // https://www.npmjs.com/package/web3
+const path = require("path");
+const validUrl = require("valid-url");
 
 exports.create = async (req, res, next) => {
   try {
@@ -17,34 +17,39 @@ exports.create = async (req, res, next) => {
 };
 
 exports.updateProfile = async (req, res, next) => {
-  if (req.body.isApproved) {
-   let payload = { userId: req.body.userId };
-    if (req.body.isApproved === 'false') {
-      payload.isApproved = false;
-    } else {
-      payload.isApproved = true;
-    }
-    try {
-      let user = await UserModal.findByIdAndUpdate(
-        { _id: ObjectId(payload.userId) },
-        { $set: payload },
-        { new: true }
-      );
-      return res.send({
-        status: true,
-        user,
-        message: 'User profile updated successfully.',
-      });
-    } catch (err) {
-      next(err);
-    }
-  }
+  console.log(req.body, "req.body");
+  // if (req.body.isApproved) {
 
-   payload = '';
+  //   let payload = { userId: req.body.userId};
+  //   console.log(payload,"payload============>")
+  //   procecss.exit()
+  //   if (req.body.isApproved === 'false') {
+  //     payload.isApproved = false;
+  //   } else {
+  //     payload.isApproved = true;
+  //   }
+
+  //   try {
+  //     let user = await UserModal.findByIdAndUpdate(
+  //       { _id: ObjectId(payload.userId) },
+  //       { $set: payload },
+  //       { new: true }
+  //     );
+  //     return res.send({
+  //       status: true,
+  //       user,
+  //       message: 'User profile updated successfully.',
+  //     });
+  //   } catch (err) {
+  //     next(err);
+  //   }
+  // }
+
   try {
     payload = {
-      userId: req.body.userId,
-      bio: req.body.bio,
+      email: req.body.email,
+      username: req.body.username,
+      userId:req.body.userId,
     };
 
     const { error } = validation.validateUserProfile(payload);
@@ -53,18 +58,19 @@ exports.updateProfile = async (req, res, next) => {
       let errorMsg = error.details[0].message;
       return res.status(400).send({ status: false, message: errorMsg });
     }
+    console.log(payload,"payload=>")
 
     if (req.body.twitterLink && !validUrl.isUri(req.body.twitterLink)) {
       return res
         .status(400)
-        .send({ status: false, message: 'Enter a valid twitter Link' });
+        .send({ status: false, message: "Enter a valid twitter Link" });
     } else {
       payload.twitterLink = req.body.twitterLink;
     }
     if (req.body.instaLink && !validUrl.isUri(req.body.instaLink)) {
       return res
         .status(400)
-        .send({ status: false, message: 'Enter a valid instagram Link' });
+        .send({ status: false, message: "Enter a valid instagram Link" });
     } else {
       payload.instaLink = req.body.instaLink;
     }
@@ -72,7 +78,7 @@ exports.updateProfile = async (req, res, next) => {
     if (req.body.webLink && !validUrl.isUri(req.body.webLink)) {
       return res
         .status(400)
-        .send({ status: false, message: 'Enter a valid website Link' });
+        .send({ status: false, message: "Enter a valid website Link" });
     } else {
       payload.webLink = req.body.webLink;
     }
@@ -96,7 +102,7 @@ exports.updateProfile = async (req, res, next) => {
         newPayload[key] = await addImage(imgData);
       }
     }
-
+console.log(newPayload,"newPayload=======================>")
     let user = await UserModal.findByIdAndUpdate(
       { _id: ObjectId(newPayload.userId) },
       { $set: newPayload },
@@ -105,7 +111,7 @@ exports.updateProfile = async (req, res, next) => {
     return res.send({
       status: true,
       user,
-      message: 'User profile updated successfully.',
+      message: "User profile updated successfully.",
     });
   } catch (error) {
     return next(error);
@@ -129,7 +135,7 @@ exports.getCreators = async (req, res, next) => {
     return res.send({
       status: true,
       data: users,
-      message: 'Authors fetched succeSsfully',
+      message: "Authors fetched succeSsfully",
     });
   } catch (error) {
     return next(error);
@@ -140,8 +146,8 @@ exports.topSellers = async (req, res, next) => {
   try {
     let { page, limit } = req.query;
 
-    page = page !== undefined && page !== '' ? parseInt(page) : 1;
-    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
+    page = page !== undefined && page !== "" ? parseInt(page) : 1;
+    limit = limit !== undefined && limit !== "" ? parseInt(limit) : 10;
 
     const total = await UserModal.countDocuments({});
 
@@ -167,7 +173,7 @@ exports.topSellers = async (req, res, next) => {
 
     return res.send({
       success: true,
-      message: 'Top Sellers fetched successfully',
+      message: "Top Sellers fetched successfully",
       data: {
         topSellers: users,
         pagination: {
@@ -203,12 +209,12 @@ exports.getUser = async (req, res, next) => {
       return res.send({
         success: true,
         data: user,
-        message: 'user fetched successfully',
+        message: "user fetched successfully",
       });
     }
     return res.send({
       success: false,
-      message: 'User does not exist',
+      message: "User does not exist",
     });
   } catch (error) {
     return next(error);

@@ -33,6 +33,7 @@ exports.create = async (req, res, next) => {
       ownerAddress: req.body.ownerAddress,
       copies: req.body.copies,
     };
+    console.log(payload,"payload")
     const { error } = validation.validateNFTSchema(payload);
 
     if (error) {
@@ -52,8 +53,6 @@ exports.create = async (req, res, next) => {
         message: 'image field of type(image/video/audio) is required',
       });
     }
-
-
 
     let payloadProperties = {
       properties: payload.properties,
@@ -242,6 +241,19 @@ exports.get = async (req, res, next) => {
       {
         $unwind: {
           path: '$user',
+        },
+      },
+      {
+        $lookup: {
+          from: 'collections',
+          foreignField: '_id',
+          localField: 'collectionId',
+          as: 'collection',
+        },
+      },
+      {
+        $unwind: {
+          path: '$collection',
         },
       },
     ];
@@ -517,6 +529,14 @@ exports.getNFTsbyCollection = async (req, res, next) => {
     const NFTs = await NFT.aggregate([
       {
         $match: { collectionId: ObjectId(collectionId) },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          foreignField: '_id',
+          localField: 'ownerId',
+          as: 'owner',
+        },
       },
     ]);
 

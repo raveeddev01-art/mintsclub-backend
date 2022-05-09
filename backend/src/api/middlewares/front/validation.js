@@ -107,7 +107,8 @@ const validateUser = (user) => {
 const validateUserProfile = (data) => {
   const schema = Joi.object().keys({
     userId: Joi.string().alphanum().min(12).max(24).required(),
-    bio: Joi.string().max(600).allow(''),
+    email: Joi.string().email().required(),
+    username: Joi.string().max(50).required(),
   });
   const options = {
     errors: {
