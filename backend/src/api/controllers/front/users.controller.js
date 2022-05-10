@@ -50,6 +50,7 @@ exports.updateProfile = async (req, res, next) => {
       email: req.body.email,
       username: req.body.username,
       userId:req.body.userId,
+      bio:req.body.bio
     };
 
     const { error } = validation.validateUserProfile(payload);
