@@ -539,7 +539,16 @@ exports.getNFTsbyCollection = async (req, res, next) => {
         },
       },
     ]);
+    for (const nft of NFTs) {
+      const findCount = await Likes.findOne().where('nftId', nft._id);
+      nft.likeCount = 0;
+      if (findCount) {
+        nft.likeCount = findCount.count;
+      }
+    }
 
+    // const nftLikes = await Likes.findOne({ collectionId: req.body.collectionId });
+    // NFTs.likesCount=nftLikes['count']
     res.status(200).send({ success: true, data: NFTs });
   } catch (err) {
     res.status(200).send({ success: false, error: err });

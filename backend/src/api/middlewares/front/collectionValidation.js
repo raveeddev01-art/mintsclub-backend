@@ -4,9 +4,9 @@ const validateCollectionSchema = (data) => {
   const schema = Joi.object().keys({
     userId: Joi.string().alphanum().min(12).max(24).required(),
     categoryId: Joi.string().alphanum().min(12).max(24).allow(''),
-    name: Joi.string().min(1).max(100).required(),
+    name: Joi.string().min(1).max(55).required(),
     url: Joi.string().allow(''),
-    description: Joi.string().min(4).max(150).allow(''),
+    description: Joi.string().min(3).max(500).allow(''),
     // category: Joi.string().allow(''),
   });
   const options = {
