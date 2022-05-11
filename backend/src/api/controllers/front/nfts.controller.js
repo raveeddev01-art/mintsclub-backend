@@ -14,6 +14,7 @@ const {
   collectionDefaultImage,
 } = require('../../../config/vars');
 
+
 // API to create NFT
 exports.create = async (req, res, next) => {
   console.log(req.body,"req.body")

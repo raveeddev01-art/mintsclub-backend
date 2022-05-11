@@ -3,7 +3,7 @@ const Joi = require('@hapi/joi').extend(require('@joi/date'));
 const validateNFTSchema = (data) => {
   const schema = Joi.object().keys({
     name: Joi.string().min(1).max(100).required(),
-    description: Joi.string().min(1).max(500).required(),
+    description: Joi.string().min(3).max(500).required(),
     creatorId: Joi.string().alphanum().min(12).max(24).allow(''),
     properties: Joi.array().items({
       name: Joi.string().max(40).allow(''),
@@ -118,7 +118,7 @@ const validateNFTimedTAuctionSchema = (data) => {
 const validateNFFixedTAuctionSchema = (data) => {
   const schema = Joi.object().keys({
     _id: Joi.string().alphanum().min(12).max(24).required(),
-    copiesForAuction: Joi.number().min(1).max(999).required(),
+    copiesForAuction: Joi.number().min(0).max(0).required(),
     sellingMethod: Joi.number().valid(1, 2).required(),
     sellingConfig: Joi.object()
       .keys({
