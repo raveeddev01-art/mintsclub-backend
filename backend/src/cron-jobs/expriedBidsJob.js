@@ -9,7 +9,7 @@ const ItemActivity = require('../api/models/item-activity.modal');
 
 module.exports.startCron = () => {
   try {
-    cron.schedule('*/30 * * * * * ', async () => {
+    cron.schedule('*/3 * * * * * ', async () => {
       const auctionEndNftsList = await nft.find({
         auctionEndDate: { $exists: true, $nin: null },
       });
