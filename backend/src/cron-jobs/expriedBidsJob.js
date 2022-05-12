@@ -17,11 +17,13 @@ module.exports.startCron = () => {
       if (auctionEndNftsList.length > 0) {
         for (const auctionEndNft of auctionEndNftsList) {
           // auctionEndNftsList.forEach(async (auctionEndNft) => {
-
+          
           let endDate = moment(auctionEndNft.auctionEndDate).utc(true);
           let currentDateTime = new moment().utc(true);
 
-          if (endDate.diff(currentDateTime) <= 0) {
+          // if (endDate.diff(currentDateTime) <= 0) {
+            if(auctionEndNft.auctionEnded){
+       
             const bid = await Bid.find({
               nftId: auctionEndNft._id,
               bidAmount: auctionEndNft.highestBid,
@@ -44,6 +46,7 @@ module.exports.startCron = () => {
                   collectionId: auctionEndNft.collectionId,
                   categoryId: auctionEndNft.categoryId,
                   currentPrice: bidData.bidAmount,
+                  auctionEnded:false,
                   metaData: auctionEndNft.metaData,
                   image: auctionEndNft.image,
                   highestBid: 0,
@@ -79,6 +82,7 @@ module.exports.startCron = () => {
                   remainingCopies: remainingCopies,
                   auctionEndDate: null,
                   auctionStartDate: null,
+                  auctionEnded:false,
                   sellingMethod: 0,
                   sellingConfig: {
                     startPrice: {
@@ -138,6 +142,7 @@ module.exports.startCron = () => {
                   remainingCopies: auctionEndNft.copiesForAuction,
                   copiesForAuction: 0,
                   currentPrice: auctionEndNft.highestBid,
+                  auctionEnded:false,
                   highestBid: 0,
                   sellingConfig: {
                     startPrice: {
@@ -186,6 +191,7 @@ module.exports.startCron = () => {
               auctionStartDate: null,
               sellingMethod: 0,
               copiesForAuction: 0,
+              auctionEnded:false,
               sellingConfig: {
                 startPrice: {
                   currency: null,

@@ -99,6 +99,7 @@ exports.storeDataInDb = async (req, res, next) => {
     createNFTPayload.image = req.body.image;
     createNFTPayload.highestBid = 0;
     createNFTPayload.currentPrice = 0;
+    createNFTPayload.auctionEnded = false;
     createNFTPayload.tokenId = Number(req.body.nftToken);
     console.log(createNFTPayload, 'createNFTPayload');
 
@@ -794,3 +795,15 @@ exports.buyNow = async (req, res, next) => {
     return next(error);
   }
 };
+exports.endAuction=async (req,res,next)=>{
+  try{
+    const { id } = req.params;
+    await NFT.findByIdAndUpdate({_id:id},{ $set: { auctionEnded: true } })
+    res.send({
+      success:true,
+      message:"Auction Ended Successfully"
+    })
+  }catch(err){
+    return next(error);
+  }
+}

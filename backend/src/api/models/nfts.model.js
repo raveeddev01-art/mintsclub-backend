@@ -38,6 +38,7 @@ const NFTSchema = new mongoose.Schema(
     highestBid: { type: Number },
     copiesForAuction: { type: Number },
     remainingCopies: { type: Number },
+    auctionEnded:{type:Boolean},
     properties: [
       {
         type: Object,
