@@ -118,7 +118,7 @@ const validateNFTimedTAuctionSchema = (data) => {
 const validateNFFixedTAuctionSchema = (data) => {
   const schema = Joi.object().keys({
     _id: Joi.string().alphanum().min(12).max(24).required(),
-    copiesForAuction: Joi.number().min(0).max(0).required(),
+    copiesForAuction: Joi.number().min(0).max(999).required(),
     sellingMethod: Joi.number().valid(1, 2).required(),
     sellingConfig: Joi.object()
       .keys({

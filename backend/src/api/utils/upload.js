@@ -50,6 +50,7 @@ const ipfs = create(ipfsServerUrl);
 
 exports.addImage = async (data) => {
   const fileAdded = await ipfs.add(data);
+  console.log(fileAdded,"fileAdded==>")
   const imgHash = fileAdded.cid.toString();
   return `${ipfsBaseUrl}${imgHash}`;
   //return `${'ipfs/'}${imgHash}`;
