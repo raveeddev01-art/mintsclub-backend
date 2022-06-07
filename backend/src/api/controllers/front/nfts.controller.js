@@ -398,6 +398,7 @@ exports.list = async (req, res, next) => {
           currentPrice: 1,
           collectionId: 1,
           ownerId: 1,
+          creatorId:1,
           highestBid: 1,
           userId: 1,
           auctionEndDate: 1,
