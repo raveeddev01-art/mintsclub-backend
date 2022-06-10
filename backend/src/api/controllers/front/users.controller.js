@@ -46,11 +46,28 @@ exports.updateProfile = async (req, res, next) => {
   // }
 
   try {
+    if(req.body.isApproved){
+      let payload={
+        userId:req.body.userId,
+        isApproved:true
+      }
+
+      let user = await UserModal.findByIdAndUpdate(
+        { _id: ObjectId(payload.userId) },
+        { $set: payload },
+        { new: true }
+      );
+      return res.send({
+        status: true,
+        user,
+        message: "User profile updated successfully.",
+      });
+    }
     payload = {
       email: req.body.email,
       username: req.body.username,
       userId:req.body.userId,
-      bio:req.body.bio
+      bio:req.body.bio,
     };
 
     const { error } = validation.validateUserProfile(payload);
