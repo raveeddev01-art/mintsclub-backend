@@ -14,7 +14,7 @@ router.route('/delete/:nftId').delete(controller.delete);
 router.route('/myNftListing').get(controller.myNftListing);
 router.route('/getNFTsByCollection').post(controller.getNFTsbyCollection);
 router.route('/buyNft').post(controller.buyNow);
-router.route('/endAuction/:id').patch(controller.endAuction);
+router.route('/endAuction').post(controller.endAuction);
 module.exports = router;
 
 
