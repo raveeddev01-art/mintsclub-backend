@@ -986,7 +986,7 @@ exports.endAuction=async (req,res,next)=>{
         { $set: payload }
         // { new: true }
       );
-      res.status(200).send({success:true,message:"auctionEnded successfully"})
+      res.status(200).send({success:true,message:"Auction Ended successfully"})
     // }
   }catch(err){
     console.log(err,"error while end auction")
