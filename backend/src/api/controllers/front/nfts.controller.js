@@ -799,7 +799,6 @@ exports.buyNow = async (req, res, next) => {
 };
 exports.endAuction=async (req,res,next)=>{
   try{
-    // if(auctionEndNft.auctionEnded){
       const auctionEndNft=req.body.nft;
        
       const bid = await Bid.find({
@@ -831,13 +830,13 @@ exports.endAuction=async (req,res,next)=>{
             remainingCopies: auctionEndNft.copiesForAuction,
           };
 
-          const NFT = await nft.create(payload);
+          const NFTCreated = await NFT.create(payload);
 
           let collectionRecord = await Collection.findOne({
             _id: auctionEndNft.collectionId,
           });
 
-          collectionRecord.nft.push(NFT._id);
+          collectionRecord.nft.push(NFTCreated._id);
           collectionRecord.save();
 
           let nftTokenDetail = await NftTokens.findOne({
@@ -846,7 +845,7 @@ exports.endAuction=async (req,res,next)=>{
 
           let nftTokenPayload = {
             nftToken: nftTokenDetail.nftToken,
-            nftId: NFT._id,
+            nftId: NFTCreated._id,
             tokenStandard: nftTokenDetail.tokenStandard,
           };
 
@@ -874,7 +873,7 @@ exports.endAuction=async (req,res,next)=>{
             },
           };
 
-          let nftUpdate = await nft.findByIdAndUpdate(
+          let nftUpdate = await NFT.findByIdAndUpdate(
             { _id: auctionEndNft._id },
             { $set: newPayload }
             // { new: true }
