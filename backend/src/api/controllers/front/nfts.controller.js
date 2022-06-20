@@ -177,6 +177,7 @@ exports.edit = async (req, res, next) => {
         return res.status(400).send({ status: false, message: errorMsg });
       }
       payload.currentPrice = Number(payload.sellingConfig.price.amount);
+      payload.highestBid=Number(payload.sellingConfig.price.amount)
     } else {
       const { error } = validation.validateNFTimedTAuctionSchema(payload);
 
@@ -197,8 +198,9 @@ exports.edit = async (req, res, next) => {
       payload.sellingConfig.duration.endDate = endDate;
       payload.auctionStartDate = startDate;
       payload.auctionEndDate = endDate;
+      payload.highestBid=Number(payload.sellingConfig.startPrice.amount)
     }
-
+   
     const nft = await NFT.findByIdAndUpdate(
       { _id: payload._id },
       { $set: payload }
@@ -206,7 +208,7 @@ exports.edit = async (req, res, next) => {
     );
     return res.send({
       success: true,
-      message: 'successfully put on sell',
+      message: 'Successfully put on sell',
       nft,
     });
   } catch (error) {
@@ -828,6 +830,7 @@ exports.endAuction=async (req,res,next)=>{
             image: auctionEndNft.image,
             highestBid: 0,
             remainingCopies: auctionEndNft.copiesForAuction,
+            tokenId:auctionEndNft.tokenId,
           };
 
           const NFTCreated = await NFT.create(payload);
@@ -920,6 +923,7 @@ exports.endAuction=async (req,res,next)=>{
             copiesForAuction: 0,
             currentPrice: auctionEndNft.highestBid,
             auctionEnded:false,
+            tokenId:auctionEndNft.tokenId,
             highestBid: 0,
             sellingConfig: {
               startPrice: {
@@ -986,6 +990,8 @@ exports.endAuction=async (req,res,next)=>{
         { $set: payload }
         // { new: true }
       );
+      let tst=[ auctionEndNft._id]
+        await Bid.deleteMany({nftId: auctionEndNft._id})
       res.status(200).send({success:true,message:"Auction Ended successfully"})
     // }
   }catch(err){
