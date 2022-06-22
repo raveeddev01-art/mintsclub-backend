@@ -667,6 +667,7 @@ exports.buyNow = async (req, res, next) => {
 
     if (buyNftDetail && buyNftDetail.copiesForAuction > 0) {
       if (buyNftDetail.remainingCopies > buyNftDetail.copiesForAuction) {
+
         let newPayload = {
           ownerId: payload.userId,
           userId: payload.userId,
@@ -707,8 +708,7 @@ exports.buyNow = async (req, res, next) => {
         await NftTokens.create(nftTokenPayload);
 
         const remainingCopies =
-          buyNftDetail.copies - buyNftDetail.copiesForAuction;
-
+          buyNftDetail.remainingCopies - buyNftDetail.copiesForAuction;
         let newPayloadCopies = {
           copiesForAuction: 0,
           remainingCopies: remainingCopies,
