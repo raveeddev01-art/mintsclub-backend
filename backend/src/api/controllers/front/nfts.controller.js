@@ -852,7 +852,7 @@ exports.endAuction = async (req, res, next) => {
         await NftTokens.create(nftTokenPayload);
 
         const remainingCopies =
-          auctionEndNft.copies - auctionEndNft.copiesForAuction;
+          auctionEndNft.remainingCopies - auctionEndNft.copiesForAuction;
 
         let newPayload = {
           copiesForAuction: 0,
