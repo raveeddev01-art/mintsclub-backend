@@ -89,6 +89,7 @@ exports.live = async (req, res, next) => {
           fileType: 1,
           ownerId: 1,
           highestBid: 1,
+          ownerAddress:1,
           owner: {
             _id: '$owner._id',
             username: '$owner.username',
