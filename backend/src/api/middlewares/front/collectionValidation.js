@@ -7,6 +7,7 @@ const validateCollectionSchema = (data) => {
     name: Joi.string().min(1).max(55).required(),
     url: Joi.string().allow(''),
     description: Joi.string().min(3).max(500).allow(''),
+    ownerAddress:Joi.string().min(3).max(40).required()
     // category: Joi.string().allow(''),
   });
   const options = {

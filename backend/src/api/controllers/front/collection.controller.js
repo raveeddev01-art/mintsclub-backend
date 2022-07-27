@@ -19,6 +19,7 @@ exports.create = async (req, res, next) => {
       name: req.body.name,
       url: req.body.url,
       description: req.body.description,
+      ownerAddress:req.body.ownerAddress
       //category: req.body.category,
     };
 
