@@ -69,6 +69,7 @@ exports.create = async (req, res, next) => {
       });
     }
 
+console.log(newPayload,"newPayload")
     const collection = await Collection.create(newPayload);
     return res.status(201).send({
       success: true,
@@ -302,6 +303,7 @@ exports.list = async (req, res, next) => {
           description: { $first: '$description' },
           logo: { $first: '$logo' },
           featuredImg: { $first: '$featuredImg' },
+          ownerAddress: { $first: '$ownerAddress' },
           banner: { $first: '$banner' },
           username: { $first: '$user.username' },
           profileImage: { $first: '$user.profileImage' },

@@ -19,6 +19,7 @@ const CollectionSchema = new mongoose.Schema(
     banner: { type: String },
     url: { type: String },
     description: { type: String },
+    ownerAddress:{type:String},
     nft: [
       {
         type: mongoose.Schema.Types.ObjectId,
