@@ -9,5 +9,6 @@ router.route('/updateProfile').put(profileUpload, controller.updateProfile);
 router.route('/creators').post(controller.getCreators);
 router.route('/top-sellers').get(controller.topSellers);
 router.route('/:userId').get(controller.getUser);
+router.route('/subscribe').post(controller.subscribeUser);
 
 module.exports = router;

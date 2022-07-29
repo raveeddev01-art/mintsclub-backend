@@ -6,7 +6,13 @@ const validation = require("../../middlewares/front/validation");
 const Web3 = require("web3"); // https://www.npmjs.com/package/web3
 const path = require("path");
 const validUrl = require("valid-url");
+const mailchimp = require('@mailchimp/mailchimp_marketing');
+const { mailChimp, sendGrid } = require('../../../config/vars');
 
+mailchimp.setConfig({
+  apiKey: mailChimp.apiKey,
+  server: mailChimp.server,
+});
 exports.create = async (req, res, next) => {
   try {
     let user = await UserModal.create(req.body);
@@ -237,4 +243,39 @@ exports.getUser = async (req, res, next) => {
   } catch (error) {
     return next(error);
   }
+};
+
+exports.subscribeUser = async (req,res,next) => {
+  let listUniqueId = mailChimp.listId;
+    try {
+      // const response = await mailchimp.lists.getListMembersInfo(listUniqueId,{status:"subscribed",count:1000});
+      // if(response?.members?.length>0){
+      //   let foundUser=response.members.find((member)=>member.email_address===req.body.email)
+      //   // console.log(foundUser,"foundUser")
+      // }
+    
+      // console.log(response.members[0].email_address,"first email address");
+     await mailchimp.lists.addListMember(listUniqueId, {
+        email_address: req.body.email,
+        status: 'subscribed',
+      });
+      // console.log(response.members.length,"response==>")
+      res.status(201).send({
+        success:true,
+        message:"Subscribed successfully",
+    
+      })
+    } catch (error) {
+      console.log(error,"error")
+      console.log(JSON.parse(error.response.text).detail,"error")
+      if(JSON.parse(error.response.text).detail.includes("already a list member")){
+
+        res.status(400).send({success:false,message:"Email is already subscribed"})
+      }else {
+        res.status(400).send({success:false,message:JSON.parse(error.response.text).detail})
+
+      }
+      // return next(JSON.parse(error.response.text));
+
+    }
 };
