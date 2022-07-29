@@ -536,6 +536,7 @@ exports.popular = async (req, res, next) => {
           logo: { $first: '$logo' },
           featuredImg: { $first: '$featuredImg' },
           banner: { $first: '$banner' },
+          ownerAddress:{$first: '$ownerAddress'},
           soldCopies: {
             $push: {
               $subtract: ['$nft.copies', '$nft.remainingCopies'],
