@@ -17,7 +17,6 @@ const {
 
 // API to create NFT
 exports.create = async (req, res, next) => {
-  console.log(req.body, "req.body}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}");
   try {
     let payload = {
       name: req.body.name,
@@ -34,7 +33,6 @@ exports.create = async (req, res, next) => {
       ownerAddress: req.body.ownerAddress,
       copies: req.body.copies,
     };
-    console.log(payload, "payload");
     const { error } = validation.validateNFTSchema(payload);
 
     if (error) {

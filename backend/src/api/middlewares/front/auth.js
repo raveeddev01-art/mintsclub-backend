@@ -16,8 +16,10 @@ exports.authenticate = async (req, res, next) => {
         var decryption_string = req.headers['x-auth-token'];
 
         if (req.token) {
+          console.log("req.token",req.token)
           var bytes = CryptoJS.AES.decrypt(req.token, decryption_string);
           var decryptedData = bytes.toString(CryptoJS.enc.Utf8);
+          console.log(decryptedData,"decryptedData======>")
           if (decryptedData !== frontEncSecret) {
             const message = 'auth_request_required_front_error1';
             return res.status(405).json({ success: false, message });
@@ -43,10 +45,10 @@ exports.authenticate = async (req, res, next) => {
 };
 
 exports.userValidation = async (req, res, next) => {
+
   let flag = true;
   req.user = 0;
   if (req.headers['x-access-token']) {
-    console.log('i was called');
     await jwt.verify(
       req.headers['x-access-token'],
       pwEncruptionKey,
@@ -61,6 +63,7 @@ exports.userValidation = async (req, res, next) => {
       }
     );
   } else if (req.method.toLocaleLowerCase() !== 'options') {
+   return  res.send({ success: false, userDisabled: true, message: "unauthorized" });
     req.user = 0;
   }
 
