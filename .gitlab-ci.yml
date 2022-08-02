@@ -27,7 +27,7 @@ mintsclub-v2:
     - echo "Deploy to PM02 server"
     - ssh-add <(echo "$PM2_SSH_KEY")
     - rm -rf .git
-    - ssh -o StrictHostKeyChecking=no $PM2_USER@$SERVER_IP -p $SSH_PORT "cd /home/mints-club-v2; touch test_2; exit"
+    - ssh -o StrictHostKeyChecking=no $PM2_USER@$SERVER_IP -p $SSH_PORT "cd /home/mints-club-v2/backend-v2/backend; npm install; exit"
 #    - ssh -o StrictHostKeyChecking=no $PM2_USER@$SERVER_IP -p $SSH_PORT "cd /home/mintsclub-v2/mintsclub-v2/backend; git reset --hard; git pull origin task/MintsClubBackend-V2; cd /home/mintsclub-v2/mintsclub-v2/backend/backend; npm install; pm2 restart 0; exit"
   only:
     - task/MintsClubBackend-V2
