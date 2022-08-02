@@ -7,7 +7,7 @@ mintsclub-v2:
     - eval $(ssh-agent -s)
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
-    - echo "Deploy to PM02 server"
+    - echo "Deploy to AWS server"
     - ssh-add <(echo "$AWS_SSH_KEY")
     - rm -rf .git
     - ssh -o StrictHostKeyChecking=no $AWS_USER@$AWS_SERVER_IP "cd /home/mintsclub/mintsclub-prod/backend-v2/backend; git reset --hard; git pull origin task/MintsClubBackend-V2; npm install; pm2 restart backend-v2; exit"
