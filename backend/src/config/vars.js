@@ -13,7 +13,6 @@ module.exports = {
   emailAdd: process.env.EMAIL,
   mongo: {
     uri: process.env.MONGO_URI,
-    // uri:"mongodb+srv://admin:admin1234@mastercluster.ms0ko.mongodb.net/class_room?retryWrites=true&w=majority"
   },
   mailgunPrivateKey: process.env.MAILGUN_PRIVATE_KEY,
   mailgunDomain: process.env.MAILGUN_DOMAIN,
