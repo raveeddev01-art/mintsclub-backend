@@ -31,7 +31,7 @@ const validateNFTSchema = (data) => {
       .regex(/^0x[a-fA-F0-9]{40}$/)
       .allow(''),
 
-    copies: Joi.number().min(1).max(999).required(),
+    copies: Joi.number().min(1).max(1000000).required(),
   });
   const options = {
     errors: {
