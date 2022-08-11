@@ -4,6 +4,7 @@ const controller = require('../../../controllers/front/collection.controller');
 const { collectionUpload } = require('../../../utils/uploadImage');
 const middleware=require('../../../middlewares/front/auth')
 
+
 router.route('/create').post(middleware.userValidation,collectionUpload, controller.create);
 router.route('/edit').put(collectionUpload, controller.edit);
 router.route('/delete/:collectionId').delete(controller.delete);
