@@ -38,6 +38,7 @@ exports.collectionUpload = upload.fields([
   { name: 'featuredImg', maxCount: 1 },
   { name: 'banner', maxCount: 1 },
 ]);
+
 exports.profileUpload = upload.fields([
   { name: 'profileImage', maxCount: 1 },
   { name: 'bannerImage', maxCount: 1 },

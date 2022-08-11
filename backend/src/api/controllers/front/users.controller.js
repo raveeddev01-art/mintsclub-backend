@@ -6,8 +6,8 @@ const validation = require("../../middlewares/front/validation");
 const Web3 = require("web3"); // https://www.npmjs.com/package/web3
 const path = require("path");
 const validUrl = require("valid-url");
-const mailchimp = require('@mailchimp/mailchimp_marketing');
-const { mailChimp, sendGrid } = require('../../../config/vars');
+const mailchimp = require("@mailchimp/mailchimp_marketing");
+const { mailChimp, sendGrid } = require("../../../config/vars");
 
 mailchimp.setConfig({
   apiKey: mailChimp.apiKey,
@@ -52,11 +52,11 @@ exports.updateProfile = async (req, res, next) => {
   // }
 
   try {
-    if(req.body.isApproved){
-      let payload={
-        userId:req.body.userId,
-        isApproved:true
-      }
+    if (req.body.isApproved) {
+      let payload = {
+        userId: req.body.userId,
+        isApproved: true,
+      };
 
       let user = await UserModal.findByIdAndUpdate(
         { _id: ObjectId(payload.userId) },
@@ -69,20 +69,21 @@ exports.updateProfile = async (req, res, next) => {
         message: "User profile updated successfully.",
       });
     }
+    console.log(req.body,"req.body")
     payload = {
       email: req.body.email,
       username: req.body.username,
-      userId:req.body.userId,
-      bio:req.body.bio,
+      userId: req.body.userId,
+      bio: req.body.bio,
     };
 
     const { error } = validation.validateUserProfile(payload);
-
+    payload.profileImage = req.body.profileImage;
     if (error) {
       let errorMsg = error.details[0].message;
       return res.status(400).send({ status: false, message: errorMsg });
     }
-    console.log(payload,"payload=>")
+    console.log(payload, "payload=>");
 
     if (req.body.twitterLink && !validUrl.isUri(req.body.twitterLink)) {
       return res
@@ -114,19 +115,19 @@ exports.updateProfile = async (req, res, next) => {
 
     const newPayload = { ...payload, ...imagesPayload };
 
-    if (req.file) {
-      const imgData = fs.readFileSync(req.file.path);
-      newPayload.profileImage = await addImage(imgData);
-    }
+    // if (req.file) {
+    //   const imgData = fs.readFileSync(req.file.path);
+    //   newPayload.profileImage = await addImage(imgData);
+    // }
 
-    if (req.files) {
-      for (const key in req.files) {
-        const image = req.files[key][0];
-        const imgData = fs.readFileSync(image.path);
-        newPayload[key] = await addImage(imgData);
-      }
-    }
-console.log(newPayload,"newPayload=======================>")
+    // if (req.files) {
+    //   for (const key in req.files) {
+    //     const image = req.files[key][0];
+    //     const imgData = fs.readFileSync(image.path);
+    //     newPayload[key] = await addImage(imgData);
+    //   }
+    // }
+    console.log(newPayload, "newPayload=======================>");
     let user = await UserModal.findByIdAndUpdate(
       { _id: ObjectId(newPayload.userId) },
       { $set: newPayload },
@@ -245,37 +246,42 @@ exports.getUser = async (req, res, next) => {
   }
 };
 
-exports.subscribeUser = async (req,res,next) => {
+exports.subscribeUser = async (req, res, next) => {
   let listUniqueId = mailChimp.listId;
-    try {
-      // const response = await mailchimp.lists.getListMembersInfo(listUniqueId,{status:"subscribed",count:1000});
-      // if(response?.members?.length>0){
-      //   let foundUser=response.members.find((member)=>member.email_address===req.body.email)
-      //   // console.log(foundUser,"foundUser")
-      // }
-    
-      // console.log(response.members[0].email_address,"first email address");
-     await mailchimp.lists.addListMember(listUniqueId, {
-        email_address: req.body.email,
-        status: 'subscribed',
-        tags:["mintsClub.io"]
-      });
-      res.status(201).send({
-        success:true,
-        message:"Subscribed successfully",
-    
-      })
-    } catch (error) {
-      console.log(error,"error")
-      console.log(JSON.parse(error.response.text).detail,"error")
-      if(JSON.parse(error.response.text).detail.includes("already a list member")){
+  try {
+    // const response = await mailchimp.lists.getListMembersInfo(listUniqueId,{status:"subscribed",count:1000});
+    // if(response?.members?.length>0){
+    //   let foundUser=response.members.find((member)=>member.email_address===req.body.email)
+    //   // console.log(foundUser,"foundUser")
+    // }
 
-        res.status(400).send({success:false,message:"Email is already subscribed"})
-      }else {
-        res.status(400).send({success:false,message:JSON.parse(error.response.text).detail})
-
-      }
-      // return next(JSON.parse(error.response.text));
-
+    // console.log(response.members[0].email_address,"first email address");
+    await mailchimp.lists.addListMember(listUniqueId, {
+      email_address: req.body.email,
+      status: "subscribed",
+      tags: ["mintsClub.io"],
+    });
+    res.status(201).send({
+      success: true,
+      message: "Subscribed successfully",
+    });
+  } catch (error) {
+    console.log(error, "error");
+    console.log(JSON.parse(error.response.text).detail, "error");
+    if (
+      JSON.parse(error.response.text).detail.includes("already a list member")
+    ) {
+      res
+        .status(400)
+        .send({ success: false, message: "Email is already subscribed" });
+    } else {
+      res
+        .status(400)
+        .send({
+          success: false,
+          message: JSON.parse(error.response.text).detail,
+        });
     }
+    // return next(JSON.parse(error.response.text));
+  }
 };

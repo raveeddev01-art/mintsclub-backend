@@ -22,7 +22,6 @@ exports.create = async (req, res, next) => {
       ownerAddress:req.body.ownerAddress
       //category: req.body.category,
     };
-
     const { error } = validation.validateCollectionSchema(payload);
 
     if (error) {
@@ -32,7 +31,7 @@ exports.create = async (req, res, next) => {
 
     let imagesPayload = {
       logo: req.body.logo,
-      featuredImg: req.body.featuredImgUrl,
+      featuredImg: req.body.featuredImg,
       banner: req.body.bannerUrl,
     };
 
@@ -43,12 +42,12 @@ exports.create = async (req, res, next) => {
       newPayload.categoryId = payload.categoryId;
     }
 
-    if (req.files)
-      for (const key in req.files) {
-        const image = req.files[key][0];
-        const imgData = fs.readFileSync(image.path);
-        newPayload[key] = await addImage(imgData);
-      }
+    // if (req.files)
+    //   for (const key in req.files) {
+    //     const image = req.files[key][0];
+    //     const imgData = fs.readFileSync(image.path);
+    //     newPayload[key] = await addImage(imgData);
+    //   }
 
     if (!newPayload.logo) {
       return res.status(400).send({
