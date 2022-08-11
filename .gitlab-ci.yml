@@ -1,5 +1,5 @@
    
-mintsclub-v2:
+mintsclub-back-v2:
   stage: deploy
   before_script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
@@ -11,7 +11,6 @@ mintsclub-v2:
     - ssh-add <(echo "$AWS_SSH_KEY")
     - rm -rf .git
     - ssh -o StrictHostKeyChecking=no $AWS_USER@$AWS_SERVER_IP "cd /home/mintsclub/mintsclub-prod/backend-v2/backend; git reset --hard; git pull origin task/MintsClubBackend-V2; npm install; pm2 restart backend-v2; exit"
-#    - ssh -o StrictHostKeyChecking=no $PM2_USER@$SERVER_IP -p $SSH_PORT "cd /home/mintsclub-v2/mintsclub-v2/backend; git reset --hard; git pull origin task/MintsClubBackend-V2; cd /home/mintsclub/mintsclub-prod/backend-v2/backend; npm install; pm2 restart backend-v2; exit"
   only:
     - task/MintsClubBackend-V2
 
