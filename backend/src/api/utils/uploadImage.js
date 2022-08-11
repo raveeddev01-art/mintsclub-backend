@@ -51,7 +51,6 @@ exports.addImage = async (data) => {
 };
 exports.uploadFileToIpfs = async (formData) => {
   // console.log('formData=====>', formData.get('file'));
-  console.log("uploading files reached",pinataJWT)
   const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`;
 try{
   console.log(formData,"formData")
