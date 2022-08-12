@@ -259,7 +259,7 @@ exports.subscribeUser = async (req, res, next) => {
     await mailchimp.lists.addListMember(listUniqueId, {
       email_address: req.body.email,
       status: "subscribed",
-      tags: ["mintsClub.io"],
+      tags: ["mintsclub.io"],
     });
     res.status(201).send({
       success: true,
