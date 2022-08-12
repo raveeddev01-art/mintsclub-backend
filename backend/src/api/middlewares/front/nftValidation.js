@@ -65,11 +65,11 @@ const validateEditNftSchema = (data) => {
     // }),
 
     collectionId: Joi.string().alphanum().min(12).max(24).required(),
-    currentPrice: Joi.number().min(1).max(999).required(),
+    currentPrice: Joi.number().required(),
     ownerAddress: Joi.string()
       .regex(/^0x[a-fA-F0-9]{40}$/)
       .allow(''),
-    copies: Joi.number().min(1).max(999).required(),
+    copies: Joi.number().min(1).max(100000).required(),
   });
   const options = {
     errors: {
@@ -87,7 +87,7 @@ const validateNFTimedTAuctionSchema = (data) => {
     auctionStartDate: Joi.date().allow(''),
     sellId:Joi.number().required(),
     auctionEndDate: Joi.date().allow(''),
-    copiesForAuction: Joi.number().min(1).max(999).required(),
+    copiesForAuction: Joi.number().min(1).max(100000).required(),
 
     sellingMethod: Joi.number().valid(1, 2).required(),
     sellingConfig: Joi.object()
@@ -95,7 +95,7 @@ const validateNFTimedTAuctionSchema = (data) => {
         startPrice: Joi.object()
           .keys({
             currency: Joi.string().valid('ETH').required(),
-            amount: Joi.number().max(999).invalid(0).required(),
+            amount: Joi.number().max(100000).invalid(0).required(),
           })
           .required(),
         duration: Joi.object()
@@ -119,7 +119,7 @@ const validateNFTimedTAuctionSchema = (data) => {
 const validateNFFixedTAuctionSchema = (data) => {
   const schema = Joi.object().keys({
     _id: Joi.string().alphanum().min(12).max(24).required(),
-    copiesForAuction: Joi.number().min(0).max(999).required(),
+    copiesForAuction: Joi.number().min(0).max(100000).required(),
     sellId:Joi.number().required(),
     sellingMethod: Joi.number().valid(1, 2).required(),
     sellingConfig: Joi.object()
@@ -127,7 +127,7 @@ const validateNFFixedTAuctionSchema = (data) => {
         price: Joi.object()
           .keys({
             currency: Joi.string().valid('ETH').required(),
-            amount: Joi.number().max(999).invalid(0).required(),
+            amount: Joi.number().max(100000).invalid(0).required(),
           })
           .required(),
         reserveFor: Joi.string().allow(''),
