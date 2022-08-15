@@ -1,13 +1,13 @@
-const fs = require('fs');
-const passport = require('passport');
-const localStrategy = require('passport-local').Strategy;
-const mongoose = require('mongoose');
-const Admin = require('../../models/admin.model');
-const { addImage } = require('../../utils/upload');
-const { checkDuplicate } = require('../../../config/errors');
-const { sendEmail } = require('../../utils/emails/emails');
-const { adminUrl } = require('../../../config/vars');
-const randomstring = require('randomstring');
+const fs = require("fs");
+const passport = require("passport");
+const localStrategy = require("passport-local").Strategy;
+const mongoose = require("mongoose");
+const Admin = require("../../models/admin.model");
+const { addImage } = require("../../utils/upload");
+const { checkDuplicate } = require("../../../config/errors");
+const { sendEmail } = require("../../utils/emails/emails");
+const { adminUrl } = require("../../../config/vars");
+const randomstring = require("randomstring");
 
 // API to login admin
 exports.login = async (req, res, next) => {
@@ -16,57 +16,54 @@ exports.login = async (req, res, next) => {
 
     email = email.toLowerCase();
     const user = await Admin.findOne({ email }).lean();
-    // console.log(req.body)
-    // console.log(user,"user found in login admin")
 
     if (!user)
       return res
         .status(404)
-        .send({ success: false, message: 'Incorrect email or password' });
+        .send({ success: false, message: "Incorrect email or password" });
 
     passport.use(
       new localStrategy(
-        { usernameField: 'email' },
+        { usernameField: "email" },
         (username, password, done) => {
           Admin.findOne(
             { email: username },
-            'name email phone address roleId status image password',
+            "name email phone address roleId status image password",
             (err, user) => {
               if (err) return done(err);
               else if (!user)
                 // unregistered email
                 return done(null, false, {
                   success: false,
-                  message: 'Incorrect email or password',
+                  message: "Incorrect email or password",
                 });
               else if (!user.verifyPassword(password))
                 // wrong password
                 return done(null, false, {
                   success: false,
-                  message: 'Incorrect email or password',
+                  message: "Incorrect email or password",
                 });
               else return done(null, user);
             }
           );
-          // .populate({ path: "roleId", select: 'title' })
         }
       )
     );
 
     // call for passport authentication
-    passport.authenticate('local', async (err, user, info) => {
+    passport.authenticate("local", async (err, user, info) => {
       if (err)
         return res.status(400).send({
           err,
           success: false,
-          message: 'Oops! Something went wrong while authenticating',
+          message: "Oops! Something went wrong while authenticating",
         });
       // registered user
       else if (user) {
         if (!user.status)
           return res.status(403).send({
             success: false,
-            message: 'Your account is inactive, kindly contact admin',
+            message: "Your account is inactive, kindly contact admin",
             user,
           });
         else {
@@ -82,7 +79,7 @@ exports.login = async (req, res, next) => {
           );
           return res.status(200).send({
             success: true,
-            message: 'Admin logged in successfully',
+            message: "Admin logged in successfully",
             data,
           });
         }
@@ -91,7 +88,7 @@ exports.login = async (req, res, next) => {
       else
         return res
           .status(402)
-          .send({ success: false, message: 'Incorrect email or password' });
+          .send({ success: false, message: "Incorrect email or password" });
     })(req, res);
   } catch (error) {
     return next(error);
@@ -111,15 +108,14 @@ exports.create = async (req, res, next) => {
     const admin = new Admin(payload);
     await admin.save();
 
-    // const admin = await Admin.create(payload)
     return res.send({
       success: true,
-      message: 'Admin user created successfully',
+      message: "Admin user created successfully",
       admin,
     });
   } catch (error) {
     if (error.code === 11000 || error.code === 11001)
-      checkDuplicate(error, res, 'Admin');
+      checkDuplicate(error, res, "Admin");
     else return next(error);
   }
 };
@@ -141,12 +137,12 @@ exports.edit = async (req, res, next) => {
     );
     return res.send({
       success: true,
-      message: 'Admin updated successfully',
+      message: "Admin updated successfully",
       admin,
     });
   } catch (error) {
     if (error.code === 11000 || error.code === 11001)
-      checkDuplicate(error, res, 'Admin');
+      checkDuplicate(error, res, "Admin");
     else return next(error);
   }
 };
@@ -160,17 +156,17 @@ exports.delete = async (req, res, next) => {
       if (admin.deletedCount)
         return res.send({
           success: true,
-          message: 'Admin deleted successfully',
+          message: "Admin deleted successfully",
           adminId,
         });
       else
         return res
           .status(400)
-          .send({ success: false, message: 'Admin not found for given Id' });
+          .send({ success: false, message: "Admin not found for given Id" });
     } else
       return res
         .status(400)
-        .send({ success: false, message: 'Admin Id is required' });
+        .send({ success: false, message: "Admin Id is required" });
   } catch (error) {
     return next(error);
   }
@@ -188,17 +184,17 @@ exports.get = async (req, res, next) => {
       if (admin)
         return res.json({
           success: true,
-          message: 'Admin retrieved successfully',
+          message: "Admin retrieved successfully",
           admin,
         });
       else
         return res
           .status(400)
-          .send({ success: false, message: 'Admin not found for given Id' });
+          .send({ success: false, message: "Admin not found for given Id" });
     } else
       return res
         .status(400)
-        .send({ success: false, message: 'Admin Id is required' });
+        .send({ success: false, message: "Admin Id is required" });
   } catch (error) {
     return next(error);
   }
@@ -209,8 +205,8 @@ exports.list = async (req, res, next) => {
   try {
     let { page, limit } = req.query;
 
-    page = page !== undefined && page !== '' ? parseInt(page) : 1;
-    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
+    page = page !== undefined && page !== "" ? parseInt(page) : 1;
+    limit = limit !== undefined && limit !== "" ? parseInt(limit) : 10;
 
     const total = await Admin.countDocuments({});
 
@@ -229,7 +225,7 @@ exports.list = async (req, res, next) => {
 
     return res.send({
       success: true,
-      message: 'Admins fetched successfully',
+      message: "Admins fetched successfully",
       data: {
         admins,
         pagination: {
@@ -261,19 +257,19 @@ exports.editPassword = async (req, res, next) => {
       );
       return res.send({
         success: true,
-        message: 'Password updated successfully',
+        message: "Password updated successfully",
         updatedAdmin,
       });
     } else {
       return res.send({
         success: false,
-        message: 'Incorrent current password',
+        message: "Incorrent current password",
         admin: admin[0],
       });
     }
   } catch (error) {
     if (error.code === 11000 || error.code === 11001)
-      checkDuplicate(error, res, 'Admin');
+      checkDuplicate(error, res, "Admin");
     else return next(error);
   }
 };
@@ -286,7 +282,7 @@ exports.forgotPassword = async (req, res, next) => {
     if (admin.length) {
       let randString = randomstring.generate({
         length: 8,
-        charset: 'alphanumeric',
+        charset: "alphanumeric",
       });
       await Admin.findByIdAndUpdate(
         { _id: mongoose.Types.ObjectId(admin[0]._id) },
@@ -295,20 +291,20 @@ exports.forgotPassword = async (req, res, next) => {
       );
 
       let content = {
-        '${url}': `${adminUrl}admin/reset-password/${admin[0]._id}/${randString}`,
+        "${url}": `${adminUrl}admin/reset-password/${admin[0]._id}/${randString}`,
       };
 
-      await sendEmail(payload.email, 'forgot-password', content);
+      await sendEmail(payload.email, "forgot-password", content);
       return res.send({
         success: true,
         message:
-          'An email has been sent to your account in case an account with this email exists. Please check your email and follow the instruction in it to reset your password.',
+          "An email has been sent to your account in case an account with this email exists. Please check your email and follow the instruction in it to reset your password.",
       });
     } else {
       return res.send({
         success: true,
         message:
-          'An email has been sent to your account in case an account with this email exists. Please check your email and follow the instruction in it to reset your password.',
+          "An email has been sent to your account in case an account with this email exists. Please check your email and follow the instruction in it to reset your password.",
       });
     }
   } catch (error) {
@@ -325,7 +321,7 @@ exports.resetPassword = async (req, res, next) => {
       if (admin[0].resetCode === payload.code) {
         let newPayload = {
           password: await admin[0].getPasswordHash(payload.new),
-          resetCode: '',
+          resetCode: "",
         };
         let updatedAdmin = await Admin.findByIdAndUpdate(
           { _id: mongoose.Types.ObjectId(payload._id) },
@@ -334,21 +330,21 @@ exports.resetPassword = async (req, res, next) => {
         );
         return res.send({
           success: true,
-          message: 'Password reset successfully',
+          message: "Password reset successfully",
           updatedAdmin,
         });
       } else {
         return res.send({
           success: false,
-          message: 'Session expired, try again with other email link.',
+          message: "Session expired, try again with other email link.",
         });
       }
     } else {
-      return res.send({ success: false, message: 'Incorrent Admin Id' });
+      return res.send({ success: false, message: "Incorrent Admin Id" });
     }
   } catch (error) {
     if (error.code === 11000 || error.code === 11001)
-      checkDuplicate(error, res, 'Admin');
+      checkDuplicate(error, res, "Admin");
     else return next(error);
   }
 };

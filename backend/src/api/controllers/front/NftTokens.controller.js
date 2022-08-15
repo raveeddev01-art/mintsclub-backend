@@ -1,38 +1,28 @@
-const NftTokens = require('../../models/nftTokens.model')
+const NftTokens = require("../../models/nftTokens.model");
 
+exports.addNftToken = async (req, res) => {
+  try {
+    let nftToken = await NftTokens.create(req.body);
 
-exports.addNftToken=async (req,res)=>{
+    res.send({
+      status: "success",
+      data: nftToken,
+    });
+  } catch (err) {}
+};
 
-    try {
-        let nftToken = await NftTokens.create(req.body);
+exports.getNftTokens = async (req, res) => {
+  try {
+    let nftTokens = await NftTokens.find();
 
-        res.send({
-            status:"success",
-            data:nftToken
-        })
-    }
-    catch(err){
-
-    }
-}
-
-
-
-exports.getNftTokens=async (req,res)=>{
-
-    try {
-        let nftTokens = await NftTokens.find()
-
-        res.status(200).send({
-            status:"success",
-            data:nftTokens
-        })
-    }
-    catch(err){
-        res.status(400).send({
-            status:"failure",
-            error:err
-        })
-    }
-}
-
+    res.status(200).send({
+      status: "success",
+      data: nftTokens,
+    });
+  } catch (err) {
+    res.status(400).send({
+      status: "failure",
+      error: err,
+    });
+  }
+};

@@ -1,7 +1,7 @@
-const fs = require('fs');
-const multer = require('multer');
+const fs = require("fs");
+const multer = require("multer");
 
-const uploadsDir = './src/uploads/';
+const uploadsDir = "./src/uploads/";
 const imagesDir = `${uploadsDir}images`;
 
 const storage = multer.diskStorage({
@@ -14,15 +14,15 @@ const storage = multer.diskStorage({
     cb(null, imagesDir);
   },
   filename: function (req, file, cb) {
-    var fileExtension = file.mimetype.split('/')[1];
+    var fileExtension = file.mimetype.split("/")[1];
     if (
       !file.originalname
         .toLowerCase()
         .match(/\.(jpg|jpeg|png|mp3|mp4|gif|svg)$/)
     ) {
-      return cb(new Error('The selected file format is not supported'));
+      return cb(new Error("The selected file format is not supported"));
     }
-    cb(null, +Date.now() + '.' + fileExtension);
+    cb(null, +Date.now() + "." + fileExtension);
   },
 });
 const upload = multer({
@@ -31,29 +31,27 @@ const upload = multer({
     fileSize: 100000000, //100MB
   },
 });
-exports.cpUpload = upload.fields([{ name: 'image', maxCount: 1 }]);
-exports.uploadSingle = upload.single('image');
+exports.cpUpload = upload.fields([{ name: "image", maxCount: 1 }]);
+exports.uploadSingle = upload.single("image");
 exports.collectionUpload = upload.fields([
-  { name: 'logo', maxCount: 1 },
-  { name: 'featuredImg', maxCount: 1 },
-  { name: 'banner', maxCount: 1 },
+  { name: "logo", maxCount: 1 },
+  { name: "featuredImg", maxCount: 1 },
+  { name: "banner", maxCount: 1 },
 ]);
 exports.profileUpload = upload.fields([
-  { name: 'profileImage', maxCount: 1 },
-  { name: 'bannerImage', maxCount: 1 },
+  { name: "profileImage", maxCount: 1 },
+  { name: "bannerImage", maxCount: 1 },
 ]);
-exports.uploadSingle = upload.single('image');
+exports.uploadSingle = upload.single("image");
 // ipfs
-const { create } = require('ipfs-http-client');
-const { ipfsServerUrl, ipfsBaseUrl } = require('../../config/vars');
+const { create } = require("ipfs-http-client");
+const { ipfsServerUrl, ipfsBaseUrl } = require("../../config/vars");
 const ipfs = create(ipfsServerUrl);
 
 exports.addImage = async (data) => {
   const fileAdded = await ipfs.add(data);
-  console.log(fileAdded,"fileAdded==>")
   const imgHash = fileAdded.cid.toString();
   return `${ipfsBaseUrl}${imgHash}`;
-  //return `${'ipfs/'}${imgHash}`;
 };
 
 exports.addContent = async (data) => {

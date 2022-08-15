@@ -1,15 +1,14 @@
-const ItemActivity = require('../../models/item-activity.modal');
-const mongoose = require('mongoose');
+const ItemActivity = require("../../models/item-activity.modal");
+const mongoose = require("mongoose");
 
 exports.create = async (req, res, next) => {
   try {
     let payload = req.body;
-    console.log(payload, 'payload');
     const result = await ItemActivity.create(payload);
     if (result) {
       res.status(200).send({
         success: true,
-        message: 'Item Activity Created Successfully',
+        message: "Item Activity Created Successfully",
         data: result,
       });
     }
@@ -24,7 +23,7 @@ exports.get = async (req, res, next) => {
 
     res.status(200).send({
       success: true,
-      message: 'Item Activity Retrieved Successfully',
+      message: "Item Activity Retrieved Successfully",
       data: activities,
     });
   } catch (error) {
@@ -43,7 +42,7 @@ exports.update = async (req, res, next) => {
     );
     res.status(200).send({
       success: true,
-      message: 'NFT Deleted Successfully',
+      message: "NFT Deleted Successfully",
       data: updatedActivity,
     });
   } catch (error) {
@@ -59,11 +58,10 @@ exports.delete = async (req, res, next) => {
     if (result) {
       res.status(200).send({
         success: true,
-        message: 'NFT Deleted Successfully',
+        message: "NFT Deleted Successfully",
       });
     }
   } catch (error) {
-    console.log(error);
     return next(error);
   }
 };

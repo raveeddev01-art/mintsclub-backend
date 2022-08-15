@@ -1,11 +1,11 @@
-const fs = require('fs');
-const moment = require('moment');
-const NFT = require('../../models/nfts.model');
-const Offer = require('../../models/offer.model');
-const ObjectId = require('mongoose').Types.ObjectId;
-const { globalImgPlaceholder } = require('../../../config/vars');
-const validation = require('../../middlewares/front/offerValidation');
-const validator = require('../../middlewares/front/validation');
+const fs = require("fs");
+const moment = require("moment");
+const NFT = require("../../models/nfts.model");
+const Offer = require("../../models/offer.model");
+const ObjectId = require("mongoose").Types.ObjectId;
+const { globalImgPlaceholder } = require("../../../config/vars");
+const validation = require("../../middlewares/front/offerValidation");
+const validator = require("../../middlewares/front/validation");
 // API to create offer
 exports.create = async (req, res, next) => {
   try {
@@ -21,7 +21,7 @@ exports.create = async (req, res, next) => {
 
     return res.send({
       success: true,
-      message: 'You have made offer successfully',
+      message: "You have made offer successfully",
       offer,
     });
   } catch (error) {
@@ -46,16 +46,16 @@ exports.delete = async (req, res, next) => {
       if (offer && offer.deletedCount)
         return res.send({
           success: true,
-          message: 'Your Offer has been cancelled successfully',
+          message: "Your Offer has been cancelled successfully",
         });
       else
         return res
           .status(400)
-          .send({ success: false, message: 'Offer not found for given Id' });
+          .send({ success: false, message: "Offer not found for given Id" });
     } else
       return res
         .status(400)
-        .send({ success: false, message: 'Offer Id is required' });
+        .send({ success: false, message: "Offer Id is required" });
   } catch (error) {
     return next(error);
   }
@@ -69,8 +69,8 @@ exports.list = async (req, res, next) => {
 
     if (nftId) filter.nftId = ObjectId(nftId);
 
-    page = page !== undefined && page !== '' ? parseInt(page) : 1;
-    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
+    page = page !== undefined && page !== "" ? parseInt(page) : 1;
+    limit = limit !== undefined && limit !== "" ? parseInt(limit) : 10;
 
     const total = await Offer.countDocuments(filter);
 
@@ -81,7 +81,7 @@ exports.list = async (req, res, next) => {
 
     return res.send({
       success: true,
-      message: 'Offers fetched successfully',
+      message: "Offers fetched successfully",
       data: {
         offers: offers,
         pagination: {
@@ -136,16 +136,16 @@ exports.accept = async (req, res, next) => {
 
         return res.send({
           success: true,
-          message: 'Offer has been accepted successfully',
+          message: "Offer has been accepted successfully",
         });
       } else
         return res
           .status(400)
-          .send({ success: false, message: 'Offer not found for given Id' });
+          .send({ success: false, message: "Offer not found for given Id" });
     } else
       return res
         .status(400)
-        .send({ success: false, message: 'Offer Id is required' });
+        .send({ success: false, message: "Offer Id is required" });
   } catch (error) {
     return next(error);
   }

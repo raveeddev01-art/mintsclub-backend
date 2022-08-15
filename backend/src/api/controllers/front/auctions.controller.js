@@ -1,23 +1,23 @@
-const moment = require('moment');
-const NFT = require('../../models/nfts.model');
-const UserModal = require('../../models/users.model');
-const ObjectId = require('mongoose').Types.ObjectId;
-const Categories = require('../../models/categories.model');
-const { globalImgPlaceholder } = require('../../../config/vars');
+const moment = require("moment");
+const NFT = require("../../models/nfts.model");
+const UserModal = require("../../models/users.model");
+const ObjectId = require("mongoose").Types.ObjectId;
+const Categories = require("../../models/categories.model");
+const { globalImgPlaceholder } = require("../../../config/vars");
 
 // API to get live auctions
 exports.live = async (req, res, next) => {
   try {
     let { page, limit, myFilter } = req.query;
     let filter, newFilter;
-    page = page !== undefined && page !== '' ? parseInt(page) : 1;
-    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
+    page = page !== undefined && page !== "" ? parseInt(page) : 1;
+    limit = limit !== undefined && limit !== "" ? parseInt(limit) : 10;
 
     var dateTime = new Date(moment().utc(false).toISOString());
 
     if (myFilter) {
-      const applyFilter = await Categories.findOne({}, '_id').where(
-        'description',
+      const applyFilter = await Categories.findOne({}, "_id").where(
+        "description",
         myFilter
       );
       if (!applyFilter) {
@@ -28,7 +28,7 @@ exports.live = async (req, res, next) => {
       newFilter = applyFilter._id;
     }
 
-    if (myFilter && myFilter != 'all') {
+    if (myFilter && myFilter != "all") {
       filter = {
         sellingMethod: 2, // timed auctions only
         auctionStartDate: {
@@ -54,24 +54,24 @@ exports.live = async (req, res, next) => {
       },
       {
         $lookup: {
-          from: 'users',
-          foreignField: '_id',
-          localField: 'ownerId',
-          as: 'owner',
+          from: "users",
+          foreignField: "_id",
+          localField: "ownerId",
+          as: "owner",
         },
       },
       {
         $unwind: {
-          path: '$owner',
+          path: "$owner",
           preserveNullAndEmptyArrays: true,
         },
       },
       {
         $lookup: {
-          from: 'bids',
-          foreignField: 'nftId',
-          localField: '_id',
-          as: 'bids',
+          from: "bids",
+          foreignField: "nftId",
+          localField: "_id",
+          as: "bids",
         },
       },
 
@@ -89,17 +89,17 @@ exports.live = async (req, res, next) => {
           fileType: 1,
           ownerId: 1,
           highestBid: 1,
-          ownerAddress:1,
+          ownerAddress: 1,
           owner: {
-            _id: '$owner._id',
-            username: '$owner.username',
+            _id: "$owner._id",
+            username: "$owner.username",
             profilePhoto: {
-              $ifNull: ['$owner.profileImage', globalImgPlaceholder],
+              $ifNull: ["$owner.profileImage", globalImgPlaceholder],
             },
           },
           bidInfo: {
-            bidBy: '$bids.bidBy',
-            bidByProfile: '$bids.bidByProfile',
+            bidBy: "$bids.bidBy",
+            bidByProfile: "$bids.bidByProfile",
           },
         },
       },
@@ -107,7 +107,7 @@ exports.live = async (req, res, next) => {
 
     return res.send({
       success: true,
-      message: 'Live auctions retrieved successfully',
+      message: "Live auctions retrieved successfully",
       data: {
         auctions,
         pagination: {

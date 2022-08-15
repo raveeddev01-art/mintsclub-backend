@@ -1,11 +1,10 @@
-const LikesModal = require('../../models/likes.model');
-var ObjectId = require('mongodb').ObjectId;
+const LikesModal = require("../../models/likes.model");
+var ObjectId = require("mongodb").ObjectId;
 
 exports.likeDislike = async (req, res, next) => {
   let nftId = req.body.nftId;
   let userId = req.body.userId;
   let count = req.body.count;
-  console.log(req.body, 'body');
 
   let foundCollection = await LikesModal.find({ nftId });
 
@@ -17,17 +16,15 @@ exports.likeDislike = async (req, res, next) => {
         nftId: req.body.nftId,
       },
       async function (err, user) {
-        console.log();
         //error
 
         if (err) {
-          console.log('error', err);
+          console.log("error", err);
         }
 
         //if user exist then delete that record
 
         if (user) {
-          console.log('found user');
           await LikesModal.updateOne(
             { nftId: new ObjectId(nftId) },
             { $inc: { count: -1 } }
@@ -42,8 +39,6 @@ exports.likeDislike = async (req, res, next) => {
         }
         //if user not found then insert a user like
         else {
-          console.log('user not found inserting one');
-
           let data = {
             userId,
           };
@@ -62,7 +57,7 @@ exports.likeDislike = async (req, res, next) => {
             ).exec();
             res.status(200).send({
               success: true,
-              message: 'record updated successfully',
+              message: "record updated successfully",
               result: insertedLike,
             });
           } catch (error) {
@@ -75,7 +70,6 @@ exports.likeDislike = async (req, res, next) => {
 
   //if collecton not found
   else {
-    console.log('colleciton not found inserting one');
     let data = {
       nftId,
       count,
@@ -110,16 +104,16 @@ exports.userNftLikes = async (req, res, next) => {
     if (!userId)
       return res
         .status(400)
-        .send({ success: false, message: 'Please Sign In First' });
+        .send({ success: false, message: "Please Sign In First" });
 
-    const likes = await LikesModal.find({}, 'nftId').where(
-      'likes.userId',
+    const likes = await LikesModal.find({}, "nftId").where(
+      "likes.userId",
       userId
     );
 
     return res.status(200).send({
       success: true,
-      message: 'User NFTs likes fetched successfully',
+      message: "User NFTs likes fetched successfully",
       data: likes,
     });
   } catch (error) {

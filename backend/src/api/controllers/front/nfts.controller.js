@@ -77,7 +77,6 @@ exports.create = async (req, res, next) => {
       nft: payload,
     });
   } catch (error) {
-    console.log(error, "error=======>");
     return next(error);
   }
 };
@@ -91,7 +90,6 @@ exports.storeDataInDb = async (req, res, next) => {
         message: "please provide data",
       });
     }
-    console.log(req.body, "req.body while storing data");
 
     let createNFTPayload = req.body.data;
     createNFTPayload.image = req.body.image;
@@ -99,7 +97,6 @@ exports.storeDataInDb = async (req, res, next) => {
     createNFTPayload.currentPrice = 0;
     createNFTPayload.auctionEnded = false;
     createNFTPayload.tokenId = Number(req.body.nftToken);
-    console.log(createNFTPayload, "createNFTPayload");
 
     const nft = await NFT.create(createNFTPayload);
 
@@ -209,7 +206,6 @@ exports.edit = async (req, res, next) => {
       nft,
     });
   } catch (error) {
-    console.log(error, "error");
     return next(error);
   }
 };
@@ -405,7 +401,7 @@ exports.list = async (req, res, next) => {
           copiesForAuction: 1,
           remainingCopies: 1,
           sellingMethod: 1,
-          ownerAddress:1,
+          ownerAddress: 1,
           owner: {
             _id: "$owner._id",
             username: "$owner.username",
@@ -666,7 +662,6 @@ exports.buyNow = async (req, res, next) => {
 
     if (buyNftDetail && buyNftDetail.copiesForAuction > 0) {
       if (buyNftDetail.remainingCopies > buyNftDetail.copiesForAuction) {
-
         let newPayload = {
           ownerId: payload.userId,
           userId: payload.userId,
@@ -993,7 +988,6 @@ exports.endAuction = async (req, res, next) => {
       .send({ success: true, message: "Auction Ended successfully" });
     // }
   } catch (err) {
-    console.log(err, "error while end auction");
     return next(err);
   }
 };

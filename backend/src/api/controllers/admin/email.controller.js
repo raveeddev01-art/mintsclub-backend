@@ -1,8 +1,8 @@
-const fs = require('fs');
-const mongoose = require('mongoose');
-const Email = require('../../models/email.model');
-const { addImage } = require('../../utils/upload');
-const { checkDuplicate } = require('../../../config/errors');
+const fs = require("fs");
+const mongoose = require("mongoose");
+const Email = require("../../models/email.model");
+const { addImage } = require("../../utils/upload");
+const { checkDuplicate } = require("../../../config/errors");
 
 // API to create email template
 exports.create = async (req, res, next) => {
@@ -11,12 +11,12 @@ exports.create = async (req, res, next) => {
     const email = await Email.create(payload);
     return res.send({
       success: true,
-      message: 'Email template created successfully',
+      message: "Email template created successfully",
       email,
     });
   } catch (error) {
     if (error.code === 11000 || error.code === 11001)
-      checkDuplicate(error, res, 'Email');
+      checkDuplicate(error, res, "Email");
     else return next(error);
   }
 };
@@ -32,12 +32,12 @@ exports.edit = async (req, res, next) => {
     );
     return res.send({
       success: true,
-      message: 'Email template updated successfully',
+      message: "Email template updated successfully",
       email,
     });
   } catch (error) {
     if (error.code === 11000 || error.code === 11001)
-      checkDuplicate(error, res, 'Email');
+      checkDuplicate(error, res, "Email");
     else return next(error);
   }
 };
@@ -54,20 +54,18 @@ exports.get = async (req, res, next) => {
       if (email)
         return res.json({
           success: true,
-          message: 'Email template retrieved successfully',
+          message: "Email template retrieved successfully",
           email,
         });
       else
-        return res
-          .status(400)
-          .send({
-            success: false,
-            message: 'Email template not found for given Id',
-          });
+        return res.status(400).send({
+          success: false,
+          message: "Email template not found for given Id",
+        });
     } else
       return res
         .status(400)
-        .send({ success: false, message: 'Email Id is required' });
+        .send({ success: false, message: "Email Id is required" });
   } catch (error) {
     return next(error);
   }
@@ -78,8 +76,8 @@ exports.list = async (req, res, next) => {
   try {
     let { page, limit } = req.query;
 
-    page = page !== undefined && page !== '' ? parseInt(page) : 1;
-    limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10;
+    page = page !== undefined && page !== "" ? parseInt(page) : 1;
+    limit = limit !== undefined && limit !== "" ? parseInt(limit) : 10;
 
     const total = await Email.countDocuments({});
 
@@ -98,7 +96,7 @@ exports.list = async (req, res, next) => {
 
     return res.send({
       success: true,
-      message: 'Email templates fetched successfully',
+      message: "Email templates fetched successfully",
       data: {
         emails,
         pagination: {
