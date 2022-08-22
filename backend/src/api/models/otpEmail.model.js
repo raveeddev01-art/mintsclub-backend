@@ -1,21 +1,21 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 /**
  * Settings Schema
  * @private
- * 
+ *
  */
-let date=new Date()
-const otpSchema = new mongoose.Schema({
-    email: { type: String, default: '' },
-    otpCode: { type: Number},
-    date:{type:String}
-
-}, { timestamps: true }
-);
+const otpSchema = new mongoose.Schema(
+    {
+        email: { type: String, default: '' },
+        otpCode: { type: Number },
+        date: { type: String },
+    },
+    { timestamps: true }
+)
 
 /**
  * @typedef Settings
  */
 
-module.exports = mongoose.model('Otp', otpSchema);
+module.exports = mongoose.model('Otp', otpSchema)

@@ -1,66 +1,51 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 /**
  * NFT Schema
  * @private
  */
 const NFTSchema = new mongoose.Schema(
-  {
-    name: { type: String },
-    description: { type: String },
-    creatorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    nftOwnerId: { type: String },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
-    collectionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Collection' },
-    currentPrice: { type: Number },
-    ownerAddress: { type: String },
-    txHash: { type: String },
-    tokenId: { type: Number },
-    image: { type: String },
-    fileType: { type: String },
-    royalty: { type: String },
-    properties:{type:Array},
-    levels:{type:Array},
-    stats:{type:Array},
-    //size: { type: String },
-    copies: { type: Number, default: 0 },
-    status: { type: Number, default: 1 }, // 1 = Put on Sale, 2 = Instant Sale Price, 3 = Unlock Purchased
-    sold: { type: Number, default: 0 },
-    sellingMethod: { type: Number }, // 1 = Fixed Price, 2 = Timed Auction
-    sellingConfig: { type: Object },
-    auctionStartDate: { type: Date },
-    auctionEndDate: { type: Date },
-    // auctionStartTime: { type: String },
-    // auctionEndTime: { type: String },
-    metaData: { type: String }, // ipfs link
-    highestBid: { type: Number },
-    copiesForAuction: { type: Number },
-    remainingCopies: { type: Number },
-    auctionEnded:{type:Boolean},
-    sellId:{type:Number},
-    properties: [
-      {
-        type: Object,
-      },
-    ],
-    levels: [
-      {
-        type: Object,
-      },
-    ],
-    stats: [
-      {
-        type: Object,
-      },
-    ],
-  },
-  { timestamps: true, collection: 'nfts' }
-);
+    {
+        name: { type: String },
+        description: { type: String },
+        creatorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        nftOwnerId: { type: String },
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
+        collectionId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Collection',
+        },
+        currentPrice: { type: Number },
+        ownerAddress: { type: String },
+        txHash: { type: String },
+        tokenId: { type: Number },
+        image: { type: String },
+        fileType: { type: String },
+        royalty: { type: String },
+        properties: { type: Array },
+        levels: { type: Array },
+        stats: { type: Array },
+        copies: { type: Number, default: 0 },
+        status: { type: Number, default: 1 }, // 1 = Put on Sale, 2 = Instant Sale Price, 3 = Unlock Purchased
+        sold: { type: Number, default: 0 },
+        sellingMethod: { type: Number }, // 1 = Fixed Price, 2 = Timed Auction
+        sellingConfig: { type: Object },
+        auctionStartDate: { type: Date },
+        auctionEndDate: { type: Date },
+        metaData: { type: String }, // ipfs link
+        highestBid: { type: Number },
+        copiesForAuction: { type: Number },
+        remainingCopies: { type: Number },
+        auctionEnded: { type: Boolean },
+        sellId: { type: Number },
+    },
+    { timestamps: true, collection: 'nfts' }
+)
 
 /**
  * @typedef NFT
  */
 
-module.exports = mongoose.model('NFT', NFTSchema);
+module.exports = mongoose.model('NFT', NFTSchema)

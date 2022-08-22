@@ -1,48 +1,49 @@
-const Settings = require('../../models/settings.model');
-const Mail = require('../../models/email.model');
-const { emailAdd } = require('../../../config/vars');
+const Settings = require('../../models/settings.model')
+const Mail = require('../../models/email.model')
+const { emailAdd } = require('../../../config/vars')
 
 //send email to mentioned users
 exports.sendEmail = async (
-  email = '',
-  type = '',
-  content = null,
-  subject = ''
+    email = '',
+    type = '',
+    content = null,
+    subject = ''
 ) => {
-  if (email !== '') {
-    const getTemplate = await Mail.findOne({ type });
+    if (email !== '') {
+        const getTemplate = await Mail.findOne({ type })
 
-    if (getTemplate) {
-      const { api, domain } = await Settings.findOne();
+        if (getTemplate) {
+            const { api, domain } = await Settings.findOne()
 
-      var mailgun = require('mailgun-js')({ apiKey: api, domain: domain });
+            var mailgun = require('mailgun-js')({ apiKey: api, domain: domain })
 
-      let sub = '';
+            let sub = ''
 
-      if (subject) {
-        sub = subject;
-      } else {
-        sub = getTemplate.subject;
-      }
+            if (subject) {
+                sub = subject
+            } else {
+                sub = getTemplate.subject
+            }
 
-      const msg = {
-        to: email,
-        from: emailAdd,
-        subject: sub,
-        html: getHtml(getTemplate, content),
-      };
+            const msg = {
+                to: email,
+                from: emailAdd,
+                subject: sub,
+                html: getHtml(getTemplate, content),
+            }
 
-      mailgun.messages().send(msg, function (err) {});
+            // eslint-disable-next-line no-unused-vars
+            mailgun.messages().send(msg, function (err) {})
+        }
     }
-  }
-};
+}
 
 function getHtml(getTemplate, content) {
-  let text = getTemplate.text;
-  if (content) {
-    for (let key in content) {
-      text = text.replace(`${key}`, "'" + `${content[key]}` + "'");
+    let text = getTemplate.text
+    if (content) {
+        for (let key in content) {
+            text = text.replace(`${key}`, "'" + `${content[key]}` + "'")
+        }
     }
-  }
-  return text;
+    return text
 }
