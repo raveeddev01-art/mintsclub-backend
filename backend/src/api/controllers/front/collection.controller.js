@@ -10,74 +10,75 @@ const validation = require('../../middlewares/front/collectionValidation')
 
 // API to create collection
 exports.create = async (req, res, next) => {
-    try {
-        let payload = {
-            userId: req.body.userId,
-            categoryId: req.body.categoryId,
-            name: req.body.name,
-            url: req.body.url,
-            description: req.body.description,
-            ownerAddress: req.body.ownerAddress,
-        }
+  try {
+    let payload = {
+      userId: req.body.userId,
+      categoryId: req.body.categoryId,
+      name: req.body.name,
+      url: req.body.url,
+      description: req.body.description,
+      ownerAddress:req.body.ownerAddress
+      //category: req.body.category,
+    };
+    const { error } = validation.validateCollectionSchema(payload);
 
-        const { error } = validation.validateCollectionSchema(payload)
-
-        if (error) {
-            let errorMsg = error.details[0].message
-            return res.status(400).send({ success: false, message: errorMsg })
-        }
-
-        let imagesPayload = {
-            logo: req.body.logo,
-            featuredImg: req.body.featuredImgUrl,
-            banner: req.body.bannerUrl,
-        }
-
-        const newPayload = { ...payload, ...imagesPayload }
-
-        newPayload.categoryId = null
-        if (payload.categoryId) {
-            newPayload.categoryId = payload.categoryId
-        }
-
-        if (req.files)
-            for (const key in req.files) {
-                const image = req.files[key][0]
-                const imgData = fs.readFileSync(image.path)
-                newPayload[key] = await addImage(imgData)
-            }
-
-        if (!newPayload.logo) {
-            return res.status(400).send({
-                success: false,
-                message: 'logo image is required',
-            })
-        }
-
-        const existingCollection = await Collection.findOne({
-            name: new RegExp(newPayload.name, 'gi'),
-            userId: newPayload.userId,
-        })
-
-        if (existingCollection) {
-            return res.status(400).send({
-                success: false,
-                message: 'Collection with same name already exists',
-            })
-        }
-
-        const collection = await Collection.create(newPayload)
-        return res.status(201).send({
-            success: true,
-            message: 'Collection created successfully',
-            collection,
-        })
-    } catch (error) {
-        if (error.code === 11000 || error.code === 11001)
-            checkDuplicate(error, res, 'Collection')
-        else return next(error)
+    if (error) {
+      let errorMsg = error.details[0].message;
+      return res.status(400).send({ success: false, message: errorMsg });
     }
-}
+
+    let imagesPayload = {
+      logo: req.body.logo,
+      featuredImg: req.body.featuredImg,
+      banner: req.body.bannerUrl,
+    };
+
+    const newPayload = { ...payload, ...imagesPayload };
+
+    newPayload.categoryId = null;
+    if (payload.categoryId) {
+      newPayload.categoryId = payload.categoryId;
+    }
+
+    // if (req.files)
+    //   for (const key in req.files) {
+    //     const image = req.files[key][0];
+    //     const imgData = fs.readFileSync(image.path);
+    //     newPayload[key] = await addImage(imgData);
+    //   }
+
+    if (!newPayload.logo) {
+      return res.status(400).send({
+        success: false,
+        message: 'logo image is required',
+      });
+    }
+
+    const existingCollection = await Collection.findOne({
+      name: new RegExp(newPayload.name, 'gi'),
+      userId: newPayload.userId,
+    });
+
+    if (existingCollection) {
+      return res.status(400).send({
+        success: false,
+        message: 'Collection with same name already exists',
+      });
+    }
+
+console.log(newPayload,"newPayload")
+    const collection = await Collection.create(newPayload);
+    return res.status(201).send({
+      success: true,
+      message: 'Collection created successfully',
+      collection,
+    });
+  } catch (error) {
+    if (error.code === 11000 || error.code === 11001)
+      checkDuplicate(error, res, 'Collection');
+    else return next(error);
+  }
+};
 
 // API to edit collection
 exports.edit = async (req, res, next) => {

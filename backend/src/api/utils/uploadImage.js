@@ -1,8 +1,8 @@
-const fs = require('fs')
-const multer = require('multer')
-
-const uploadsDir = './src/uploads/'
-const imagesDir = `${uploadsDir}images`
+const fs = require('fs');
+const multer = require('multer');
+const axios=require('axios')
+const uploadsDir = './src/uploads/';
+const imagesDir = `${uploadsDir}images`;
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -40,16 +40,34 @@ exports.profileUpload = upload.fields([
 ])
 exports.uploadSingle = upload.single('image')
 // ipfs
-const { create } = require('ipfs-http-client')
-const { ipfsServerUrl, ipfsBaseUrl } = require('../../config/vars')
-const ipfs = create(ipfsServerUrl)
+const { create } = require('ipfs-http-client');
+const { ipfsServerUrl, ipfsBaseUrl,pinataJWT } = require('../../config/vars');
+const ipfs = create(ipfsServerUrl);
 
 exports.addImage = async (data) => {
-    const fileAdded = await ipfs.add(data)
-    const imgHash = fileAdded.cid.toString()
-    return `${ipfsBaseUrl}${imgHash}`
+  const fileAdded = await ipfs.add(data);
+  const imgHash = fileAdded.cid.toString();
+  return `${ipfsBaseUrl}${imgHash}`;
+};
+exports.uploadFileToIpfs = async (formData) => {
+  // console.log('formData=====>', formData.get('file'));
+  const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`;
+try{
+  console.log(formData,"formData")
+  const response = await axios.post(url, formData, {
+    headers: {
+      'Content-Type': `multipart/form-data; boundary= ${formData._boundary}`,
+      Authorization: `Bearer ${pinataJWT}`,
+      // pinata_api_key: `${process.env.REACT_APP_PINATA_API_KEY}`,
+      // pinata_secret_api_key: `${process.env.REACT_APP_PINATA_API_SECRET}`,
+    },
+  });
+  // console.log('response=========>', response);
+  return response;
+}catch(err){
+  console.log("error=======>",err)
 }
-
+};
 exports.addContent = async (data) => {
     const doc = JSON.stringify(data)
     const dataAdded = await ipfs.add(doc)

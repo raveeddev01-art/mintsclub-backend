@@ -34,10 +34,11 @@ const upload = multer({
 exports.cpUpload = upload.fields([{ name: 'image', maxCount: 1 }])
 exports.uploadSingle = upload.single('image')
 exports.collectionUpload = upload.fields([
-    { name: 'logo', maxCount: 1 },
-    { name: 'featuredImg', maxCount: 1 },
-    { name: 'banner', maxCount: 1 },
-])
+  { name: 'logo', maxCount: 1 },
+  { name: 'featuredImg', maxCount: 1 },
+  { name: 'banner', maxCount: 1 },
+]);
+
 exports.profileUpload = upload.fields([
     { name: 'profileImage', maxCount: 1 },
     { name: 'bannerImage', maxCount: 1 },
