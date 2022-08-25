@@ -1,10 +1,15 @@
 const User = require('../../models/users.model')
 const validation = require('../../middlewares/front/validation')
 const Approval = require('../../models/approvals.model')
-
+const {
+    SUCCESS_MESSAGE,
+    ERROR_MESSAGE,
+    SUCCESS_STATUS,
+    HTTP_STATUS_CODE,
+} = require('../../../config/constants')
 exports.register = async (req, res, next) => {
     try {
-        let payload = {
+        const payload = {
             address: req.body.address,
             username: req.body.username,
             email: req.body.email,
@@ -14,8 +19,10 @@ exports.register = async (req, res, next) => {
         const { error } = validation.validateSignUpSchema(payload)
 
         if (error) {
-            let errorMsg = error.details[0].message
-            return res.status(400).send({ status: false, data: errorMsg })
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                data: error?.details[0]?.message,
+            })
         }
 
         const email = payload.email.toLowerCase()
@@ -28,9 +35,10 @@ exports.register = async (req, res, next) => {
 
         let user = await User.findOne({ address })
         if (user) {
-            return res
-                .status(200)
-                .send({ status: false, message: 'Wallet already exists' })
+            return res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.WALLET_EXIST,
+            })
         }
 
         user = await User.create({
@@ -41,23 +49,23 @@ exports.register = async (req, res, next) => {
             isApproved,
         })
 
-        let approvalPayload = {
+        const approvalPayload = {
             userId: user._id,
             isApproved: false,
         }
 
         await Approval.create(approvalPayload)
 
-        let accessToken = await user.token()
+        const accessToken = await user.token()
         user = user.transform()
         let data = {
             ...user,
             accessToken,
         }
 
-        return res.status(200).send({
-            status: true,
-            message: 'User registered successfully',
+        return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.USER_REGISTERED,
             data: data,
         })
     } catch (error) {
@@ -71,35 +79,35 @@ exports.register = async (req, res, next) => {
  */
 exports.login = async (req, res, next) => {
     try {
-        let payload = {
+        const payload = {
             address: req.body.address,
         }
 
         const { error } = validation.validateAddress(payload)
 
         if (error) {
-            let errorMsg = error.details[0].message
-            return res.status(400).send({ status: false, data: errorMsg })
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                data: error?.details[0]?.message,
+            })
         }
         const address = payload.address
         let user = await User.findOne({ address })
         if (!user) {
-            return res.status(200).send({
-                status: false,
-                message:
-                    'There is no account linked to that address, Please signup first',
-                notExist: 1,
+            return res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.NO_ACCOUNT_EXIST,
             })
         }
-        let accessToken = await user.token()
+        const accessToken = await user.token()
         user = user.transform()
-        let data = {
+        const data = {
             ...user,
             accessToken,
         }
         return res.status(200).send({
-            status: true,
-            message: 'User logged in successfully',
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.USER_LOGGEDIN,
             data,
         })
     } catch (error) {

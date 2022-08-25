@@ -3,7 +3,7 @@ const NFT = require('../../models/nfts.model')
 const ObjectId = require('mongoose').Types.ObjectId
 const Categories = require('../../models/categories.model')
 const { globalImgPlaceholder } = require('../../../config/vars')
-
+const { SUCCESS_MESSAGE, SUCCESS_STATUS } = require('../../../config/constants')
 // API to get live auctions
 exports.live = async (req, res, next) => {
     try {
@@ -12,7 +12,7 @@ exports.live = async (req, res, next) => {
         page = page !== undefined && page !== '' ? parseInt(page) : 1
         limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
 
-        let dateTime = new Date(moment().utc(false).toISOString())
+        const dateTime = new Date(moment().utc(false).toISOString())
 
         if (myFilter) {
             const applyFilter = await Categories.findOne({}, '_id').where(
@@ -27,7 +27,7 @@ exports.live = async (req, res, next) => {
             newFilter = applyFilter._id
         }
 
-        if (myFilter && myFilter != 'all') {
+        if (myFilter && myFilter !== 'all') {
             filter = {
                 sellingMethod: 2, // timed auctions only
                 auctionStartDate: {
@@ -45,9 +45,7 @@ exports.live = async (req, res, next) => {
                 auctionEndDate: { $gte: dateTime },
             }
         }
-        const total = await NFT.countDocuments(filter)
-
-        const auctions = await NFT.aggregate([
+        const pipeline = [
             {
                 $match: filter,
             },
@@ -105,21 +103,27 @@ exports.live = async (req, res, next) => {
                     },
                 },
             },
-        ])
+        ]
+
+        const total = NFT.countDocuments(filter)
+
+        const auctions = NFT.aggregate(pipeline)
+
+        const auctionList = await Promise.all([total, auctions])
 
         return res.send({
-            success: true,
-            message: 'Live auctions retrieved successfully',
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.LIVE_AUCTIONS,
             data: {
-                auctions,
+                auctions: auctionList[1],
                 pagination: {
                     page,
                     limit,
-                    total,
+                    total: auctionList[0],
                     pages:
-                        Math.ceil(total / limit) <= 0
+                        Math.ceil(auctionList[0] / limit) <= 0
                             ? 1
-                            : Math.ceil(total / limit),
+                            : Math.ceil(auctionList[0] / limit),
                 },
             },
         })

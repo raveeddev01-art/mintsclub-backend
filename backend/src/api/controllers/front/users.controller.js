@@ -1,120 +1,132 @@
-const fs = require('fs')
+/* eslint-disable no-undef */
+// const fs = require('fs')
 const ObjectId = require('mongoose').Types.ObjectId
 const UserModal = require('../../models/users.model')
-const { addImage } = require('../../utils/uploadImage')
+// const { addImage } = require('../../utils/uploadImage')
 const validation = require('../../middlewares/front/validation')
 const validUrl = require('valid-url')
 const mailchimp = require('@mailchimp/mailchimp_marketing')
 const { mailChimp } = require('../../../config/vars')
+const {
+    ERROR_MESSAGE,
+    SUCCESS_MESSAGE,
+    SUCCESS_STATUS,
+    HTTP_STATUS_CODE,
+} = require('../../../config/constants')
 
 mailchimp.setConfig({
     apiKey: mailChimp.apiKey,
     server: mailChimp.server,
 })
 exports.create = async (req, res, next) => {
-  try {
-    let user = await UserModal.create(req.body);
-    return res.send({ status: true, data: user });
-  } catch (error) {
-    return next(error);
-  }
-};
+    try {
+        const user = await UserModal.create(req.body)
+        return res
+            .status(HTTP_STATUS_CODE.OK)
+            .send({ success: SUCCESS_STATUS.TRUE, data: user })
+    } catch (error) {
+        return next(error)
+    }
+}
 
 exports.updateProfile = async (req, res, next) => {
+    try {
+        if (req.body.isApproved) {
+            const payload = {
+                userId: req.body.userId,
+                isApproved: true,
+            }
 
-  try {
-    if (req.body.isApproved) {
-      let payload = {
-        userId: req.body.userId,
-        isApproved: true,
-      };
+            const user = await UserModal.findByIdAndUpdate(
+                { _id: ObjectId(payload.userId) },
+                { $set: payload },
+                { new: true }
+            )
+            return res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.TRUE,
+                user,
+                message: SUCCESS_MESSAGE.PROFILE_UPDATED,
+            })
+        }
+        // console.log(req.body, 'req.body')
+        payload = {
+            email: req.body.email,
+            username: req.body.username,
+            userId: req.body.userId,
+            bio: req.body.bio,
+        }
 
-      let user = await UserModal.findByIdAndUpdate(
-        { _id: ObjectId(payload.userId) },
-        { $set: payload },
-        { new: true }
-      );
-      return res.send({
-        status: true,
-        user,
-        message: "User profile updated successfully.",
-      });
+        const { error } = validation.validateUserProfile(payload)
+        payload.profileImage = req.body.profileImage
+        if (error) {
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: error?.details[0]?.message,
+            })
+        }
+        // console.log(payload, 'payload=>')
+
+        if (req.body.twitterLink && !validUrl.isUri(req.body.twitterLink)) {
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.VALID_TWITTER_LINK,
+            })
+        } else {
+            payload.twitterLink = req.body.twitterLink
+        }
+        if (req.body.instaLink && !validUrl.isUri(req.body.instaLink)) {
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.VALID_INSTAGRAM_LINK,
+            })
+        } else {
+            payload.instaLink = req.body.instaLink
+        }
+
+        if (req.body.webLink && !validUrl.isUri(req.body.webLink)) {
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.VALID_WEBSITE_LINK,
+            })
+        } else {
+            payload.webLink = req.body.webLink
+        }
+
+        let payload = {
+            ...payload,
+            profileImage: req.body.profileImage,
+            bannerImage: req.body.bannerImage,
+        }
+
+        // if (req.file) {
+        //   const imgData = fs.readFileSync(req.file.path);
+        //   newPayload.profileImage = await addImage(imgData);
+        // }
+
+        // if (req.files) {
+        //   for (const key in req.files) {
+        //     const image = req.files[key][0];
+        //     const imgData = fs.readFileSync(image.path);
+        //     newPayload[key] = await addImage(imgData);
+        //   }
+        // }
+        const user = await UserModal.findByIdAndUpdate(
+            { _id: ObjectId(payload.userId) },
+            { $set: payload },
+            { new: true }
+        )
+        return res.status(HTTP_STATUS_CODE.OK).send({
+            success: SUCCESS_STATUS.TRUE,
+            user,
+            message: SUCCESS_MESSAGE.PROFILE_UPDATED,
+        })
+    } catch (error) {
+        return next(error)
     }
-    console.log(req.body,"req.body")
-    payload = {
-      email: req.body.email,
-      username: req.body.username,
-      userId: req.body.userId,
-      bio: req.body.bio,
-    };
-
-    const { error } = validation.validateUserProfile(payload);
-    payload.profileImage = req.body.profileImage;
-    if (error) {
-      let errorMsg = error.details[0].message;
-      return res.status(400).send({ status: false, message: errorMsg });
-    }
-    console.log(payload, "payload=>");
-
-    if (req.body.twitterLink && !validUrl.isUri(req.body.twitterLink)) {
-      return res
-        .status(400)
-        .send({ status: false, message: "Enter a valid twitter Link" });
-    } else {
-      payload.twitterLink = req.body.twitterLink;
-    }
-    if (req.body.instaLink && !validUrl.isUri(req.body.instaLink)) {
-      return res
-        .status(400)
-        .send({ status: false, message: "Enter a valid instagram Link" });
-    } else {
-      payload.instaLink = req.body.instaLink;
-    }
-
-    if (req.body.webLink && !validUrl.isUri(req.body.webLink)) {
-      return res
-        .status(400)
-        .send({ status: false, message: "Enter a valid website Link" });
-    } else {
-      payload.webLink = req.body.webLink;
-    }
-
-    let imagesPayload = {
-      profileImage: req.body.profileImage,
-      bannerImage: req.body.bannerImage,
-    };
-
-    const newPayload = { ...payload, ...imagesPayload };
-
-    // if (req.file) {
-    //   const imgData = fs.readFileSync(req.file.path);
-    //   newPayload.profileImage = await addImage(imgData);
-    // }
-
-    // if (req.files) {
-    //   for (const key in req.files) {
-    //     const image = req.files[key][0];
-    //     const imgData = fs.readFileSync(image.path);
-    //     newPayload[key] = await addImage(imgData);
-    //   }
-    // }
-    let user = await UserModal.findByIdAndUpdate(
-      { _id: ObjectId(newPayload.userId) },
-      { $set: newPayload },
-      { new: true }
-    );
-    return res.send({
-      status: true,
-      user,
-      message: "User profile updated successfully.",
-    });
-  } catch (error) {
-    return next(error);
-  }
-};
+}
 exports.getCreators = async (req, res, next) => {
     try {
-        let users = await UserModal.aggregate([
+        const users = await UserModal.aggregate([
             {
                 $match: {},
             },
@@ -127,10 +139,10 @@ exports.getCreators = async (req, res, next) => {
             },
         ])
 
-        return res.send({
-            status: true,
+        return res.status(HTTP_STATUS_CODE.OK).send({
+            success: SUCCESS_STATUS.TRUE,
             data: users,
-            message: 'Authors fetched succeSsfully',
+            message: SUCCESS_MESSAGE.AUTHORS_FETCHED,
         })
     } catch (error) {
         return next(error)
@@ -144,10 +156,7 @@ exports.topSellers = async (req, res, next) => {
         page = page !== undefined && page !== '' ? parseInt(page) : 1
         limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
 
-        const total = await UserModal.countDocuments({})
-
-        if (page > Math.ceil(total / limit) && total > 0)
-            page = Math.ceil(total / limit)
+        const total = UserModal.countDocuments({})
 
         const pipeline = [
             {
@@ -157,18 +166,20 @@ exports.topSellers = async (req, res, next) => {
                 $sort: { totalETH: -1 },
             },
         ]
-        const newTotal = await UserModal.aggregate(pipeline)
-
-        const totalRecords = newTotal.length
+        const newTotal = UserModal.aggregate(pipeline)
+        const topSellers = await Promise.all([total, newTotal])
+        if (page > Math.ceil(topSellers[0] / limit) && topSellers[0] > 0)
+            page = Math.ceil(topSellers[0] / limit)
+        const totalRecords = topSellers[1]?.length
 
         pipeline.push({ $skip: limit * (page - 1) })
         pipeline.push({ $limit: limit })
 
-        let users = await UserModal.aggregate(pipeline)
+        const users = await UserModal.aggregate(pipeline)
 
-        return res.send({
-            success: true,
-            message: 'Top Sellers fetched successfully',
+        return res.status(HTTP_STATUS_CODE.OK).send({
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.TOP_SELLERS_FETCHED,
             data: {
                 topSellers: users,
                 pagination: {
@@ -190,26 +201,28 @@ exports.getUser = async (req, res, next) => {
     try {
         let { userId } = req.params
 
-        let payload = { userId }
+        const payload = { userId }
 
         const { error } = validation.validateUser(payload)
 
         if (error) {
-            let errorMsg = error.details[0].message
-            return res.status(400).send({ status: false, data: errorMsg })
-        }
-        let user = await UserModal.findOne({ _id: ObjectId(payload.userId) })
-
-        if (user) {
-            return res.send({
-                success: true,
-                data: user,
-                message: 'user fetched successfully',
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: error?.details[0]?.message,
             })
         }
-        return res.send({
-            success: false,
-            message: 'User does not exist',
+        const user = await UserModal.findOne({ _id: ObjectId(payload.userId) })
+
+        if (user) {
+            return res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.TRUE,
+                data: user,
+                message: SUCCESS_MESSAGE.USER_FETCHED,
+            })
+        }
+        return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: ERROR_MESSAGE.USER_DOES_NOT_EXIST,
         })
     } catch (error) {
         return next(error)
@@ -217,35 +230,33 @@ exports.getUser = async (req, res, next) => {
 }
 
 exports.subscribeUser = async (req, res, next) => {
-  let listUniqueId = mailChimp.listId;
-  try {
-
-    await mailchimp.lists.addListMember(listUniqueId, {
-      email_address: req.body.email,
-      status: "subscribed",
-      tags: ["mintsclub.io"],
-    });
-    res.status(201).send({
-      success: true,
-      message: "Subscribed successfully",
-    });
-  } catch (error) {
-    console.log(error, "error");
-    console.log(JSON.parse(error.response.text).detail, "error");
-    if (
-      JSON.parse(error.response.text).detail.includes("already a list member")
-    ) {
-      res
-        .status(400)
-        .send({ success: false, message: "Email is already subscribed" });
-    } else {
-      res
-        .status(400)
-        .send({
-          success: false,
-          message: JSON.parse(error.response.text).detail,
-        });
+    const listUniqueId = mailChimp.listId
+    try {
+        await mailchimp.lists.addListMember(listUniqueId, {
+            email_address: req.body.email,
+            status: 'subscribed',
+            tags: ['mintsclub.io'],
+        })
+        res.status(HTTP_STATUS_CODE.CREATED).send({
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.SUBSCRIBED_SUCCESSFULLY,
+        })
+    } catch (error) {
+        if (
+            JSON.parse(error.response.text).detail.includes(
+                'already a list member'
+            )
+        ) {
+            res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.EMAIL_ALREADY_SUBSCRIBED,
+            })
+        } else {
+            res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: JSON.parse(error.response.text).detail,
+            })
+        }
+        // return next(JSON.parse(error.response.text));
     }
-    // return next(JSON.parse(error.response.text));
-  }
-};
+}

@@ -1,84 +1,82 @@
-const fs = require('fs')
+// const fs = require('fs')
 const ObjectId = require('mongoose').Types.ObjectId
 const NFT = require('../../models/nfts.model')
 const Collection = require('../../models/collection.model')
 const Categories = require('../../models/categories.model')
 const User = require('../../models/users.model')
-const { addImage } = require('../../utils/uploadImage')
-const { checkDuplicate } = require('../../../config/errors')
+// const { addImage } = require('../../utils/uploadImage')
 const validation = require('../../middlewares/front/collectionValidation')
+const {
+    SUCCESS_MESSAGE,
+    ERROR_MESSAGE,
+    SUCCESS_STATUS,
+    HTTP_STATUS_CODE,
+} = require('../../../config/constants')
 
 // API to create collection
 exports.create = async (req, res, next) => {
-  try {
-    let payload = {
-      userId: req.body.userId,
-      categoryId: req.body.categoryId,
-      name: req.body.name,
-      url: req.body.url,
-      description: req.body.description,
-      ownerAddress:req.body.ownerAddress
-      //category: req.body.category,
-    };
-    const { error } = validation.validateCollectionSchema(payload);
+    try {
+        let payload = {
+            userId: req.body.userId,
+            categoryId: req.body.categoryId,
+            name: req.body.name,
+            url: req.body.url,
+            description: req.body.description,
+            ownerAddress: req.body.ownerAddress,
+        }
+        const { error } = validation.validateCollectionSchema(payload)
 
-    if (error) {
-      let errorMsg = error.details[0].message;
-      return res.status(400).send({ success: false, message: errorMsg });
+        if (error) {
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: error?.details[0]?.message,
+            })
+        }
+
+        payload = {
+            ...payload,
+            logo: req.body.logo,
+            featuredImg: req.body.featuredImg,
+            banner: req.body.bannerUrl,
+        }
+
+        payload.categoryId = payload.categoryId ? payload.categoryId : null
+
+        // if (req.files)
+        //   for (const key in req.files) {
+        //     const image = req.files[key][0];
+        //     const imgData = fs.readFileSync(image.path);
+        //     newPayload[key] = await addImage(imgData);
+        //   }
+
+        if (!payload?.logo) {
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.LOGO_REQUIRED,
+            })
+        }
+
+        const existingCollection = await Collection.findOne({
+            name: new RegExp(payload.name, 'gi'),
+            userId: payload.userId,
+        })
+
+        if (existingCollection) {
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.COLLECTION_EXIST_ALREADY,
+            })
+        }
+        const collection = await Collection.create(payload)
+        return res.status(HTTP_STATUS_CODE.CREATED).send({
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.COLLECTION_CREATED,
+            collection,
+        })
+    } catch (error) {
+        return next(error)
     }
-
-    let imagesPayload = {
-      logo: req.body.logo,
-      featuredImg: req.body.featuredImg,
-      banner: req.body.bannerUrl,
-    };
-
-    const newPayload = { ...payload, ...imagesPayload };
-
-    newPayload.categoryId = null;
-    if (payload.categoryId) {
-      newPayload.categoryId = payload.categoryId;
-    }
-
-    // if (req.files)
-    //   for (const key in req.files) {
-    //     const image = req.files[key][0];
-    //     const imgData = fs.readFileSync(image.path);
-    //     newPayload[key] = await addImage(imgData);
-    //   }
-
-    if (!newPayload.logo) {
-      return res.status(400).send({
-        success: false,
-        message: 'logo image is required',
-      });
-    }
-
-    const existingCollection = await Collection.findOne({
-      name: new RegExp(newPayload.name, 'gi'),
-      userId: newPayload.userId,
-    });
-
-    if (existingCollection) {
-      return res.status(400).send({
-        success: false,
-        message: 'Collection with same name already exists',
-      });
-    }
-
-console.log(newPayload,"newPayload")
-    const collection = await Collection.create(newPayload);
-    return res.status(201).send({
-      success: true,
-      message: 'Collection created successfully',
-      collection,
-    });
-  } catch (error) {
-    if (error.code === 11000 || error.code === 11001)
-      checkDuplicate(error, res, 'Collection');
-    else return next(error);
-  }
-};
+}
 
 // API to edit collection
 exports.edit = async (req, res, next) => {
@@ -95,63 +93,58 @@ exports.edit = async (req, res, next) => {
         const { error } = validation.validateEditCollectionSchema(payload)
 
         if (error) {
-            let errorMsg = error.details[0].message
-            return res.status(400).send({ success: false, message: errorMsg })
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: error?.details[0]?.message,
+            })
         }
-        let imagesPayload = {
+        payload = {
+            ...payload,
             logo: req.body.logo,
             featuredImg: req.body.featuredImgUrl,
             banner: req.body.bannerUrl,
         }
+        payload.categoryId = payload.categoryId ? payload.categoryId : null
 
-        const newPayload = { ...payload, ...imagesPayload }
+        // if (req.files)
+        //     for (const key in req.files) {
+        //         const image = req.files[key][0]
+        //         const imgData = fs.readFileSync(image.path)
+        //         newPayload[key] = await addImage(imgData)
+        //     }
 
-        newPayload.categoryId = null
-        if (payload.categoryId) {
-            newPayload.categoryId = payload.categoryId
-        }
-
-        if (req.files)
-            for (const key in req.files) {
-                const image = req.files[key][0]
-                const imgData = fs.readFileSync(image.path)
-                newPayload[key] = await addImage(imgData)
-            }
-
-        if (!newPayload.logo) {
-            return res.status(400).send({
-                success: false,
-                message: 'logo image is required',
+        if (!payload?.logo) {
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.LOGO_REQUIRED,
             })
         }
 
-        if (newPayload.name) {
+        if (payload.name) {
             const existingCollection = await Collection.findOne({
-                _id: { $ne: newPayload._id },
-                name: new RegExp(newPayload.name, 'gi'),
-                userId: newPayload.userId,
+                _id: { $ne: payload._id },
+                name: new RegExp(payload.name, 'gi'),
+                userId: payload.userId,
             })
             if (existingCollection)
-                return res.status(400).send({
-                    success: false,
-                    message: 'Collection with same name already exists',
+                return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                    success: SUCCESS_STATUS.FALSE,
+                    message: ERROR_MESSAGE.COLLECTION_EXIST_ALREADY,
                 })
         }
 
         const collection = await Collection.findByIdAndUpdate(
-            { _id: newPayload._id },
-            { $set: newPayload },
+            { _id: payload._id },
+            { $set: payload },
             { new: true }
         )
         return res.send({
-            success: true,
-            message: 'Collection updated successfully',
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.COLLECTION_UPDATED,
             collection,
         })
     } catch (error) {
-        if (error.code === 11000 || error.code === 11001)
-            checkDuplicate(error, res, 'Collection')
-        else return next(error)
+        return next(error)
     }
 }
 
@@ -159,23 +152,28 @@ exports.edit = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
     try {
         const { collectionId } = req.params
-        if (collectionId) {
-            const collection = await Collection.deleteOne({ _id: collectionId })
-            if (collection.deletedCount)
-                return res.send({
-                    success: true,
-                    message: 'Collection deleted successfully',
-                    collectionId,
-                })
-            else
-                return res.status(400).send({
-                    success: false,
-                    message: 'Collection not found for given Id',
-                })
-        } else
-            return res
-                .status(400)
-                .send({ success: false, message: 'Collection Id is required' })
+
+        const { error } = validation.validateCollectionId({ collectionId })
+
+        if (error) {
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: error?.details[0]?.message,
+            })
+        }
+
+        const collection = await Collection.deleteOne({ _id: collectionId })
+        if (collection.deletedCount)
+            return res.send({
+                success: SUCCESS_STATUS.TRUE,
+                message: SUCCESS_MESSAGE.COLLECTION_DELETED,
+                collectionId,
+            })
+        else
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.COLLECTION_NOT_FOUND,
+            })
     } catch (error) {
         return next(error)
     }
@@ -185,51 +183,48 @@ exports.delete = async (req, res, next) => {
 exports.get = async (req, res, next) => {
     try {
         const { collectionId } = req.params
-        const { error } = validation.validateCollectionId(collectionId)
+        const { error } = validation.validateCollectionId({ collectionId })
 
         if (error) {
-            let errorMsg = error.details[0].message
-            return res.status(400).send({ status: false, data: errorMsg })
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: error?.details[0]?.message,
+            })
         }
 
-        if (collectionId) {
-            let collection = await Collection.findOne({ _id: collectionId })
-                .populate([
-                    {
-                        path: 'userId',
-                        select: '_id username email profilePhoto',
-                    },
-                    { path: 'categoryId', select: '_id name image' },
-                ])
-                .lean(true)
-            if (collection) {
-                collection.user = collection.userId
-                collection.category = collection.categoryId
+        let collection = await Collection.findOne({ _id: collectionId })
+            .populate([
+                {
+                    path: 'userId',
+                    select: '_id username email profilePhoto',
+                },
+                { path: 'categoryId', select: '_id name image' },
+            ])
+            .lean(true)
+        if (collection) {
+            collection.user = collection.userId
+            collection.category = collection.categoryId
 
-                delete collection.userId
-                delete collection.categoryId
+            delete collection.userId
+            delete collection.categoryId
 
-                collection.items = await NFT.countDocuments({ collectionId })
+            collection.items = await NFT.countDocuments({ collectionId })
 
-                let owners = await NFT.find({ collectionId }).distinct(
-                    'collectionId'
-                )
-                collection.owners = owners?.length || 0
+            let owners = await NFT.find({ collectionId }).distinct(
+                'collectionId'
+            )
+            collection.owners = owners?.length || 0
 
-                return res.json({
-                    success: true,
-                    message: 'Collection retrieved successfully',
-                    collection,
-                })
-            } else
-                return res.status(400).send({
-                    success: false,
-                    message: 'Collection not found for given Id',
-                })
+            return res.json({
+                success: SUCCESS_STATUS.TRUE,
+                message: SUCCESS_MESSAGE.COLLECTION_FETCHED,
+                collection,
+            })
         } else
-            return res
-                .status(400)
-                .send({ success: false, message: 'Collection Id is required' })
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.COLLECTION_NOT_FOUND,
+            })
     } catch (error) {
         return next(error)
     }
@@ -248,15 +243,15 @@ exports.list = async (req, res, next) => {
                 myFilter
             )
             if (!applyFilter) {
-                return res.status(400).send({
-                    success: false,
-                    message: 'Invalid Filter passed',
+                return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                    success: SUCCESS_STATUS.FALSE,
+                    message: ERROR_MESSAGE.INVALID_FILTER_PASSED,
                 })
             }
             filter = { categoryId: applyFilter._id }
         }
 
-        if (myFilter && myFilter == 'all') {
+        if (myFilter && myFilter === 'all') {
             filter = {}
         }
 
@@ -335,8 +330,8 @@ exports.list = async (req, res, next) => {
         const collections = await Collection.aggregate(pipeline)
 
         return res.send({
-            success: true,
-            message: 'Collections fetched successfully',
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.COLLECTIONS_FETCHED,
             data: {
                 collections: collections,
 
@@ -362,9 +357,10 @@ exports.myCollectionList = async (req, res, next) => {
         let { userId, page, limit } = req.query
 
         if (!userId)
-            return res
-                .status(400)
-                .send({ success: false, message: 'Please Sign In First' })
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.SIGN_IN_FIRST,
+            })
 
         const findUser = await User.findOne({ _id: userId })
 
@@ -374,10 +370,7 @@ exports.myCollectionList = async (req, res, next) => {
             page = page !== undefined && page !== '' ? parseInt(page) : 1
             limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
 
-            total = await Collection.find({}).where('userId', userId)
-
-            if (page > Math.ceil(total / limit) && total > 0)
-                page = Math.ceil(total / limit)
+            total = Collection.find({}).where('userId', userId)
 
             const pipeline = [
                 {
@@ -427,18 +420,25 @@ exports.myCollectionList = async (req, res, next) => {
                 },
             ]
 
-            const newTotal = await Collection.aggregate(pipeline)
+            const newTotal = Collection.aggregate(pipeline)
+            const collectionList = await Promise.all([total, newTotal])
 
-            const totalRecords = newTotal.length
+            if (
+                page > Math.ceil(collectionList[0] / limit) &&
+                collectionList[0] > 0
+            )
+                page = Math.ceil(collectionList[0] / limit)
+
+            const totalRecords = collectionList[1]?.length
 
             pipeline.push({ $skip: limit * (page - 1) })
             pipeline.push({ $limit: limit })
 
             const Collections = await Collection.aggregate(pipeline)
 
-            return res.status(200).send({
-                success: true,
-                message: 'My collections fetched successfully',
+            return res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.TRUE,
+                message: SUCCESS_MESSAGE.MY_COLLECTIONS_FETCHED,
                 data: {
                     collections: {
                         totalRecords: totalRecords,
@@ -456,9 +456,9 @@ exports.myCollectionList = async (req, res, next) => {
                 },
             })
         }
-        return res.status(200).send({
-            success: false,
-            message: 'UserId not found',
+        return res.status(HTTP_STATUS_CODE.OK).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: ERROR_MESSAGE.USER_ID_NOT_FOUND,
         })
     } catch (error) {
         return next(error)
@@ -467,8 +467,8 @@ exports.myCollectionList = async (req, res, next) => {
 
 exports.popular = async (req, res, next) => {
     try {
-        let { page, limit, myFilter } = req.query
-
+        let { page, limit } = req.query
+        const { myFilter } = req.query
         let filter = {}
 
         if (myFilter) {
@@ -477,16 +477,16 @@ exports.popular = async (req, res, next) => {
                 myFilter
             )
             if (!applyFilter) {
-                return res.status(400).send({
-                    success: false,
-                    message: 'Invalid Filter passed',
+                return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                    success: SUCCESS_STATUS.FALSE,
+                    message: ERROR_MESSAGE.INVALID_FILTER_PASSED,
                 })
             }
 
             filter = { categoryId: applyFilter._id }
         }
 
-        if (myFilter && myFilter == 'all') {
+        if (myFilter && myFilter === 'all') {
             filter = {}
         }
 
@@ -495,10 +495,7 @@ exports.popular = async (req, res, next) => {
         page = page !== undefined && page !== '' ? parseInt(page) : 1
         limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
 
-        total = await Collection.countDocuments({})
-
-        if (page > Math.ceil(total / limit) && total > 0)
-            page = Math.ceil(total / limit)
+        total = Collection.countDocuments({})
 
         const pipeline = [
             {
@@ -564,18 +561,25 @@ exports.popular = async (req, res, next) => {
             },
         ]
 
-        const newTotal = await Collection.aggregate(pipeline)
+        const newTotal = Collection.aggregate(pipeline)
 
-        const totalRecords = newTotal.length
+        const popularCollections = await Promise.all([total, newTotal])
+        if (
+            page > Math.ceil(popularCollections[0] / limit) &&
+            popularCollections[0] > 0
+        )
+            page = Math.ceil(popularCollections[0] / limit)
+
+        const totalRecords = popularCollections[1]?.length
 
         pipeline.push({ $skip: limit * (page - 1) })
         pipeline.push({ $limit: limit })
 
         const collectionsList = await Collection.aggregate(pipeline)
 
-        return res.status(200).send({
-            success: true,
-            message: 'popular collection fetched successfully',
+        return res.status(HTTP_STATUS_CODE.OK).send({
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.POPULAR_COLLECTIONS_FETCHED,
             data: {
                 collectionsList: collectionsList,
                 pagination: {

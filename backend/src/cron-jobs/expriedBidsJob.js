@@ -29,12 +29,12 @@ module.exports.startCron = () => {
                         })
 
                         if (bid.length > 0) {
-                            let bidData = bid[0]
+                            const bidData = bid[0]
                             if (
                                 auctionEndNft.remainingCopies >
                                 auctionEndNft.copiesForAuction
                             ) {
-                                let payload = {
+                                const payload = {
                                     ownerId: bidData.bidBy,
                                     userId: bidData.bidBy,
                                     ownerAddress: bidData.fromAddress,
@@ -56,20 +56,19 @@ module.exports.startCron = () => {
 
                                 const NFT = await nft.create(payload)
 
-                                let collectionRecord = await Collection.findOne(
-                                    {
+                                const collectionRecord =
+                                    await Collection.findOne({
                                         _id: auctionEndNft.collectionId,
-                                    }
-                                )
+                                    })
 
                                 collectionRecord.nft.push(NFT._id)
                                 collectionRecord.save()
 
-                                let nftTokenDetail = await NftTokens.findOne({
+                                const nftTokenDetail = await NftTokens.findOne({
                                     nftId: auctionEndNft._id,
                                 })
 
-                                let nftTokenPayload = {
+                                const nftTokenPayload = {
                                     nftToken: nftTokenDetail.nftToken,
                                     nftId: NFT._id,
                                     tokenStandard: nftTokenDetail.tokenStandard,
@@ -81,7 +80,7 @@ module.exports.startCron = () => {
                                     auctionEndNft.copies -
                                     auctionEndNft.copiesForAuction
 
-                                let newPayload = {
+                                const newPayload = {
                                     copiesForAuction: 0,
                                     remainingCopies: remainingCopies,
                                     auctionEndDate: null,
@@ -100,17 +99,17 @@ module.exports.startCron = () => {
                                     },
                                 }
 
-                                let nftUpdate = await nft.findByIdAndUpdate(
+                                const nftUpdate = await nft.findByIdAndUpdate(
                                     { _id: auctionEndNft._id },
                                     { $set: newPayload }
                                     // { new: true }
                                 )
                                 if (nftUpdate) {
-                                    let findUserDetail = await Users.findOne({
+                                    const findUserDetail = await Users.findOne({
                                         _id: nftUpdate.ownerId,
                                     })
 
-                                    let newTotalETH =
+                                    const newTotalETH =
                                         findUserDetail.totalETH +
                                         bidData.bidAmount
 
@@ -126,7 +125,7 @@ module.exports.startCron = () => {
                                     // { new: true }
                                 )
 
-                                let activityPayload = {
+                                const activityPayload = {
                                     nftId: auctionEndNft._id,
                                     ownerId: auctionEndNft.ownerId,
                                     fromAddress: auctionEndNft.ownerAddress,
@@ -137,7 +136,7 @@ module.exports.startCron = () => {
 
                                 await ItemActivity.create(activityPayload)
                             } else {
-                                let payload = {
+                                const payload = {
                                     ownerId: bidData.bidBy,
                                     userId: bidData.bidBy,
                                     ownerAddress: bidData.fromAddress,
@@ -163,17 +162,17 @@ module.exports.startCron = () => {
                                     },
                                 }
 
-                                let nftUpdate = await nft.findByIdAndUpdate(
+                                const nftUpdate = await nft.findByIdAndUpdate(
                                     { _id: auctionEndNft._id },
                                     { $set: payload }
                                     // { new: true }
                                 )
                                 if (nftUpdate) {
-                                    let findUserDetail = await Users.findOne({
+                                    const findUserDetail = await Users.findOne({
                                         _id: nftUpdate.ownerId,
                                     })
 
-                                    let newTotalETH =
+                                    const newTotalETH =
                                         findUserDetail.totalETH +
                                         bidData.bidAmount
 
@@ -182,7 +181,7 @@ module.exports.startCron = () => {
                                         { $set: { totalETH: newTotalETH } }
                                     )
 
-                                    let activityPayload = {
+                                    const activityPayload = {
                                         nftId: auctionEndNft._id,
                                         ownerId: auctionEndNft.ownerId,
                                         fromAddress: auctionEndNft.ownerAddress,
@@ -195,7 +194,7 @@ module.exports.startCron = () => {
                                 }
                             }
                         }
-                        let payload = {
+                        const payload = {
                             auctionEndDate: null,
                             auctionStartDate: null,
                             sellingMethod: 0,

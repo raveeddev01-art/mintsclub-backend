@@ -3,22 +3,30 @@ const Offer = require('../../models/offer.model')
 const ObjectId = require('mongoose').Types.ObjectId
 const validation = require('../../middlewares/front/offerValidation')
 const validator = require('../../middlewares/front/validation')
+const {
+    ERROR_MESSAGE,
+    SUCCESS_MESSAGE,
+    SUCCESS_STATUS,
+    HTTP_STATUS_CODE,
+} = require('../../../config/constants')
 // API to create offer
 exports.create = async (req, res, next) => {
     try {
-        let payload = req.body
+        const payload = req.body
 
         const { error } = validation.validateOfferSchema(payload)
 
         if (error) {
-            let errorMsg = error.details[0].message
-            return res.status(400).send({ status: false, message: errorMsg })
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: error?.details[0]?.message,
+            })
         }
         const offer = await Offer.create(payload)
 
-        return res.send({
-            success: true,
-            message: 'You have made offer successfully',
+        return res.status(HTTP_STATUS_CODE.OK).send({
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.OFFER_MADE_SUCCESSFULLY,
             offer,
         })
     } catch (error) {
@@ -30,30 +38,26 @@ exports.create = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
     try {
         const { offerId } = req.params
-        let payload = {
-            id: offerId,
-        }
-        const { error } = validator.validateId(payload)
+
+        const { error } = validator.validateId({ offerId })
         if (error) {
-            let errorMsg = error.details[0].message
-            return res.status(400).send({ status: false, message: errorMsg })
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: error?.details[0]?.message,
+            })
         }
-        if (offerId) {
-            const offer = await Offer.deleteOne({ _id: offerId })
-            if (offer && offer.deletedCount)
-                return res.send({
-                    success: true,
-                    message: 'Your Offer has been cancelled successfully',
-                })
-            else
-                return res.status(400).send({
-                    success: false,
-                    message: 'Offer not found for given Id',
-                })
-        } else
-            return res
-                .status(400)
-                .send({ success: false, message: 'Offer Id is required' })
+
+        const offer = await Offer.deleteOne({ _id: offerId })
+        if (offer && offer.deletedCount)
+            return res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.TRUE,
+                message: SUCCESS_MESSAGE.OFFER_CANCELLED,
+            })
+        else
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.OFFER_NOT_FOUND,
+            })
     } catch (error) {
         return next(error)
     }
@@ -62,8 +66,10 @@ exports.delete = async (req, res, next) => {
 // API to get offers list
 exports.list = async (req, res, next) => {
     try {
-        let { page, limit, nftId } = req.query
-        let filter = { isExpired: false, isAccepted: false }
+        let { page, limit } = req.query
+        const { nftId } = req.query
+
+        const filter = { isExpired: false, isAccepted: false }
 
         if (nftId) filter.nftId = ObjectId(nftId)
 
@@ -77,9 +83,9 @@ exports.list = async (req, res, next) => {
             { $sort: { createdAt: -1 } },
         ])
 
-        return res.send({
-            success: true,
-            message: 'Offers fetched successfully',
+        return res.status(HTTP_STATUS_CODE.OK).send({
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.OFFERS_FETCHED,
             data: {
                 offers: offers,
                 pagination: {
@@ -102,57 +108,53 @@ exports.list = async (req, res, next) => {
 exports.accept = async (req, res, next) => {
     try {
         const { offerId } = req.body
-        const { error } = validator.validateId(offerId)
+        const { error } = validator.validateId({ offerId })
         if (error) {
-            let errorMsg = error.details[0].message
-            return res.status(400).send({ status: false, message: errorMsg })
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: error?.details[0]?.message,
+            })
         }
 
-        if (offerId) {
-            // accept offer
-            const offer = await Offer.findByIdAndUpdate(
-                { _id: offerId },
-                { isAccepted: true },
-                { new: true }
+        const offer = await Offer.findByIdAndUpdate(
+            { _id: offerId },
+            { isAccepted: true },
+            { new: true }
+        )
+
+        if (offer) {
+            // expire other offers
+            await Offer.updateMany(
+                { _id: { $ne: ObjectId(offerId) }, nftId: offer.nftId },
+                { $set: { isExpired: true } }
             )
 
-            if (offer) {
-                // expire other offers
-                await Offer.updateMany(
-                    { _id: { $ne: ObjectId(offerId) }, nftId: offer.nftId },
-                    { $set: { isExpired: true } }
-                )
+            await NFT.updateOne(
+                { _id: offer.nftId },
+                {
+                    $unset: {
+                        sellingMethod: undefined,
+                        sellingConfig: undefined,
+                        auctionEndDate: undefined,
+                        auctionEndTime: undefined,
+                        auctionStartDate: undefined,
+                        auctionStartTime: undefined,
+                    },
+                    $set: {
+                        ownerId: offer.offerBy,
+                    },
+                }
+            )
 
-                await NFT.updateOne(
-                    { _id: offer.nftId },
-                    {
-                        $unset: {
-                            sellingMethod: undefined,
-                            sellingConfig: undefined,
-                            auctionEndDate: undefined,
-                            auctionEndTime: undefined,
-                            auctionStartDate: undefined,
-                            auctionStartTime: undefined,
-                        },
-                        $set: {
-                            ownerId: offer.offerBy,
-                        },
-                    }
-                )
-
-                return res.send({
-                    success: true,
-                    message: 'Offer has been accepted successfully',
-                })
-            } else
-                return res.status(400).send({
-                    success: false,
-                    message: 'Offer not found for given Id',
-                })
+            return res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.TRUE,
+                message: SUCCESS_MESSAGE.OFFER_ACCEPTED,
+            })
         } else
-            return res
-                .status(400)
-                .send({ success: false, message: 'Offer Id is required' })
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.OFFER_NOT_FOUND,
+            })
     } catch (error) {
         return next(error)
     }

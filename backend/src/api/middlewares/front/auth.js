@@ -12,14 +12,14 @@ exports.authenticate = async (req, res, next) => {
             next()
         } else {
             if (req.headers['x-auth-token']) {
-                var decryption_string = req.headers['x-auth-token']
+                let decryption_string = req.headers['x-auth-token']
 
                 if (req.token) {
-                    var bytes = CryptoJS.AES.decrypt(
+                    let bytes = CryptoJS.AES.decrypt(
                         req.token,
                         decryption_string
                     )
-                    var decryptedData = bytes.toString(CryptoJS.enc.Utf8)
+                    let decryptedData = bytes.toString(CryptoJS.enc.Utf8)
                     if (decryptedData !== frontEncSecret) {
                         const message = 'auth_request_required_front_error1'
                         return res.status(405).json({ success: false, message })

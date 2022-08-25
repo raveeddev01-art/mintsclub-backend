@@ -67,6 +67,7 @@ app.use('/admin/', express.static(path.join(__dirname, '../../admin')))
 app.get('/admin/*', function (req, res) {
     res.sendFile(path.join(__dirname, '../../admin', 'index.html'))
 })
+// TODO: Handle errors with centralized way.
 
 // if error is not an instanceOf APIError, convert it.
 app.use(error.converter)

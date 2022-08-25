@@ -1,15 +1,23 @@
 const NFT = require('../../models/nfts.model')
 const ObjectId = require('mongoose').Types.ObjectId
 const validation = require('../../middlewares/front/collectionValidation')
+const {
+    SUCCESS_MESSAGE,
+    SUCCESS_STATUS,
+    HTTP_STATUS_CODE,
+} = require('../../../config/constants')
+
 exports.get = async (req, res, next) => {
-    let { collectionId } = req.query
-    const { error } = validation.validateCollectionId(collectionId)
+    const { collectionId } = req.query
+    const { error } = validation.validateCollectionId({ collectionId })
     if (error) {
-        let errorMsg = error.details[0].message
-        return res.status(400).send({ status: false, data: errorMsg })
+        return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: error?.details[0]?.message,
+        })
     }
     try {
-        let filter = {
+        const filter = {
             sellingMethod: 1, // timed auctions only
             collectionId: ObjectId(collectionId),
         }
@@ -19,10 +27,10 @@ exports.get = async (req, res, next) => {
             },
         ])
 
-        res.status(200).send({
-            success: true,
+        res.status(HTTP_STATUS_CODE.OK).send({
+            success: SUCCESS_STATUS.TRUE,
             data: itemsListing,
-            message: 'Items Listing Retrieved Successfully',
+            message: SUCCESS_MESSAGE.ITEM_LISTING_FETCHED,
         })
     } catch (err) {
         next(err)

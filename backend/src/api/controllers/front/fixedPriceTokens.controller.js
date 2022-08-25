@@ -1,23 +1,32 @@
 const FixedPriceTokens = require('../../models/fixedPriceTokens.model')
 const validation = require('../../middlewares/front/fixedPriceTokenValidation.js')
-
+const {
+    SUCCESS_MESSAGE,
+    ERROR_MESSAGE,
+    SUCCESS_STATUS,
+    HTTP_STATUS_CODE,
+} = require('../../../config/constants')
 exports.addNftToken = async (req, res) => {
     try {
-        let payload = req.body
+        const payload = req.body
         const { error } = validation.validateAddFixedPriceToken(payload)
         if (error) {
-            let errorMsg = error.details[0].message
-            return res.status(400).send({ status: false, message: errorMsg })
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: error?.details[0]?.message,
+            })
         }
-        let result = await FixedPriceTokens.create(payload)
+        const result = await FixedPriceTokens.create(payload)
 
         res.send({
-            status: 'success',
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.ADD_NFT_TOKEN_FIXED_PRICE,
             data: result,
         })
     } catch (err) {
-        res.status(400).send({
-            status: 'failure',
+        res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: ERROR_MESSAGE.ADD_NFT_TOKEN_FIXED_PRICE_FAILED,
             error: err,
         })
     }
@@ -25,15 +34,17 @@ exports.addNftToken = async (req, res) => {
 
 exports.getNftTokens = async (req, res) => {
     try {
-        let result = await FixedPriceTokens.find()
+        const result = await FixedPriceTokens.find()
 
-        res.status(200).send({
-            status: 'success',
+        res.status(HTTP_STATUS_CODE.OK).send({
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.NFT_TOKEN_FIXED_PRICE_LIST,
             data: result,
         })
     } catch (err) {
-        res.status(400).send({
-            status: 'failure',
+        res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: ERROR_MESSAGE.NFT_TOKEN_FIXED_PRICE_LIST_FAILED,
             error: err,
         })
     }
@@ -41,22 +52,26 @@ exports.getNftTokens = async (req, res) => {
 
 exports.getNftToken = async (req, res) => {
     const id = req.params.id
-    const { error } = validation.validateNFTid(id)
+    const { error } = validation.validateNFTid({ id })
 
     if (error) {
-        let errorMsg = error.details[0].message
-        return res.status(400).send({ status: false, message: errorMsg })
+        return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: error?.details[0]?.message,
+        })
     }
     try {
-        let result = await FixedPriceTokens.findOne({ nftId: id })
+        const result = await FixedPriceTokens.findOne({ nftId: id })
 
-        res.status(200).send({
-            status: 'success',
+        res.status(HTTP_STATUS_CODE.OK).send({
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.NFT_TOKEN_FIXED_PRICE_FOR_NFT,
             data: result,
         })
     } catch (err) {
-        res.status(400).send({
-            status: 'failure',
+        res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: ERROR_MESSAGE.NFT_TOKEN_FIXED_PRICE_FOR_NFT_FAILED,
             error: err,
         })
     }

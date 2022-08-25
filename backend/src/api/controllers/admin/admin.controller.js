@@ -70,7 +70,7 @@ exports.login = async (req, res, next) => {
                         user,
                     })
                 else {
-                    var accessToken = await user.token()
+                    let accessToken = await user.token()
                     let data = {
                         ...user._doc,
                         accessToken,

@@ -1,21 +1,27 @@
 const ItemActivity = require('../../models/item-activity.modal')
-const mongoose = require('mongoose')
+// const mongoose = require('mongoose')
+const {
+    SUCCESS_MESSAGE,
+    SUCCESS_STATUS,
+    HTTP_STATUS_CODE,
+} = require('../../../config/constants')
 const validation = require('../../middlewares/front/itemActivity')
 exports.create = async (req, res, next) => {
     try {
-        let payload = req.body
+        const payload = req.body
         const { error } = validation.validateCreateItemActivity(payload)
 
         if (error) {
-            let errorMsg = error.details[0].message
-            return res.status(400).send({ status: false, message: errorMsg })
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: error?.details[0]?.message,
+            })
         }
-
         const result = await ItemActivity.create(payload)
         if (result) {
-            res.status(200).send({
-                success: true,
-                message: 'Item Activity Created Successfully',
+            res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.TRUE,
+                message: SUCCESS_MESSAGE.ITEM_ACTIVITY__CREATED,
                 data: result,
             })
         }
@@ -26,20 +32,22 @@ exports.create = async (req, res, next) => {
 
 exports.get = async (req, res, next) => {
     try {
-        let payload = {
+        const payload = {
             nftId: req.query.nftId,
         }
-        const { error } = validation.validateNFTid(payload.nftId)
+        const { error } = validation.validateNFTid(payload)
 
         if (error) {
-            let errorMsg = error.details[0].message
-            return res.status(400).send({ status: false, message: errorMsg })
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: error?.details[0]?.message,
+            })
         }
-        let activities = await ItemActivity.find(payload)
+        const activities = await ItemActivity.find(payload)
 
-        res.status(200).send({
-            success: true,
-            message: 'Item Activity Retrieved Successfully',
+        res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.ITEM_ACTIVITY__FETCHED,
             data: activities,
         })
     } catch (error) {
@@ -49,22 +57,23 @@ exports.get = async (req, res, next) => {
 
 exports.update = async (req, res, next) => {
     try {
-        let payload = req.body
-
-        const { error } = validation.validateCreateItemActivity(payload)
+        const payload = req.body
+        const { error } = validation.validateUpdateItemActivity(payload)
 
         if (error) {
-            let errorMsg = error.details[0].message
-            return res.status(400).send({ status: false, message: errorMsg })
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: error?.details[0]?.message,
+            })
         }
         const updatedActivity = await ItemActivity.findByIdAndUpdate(
-            { _id: payload.id },
+            { _id: payload?.activityId },
             { $set: payload },
             { new: true }
         )
-        res.status(200).send({
-            success: true,
-            message: 'NFT Deleted Successfully',
+        res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.ITEM_ACTIVITY__UPDATED,
             data: updatedActivity,
         })
     } catch (error) {
@@ -74,20 +83,21 @@ exports.update = async (req, res, next) => {
 
 exports.delete = async (req, res, next) => {
     try {
-        let nftId = req.body.nftId
-        nftId = mongoose.Types.ObjectId(nftId)
-        const { error } = validation.validateNFTid(nftId)
+        const nftId = req.body.nftId
+        const { error } = validation.validateNFTid({ nftId })
 
         if (error) {
-            let errorMsg = error.details[0].message
-            return res.status(400).send({ status: false, message: errorMsg })
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: error?.details[0]?.message,
+            })
         }
 
         let result = await ItemActivity.deleteMany({ nftId: nftId })
         if (result) {
-            res.status(200).send({
-                success: true,
-                message: 'NFT Deleted Successfully',
+            res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.TRUE,
+                message: SUCCESS_MESSAGE.ITEM_ACTIVITY__FETCHED_DELETED,
             })
         }
     } catch (error) {

@@ -1,75 +1,87 @@
 const LikesModal = require('../../models/likes.model')
 let ObjectId = require('mongodb').ObjectId
 const validation = require('../../middlewares/front/likes')
+const {
+    ERROR_MESSAGE,
+    SUCCESS_MESSAGE,
+    SUCCESS_STATUS,
+    HTTP_STATUS_CODE,
+} = require('../../../config/constants')
 
 exports.likeDislike = async (req, res, next) => {
-    let nftId = req.body.nftId
-    let userId = req.body.userId
-    let count = req.body.count
-    let Payload = {
-        nftId: nftId,
-        userId: userId,
-        count: count,
+    const Payload = {
+        nftId: req.body.nftId,
+        userId: req.body.userId,
+        count: req.body.count,
     }
     const { error } = validation.validateLikesDislikeSchema(Payload)
 
     if (error) {
-        let errorMsg = error.details[0].message
-        return res.status(400).send({ status: false, data: errorMsg })
+        return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: error?.details[0]?.message,
+        })
     }
 
-    let foundCollection = await LikesModal.find({ nftId })
+    const foundCollection = await LikesModal.find({ nftId: Payload.nftId })
+    const userId = req.body.userId
+    const nftId = req.body.nftId
+    const count = req.body.count
 
     if (foundCollection[0]) {
         // find if user already exist
         await LikesModal.findOne(
             {
-                likes: { $elemMatch: { userId: req.body.userId } },
-                nftId: req.body.nftId,
+                likes: { $elemMatch: { userId: Payload.userId } },
+                nftId: Payload.nftId,
             },
             async function (err, user) {
                 //error
 
-                if (err) {
-                    console.log('error', err)
-                }
+                // if (err) {
+                //     console.log('error', err)
+                // }
 
                 //if user exist then delete that record
 
                 if (user) {
                     await LikesModal.updateOne(
-                        { nftId: new ObjectId(nftId) },
+                        { nftId: new ObjectId(Payload.nftId) },
                         { $inc: { count: -1 } }
                     ).exec()
 
-                    let result = await LikesModal.updateOne(
-                        { nftId: new ObjectId(nftId) },
-                        { $pull: { likes: { userId: new ObjectId(userId) } } },
+                    const result = await LikesModal.updateOne(
+                        { nftId: new ObjectId(Payload.nftId) },
+                        {
+                            $pull: {
+                                likes: { userId: new ObjectId(Payload.userId) },
+                            },
+                        },
                         { multi: true }
                     )
-                    res.status(200).send(result)
+                    res.status(HTTP_STATUS_CODE.OK).send(result)
                 }
                 //if user not found then insert a user like
                 else {
-                    let data = {
+                    const data = {
                         userId,
                     }
                     try {
                         await LikesModal.updateOne(
-                            { nftId: new ObjectId(nftId) },
+                            { nftId: new ObjectId(Payload.nftId) },
                             { $inc: { count: 1 } },
 
                             { new: true, upsert: true }
                         ).exec()
 
-                        let insertedLike = await LikesModal.updateOne(
-                            { nftId: new ObjectId(nftId) },
+                        const insertedLike = await LikesModal.updateOne(
+                            { nftId: new ObjectId(Payload.nftId) },
                             { $push: { likes: data } },
                             { new: true, upsert: true }
                         ).exec()
-                        res.status(200).send({
-                            success: true,
-                            message: 'record updated successfully',
+                        res.status(HTTP_STATUS_CODE.OK).send({
+                            success: SUCCESS_STATUS.TRUE,
+                            message: SUCCESS_MESSAGE.LIKES_RECORD_UPDATED,
                             result: insertedLike,
                         })
                     } catch (error) {
@@ -94,9 +106,15 @@ exports.likeDislike = async (req, res, next) => {
 
         try {
             const result = await LikesModal.create(data)
-            res.status(201).json({ success: true, data: result })
+            res.status(HTTP_STATUS_CODE.CREATED).json({
+                success: true,
+                data: result,
+            })
         } catch (error) {
-            res.status(200).json({ success: false, error: error })
+            res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
+                success: SUCCESS_STATUS.FALSE,
+                error: error,
+            })
         }
     }
 }
@@ -104,35 +122,44 @@ exports.likeDislike = async (req, res, next) => {
 exports.get = async (req, res) => {
     try {
         const likes = await LikesModal.find()
-        res.status(201).json({ success: true, data: likes })
+        res.status(HTTP_STATUS_CODE.CREATED).json({
+            success: SUCCESS_STATUS.TRUE,
+            data: likes,
+        })
     } catch (error) {
-        res.status(200).json({ success: false, error: error })
+        res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
+            success: SUCCESS_STATUS.FALSE,
+            error: error,
+        })
     }
 }
 
 exports.userNftLikes = async (req, res, next) => {
     try {
-        let { userId } = req.query
+        const { userId } = req.query
 
         const { error } = validation.validateId(userId)
 
         if (error) {
-            let errorMsg = error.details[0].message
-            return res.status(400).send({ status: false, data: errorMsg })
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: error?.details[0]?.message,
+            })
         }
         if (!userId)
-            return res
-                .status(400)
-                .send({ success: false, message: 'Please Sign In First' })
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.SIGN_IN_FIRST,
+            })
 
         const likes = await LikesModal.find({}, 'nftId').where(
             'likes.userId',
             userId
         )
 
-        return res.status(200).send({
-            success: true,
-            message: 'User NFTs likes fetched successfully',
+        return res.status(HTTP_STATUS_CODE.OK).send({
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.LIKES_NFT_FETCHED,
             data: likes,
         })
     } catch (error) {
