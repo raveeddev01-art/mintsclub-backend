@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const Nft = require('../models/nfts.model')
+const User = require('../models/users.model')
 
 /**
  * Bid Schema
@@ -24,8 +26,42 @@ const BidSchema = new mongoose.Schema(
     { timestamps: true }
 )
 
-// /**
-//  * @typedef Bid
-//  */
+/**
+ * Methods
+ */
+
+BidSchema.pre('save', async function (next) {
+    try {
+        // console.log('nftUpdate', this)
+        const bidUser = await User.findOne({ _id: this?.bidBy })
+        this.bidByProfile = bidUser.profileImage ? bidUser.profileImage : null
+    } catch (error) {
+        console.log('error', error)
+        // next(error)
+    }
+})
+BidSchema.post('save', async function (next) {
+    try {
+        const newPayload = {
+            highestBid: this?.bidAmount,
+        }
+        await Nft.findByIdAndUpdate(
+            { _id: this?.nftId },
+            { $set: newPayload },
+            function (err, results) {
+                if (err) {
+                    console.log('error', err)
+                }
+            }
+        )
+        // console.log('nftUpdate', nftUpdate)
+    } catch (error) {
+        console.log('error', error)
+        // next(error)
+    }
+})
+/**
+ * @typedef Bid
+ */
 
 module.exports = mongoose.model('Bid', BidSchema)

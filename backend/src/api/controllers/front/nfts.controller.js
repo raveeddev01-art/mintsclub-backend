@@ -101,46 +101,47 @@ exports.storeDataInDb = async (req, res, next) => {
         createNFTPayload.currentPrice = 0
         createNFTPayload.auctionEnded = false
         createNFTPayload.tokenId = Number(req.body.nftToken)
-
+        // console.log('createNFTPayload', createNFTPayload)
         const nft = await NFT.create(createNFTPayload)
+        // console.log('nft', nft)
 
-        if (nft) {
-            const collectionRecord = await Collection.findOne({
-                _id: req.body.data.collectionId,
-            })
+        // if (nft) {
+        //     const collectionRecord = await Collection.findOne({
+        //         _id: req.body.data.collectionId,
+        //     })
 
-            collectionRecord.nft.push(nft._id)
-            collectionRecord.save()
-        }
+        //     collectionRecord.nft.push(nft._id)
+        //     collectionRecord.save()
+        // }
 
-        const nftTokenPayload = {
-            nftToken: req.body.nftToken,
-            nftId: nft._id,
-            tokenStandard: req.body.tokenStandard,
-        }
+        // const nftTokenPayload = {
+        //     nftToken: req.body.nftToken,
+        //     nftId: nft._id,
+        //     tokenStandard: req.body.tokenStandard,
+        // }
 
-        if (!nftTokenPayload.tokenStandard) {
-            nftTokenPayload.tokenStandard = 'ERC-1155'
-        }
+        // if (!nftTokenPayload.tokenStandard) {
+        //     nftTokenPayload.tokenStandard = 'ERC-1155'
+        // }
 
-        const nftToken = await NftTokens.create(nftTokenPayload)
+        // const nftToken = await NftTokens.create(nftTokenPayload)
 
-        //add activity
-        const activityPayload = {
-            ownerId: nft.ownerId,
-            toAddress: nft.ownerAddress,
-            nftId: nft._id,
-            activityType: 'Mint',
-        }
+        // //add activity
+        // const activityPayload = {
+        //     ownerId: nft.ownerId,
+        //     toAddress: nft.ownerAddress,
+        //     nftId: nft._id,
+        //     activityType: 'Mint',
+        // }
 
-        await ActivityModal.create(activityPayload)
-        if (nftToken) {
-            return res.status(HTTP_STATUS_CODE.CREATED).send({
-                success: SUCCESS_STATUS.TRUE,
-                message: SUCCESS_MESSAGE.NFT_CREATED,
-                nft,
-            })
-        }
+        // await ActivityModal.create(activityPayload)
+        // if (nftToken) {
+        return res.status(HTTP_STATUS_CODE.CREATED).send({
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.NFT_CREATED,
+            nft,
+        })
+        // }
     } catch (error) {
         return next(error)
     }

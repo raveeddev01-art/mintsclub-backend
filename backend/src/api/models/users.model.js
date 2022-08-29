@@ -7,6 +7,7 @@ const {
     jwtExpirationInterval,
     pwEncruptionKey,
 } = require('../../config/vars')
+const Approval = require('../models/approvals.model')
 
 /**
  * User Schema
@@ -68,6 +69,21 @@ UserSchema.pre('save', async function save(next) {
         return next()
     } catch (error) {
         return next(error)
+    }
+})
+
+UserSchema.post('save', async function (next) {
+    try {
+        const approvalPayload = {
+            userId: this?._id,
+            isApproved: false,
+        }
+
+        await Approval.create(approvalPayload)
+        // return next()
+    } catch (error) {
+        console.log('error', error)
+        // next(error)
     }
 })
 

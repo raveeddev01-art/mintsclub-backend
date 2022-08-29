@@ -1,6 +1,6 @@
 const Bid = require('../../models/bids.model')
 const Nft = require('../../models/nfts.model')
-const User = require('../../models/users.model')
+// const User = require('../../models/users.model')
 const ObjectId = require('mongoose').Types.ObjectId
 const validation = require('../../middlewares/front/bidValidation')
 const nftValidation = require('../../middlewares/front/nftValidation')
@@ -33,31 +33,31 @@ exports.create = async (req, res, next) => {
             })
         }
 
-        const bidUser = await User.findOne({ _id: payload.bidBy })
-
-        payload.bidByProfile = bidUser.profileImage
-            ? bidUser.profileImage
-            : null
+        // const bidUser = await User.findOne({ _id: payload.bidBy })
+        // payload.bidByProfile = bidUser.profileImage
+        //     ? bidUser.profileImage
+        //     : null
 
         const bid = await Bid.create(payload)
+        // console.log('bid', bid)
 
         if (bid) {
-            const newPayload = {
-                highestBid: payload.bidAmount,
-            }
+            // const newPayload = {
+            //     highestBid: payload.bidAmount,
+            // }
 
-            const nftUpdate = await Nft.findByIdAndUpdate(
-                { _id: payload.nftId },
-                { $set: newPayload }
-            )
+            // const nftUpdate = await Nft.findByIdAndUpdate(
+            //     { _id: payload.nftId },
+            //     { $set: newPayload }
+            // )
 
-            if (nftUpdate) {
-                return res.send({
-                    success: SUCCESS_STATUS.TRUE,
-                    message: SUCCESS_MESSAGE.BID_PLACED_SUCCESSFULLY,
-                    bid,
-                })
-            }
+            // if (nftUpdate) {
+            return res.send({
+                success: SUCCESS_STATUS.TRUE,
+                message: SUCCESS_MESSAGE.BID_PLACED_SUCCESSFULLY,
+                bid,
+            })
+            // }
         }
         return res.send({
             success: SUCCESS_STATUS.FALSE,
@@ -172,7 +172,7 @@ exports.claimableBidListbyNftId = async (req, res, next) => {
 
         const data = {}
 
-        data.totalRecords = bidsByNftId.length
+        data.totalRecords = bidsByNftId?.length
 
         if (endIndex < bidsByNftId.length) {
             data.next = {
@@ -210,8 +210,6 @@ exports.accept = async (req, res, next) => {
                 data: error?.details[0]?.message,
             })
         }
-
-        // if (bidId) {
         const bid = await Bid.findByIdAndUpdate(
             { _id: bidId },
             { isAccepted: true },

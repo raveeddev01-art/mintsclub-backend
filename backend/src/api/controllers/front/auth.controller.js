@@ -21,7 +21,7 @@ exports.register = async (req, res, next) => {
         if (error) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.FALSE,
-                data: error?.details[0]?.message,
+                message: error?.details[0]?.message,
             })
         }
 
@@ -49,12 +49,12 @@ exports.register = async (req, res, next) => {
             isApproved,
         })
 
-        const approvalPayload = {
-            userId: user._id,
-            isApproved: false,
-        }
+        // const approvalPayload = {
+        //     userId: user._id,
+        //     isApproved: false,
+        // }
 
-        await Approval.create(approvalPayload)
+        // await Approval.create(approvalPayload)
 
         const accessToken = await user.token()
         user = user.transform()
