@@ -3,6 +3,8 @@
 const ObjectId = require('mongoose').Types.ObjectId
 const UserModal = require('../../models/users.model')
 // const { addImage } = require('../../utils/uploadImage')
+const ethUtil = require('ethereumjs-util')
+const sigUtil = require('eth-sig-util')
 const validation = require('../../middlewares/front/validation')
 const validUrl = require('valid-url')
 const mailchimp = require('@mailchimp/mailchimp_marketing')
@@ -258,5 +260,63 @@ exports.subscribeUser = async (req, res, next) => {
             })
         }
         // return next(JSON.parse(error.response.text));
+    }
+}
+exports.signUser = async (req, res, next) => {
+    try {
+        let { publicAddress } = req.params
+        const result = await UserModal.find({ publicAddress })
+        res.status(200).send({ success: true, users: result })
+    } catch (error) {
+        return next(error)
+    }
+}
+exports.createUser = async (req, res, next) => {
+    try {
+        let paylaod = req.body
+        paylaod.nounce = Math.floor(Math.random() * 1000000)
+        let user = await UserModal.create(paylaod)
+        res.status(200).send({
+            success: true,
+            data: user,
+            message: 'user is created successfully',
+        })
+    } catch (error) {
+        return next(error)
+    }
+}
+
+exports.authenticate = async (req, res, next) => {
+    try {
+        let publicAddress = req.body.publicAddress
+        let user = await UserModal.findOne({ publicAddress })
+        // --snip--
+        const msg = `I am signing my one-time nonce: ${user.nounce}`
+        const msgBuffer = ethUtil.bufferToHex(Buffer.from(msg, 'utf8'))
+        const address = sigUtil.recoverPersonalSignature({
+            data: msgBuffer,
+            sig: req.body.signature,
+        })
+        // ecrecover matches the initial publicAddress
+
+        if (address.toLowerCase() === publicAddress.toLowerCase()) {
+            user.nounce = Math.floor(Math.random() * 1000000)
+            await UserModal.findByIdAndUpdate(
+                { _id: user._id },
+                { $set: user },
+                { new: true }
+            )
+            return res.status(200).send({
+                success: true,
+                message: 'user authenticated successfully',
+                user,
+            })
+        } else {
+            return res
+                .status(401)
+                .send({ error: 'Signature verification failed' })
+        }
+    } catch (err) {
+        return next(err)
     }
 }

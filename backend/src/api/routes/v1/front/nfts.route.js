@@ -8,7 +8,7 @@ const middleware = require('../../../middlewares/front/auth')
 router
     .route('/create')
     .post(middleware.userValidation, cpUpload, controller.create)
-router.route('/edit').put(cpUpload, controller.edit)
+// router.route('/edit').put(cpUpload, controller.edit)
 router.get('/get/:nftId', controller.get)
 router.route('/list').get(controller.list)
 router.route('/editNft').patch(middleware.userValidation, controller.editNft)
@@ -21,8 +21,4 @@ router
     .delete(middleware.userValidation, controller.delete)
 router.route('/myNftListing').get(controller.myNftListing)
 router.route('/getNFTsByCollection').post(controller.getNFTsbyCollection)
-router.route('/buyNft').post(middleware.userValidation, controller.buyNow)
-router
-    .route('/endAuction')
-    .post(middleware.userValidation, controller.endAuction)
 module.exports = router

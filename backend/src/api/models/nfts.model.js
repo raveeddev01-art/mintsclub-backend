@@ -26,13 +26,13 @@ const NFTSchema = new mongoose.Schema(
         tokenId: { type: Number },
         image: { type: String },
         fileType: { type: String },
-        royalty: { type: String },
+        // royalty: { type: String },
         properties: { type: Array },
         levels: { type: Array },
         stats: { type: Array },
         copies: { type: Number, default: 0 },
-        status: { type: Number, default: 1 }, // 1 = Put on Sale, 2 = Instant Sale Price, 3 = Unlock Purchased
-        sold: { type: Number, default: 0 },
+        // status: { type: Number, default: 1 }, // 1 = Put on Sale, 2 = Instant Sale Price, 3 = Unlock Purchased
+        // sold: { type: Number, default: 0 },
         sellingMethod: { type: Number }, // 1 = Fixed Price, 2 = Timed Auction
         sellingConfig: { type: Object },
         auctionStartDate: { type: Date },
@@ -57,7 +57,7 @@ NFTSchema.post('save', async function (next) {
         collectionRecord.save()
 
         const nftTokenPayload = {
-            nftToken: this.nftToken,
+            nftToken: this.token,
             nftId: this._id,
             tokenStandard: this.tokenStandard ? this.tokenStandard : 'ERC-1155',
         }

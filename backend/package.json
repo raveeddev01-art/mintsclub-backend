@@ -45,6 +45,8 @@
         "cors": "^2.8.5",
         "crypto-js": "^4.1.1",
         "dotenv": "^10.0.0",
+        "eth-sig-util": "^3.0.1",
+        "ethereumjs-util": "^7.1.5",
         "express": "^4.17.1",
         "express-bearer-token": "^2.4.0",
         "express-joi-validate": "^3.0.1",

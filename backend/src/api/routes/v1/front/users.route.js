@@ -12,5 +12,8 @@ router.route('/creators').post(controller.getCreators)
 router.route('/top-sellers').get(controller.topSellers)
 router.route('/:userId').get(controller.getUser)
 router.route('/subscribe').post(controller.subscribeUser)
+router.route('/validate/:publicAddress').post(controller.signUser)
+router.route('/createUser').post(controller.createUser)
+router.route('/authenticate').post(controller.authenticate)
 
 module.exports = router
