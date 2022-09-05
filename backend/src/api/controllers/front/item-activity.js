@@ -45,7 +45,7 @@ exports.get = async (req, res, next) => {
         }
         const activities = await ItemActivity.find(payload)
 
-        res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+        res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.ITEM_ACTIVITY__FETCHED,
             data: activities,
