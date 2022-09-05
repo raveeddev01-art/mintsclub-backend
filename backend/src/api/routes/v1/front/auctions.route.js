@@ -5,7 +5,7 @@ const { cpUpload } = require('../../../utils/upload')
 const middleware = require('../../../middlewares/front/auth')
 
 router.route('/live').get(controller.live)
-router.route('/create').put(cpUpload, controller.create)
+router.route('/create').post(cpUpload, controller.create)
 router.route('/buyNft').post(middleware.userValidation, controller.buyNow)
 router
     .route('/endAuction')
