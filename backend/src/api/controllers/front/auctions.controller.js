@@ -147,7 +147,7 @@ exports.live = async (req, res, next) => {
     }
 }
 
-exports.edit = async (req, res, next) => {
+exports.create = async (req, res, next) => {
     try {
         const payload = req.body
         if (!payload.sellingMethod) {
@@ -224,7 +224,7 @@ exports.edit = async (req, res, next) => {
         }
 
         const nftAuction = await nftAuctions.create(payload)
-        return res.status(HTTP_STATUS_CODE.OK).send({
+        return res.status(HTTP_STATUS_CODE.CREATED).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.NFT_PUT_ON_SELL,
             nftAuction,
