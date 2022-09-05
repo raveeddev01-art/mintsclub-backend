@@ -30,11 +30,11 @@ const UserSchema = new mongoose.Schema(
             type: Number,
             defaultValue: () => Math.floor(Math.random() * 1000000),
         },
-        publicAddress: {
-            type: String,
-            unique: true,
-            //   validate: { isLowercase: true },
-        },
+        // publicAddress: {
+        //     type: String,
+        //     unique: true,
+        //     //   validate: { isLowercase: true },
+        // },
     },
     { timestamps: true }
 )
@@ -49,7 +49,7 @@ UserSchema.methods.verifyPassword = function (password) {
 UserSchema.method({
     transform() {
         const transformed = {}
-        const fields = ['_id', 'email', 'address', 'username']
+        const fields = ['_id', 'email', 'address', 'username', 'nounce']
         fields.forEach((field) => {
             transformed[field] = this[field]
         })

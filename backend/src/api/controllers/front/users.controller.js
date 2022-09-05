@@ -264,22 +264,42 @@ exports.subscribeUser = async (req, res, next) => {
 }
 exports.signUser = async (req, res, next) => {
     try {
-        let { publicAddress } = req.params
-        const result = await UserModal.find({ publicAddress })
-        res.status(200).send({ success: true, users: result })
+        const { address } = req.params
+
+        const { error } = validation.validateAddress({ address })
+        if (error) {
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: error?.details[0]?.message,
+            })
+        }
+        const result = await UserModal.find({ address })
+        res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.TRUE,
+            users: result,
+        })
     } catch (error) {
         return next(error)
     }
 }
 exports.createUser = async (req, res, next) => {
     try {
-        let paylaod = req.body
-        paylaod.nounce = Math.floor(Math.random() * 1000000)
-        let user = await UserModal.create(paylaod)
-        res.status(200).send({
-            success: true,
+        let payload = {
+            address: req.body.address,
+        }
+        const { error } = validation.validateAddress(payload)
+        if (error) {
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: error?.details[0]?.message,
+            })
+        }
+        payload.nounce = Math.floor(Math.random() * 1000000)
+        let user = await UserModal.create(payload)
+        res.status(HTTP_STATUS_CODE.OK).send({
+            success: SUCCESS_STATUS.TURE,
             data: user,
-            message: 'user is created successfully',
+            message: SUCCESS_MESSAGE.USER_CREATED,
         })
     } catch (error) {
         return next(error)
@@ -288,33 +308,56 @@ exports.createUser = async (req, res, next) => {
 
 exports.authenticate = async (req, res, next) => {
     try {
-        let publicAddress = req.body.publicAddress
-        let user = await UserModal.findOne({ publicAddress })
+        let address = req.body.address
+
+        const { error } = validation.validateAucthentication(payload)
+        if (error) {
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: error?.details[0]?.message,
+            })
+        }
+        let user = await UserModal.findOne({ address })
+        if (!user) {
+            return res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.NO_ACCOUNT_EXIST,
+            })
+        }
+        const accessToken = await user.token()
+        user = user.transform()
+
+        const data = {
+            ...user,
+            accessToken,
+        }
         // --snip--
         const msg = `I am signing my one-time nonce: ${user.nounce}`
         const msgBuffer = ethUtil.bufferToHex(Buffer.from(msg, 'utf8'))
-        const address = sigUtil.recoverPersonalSignature({
+        const signAddress = sigUtil.recoverPersonalSignature({
             data: msgBuffer,
             sig: req.body.signature,
         })
         // ecrecover matches the initial publicAddress
 
-        if (address.toLowerCase() === publicAddress.toLowerCase()) {
+        if (signAddress.toLowerCase() === address.toLowerCase()) {
             user.nounce = Math.floor(Math.random() * 1000000)
             await UserModal.findByIdAndUpdate(
                 { _id: user._id },
                 { $set: user },
                 { new: true }
             )
-            return res.status(200).send({
-                success: true,
-                message: 'user authenticated successfully',
-                user,
+
+            return res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.TRUE,
+                message: SUCCESS_MESSAGE.USER_AUTHENTICATED,
+                data,
             })
         } else {
-            return res
-                .status(401)
-                .send({ error: 'Signature verification failed' })
+            return res.status(HTTP_STATUS_CODE.UNAUTHORIZED).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.SIGNATURE_VERIFICATION_FAILED,
+            })
         }
     } catch (err) {
         return next(err)

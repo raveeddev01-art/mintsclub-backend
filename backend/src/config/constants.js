@@ -29,6 +29,7 @@ const ERROR_MESSAGE = {
     VALID_WEBSITE_LINK: 'Enter a valid website Link',
     USER_DOES_NOT_EXIST: 'User does not exist',
     EMAIL_ALREADY_SUBSCRIBED: 'Email is already subscribed',
+    SIGNATURE_VERIFICATION_FAILED: 'Signature verification failed',
 }
 
 const SUCCESS_MESSAGE = {
@@ -81,6 +82,8 @@ const SUCCESS_MESSAGE = {
     TOP_SELLERS_FETCHED: 'Top Sellers fetched successfully',
     USER_FETCHED: 'user fetched successfully',
     SUBSCRIBED_SUCCESSFULLY: 'Subscribed successfully',
+    USER_CREATED: 'user is created successfully',
+    USER_AUTHENTICATED: 'user authenticated successfully',
 }
 const SUCCESS_STATUS = {
     TRUE: true,

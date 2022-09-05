@@ -92,8 +92,7 @@ exports.login = async (req, res, next) => {
             })
         }
         const address = payload.address
-        let user = await User.findOne({ publicAddress: address })
-        console.log('user', user)
+        let user = await User.findOne({ address: address })
         if (!user) {
             return res.status(HTTP_STATUS_CODE.OK).send({
                 success: SUCCESS_STATUS.FALSE,
