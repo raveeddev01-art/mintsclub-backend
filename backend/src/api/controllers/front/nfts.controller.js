@@ -181,6 +181,7 @@ exports.get = async (req, res, next) => {
             {
                 $unwind: {
                     path: '$auction',
+                    preserveNullAndEmptyArrays: true,
                 },
             },
             {
@@ -518,6 +519,7 @@ exports.getNFTsbyCollection = async (req, res) => {
             {
                 $unwind: {
                     path: '$auction',
+                    preserveNullAndEmptyArrays: true,
                 },
             },
             {
