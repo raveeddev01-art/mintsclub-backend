@@ -147,7 +147,7 @@ exports.live = async (req, res, next) => {
     }
 }
 
-exports.edit = async (req, res, next) => {
+exports.create = async (req, res, next) => {
     try {
         const payload = req.body
         if (!payload.sellingMethod) {

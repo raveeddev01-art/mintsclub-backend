@@ -213,7 +213,6 @@ exports.get = async (req, res, next) => {
         ]
 
         let nftDetail = await NFT.aggregate(pipeline)
-        console.log('nftDetail', nftDetail)
         nftDetail = nftDetail[0]
         if (!nftDetail) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
@@ -341,6 +340,34 @@ exports.list = async (req, res, next) => {
             { $limit: limit },
             {
                 $lookup: {
+                    from: 'auctions',
+                    foreignField: 'nftId',
+                    localField: '_id',
+                    as: 'auction',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$auction',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    foreignField: '_id',
+                    localField: 'ownerId',
+                    as: 'owner',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$owner',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $lookup: {
                     from: 'users',
                     foreignField: '_id',
                     localField: 'ownerId',
@@ -391,7 +418,7 @@ exports.list = async (req, res, next) => {
                 nft.likeCount = findCount.count
             }
         }
-
+        console.log('nfts', allNfts)
         return res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.NFTs_FETCHED,
