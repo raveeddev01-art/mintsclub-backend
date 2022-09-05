@@ -265,16 +265,15 @@ exports.subscribeUser = async (req, res, next) => {
 exports.signUser = async (req, res, next) => {
     try {
         const { address } = req.params
-
-        const { error } = validation.validateAddress({ address })
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
+        // const { error } = validation.validateAddress({ address })
+        // if (error) {
+        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+        //         success: SUCCESS_STATUS.FALSE,
+        //         message: error?.details[0]?.message,
+        //     })
+        // }
         const result = await UserModal.find({ address })
-        res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+        res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             users: result,
         })
@@ -308,15 +307,16 @@ exports.createUser = async (req, res, next) => {
 
 exports.authenticate = async (req, res, next) => {
     try {
-        let address = req.body.address
-
-        const { error } = validation.validateAucthentication(payload)
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
+        let address = req.body.publicAddress
+        console.log(req.body,"req.body==>")
+        // let payload=req.body
+        // const { error } = validation.validateAucthentication(payload)
+        // if (error) {
+        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+        //         success: SUCCESS_STATUS.FALSE,
+        //         message: error?.details[0]?.message,
+        //     })
+        // }
         let user = await UserModal.findOne({ address })
         if (!user) {
             return res.status(HTTP_STATUS_CODE.OK).send({
