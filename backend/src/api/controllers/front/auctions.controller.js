@@ -150,6 +150,7 @@ exports.live = async (req, res, next) => {
 exports.create = async (req, res, next) => {
     try {
         const payload = req.body
+        console.log(payload,"payload")
         if (!payload.sellingMethod) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.FALSE,
@@ -158,7 +159,7 @@ exports.create = async (req, res, next) => {
         }
         payload.sellingConfig = JSON.parse(payload.sellingConfig)
         const getNFT = await NFT.findOne({
-            _id: payload.nftId,
+            _id: payload._id,
         })
 
         if (!getNFT) {
@@ -185,10 +186,10 @@ exports.create = async (req, res, next) => {
                 })
             }
             payload.currentPrice = Number(payload.sellingConfig.price.amount)
-            payload.highestBid = payload.sellingConfig.startPrice.amount
-                ? Number(payload.sellingConfig.startPrice.amount)
-                : 0
-            payload.auctionEnded = false
+            // payload.highestBid = payload.sellingConfig.startPrice.amount
+            //     ? Number(payload.sellingConfig.startPrice.amount)
+            //     : 0
+            // payload.auctionEnded = false
         } else {
             const { error } = validation.validateNFTimedTAuctionSchema(payload)
 

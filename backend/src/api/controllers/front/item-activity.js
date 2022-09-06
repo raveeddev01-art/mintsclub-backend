@@ -5,7 +5,7 @@ const {
     SUCCESS_STATUS,
     HTTP_STATUS_CODE,
 } = require('../../../config/constants')
-const validation = require('../../middlewares/front/itemActivity')
+const validation = require('../../middlewares/front/itemActivity');
 exports.create = async (req, res, next) => {
     try {
         const payload = req.body
@@ -19,7 +19,7 @@ exports.create = async (req, res, next) => {
         }
         const result = await ItemActivity.create(payload)
         if (result) {
-            res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            res.status(HTTP_STATUS_CODE.OK).send({
                 success: SUCCESS_STATUS.TRUE,
                 message: SUCCESS_MESSAGE.ITEM_ACTIVITY__CREATED,
                 data: result,

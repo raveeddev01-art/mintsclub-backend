@@ -2,7 +2,7 @@ const Joi = require('@hapi/joi').extend(require('@joi/date'))
 
 const validateNFTFixedTAuctionSchema = (data) => {
     const schema = Joi.object().keys({
-        nftId: Joi.string().alphanum().min(12).max(24).required(),
+        _id: Joi.string().alphanum().min(12).max(24).required(),
         copiesForAuction: Joi.number().min(0).max(100000).required(),
         sellId: Joi.number().required(),
         sellingMethod: Joi.number().valid(1, 2).required(),
@@ -30,7 +30,7 @@ const validateNFTFixedTAuctionSchema = (data) => {
 
 const validateNFTimedTAuctionSchema = (data) => {
     const schema = Joi.object().keys({
-        nftId: Joi.string().alphanum().min(12).max(24).required(),
+        _id: Joi.string().alphanum().min(12).max(24).required(),
         auctionStartDate: Joi.date().allow(''),
         sellId: Joi.number().required(),
         auctionEndDate: Joi.date().allow(''),

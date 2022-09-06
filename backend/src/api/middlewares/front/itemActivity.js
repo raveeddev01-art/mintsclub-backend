@@ -3,7 +3,9 @@ const Joi = require('@hapi/joi')
 const validateCreateItemActivity = (add) => {
     const schema = Joi.object().keys({
         ownerId: Joi.string().alphanum().min(12).max(24).required(),
-        toAddress: Joi.string().required(),
+        toAddress: Joi.string().allow(null),
+        fromAddress:Joi.string().allow(null),
+        price: Joi.number().allow(null),
         nftId: Joi.string().alphanum().min(12).max(24).required(),
         activityType: Joi.string()
             .valid('Mint', 'List', 'Bid', 'Transfer')
@@ -18,6 +20,7 @@ const validateCreateItemActivity = (add) => {
     }
     return schema.validate(add, options)
 }
+
 
 const validateUpdateItemActivity = (add) => {
     const schema = Joi.object().keys({
