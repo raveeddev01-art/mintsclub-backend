@@ -7,6 +7,7 @@ const validateCreateBid = (data) => {
         nftId: Joi.string().alphanum().min(12).max(24).required(),
         bidAmount: Joi.number().required(),
         isAccepted: Joi.boolean().default(false),
+        auctionId:Joi.string().alphanum().min(12).max(24).required(),
         expiryDate: Joi.date().allow(''),
         fromAddress: Joi.string()
             .regex(/^0x[a-fA-F0-9]{40}$/)
