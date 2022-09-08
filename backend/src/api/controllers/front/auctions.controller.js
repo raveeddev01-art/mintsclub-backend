@@ -49,7 +49,7 @@ exports.live = async (req, res, next) => {
                     $lt: dateTime,
                 },
                 auctionEndDate: { $gte: dateTime },
-                categoryId: ObjectId(newFilter),
+                'nft.categoryId': ObjectId(newFilter),
             }
         } else {
             filter = {
@@ -66,15 +66,15 @@ exports.live = async (req, res, next) => {
             },
             {
                 $lookup: {
-                    from: 'users',
+                    from: 'nfts',
                     foreignField: '_id',
-                    localField: 'ownerId',
-                    as: 'owner',
+                    localField: 'nftId',
+                    as: 'nft',
                 },
             },
             {
                 $unwind: {
-                    path: '$owner',
+                    path: '$nft',
                     preserveNullAndEmptyArrays: true,
                 },
             },
@@ -86,6 +86,14 @@ exports.live = async (req, res, next) => {
                     as: 'bids',
                 },
             },
+            {
+                $lookup: {
+                    from: 'users',
+                    foreignField: 'userId',
+                    localField: '_id',
+                    as: 'user',
+                },
+            },
 
             { $sort: { createdAt: -1 } },
             { $skip: limit * (page - 1) },
@@ -93,21 +101,29 @@ exports.live = async (req, res, next) => {
             {
                 $project: {
                     _id: 1,
-                    name: 1,
-                    image: 1,
-                    copies: 1,
-                    currentPrice: 1,
+                    nftId: 1,
+                    sellingMethod: 1,
+                    copiesForAuction: 1,
+                    sellId: 1,
+                    auctionStartDate: 1,
                     auctionEndDate: 1,
-                    fileType: 1,
-                    ownerId: 1,
                     highestBid: 1,
-                    ownerAddress: 1,
-                    owner: {
-                        _id: '$owner._id',
-                        username: '$owner.username',
+                    nft: {
+                        _id: '$nft._id',
+                        name: '$nft.name',
+                        image: '$nft.image',
+                        copies: '$nft.copies',
+                        currentPrice: '$nft.currentPrice',
+                        fileType: '$nft.fileType',
+                        ownerId: '$nft.ownerId',
+                        ownerAddress: '$nft.ownerAddress',
+                    },
+                    user: {
+                        _id: '$user._id',
+                        username: '$user.username',
                         profilePhoto: {
                             $ifNull: [
-                                '$owner.profileImage',
+                                '$user.profileImage',
                                 globalImgPlaceholder,
                             ],
                         },
@@ -122,7 +138,7 @@ exports.live = async (req, res, next) => {
 
         const total = NFT.countDocuments(filter)
 
-        const auctions = NFT.aggregate(pipeline)
+        const auctions = nftAuctions.aggregate(pipeline)
 
         const auctionList = await Promise.all([total, auctions])
 
@@ -134,7 +150,7 @@ exports.live = async (req, res, next) => {
                 pagination: {
                     page,
                     limit,
-                    total: auctionList[0],
+                    total: auctionList[1].length,
                     pages:
                         Math.ceil(auctionList[0] / limit) <= 0
                             ? 1
@@ -156,7 +172,7 @@ exports.create = async (req, res, next) => {
                 message: ERROR_MESSAGE.SELLING_METHOD,
             })
         }
-        payload.sellingConfig = JSON.parse(payload.sellingConfig)
+        // payload.sellingConfig = JSON.parse(payload.sellingConfig)
         const getNFT = await NFT.findOne({
             _id: payload.nftId,
         })

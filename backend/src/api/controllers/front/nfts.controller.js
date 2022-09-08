@@ -184,19 +184,19 @@ exports.get = async (req, res, next) => {
                     preserveNullAndEmptyArrays: true,
                 },
             },
-            {
-                $lookup: {
-                    from: 'users',
-                    foreignField: '_id',
-                    localField: 'userId',
-                    as: 'user',
-                },
-            },
-            {
-                $unwind: {
-                    path: '$user',
-                },
-            },
+            // {
+            //     $lookup: {
+            //         from: 'users',
+            //         foreignField: '_id',
+            //         localField: 'userId',
+            //         as: 'user',
+            //     },
+            // },
+            // {
+            //     $unwind: {
+            //         path: '$user',
+            //     },
+            // },
             {
                 $lookup: {
                     from: 'collections',
@@ -302,8 +302,8 @@ exports.list = async (req, res, next) => {
             }),
             ...(collectionId && { collectionId }),
             ...(categoryId && { categoryId }),
-            ...(buy && { sellingMethod: { $eq: 1 } }),
-            ...(auction && { sellingMethod: { $eq: 2 } }),
+            ...(buy && { 'auction.sellingMethod': { $eq: 1 } }),
+            ...(auction && { 'auction.sellingMethod': { $eq: 2 } }),
             ...(search && {
                 $or: [
                     { name: { $regex: '.*' + keyword + '.*', $options: 'i' } },
@@ -326,7 +326,6 @@ exports.list = async (req, res, next) => {
         const total = NFT.countDocuments(filter)
 
         const nfts = NFT.aggregate([
-            { $match: filter },
             {
                 $sort: {
                     ...(newest && { createdAt: -1 }),
@@ -380,6 +379,7 @@ exports.list = async (req, res, next) => {
                     preserveNullAndEmptyArrays: true,
                 },
             },
+            { $match: filter },
             {
                 $project: {
                     _id: 1,
@@ -392,12 +392,8 @@ exports.list = async (req, res, next) => {
                     collectionId: 1,
                     ownerId: 1,
                     creatorId: 1,
-                    highestBid: 1,
                     userId: 1,
-                    auctionEndDate: 1,
-                    copiesForAuction: 1,
                     remainingCopies: 1,
-                    sellingMethod: 1,
                     ownerAddress: 1,
                     owner: {
                         _id: '$owner._id',
@@ -405,6 +401,16 @@ exports.list = async (req, res, next) => {
                         profilePhoto: {
                             $ifNull: ['$owner.profileImage', userDefaultImage],
                         },
+                    },
+                    auction: {
+                        _id: '$auction._id',
+                        highestBid: '$auction.highestBid',
+                        sellingMethod: '$auction.sellingMethod',
+                        copiesForAuction: '$auction.copiesForAuction',
+                        sellId: '$auction.sellId',
+                        auctionStartDate: '$auction.auctionStartDate',
+                        auctionEndDate: '$auction.auctionEndDate',
+                        auctionEnded: '$auction.auctionEnded',
                     },
                 },
             },
@@ -418,7 +424,7 @@ exports.list = async (req, res, next) => {
                 nft.likeCount = findCount.count
             }
         }
-        console.log('nfts', allNfts)
+
         return res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.NFTs_FETCHED,
@@ -427,7 +433,7 @@ exports.list = async (req, res, next) => {
                 pagination: {
                     page,
                     limit,
-                    total: nftLiting[0],
+                    total: allNfts.length,
                     pages:
                         Math.ceil(nftLiting[0] / limit) <= 0
                             ? 1

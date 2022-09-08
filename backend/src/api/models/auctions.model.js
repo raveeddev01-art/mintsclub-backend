@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const Bid = require('../models/bids.model')
 
 /**
  * Auction Schema
@@ -18,6 +19,12 @@ const AuctionSchema = new mongoose.Schema(
         copiesForAuction: { type: Number },
         auctionEnded: { type: Boolean },
         sellId: { type: Number },
+        bid: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: Bid,
+            },
+        ],
     },
     { timestamps: true }
 )
