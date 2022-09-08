@@ -166,6 +166,7 @@ exports.live = async (req, res, next) => {
 exports.create = async (req, res, next) => {
     try {
         const payload = req.body
+        console.log(payload,"payload")
         if (!payload.sellingMethod) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.FALSE,
@@ -174,7 +175,7 @@ exports.create = async (req, res, next) => {
         }
         // payload.sellingConfig = JSON.parse(payload.sellingConfig)
         const getNFT = await NFT.findOne({
-            _id: payload.nftId,
+            _id: payload._id,
         })
 
         if (!getNFT) {
@@ -201,10 +202,11 @@ exports.create = async (req, res, next) => {
                 })
             }
             payload.currentPrice = Number(payload.sellingConfig.price.amount)
-            payload.highestBid = payload.sellingConfig.startPrice.amount
-                ? Number(payload.sellingConfig.startPrice.amount)
-                : 0
-            payload.auctionEnded = false
+            payload.nftId=payload._id
+            // payload.highestBid = payload.sellingConfig.startPrice.amount
+            //     ? Number(payload.sellingConfig.startPrice.amount)
+            //     : 0
+            // payload.auctionEnded = false
         } else {
             const { error } = validation.validateNFTimedTAuctionSchema(payload)
 
@@ -236,7 +238,8 @@ exports.create = async (req, res, next) => {
             payload.highestBid = payload.sellingConfig.startPrice.amount
                 ? Number(payload.sellingConfig.startPrice.amount)
                 : 0
-            payload.auctionEnded = false
+            payload.auctionEnded = false;
+            payload.nftId=payload._id;
         }
 
         const nftAuction = await nftAuctions.create(payload)
@@ -425,6 +428,7 @@ exports.buyNow = async (req, res, next) => {
 exports.endAuction = async (req, res, next) => {
     try {
         const payload = req.body
+        
 
         const { error } = validation.validateAuctionEndSchema(payload)
 
@@ -439,18 +443,22 @@ exports.endAuction = async (req, res, next) => {
             .find({})
             .where('_id', payload.auctionId)
             .populate('nftId')
+            console.log({nftId:auctionEndNft[0].nftId,highestBId:auctionEndNft[0]?.highestBid},"data before===========>")
 
         const bid = await Bid.find({
-            nftId: auctionEndNft[0]?._id,
+            nftId: ObjectId(auctionEndNft[0]?.nftId?._id),
             bidAmount: auctionEndNft[0]?.highestBid,
         })
-
+    
+       
         if (bid.length > 0) {
             let bidData = bid[0]
+           
             if (
                 auctionEndNft[0]?.nftId?.remainingCopies >
                 auctionEndNft[0]?.copiesForAuction
             ) {
+              
                 let payload = {
                     ownerId: bidData.bidBy,
                     userId: bidData.bidBy,
@@ -531,12 +539,20 @@ exports.endAuction = async (req, res, next) => {
                     { $set: nftUpdateNewPayload }
                 )
                 if (nftUpdate && aucUpdate) {
+
                     const findUserDetail = await Users.findOne({
                         _id: nftUpdate.ownerId,
                     })
+                    console.log(bidData,typeof bidData.bidAmount,"bidAmount====>")
+                    console.log(findUserDetail,"findUserDetail==>")
+                    let newTotalETH=0;
+                       if(findUserDetail?.totalETH){
 
-                    const newTotalETH =
-                        findUserDetail.totalETH + bidData.bidAmount
+                            newTotalETH =
+                               findUserDetail.totalETH + bidData.bidAmount
+                       }else {
+                        findUserDetail.totalEth=bidData.bidAmount
+                       }
 
                     await Users.findByIdAndUpdate(
                         { _id: nftUpdate.ownerId },
@@ -560,6 +576,7 @@ exports.endAuction = async (req, res, next) => {
 
                 await ActivityModal.create(activityPayload)
             } else {
+         
                 const nftPayload = {
                     ownerId: bidData.bidBy,
                     userId: bidData.bidBy,
@@ -601,9 +618,16 @@ exports.endAuction = async (req, res, next) => {
                     const findUserDetail = await Users.findOne({
                         _id: nftUpdate.ownerId,
                     })
+                  
 
-                    const newTotalETH =
-                        findUserDetail.totalETH + bidData.bidAmount
+                    let newTotalETH=0;
+                    if(findUserDetail?.totalETH){
+
+                         newTotalETH =
+                            findUserDetail.totalETH + bidData.bidAmount
+                    }else {
+                     findUserDetail.totalEth=bidData.bidAmount
+                    }
 
                     await Users.findByIdAndUpdate(
                         { _id: nftUpdate.ownerId },

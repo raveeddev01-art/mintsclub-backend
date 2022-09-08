@@ -10,6 +10,8 @@ const {
     SUCCESS_STATUS,
     HTTP_STATUS_CODE,
 } = require('../../../config/constants')
+const nftAuctions = require('../../models/auctions.model')
+
 // API to create bid validateNftId
 exports.create = async (req, res, next) => {
     try {
@@ -22,8 +24,9 @@ exports.create = async (req, res, next) => {
             expiryDate: req.body.expiryDate,
             fromAddress: req.body.fromAddress,
             toAddress: req.body.toAddress,
+            auctionId:req.body.auctionId
         }
-
+         
         const { error } = validation.validateCreateBid(payload)
 
         if (error) {
@@ -39,6 +42,11 @@ exports.create = async (req, res, next) => {
         //     : null
 
         const bid = await Bid.create(payload)
+        await nftAuctions.findByIdAndUpdate(
+            {_id:req.body.auctionId},
+            {$set:{highestBid:req.body.bidAmount}}
+            )
+        // await nftAuctions.findBy({_id:req.body.auctionId})
         // console.log('bid', bid)
 
         if (bid) {

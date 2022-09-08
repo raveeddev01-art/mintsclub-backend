@@ -122,7 +122,7 @@ exports.likeDislike = async (req, res, next) => {
 exports.get = async (req, res) => {
     try {
         const likes = await LikesModal.find()
-        res.status(HTTP_STATUS_CODE.CREATED).json({
+        res.status(HTTP_STATUS_CODE.OK).json({
             success: SUCCESS_STATUS.TRUE,
             data: likes,
         })
@@ -138,7 +138,7 @@ exports.userNftLikes = async (req, res, next) => {
     try {
         const { userId } = req.query
 
-        const { error } = validation.validateId(userId)
+        const { error } = validation.validateId(req.query)
 
         if (error) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
