@@ -1,5 +1,6 @@
 const Bid = require('../../models/bids.model')
 const Nft = require('../../models/nfts.model')
+const Auction = require('../../models/auctions.model')
 // const User = require('../../models/users.model')
 const ObjectId = require('mongoose').Types.ObjectId
 const validation = require('../../middlewares/front/bidValidation')
@@ -24,9 +25,9 @@ exports.create = async (req, res, next) => {
             expiryDate: req.body.expiryDate,
             fromAddress: req.body.fromAddress,
             toAddress: req.body.toAddress,
-            auctionId:req.body.auctionId
+            auctionId: req.body.auctionId,
         }
-         
+
         const { error } = validation.validateCreateBid(payload)
 
         if (error) {
@@ -42,10 +43,30 @@ exports.create = async (req, res, next) => {
         //     : null
 
         const bid = await Bid.create(payload)
-        await nftAuctions.findByIdAndUpdate(
-            {_id:req.body.auctionId},
-            {$set:{highestBid:req.body.bidAmount}}
-            )
+
+        // const bidData = {
+        // highestBid: req.body.bidAmount,
+        //  collectionRecord.nft.push(nft._id)
+        //     collectionRecord.save()
+        // bid: [bidId:bid._id, bidAmount:bid.bidAmount],
+        // bidId: bid._id,
+        // bidAmount: bid.bidAmount,
+        // }
+        // const auctionData = await Auction.findOneAndUpdate(
+        //     { _id: payload.auctionId },
+        //     { $push: { bids: newBid._id } }
+        //   );
+
+        await nftAuctions.findOneAndUpdate(
+            { _id: req.body.auctionId },
+            // { highestBid: req.body.bidAmount },
+            // {
+            //     $push: {
+            //         bids: [{ bidId: bid._id }, { bidAmout: bid.bidAmout }],
+            //     },
+            // }
+            { $push: { bids: bid._id }, highestBid: req.body.bidAmount }
+        )
         // await nftAuctions.findBy({_id:req.body.auctionId})
         // console.log('bid', bid)
 
@@ -233,8 +254,8 @@ exports.accept = async (req, res, next) => {
 
             await Nft.findById({ _id: bid.nftId })
 
-            await Nft.updateOne(
-                { _id: bid.nftId },
+            await Auction.updateOne(
+                { nftId: bid.nftId },
                 {
                     $unset: {
                         sellingMethod: undefined,
@@ -244,6 +265,16 @@ exports.accept = async (req, res, next) => {
                         auctionStartDate: undefined,
                         auctionStartTime: undefined,
                     },
+                    $set: {
+                        ownerId: bid.bidBy,
+                        nftOwnerId: bid.bidBy,
+                    },
+                }
+            )
+
+            await Nft.updateOne(
+                { _id: bid.nftId },
+                {
                     $set: {
                         ownerId: bid.bidBy,
                         nftOwnerId: bid.bidBy,

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const Nft = require('../models/nfts.model')
 const User = require('../models/users.model')
+// const Auction = require('../models/auctions.model')
 
 /**
  * Bid Schema
@@ -15,8 +16,16 @@ const BidSchema = new mongoose.Schema(
         },
         bidByProfile: { type: String },
         ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-        nftId: { type: mongoose.Schema.Types.ObjectId, ref: 'NFT' },
-
+        nftId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'NFT',
+            required: true,
+        },
+        auctionId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Auction',
+            required: true,
+        },
         bidAmount: { type: Number },
         fromAddress: { type: String },
         toAddress: { type: String },

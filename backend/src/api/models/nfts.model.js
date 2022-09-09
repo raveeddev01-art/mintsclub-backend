@@ -20,7 +20,12 @@ const NFTSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Collection',
         },
-        currentPrice: { type: Number },
+        activeAuction: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Auction',
+            default: null,
+        },
+        currentPrice: { type: Number, default: 0 },
         ownerAddress: { type: String },
         txHash: { type: String },
         tokenId: { type: Number },
@@ -31,17 +36,18 @@ const NFTSchema = new mongoose.Schema(
         levels: { type: Array },
         stats: { type: Array },
         copies: { type: Number, default: 0 },
+
         // status: { type: Number, default: 1 }, // 1 = Put on Sale, 2 = Instant Sale Price, 3 = Unlock Purchased
         // sold: { type: Number, default: 0 },
-        sellingMethod: { type: Number }, // 1 = Fixed Price, 2 = Timed Auction
-        sellingConfig: { type: Object },
-        auctionStartDate: { type: Date },
-        auctionEndDate: { type: Date },
+        // sellingMethod: { type: Number }, // 1 = Fixed Price, 2 = Timed Auction
+        // sellingConfig: { type: Object },
+        // auctionStartDate: { type: Date },
+        // auctionEndDate: { type: Date },
         metaData: { type: String }, // ipfs link
-        highestBid: { type: Number },
-        copiesForAuction: { type: Number },
+        // highestBid: { type: Number },
+        // copiesForAuction: { type: Number },
         remainingCopies: { type: Number },
-        auctionEnded: { type: Boolean },
+        // auctionEnded: { type: Boolean },
         sellId: { type: Number },
     },
     { timestamps: true, collection: 'nfts' }

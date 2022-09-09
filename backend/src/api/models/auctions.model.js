@@ -11,6 +11,7 @@ const AuctionSchema = new mongoose.Schema(
         endDate: { type: Date },
         nftId: { type: mongoose.Schema.Types.ObjectId, ref: 'NFT' },
         ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         sellingMethod: { type: Number },
         sellingConfig: { type: Object },
         auctionStartDate: { type: Date },
@@ -19,12 +20,11 @@ const AuctionSchema = new mongoose.Schema(
         copiesForAuction: { type: Number },
         auctionEnded: { type: Boolean },
         sellId: { type: Number },
-        bid: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: Bid,
-            },
-        ],
+        bids: [{ type: mongoose.Schema.Types.ObjectId, ref: Bid }],
+        // bids: [
+        //     { bidId: { type: mongoose.Schema.Types.ObjectId, ref: Bid } },
+        //     { bidAmount: { type: Number } },
+        // ],
     },
     { timestamps: true }
 )
