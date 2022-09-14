@@ -280,14 +280,62 @@ exports.list = async (req, res, next) => {
                     as: 'user',
                 },
             },
+            
+
+
             {
-                $lookup: {
-                    from: 'nfts',
-                    foreignField: '_id',
-                    localField: 'nft',
-                    as: 'nfts',
-                },
+                $lookup: 
+                        { 
+                            from: "nfts", 
+                            localField: 'nft', 
+                            foreignField: "_id", as: "totalnft",
+                        }
             },
+
+
+
+            {
+                $lookup: 
+                        { 
+                            from: "nfts", 
+                            localField: 'nft', 
+                            foreignField: "_id", as: "nfts",
+                            pipeline: 
+                            [ 
+                                
+                                { $limit: 3 } 
+                            ],
+                        }
+            },
+
+
+
+
+           
+
+
+              {
+                $addFields: {
+
+                    NftsCount: {$size: "$totalnft"},
+                    NFTArray: {
+                        $arrayElemAt: [
+                            {
+                                $filter: {
+                                    input: "$nfts",
+                                    as: "comp",
+                                    cond: {
+                                        $eq: [ "$$comp.fileType", "image" ]
+                                    }
+                                }
+                            }, 0
+                        ]
+                    }
+                }
+            },
+
+
+
             {
                 $unwind: {
                     path: '$nfts',
@@ -298,12 +346,22 @@ exports.list = async (req, res, next) => {
             {
                 $group: {
                     _id: '$_id',
+                   
+
                     nftDetail: {
                         $push: {
-                            image: '$nfts.image',
-                            fileType: '$nfts.fileType',
+                            
+                           
+                            nfts : '$NFTArray.image',
+                            file : '$NFTArray.fileType',
                         },
+                       
+                       
                     },
+                    
+                
+                    TotalNfts : {$first :'$NftsCount'},
+                    // count: { "$sum": 1 },
                     userId: { $first: '$userId' },
                     categoryId: { $first: '$categoryId' },
                     name: { $first: '$name' },
