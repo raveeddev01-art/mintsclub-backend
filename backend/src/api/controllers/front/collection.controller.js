@@ -202,12 +202,6 @@ exports.get = async (req, res, next) => {
             ])
             .lean(true)
         if (collection) {
-            collection.user = collection.userId
-            collection.category = collection.categoryId
-
-            delete collection.userId
-            delete collection.categoryId
-
             collection.items = await NFT.countDocuments({ collectionId })
 
             let owners = await NFT.find({ collectionId }).distinct(

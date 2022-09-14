@@ -37,6 +37,7 @@ exports.create = async (req, res, next) => {
             currentPrice: 0,
             ownerAddress: req.body.ownerAddress,
             copies: req.body.copies,
+            activeAuction: req.body.activeAuction,
         }
         const { error } = validation.validateNFTSchema(payload)
         if (error) {
@@ -101,7 +102,7 @@ exports.storeDataInDb = async (req, res, next) => {
         createNFTPayload.image = req.body.image
         //for auction collectio
         // createNFTPayload.highestBid = 0
-        createNFTPayload.currentPrice = 0
+        // createNFTPayload.currentPrice = 0
         //for auction collectio
         // createNFTPayload.auctionEnded = false
         createNFTPayload.tokenId = Number(req.body.nftToken)
