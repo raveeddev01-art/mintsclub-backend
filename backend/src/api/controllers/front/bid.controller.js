@@ -11,7 +11,6 @@ const {
     SUCCESS_STATUS,
     HTTP_STATUS_CODE,
 } = require('../../../config/constants')
-const nftAuctions = require('../../models/auctions.model')
 
 // API to create bid validateNftId
 exports.create = async (req, res, next) => {
@@ -37,56 +36,14 @@ exports.create = async (req, res, next) => {
             })
         }
 
-        // const bidUser = await User.findOne({ _id: payload.bidBy })
-        // payload.bidByProfile = bidUser.profileImage
-        //     ? bidUser.profileImage
-        //     : null
-
         const bid = await Bid.create(payload)
 
-        // const bidData = {
-        // highestBid: req.body.bidAmount,
-        //  collectionRecord.nft.push(nft._id)
-        //     collectionRecord.save()
-        // bid: [bidId:bid._id, bidAmount:bid.bidAmount],
-        // bidId: bid._id,
-        // bidAmount: bid.bidAmount,
-        // }
-        // const auctionData = await Auction.findOneAndUpdate(
-        //     { _id: payload.auctionId },
-        //     { $push: { bids: newBid._id } }
-        //   );
-
-        await nftAuctions.findOneAndUpdate(
-            { _id: req.body.auctionId },
-            // { highestBid: req.body.bidAmount },
-            // {
-            //     $push: {
-            //         bids: [{ bidId: bid._id }, { bidAmout: bid.bidAmout }],
-            //     },
-            // }
-            { $push: { bids: bid._id }, highestBid: req.body.bidAmount }
-        )
-        // await nftAuctions.findBy({_id:req.body.auctionId})
-        // console.log('bid', bid)
-
         if (bid) {
-            // const newPayload = {
-            //     highestBid: payload.bidAmount,
-            // }
-
-            // const nftUpdate = await Nft.findByIdAndUpdate(
-            //     { _id: payload.nftId },
-            //     { $set: newPayload }
-            // )
-
-            // if (nftUpdate) {
             return res.send({
                 success: SUCCESS_STATUS.TRUE,
                 message: SUCCESS_MESSAGE.BID_PLACED_SUCCESSFULLY,
                 bid,
             })
-            // }
         }
         return res.send({
             success: SUCCESS_STATUS.FALSE,
@@ -115,7 +72,7 @@ exports.delete = async (req, res, next) => {
 
         const bid = await Bid.deleteOne({ _id: payload.bidId })
 
-        if (bid && bid.deletedCount === 1)
+        if (bid && bid?.deletedCount === 1)
             return res.send({
                 success: SUCCESS_STATUS.TRUE,
                 message: SUCCESS_MESSAGE.BID_CANCELED_SUCCESSFULLY,
@@ -239,58 +196,22 @@ exports.accept = async (req, res, next) => {
                 data: error?.details[0]?.message,
             })
         }
-        const bid = await Bid.findByIdAndUpdate(
+        const bid = await Bid.findOneAndUpdate(
             { _id: bidId },
             { isAccepted: true },
             { new: true }
         )
-
-        if (bid) {
-            // expire other bids
-            await Bid.updateMany(
-                { _id: { $ne: ObjectId(bidId) }, nftId: bid.nftId },
-                { $set: { isClaimable: true, isExpired: true } }
-            )
-
-            await Nft.findById({ _id: bid.nftId })
-
-            await Auction.updateOne(
-                { nftId: bid.nftId },
-                {
-                    $unset: {
-                        sellingMethod: undefined,
-                        sellingConfig: undefined,
-                        auctionEndDate: undefined,
-                        auctionEndTime: undefined,
-                        auctionStartDate: undefined,
-                        auctionStartTime: undefined,
-                    },
-                    $set: {
-                        ownerId: bid.bidBy,
-                        nftOwnerId: bid.bidBy,
-                    },
-                }
-            )
-
-            await Nft.updateOne(
-                { _id: bid.nftId },
-                {
-                    $set: {
-                        ownerId: bid.bidBy,
-                        nftOwnerId: bid.bidBy,
-                    },
-                }
-            )
-
-            return res.send({
-                success: SUCCESS_STATUS.TRUE,
-                message: SUCCESS_MESSAGE.BID_ACCEPTED_SUCCESSFULLY,
-            })
-        } else
+        if (!bid || bid === null) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.FALSE,
                 message: ERROR_MESSAGE.BID_NOT_FOUND,
             })
+        } else {
+            return res.send({
+                success: SUCCESS_STATUS.TRUE,
+                message: SUCCESS_MESSAGE.BID_ACCEPTED_SUCCESSFULLY,
+            })
+        }
     } catch (error) {
         return next(error)
     }

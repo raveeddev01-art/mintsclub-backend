@@ -31,7 +31,6 @@ const NFTSchema = new mongoose.Schema(
         tokenId: { type: Number },
         image: { type: String },
         fileType: { type: String },
-        // royalty: { type: String },
         properties: { type: Array },
         levels: { type: Array },
         stats: { type: Array },
@@ -55,6 +54,7 @@ const NFTSchema = new mongoose.Schema(
 
 NFTSchema.post('save', async function (next) {
     try {
+        // const err = new Error('something went wrong');
         const collectionRecord = await Collection.findOne({
             _id: this.collectionId,
         })
@@ -79,6 +79,8 @@ NFTSchema.post('save', async function (next) {
         }
 
         await ActivityModal.create(activityPayload)
+        // next(err);
+        // throw new Error('!!!!!!!!something went wrong')
     } catch (error) {
         console.log('error', error)
         // next(error)

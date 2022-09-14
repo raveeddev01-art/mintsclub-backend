@@ -293,6 +293,9 @@ exports.createUser = async (req, res, next) => {
                 message: error?.details[0]?.message,
             })
         }
+        payload.profileImage = null
+        payload.totalETH = 0
+
         payload.nounce = Math.floor(Math.random() * 1000000)
         let user = await UserModal.create(payload)
         res.status(HTTP_STATUS_CODE.OK).send({
@@ -308,7 +311,6 @@ exports.createUser = async (req, res, next) => {
 exports.authenticate = async (req, res, next) => {
     try {
         let address = req.body.publicAddress
-        console.log(req.body,"req.body==>")
         // let payload=req.body
         // const { error } = validation.validateAucthentication(payload)
         // if (error) {

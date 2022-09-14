@@ -171,7 +171,7 @@ exports.create = async (req, res, next) => {
                 message: ERROR_MESSAGE.SELLING_METHOD,
             })
         }
-        payload.sellingConfig = JSON.parse(payload.sellingConfig)
+        // payload.sellingConfig = JSON.parse(payload.sellingConfig)
         const getNFT = await NFT.findOne({
             _id: payload.nftId,
         })
@@ -209,6 +209,7 @@ exports.create = async (req, res, next) => {
                     message: error?.details[0]?.message,
                 })
             }
+
             payload.currentPrice = Number(
                 payload.sellingConfig.startPrice.amount
             )
@@ -232,15 +233,9 @@ exports.create = async (req, res, next) => {
                 ? Number(payload.sellingConfig.startPrice.amount)
                 : 0
             payload.auctionEnded = false
+            payload.bid = []
         }
-
         const nftAuction = await nftAuctions.create(payload)
-
-        await NFT.findByIdAndUpdate(
-            { _id: payload.nftId },
-            { $set: { activeAuction: nftAuction._id } },
-            { new: true }
-        )
 
         return res.status(HTTP_STATUS_CODE.CREATED).send({
             success: SUCCESS_STATUS.TRUE,
@@ -262,16 +257,13 @@ exports.buyNow = async (req, res, next) => {
                 message: error?.details[0]?.message,
             })
         }
+
         const buyNftDetail = await NFT.findOne({
             _id: payload.nftId,
         })
         const nftAuctionDetail = await nftAuctions.findOne({
             nftId: payload.nftId,
         })
-        // const auctionEndNft = await nftAuctions
-        //     .find({})
-        //     .where('_id', payload.auctionId)
-        //     .populate('nftId')
 
         if (buyNftDetail && nftAuctionDetail?.copiesForAuction > 0) {
             if (
@@ -293,6 +285,7 @@ exports.buyNow = async (req, res, next) => {
                     metaData: buyNftDetail.metaData,
                     image: buyNftDetail.image,
                     remainingCopies: nftAuctionDetail?.copiesForAuction,
+                    activeAuction: null,
                 }
 
                 const nft = await NFT.create(newPayload)
@@ -320,22 +313,6 @@ exports.buyNow = async (req, res, next) => {
                 const remainingCopies =
                     buyNftDetail.remainingCopies -
                     nftAuctionDetail?.copiesForAuction
-                const auctionPayload = {
-                    copiesForAuction: 0,
-                    sellingMethod: 0,
-                    sellingConfig: {
-                        price: {
-                            currency: null,
-                            amount: 0,
-                        },
-                        reserveFor: 0,
-                    },
-                }
-                const auctionUpdate = await NFT.findOneAndUpdate(
-                    { nftId: buyNftDetail._id },
-                    { $set: auctionPayload }
-                    // { new: true }
-                )
 
                 const newPayloadCopies = {
                     remainingCopies: remainingCopies,
@@ -344,9 +321,9 @@ exports.buyNow = async (req, res, next) => {
                 const nftUpdate = await NFT.findByIdAndUpdate(
                     { _id: buyNftDetail._id },
                     { $set: newPayloadCopies }
-                    // { new: true }
                 )
-                if (nftUpdate && auctionUpdate) {
+
+                if (nftUpdate) {
                     const findUserDetail = await Users.findOne({
                         _id: nftUpdate.ownerId,
                     })
@@ -359,6 +336,10 @@ exports.buyNow = async (req, res, next) => {
                         { $set: { totalETH: newTotalETH } }
                     )
 
+                    await NFT.findByIdAndUpdate(
+                        { _id: buyNftDetail._id },
+                        { $set: { nftAuction: null } }
+                    )
                     return res.status(HTTP_STATUS_CODE.OK).send({
                         success: SUCCESS_STATUS.TRUE,
                         message: SUCCESS_MESSAGE.OWNERSHIP_TRANSFERED,
@@ -371,34 +352,14 @@ exports.buyNow = async (req, res, next) => {
                     userId: payload.userId,
                     copies: nftAuctionDetail.copiesForAuction,
                     remainingCopies: nftAuctionDetail.copiesForAuction,
+                    activeAuction: null,
                 }
                 const nftUpdate = await NFT.findByIdAndUpdate(
                     { _id: buyNftDetail._id },
                     { $set: newPayload }
-                    // { new: true }
-                )
-                const newAuctionPayload = {
-                    copiesForAuction: 0,
-                    sellingMethod: 0,
-                    sellingConfig: {
-                        listingSchedule: {
-                            startTime: null,
-                            endTime: null,
-                        },
-                        price: {
-                            currency: null,
-                            amount: 0,
-                        },
-                    },
-                }
-
-                const auctionUpdate = await NFT.findOneAndUpdate(
-                    { nftId: buyNftDetail._id },
-                    { $set: newAuctionPayload }
-                    // { new: true }
                 )
 
-                if (nftUpdate && auctionUpdate) {
+                if (nftUpdate) {
                     const findUserDetail = await Users.findOne({
                         _id: nftUpdate.ownerId,
                     })
@@ -409,6 +370,11 @@ exports.buyNow = async (req, res, next) => {
                     await Users.findByIdAndUpdate(
                         { _id: nftUpdate.ownerId },
                         { $set: { totalETH: newTotalETH } }
+                    )
+
+                    await NFT.findByIdAndUpdate(
+                        { _id: buyNftDetail._id },
+                        { $set: { nftAuction: null } }
                     )
 
                     return res.status(HTTP_STATUS_CODE.OK).send({
@@ -483,6 +449,7 @@ exports.endAuction = async (req, res, next) => {
                     auctionEnded: false,
                     highestBid: 0,
                 }
+
                 await nftAuctions.create(auctionPayload)
 
                 const collectionRecord = await Collection.findOne({
@@ -508,28 +475,29 @@ exports.endAuction = async (req, res, next) => {
                     auctionEndNft[0]?.nftId?.remainingCopies -
                     auctionEndNft[0]?.copiesForAuction
 
-                const newPayload = {
-                    copiesForAuction: 0,
-                    auctionEndDate: null,
-                    auctionStartDate: null,
-                    auctionEnded: false,
-                    sellingMethod: 0,
-                    sellingConfig: {
-                        startPrice: {
-                            currency: null,
-                            amount: 0,
-                        },
-                        duration: {
-                            startTime: null,
-                            endTime: null,
-                        },
-                    },
-                }
+                // const newPayload = {
+                //     copiesForAuction: 0,
+                //     auctionEndDate: null,
+                //     auctionStartDate: null,
+                //     auctionEnded: false,
+                //     sellingMethod: 0,
+                //     sellingConfig: {
+                //         startPrice: {
+                //             currency: null,
+                //             amount: 0,
+                //         },
+                //         duration: {
+                //             startTime: null,
+                //             endTime: null,
+                //         },
+                //     },
+                // }
 
-                const aucUpdate = await nftAuctions.findByIdAndUpdate(
-                    { _id: auctionEndNft[0]?._id },
-                    { $set: newPayload }
-                )
+                // const aucUpdate = await nftAuctions.findByIdAndUpdate(
+                //     { _id: auctionEndNft[0]?._id },
+                //     { $set: newPayload }
+                // )
+
                 const nftUpdateNewPayload = {
                     remainingCopies: remainingCopies,
                 }
@@ -537,23 +505,13 @@ exports.endAuction = async (req, res, next) => {
                     { _id: auctionEndNft[0]?.nftId?._id },
                     { $set: nftUpdateNewPayload }
                 )
-                if (nftUpdate && aucUpdate) {
+                if (nftUpdate) {
                     const findUserDetail = await Users.findOne({
                         _id: nftUpdate.ownerId,
                     })
-                    console.log(
-                        bidData,
-                        typeof bidData.bidAmount,
-                        'bidAmount====>'
-                    )
-                    console.log(findUserDetail, 'findUserDetail==>')
-                    let newTotalETH = 0
-                    if (findUserDetail?.totalETH) {
-                        newTotalETH =
-                            findUserDetail.totalETH + bidData.bidAmount
-                    } else {
-                        findUserDetail.totalEth = bidData.bidAmount
-                    }
+
+                    let newTotalETH =
+                        findUserDetail.totalETH + bidData.bidAmount
 
                     await Users.findByIdAndUpdate(
                         { _id: nftUpdate.ownerId },
@@ -590,42 +548,37 @@ exports.endAuction = async (req, res, next) => {
                     { _id: auctionEndNft[0]?.nft._id },
                     { $set: nftPayload }
                 )
-                const aucPayload = {
-                    nftId: auctionEndNft[0]?.nft?._id,
-                    auctionEndDate: null,
-                    auctionStartDate: null,
-                    sellingMethod: 0,
-                    copiesForAuction: 0,
-                    auctionEnded: false,
-                    highestBid: 0,
-                    sellingConfig: {
-                        startPrice: {
-                            currency: null,
-                            amount: 0,
-                        },
-                        duration: {
-                            startTime: null,
-                            endTime: null,
-                        },
-                    },
-                }
-                const aucUpdate = await nftAuctions.findByIdAndUpdate(
-                    { _id: auctionEndNft[0]?.nft._id },
-                    { $set: aucPayload }
-                    // { new: true }
-                )
-                if (nftUpdate && aucUpdate) {
+                // const aucPayload = {
+                //     nftId: auctionEndNft[0]?.nft?._id,
+                //     auctionEndDate: null,
+                //     auctionStartDate: null,
+                //     sellingMethod: 0,
+                //     copiesForAuction: 0,
+                //     auctionEnded: false,
+                //     highestBid: 0,
+                //     sellingConfig: {
+                //         startPrice: {
+                //             currency: null,
+                //             amount: 0,
+                //         },
+                //         duration: {
+                //             startTime: null,
+                //             endTime: null,
+                //         },
+                //     },
+                // }
+                // const aucUpdate = await nftAuctions.findByIdAndUpdate(
+                //     { _id: auctionEndNft[0]?.nft._id },
+                //     { $set: aucPayload }
+                //     // { new: true }
+                // )
+                if (nftUpdate) {
                     const findUserDetail = await Users.findOne({
                         _id: nftUpdate.ownerId,
                     })
 
-                    let newTotalETH = 0
-                    if (findUserDetail?.totalETH) {
-                        newTotalETH =
-                            findUserDetail.totalETH + bidData.bidAmount
-                    } else {
-                        findUserDetail.totalEth = bidData.bidAmount
-                    }
+                    let newTotalETH =
+                        findUserDetail.totalETH + bidData.bidAmount
 
                     await Users.findByIdAndUpdate(
                         { _id: nftUpdate.ownerId },
@@ -646,25 +599,26 @@ exports.endAuction = async (req, res, next) => {
             }
         }
         const payloadUpdateNFT = {
-            auctionEndDate: null,
-            auctionStartDate: null,
-            sellingMethod: 0,
-            copiesForAuction: 0,
-            auctionEnded: false,
-            sellingConfig: {
-                startPrice: {
-                    currency: null,
-                    amount: 0,
-                },
-                duration: {
-                    startTime: null,
-                    endTime: null,
-                },
-            },
+            activeAuction: null,
+            // auctionEndDate: null,
+            // auctionStartDate: null,
+            // sellingMethod: 0,
+            // copiesForAuction: 0,
+            // auctionEnded: false,
+            // sellingConfig: {
+            //     startPrice: {
+            //         currency: null,
+            //         amount: 0,
+            //     },
+            //     duration: {
+            //         startTime: null,
+            //         endTime: null,
+            //     },
+            // },
         }
 
-        await nftAuctions.findByIdAndUpdate(
-            { _id: auctionEndNft[0]?._id },
+        await NFT.findByIdAndUpdate(
+            { _id: auctionEndNft[0]?.nftId?._id },
             { $set: payloadUpdateNFT }
             // { new: true }
         )

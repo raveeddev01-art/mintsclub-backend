@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const Bid = require('../models/bids.model')
+const NFT = require('../models/nfts.model')
 
 /**
  * Auction Schema
@@ -32,5 +33,18 @@ const AuctionSchema = new mongoose.Schema(
 /**
  * @typedef Auction
  */
+
+AuctionSchema.post('save', async function (next) {
+    try {
+        await NFT.findByIdAndUpdate(
+            { _id: this.nftId },
+            { $set: { activeAuction: this._id } },
+            { new: true }
+        )
+    } catch (error) {
+        console.log('error', error)
+        // next(error)
+    }
+})
 
 module.exports = mongoose.model('Auction', AuctionSchema)
