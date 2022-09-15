@@ -3,8 +3,8 @@ const router = express.Router()
 const controller = require('../../../controllers/front/bid.controller')
 const middleware = require('../../../middlewares/front/auth')
 
-router.route('/create').post(controller.create)
-// router.route('/create').post(middleware.userValidation, controller.create)
+
+router.route('/create').post(middleware.userValidation, controller.create)
 
 router
     .route('/delete/:bidId')
