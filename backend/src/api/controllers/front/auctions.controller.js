@@ -124,6 +124,7 @@ exports.live = async (req, res, next) => {
                     },
                     userId: { $first: '$user._id' },
                     username: { $first: '$user.username' },
+                    ownerAddress:{$first:"$nft.ownerAddress"},
                     profilePhoto: {
                         $first: '$user.profileImage',
                     },

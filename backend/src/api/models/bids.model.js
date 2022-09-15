@@ -1,10 +1,8 @@
 const mongoose = require('mongoose')
 const Nft = require('../models/nfts.model')
-const Auction = require('../models/auctions.model')
 const User = require('../models/users.model')
 const ObjectId = require('mongoose').Types.ObjectId
-
-// const Auction = require('../models/auctions.model')
+const Auction = require('../models/auctions.model')
 
 /**
  * Bid Schema
@@ -51,17 +49,19 @@ BidSchema.pre('save', async function (next) {
         // next(error)
     }
 })
-BidSchema.post('save', async function (next) {
-    try {
-        await Auction.findOneAndUpdate(
-            { nft: this?.nftId },
-            { $push: { bids: this._id }, highestBid: this.bidAmount }
-        )
-    } catch (error) {
-        console.log('error', error)
-        // next(error)
-    }
-})
+// BidSchema.post('save', async function (next) {
+//     try {
+//         console.log('this', this)
+//         const check = await Auction.findOneAndUpdate(
+//             { _id: this?.auctionId },
+//             { $push: { bids: this._id }, highestBid: this.bidAmount }
+//         )
+//         console.log('check', check)
+//     } catch (error) {
+//         console.log('error', error)
+//         // next(error)
+//     }
+// })
 
 BidSchema.post('findOneAndUpdate', async function (next) {
     const docToUpdate = await this.model.findOne(this.getQuery())

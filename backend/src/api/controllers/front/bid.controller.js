@@ -1,5 +1,5 @@
 const Bid = require('../../models/bids.model')
-const Nft = require('../../models/nfts.model')
+// const Nft = require('../../models/nfts.model')
 const Auction = require('../../models/auctions.model')
 // const User = require('../../models/users.model')
 const ObjectId = require('mongoose').Types.ObjectId
@@ -37,7 +37,10 @@ exports.create = async (req, res, next) => {
         }
 
         const bid = await Bid.create(payload)
-
+        await Auction.findOneAndUpdate(
+            { _id: payload?.auctionId },
+            { $push: { bids: bid?._id }, highestBid: this.bidAmount }
+        )
         if (bid) {
             return res.send({
                 success: SUCCESS_STATUS.TRUE,
