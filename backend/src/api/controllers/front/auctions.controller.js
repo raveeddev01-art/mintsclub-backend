@@ -155,6 +155,7 @@ exports.live = async (req, res, next) => {
                     Totalbids : {$first :'$bidsCount'},
                     userId: { $first: '$user._id' },
                     username: { $first: '$user.username' },
+                    ownerAddress:{$first:"$nft.ownerAddress"},
                     profilePhoto: {
                         $first: '$user.profileImage',
                     },
