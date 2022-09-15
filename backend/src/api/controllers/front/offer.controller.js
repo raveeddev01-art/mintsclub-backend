@@ -76,26 +76,28 @@ exports.list = async (req, res, next) => {
         page = page !== undefined && page !== '' ? parseInt(page) : 1
         limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
 
-        const total = await Offer.countDocuments(filter)
+        const total = Offer.countDocuments(filter)
 
-        const offers = await Offer.aggregate([
+        const offers = Offer.aggregate([
             { $match: filter },
             { $sort: { createdAt: -1 } },
         ])
+
+        const offerList = await Promise.all([total, offers])
 
         return res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.OFFERS_FETCHED,
             data: {
-                offers: offers,
+                offers: offerList[1],
                 pagination: {
                     page,
                     limit,
-                    total,
+                    total: offerList[0],
                     pages:
-                        Math.ceil(total / limit) <= 0
+                        Math.ceil(offerList[0] / limit) <= 0
                             ? 1
-                            : Math.ceil(total / limit),
+                            : Math.ceil(offerList[0] / limit),
                 },
             },
         })
@@ -116,44 +118,21 @@ exports.accept = async (req, res, next) => {
             })
         }
 
-        const offer = await Offer.findByIdAndUpdate(
+        const offer = await Offer.findOneAndUpdate(
             { _id: offerId },
             { isAccepted: true },
             { new: true }
         )
 
-        if (offer) {
-            // expire other offers
-            await Offer.updateMany(
-                { _id: { $ne: ObjectId(offerId) }, nftId: offer.nftId },
-                { $set: { isExpired: true } }
-            )
-
-            await NFT.updateOne(
-                { _id: offer.nftId },
-                {
-                    $unset: {
-                        sellingMethod: undefined,
-                        sellingConfig: undefined,
-                        auctionEndDate: undefined,
-                        auctionEndTime: undefined,
-                        auctionStartDate: undefined,
-                        auctionStartTime: undefined,
-                    },
-                    $set: {
-                        ownerId: offer.offerBy,
-                    },
-                }
-            )
-
-            return res.status(HTTP_STATUS_CODE.OK).send({
-                success: SUCCESS_STATUS.TRUE,
-                message: SUCCESS_MESSAGE.OFFER_ACCEPTED,
-            })
-        } else
+        if (!offer || offer === null) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.FALSE,
                 message: ERROR_MESSAGE.OFFER_NOT_FOUND,
+            })
+        } else
+            return res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.TRUE,
+                message: SUCCESS_MESSAGE.OFFER_ACCEPTED,
             })
     } catch (error) {
         return next(error)
