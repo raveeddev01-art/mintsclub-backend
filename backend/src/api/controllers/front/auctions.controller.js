@@ -79,7 +79,6 @@ exports.live = async (req, res, next) => {
                 },
             },
 
-
             {
                 $lookup: {
                     from: 'bids',
@@ -89,7 +88,6 @@ exports.live = async (req, res, next) => {
                    
                 },
             },
-
             {
                 $addFields: {
 
@@ -97,7 +95,6 @@ exports.live = async (req, res, next) => {
                     
                 }
             },
-
             {
                 $lookup: {
                     from: 'bids',
@@ -111,11 +108,6 @@ exports.live = async (req, res, next) => {
                     ],
                 },
             },
-
-           
-
-            
-
             {
                 $unwind: {
                     path: '$bids',

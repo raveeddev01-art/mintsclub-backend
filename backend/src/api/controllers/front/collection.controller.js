@@ -274,9 +274,6 @@ exports.list = async (req, res, next) => {
                     as: 'user',
                 },
             },
-            
-
-
             {
                 $lookup: 
                         { 
@@ -285,9 +282,6 @@ exports.list = async (req, res, next) => {
                             foreignField: "_id", as: "totalnft",
                         }
             },
-
-
-
             {
                 $lookup: 
                         { 
@@ -301,13 +295,6 @@ exports.list = async (req, res, next) => {
                             ],
                         }
             },
-
-
-
-
-           
-
-
               {
                 $addFields: {
 
@@ -328,8 +315,6 @@ exports.list = async (req, res, next) => {
                 }
             },
 
-
-
             {
                 $unwind: {
                     path: '$nfts',
@@ -340,22 +325,13 @@ exports.list = async (req, res, next) => {
             {
                 $group: {
                     _id: '$_id',
-                   
-
                     nftDetail: {
                         $push: {
-                            
-                           
                             nfts : '$NFTArray.image',
                             file : '$NFTArray.fileType',
                         },
-                       
-                       
                     },
-                    
-                
                     TotalNfts : {$first :'$NftsCount'},
-                    // count: { "$sum": 1 },
                     userId: { $first: '$userId' },
                     categoryId: { $first: '$categoryId' },
                     name: { $first: '$name' },
