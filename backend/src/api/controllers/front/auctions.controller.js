@@ -78,12 +78,34 @@ exports.live = async (req, res, next) => {
                     preserveNullAndEmptyArrays: true,
                 },
             },
+
+            {
+                $lookup: {
+                    from: 'bids',
+                    foreignField: '_id',
+                    localField: 'bids',
+                    as: 'totalBids',
+                   
+                },
+            },
+            {
+                $addFields: {
+
+                    bidsCount: {$size: "$totalBids"},
+                    
+                }
+            },
             {
                 $lookup: {
                     from: 'bids',
                     foreignField: '_id',
                     localField: 'bids',
                     as: 'bids',
+                    pipeline: 
+                    [ 
+                        
+                        { $limit: 2 } 
+                    ],
                 },
             },
             {
@@ -122,6 +144,7 @@ exports.live = async (req, res, next) => {
                             bidByProfile: '$bids.bidByProfile',
                         },
                     },
+                    Totalbids : {$first :'$bidsCount'},
                     userId: { $first: '$user._id' },
                     username: { $first: '$user.username' },
                     ownerAddress:{$first:"$nft.ownerAddress"},
