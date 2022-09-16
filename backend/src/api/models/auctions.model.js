@@ -34,17 +34,26 @@ const AuctionSchema = new mongoose.Schema(
  * @typedef Auction
  */
 
-AuctionSchema.post('save', async function (next) {
-    try {
-        await NFT.findByIdAndUpdate(
-            { _id: this.nftId },
-            { $set: { activeAuction: this._id } },
-            { new: true }
-        )
-    } catch (error) {
-        console.log('error', error)
-        // next(error)
-    }
-})
+// AuctionSchema.post('save', async function (next) {
+//     try {
+//         // payload.highestBid = payload.sellingConfig.startPrice.amount
+//         //     ? Number(payload.sellingConfig.startPrice.amount)
+//         //     : 0
+//         console.log('this', this)
+//         await NFT.findByIdAndUpdate(
+//             { _id: this.nftId },
+//             {
+//                 $set: {
+//                     activeAuction: this._id,
+//                     currentPrice: Number(this.sellingConfig.startPrice.amount),
+//                 },
+//             },
+//             { new: true }
+//         )
+//     } catch (error) {
+//         console.log('error', error)
+//         // next(error)
+//     }
+// })
 
 module.exports = mongoose.model('Auction', AuctionSchema)
