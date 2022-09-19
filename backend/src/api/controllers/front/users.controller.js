@@ -328,7 +328,7 @@ exports.authenticate = async (req, res, next) => {
         }
         const accessToken = await user.token()
         user = user.transform()
-
+        user.isApproved = true
         const data = {
             ...user,
             accessToken,

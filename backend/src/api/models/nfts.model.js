@@ -35,6 +35,8 @@ const NFTSchema = new mongoose.Schema(
         levels: { type: Array },
         stats: { type: Array },
         copies: { type: Number, default: 0 },
+        lazyMinted:{type:Boolean},
+        lazyInfo:{type:Object},
 
         // status: { type: Number, default: 1 }, // 1 = Put on Sale, 2 = Instant Sale Price, 3 = Unlock Purchased
         // sold: { type: Number, default: 0 },
