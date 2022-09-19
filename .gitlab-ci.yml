@@ -12,6 +12,6 @@ mintsclub-back-v2:
     - rm -rf .git
     - ssh -o StrictHostKeyChecking=no $AWS_USER@$AWS_SERVER_IP "cd /home/mintsclub/mintsclub-prod/backend-v2/backend; git reset --hard; git pull origin task/MintsClubBackend-V2; npm install; pm2 restart backend-v2; exit"
   only:
-    - task/MintsClubBackend-V2
+    - task/MintsClubBackend-V3
 
 
