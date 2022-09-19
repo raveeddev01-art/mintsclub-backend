@@ -6,6 +6,7 @@ const validateNFTFixedTAuctionSchema = (data) => {
         copiesForAuction: Joi.number().min(0).max(100000).required(),
         sellId: Joi.number().required(),
         sellingMethod: Joi.number().valid(1, 2).required(),
+        signature:Joi.string(),
         sellingConfig: Joi.object()
             .keys({
                 price: Joi.object()

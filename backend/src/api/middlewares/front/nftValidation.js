@@ -21,9 +21,7 @@ const validateNFTSchema = (data) => {
         }),
         fileType: Joi.string().valid('image', 'audio', 'video').required(),
         ownerId: Joi.string().alphanum().min(12).max(24).required(),
-
         currentPrice: Joi.number().min(0).max(1000000).required(),
-
         userId: Joi.string().alphanum().min(12).max(24).required(),
         categoryId: Joi.string().alphanum().min(12).max(24).allow(''),
         collectionId: Joi.string().alphanum().min(12).max(24).required(),

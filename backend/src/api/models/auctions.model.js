@@ -21,6 +21,7 @@ const AuctionSchema = new mongoose.Schema(
         copiesForAuction: { type: Number },
         auctionEnded: { type: Boolean },
         sellId: { type: Number },
+        signature:{type:String},
         bids: [{ type: mongoose.Schema.Types.ObjectId, ref: Bid }],
         // bids: [
         //     { bidId: { type: mongoose.Schema.Types.ObjectId, ref: Bid } },

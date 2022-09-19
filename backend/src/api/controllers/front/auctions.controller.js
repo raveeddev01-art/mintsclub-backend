@@ -195,7 +195,7 @@ exports.create = async (req, res, next) => {
                 message: ERROR_MESSAGE.SELLING_METHOD,
             })
         }
-        // payload.sellingConfig = JSON.parse(payload.sellingConfig)
+        payload.sellingConfig = JSON.parse(payload.sellingConfig)
         const getNFT = await NFT.findOne({
             _id: payload.nftId,
         })
@@ -351,9 +351,9 @@ exports.buyNow = async (req, res, next) => {
                     const findUserDetail = await Users.findOne({
                         _id: nftUpdate.ownerId,
                     })
-
+                   
                     const newTotalETH =
-                        findUserDetail.totalETH + buyNftDetail.currentPrice
+                        findUserDetail.totalETH + Number(buyNftDetail.currentPrice)
 
                     await Users.findByIdAndUpdate(
                         { _id: nftUpdate.ownerId },
@@ -387,9 +387,10 @@ exports.buyNow = async (req, res, next) => {
                     const findUserDetail = await Users.findOne({
                         _id: nftUpdate.ownerId,
                     })
+                   
 
                     const newTotalETH =
-                        findUserDetail.totalETH + buyNftDetail.currentPrice
+                        findUserDetail.totalETH + Number(buyNftDetail.currentPrice)
 
                     await Users.findByIdAndUpdate(
                         { _id: nftUpdate.ownerId },
