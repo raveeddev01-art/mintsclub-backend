@@ -193,19 +193,19 @@ exports.get = async (req, res, next) => {
                     preserveNullAndEmptyArrays: true,
                 },
             },
-            // {
-            //     $lookup: {
-            //         from: 'users',
-            //         foreignField: '_id',
-            //         localField: 'userId',
-            //         as: 'user',
-            //     },
-            // },
-            // {
-            //     $unwind: {
-            //         path: '$user',
-            //     },
-            // },
+            {
+                $lookup: {
+                    from: 'users',
+                    foreignField: '_id',
+                    localField: 'userId',
+                    as: 'user',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$user',
+                },
+            },
             {
                 $lookup: {
                     from: 'collections',

@@ -1,5 +1,5 @@
 const Bid = require('../../models/bids.model')
-// const Nft = require('../../models/nfts.model')
+const Nft = require('../../models/nfts.model')
 const Auction = require('../../models/auctions.model')
 // const User = require('../../models/users.model')
 const ObjectId = require('mongoose').Types.ObjectId
@@ -39,7 +39,7 @@ exports.create = async (req, res, next) => {
         const bid = await Bid.create(payload)
         await Auction.findOneAndUpdate(
             { _id: payload?.auctionId },
-            { $push: { bids: bid?._id }, highestBid: this.bidAmount }
+            { $push: { bids: bid?._id }, highestBid: payload?.bidAmount }
         )
         if (bid) {
             return res.send({
@@ -210,6 +210,22 @@ exports.accept = async (req, res, next) => {
                 message: ERROR_MESSAGE.BID_NOT_FOUND,
             })
         } else {
+            await Bid.updateMany(
+                { _id: { $ne: ObjectId(bidId) }, nftId: bid.nftId },
+                { $set: { isClaimable: true, isExpired: true } }
+            )
+
+            await Nft.findById({ _id: bid.nftId })
+
+            await Nft.updateOne(
+                { _id: bid.nftId },
+                {
+                    $set: {
+                        ownerId: bid.bidBy,
+                        nftOwnerId: bid.bidBy,
+                    },
+                }
+            )
             return res.send({
                 success: SUCCESS_STATUS.TRUE,
                 message: SUCCESS_MESSAGE.BID_ACCEPTED_SUCCESSFULLY,
