@@ -34,7 +34,7 @@ exports.create = async (req, res, next) => {
 exports.updateProfile = async (req, res, next) => {
     try {
         if (req.body.isApproved) {
-            const payload = {
+            let payload = {
                 userId: req.body.userId,
                 isApproved: true,
             }
@@ -50,7 +50,7 @@ exports.updateProfile = async (req, res, next) => {
                 message: SUCCESS_MESSAGE.PROFILE_UPDATED,
             })
         }
-        // console.log(req.body, 'req.body')
+
         payload = {
             email: req.body.email,
             username: req.body.username,
@@ -66,7 +66,6 @@ exports.updateProfile = async (req, res, next) => {
                 message: error?.details[0]?.message,
             })
         }
-        // console.log(payload, 'payload=>')
 
         if (req.body.twitterLink && !validUrl.isUri(req.body.twitterLink)) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
@@ -94,27 +93,16 @@ exports.updateProfile = async (req, res, next) => {
             payload.webLink = req.body.webLink
         }
 
-        let payload = {
-            ...payload,
+        let imagesPayload = {
             profileImage: req.body.profileImage,
             bannerImage: req.body.bannerImage,
         }
 
-        // if (req.file) {
-        //   const imgData = fs.readFileSync(req.file.path);
-        //   newPayload.profileImage = await addImage(imgData);
-        // }
+        const newPayload = { ...payload, ...imagesPayload }
 
-        // if (req.files) {
-        //   for (const key in req.files) {
-        //     const image = req.files[key][0];
-        //     const imgData = fs.readFileSync(image.path);
-        //     newPayload[key] = await addImage(imgData);
-        //   }
-        // }
-        const user = await UserModal.findByIdAndUpdate(
-            { _id: ObjectId(payload.userId) },
-            { $set: payload },
+        let user = await UserModal.findByIdAndUpdate(
+            { _id: ObjectId(newPayload.userId) },
+            { $set: newPayload },
             { new: true }
         )
         return res.status(HTTP_STATUS_CODE.OK).send({

@@ -254,19 +254,22 @@ exports.create = async (req, res, next) => {
             payload.bid = []
         }
         const nftAuction = await nftAuctions.create(payload)
-
-        await NFT.findByIdAndUpdate(
-            { _id: this.nftId },
-            {
-                $set: {
-                    activeAuction: this._id,
-                    currentPrice: payload.sellingConfig.startPrice.amount
-                        ? Number(payload.sellingConfig.startPrice.amount)
-                        : 0,
-                },
-            },
-            { new: true }
-        )
+        // let price = payload.sellingConfig.startPrice.amount
+        // if (Number(payload.sellingMethod) === 1) {
+        //     price = payload.sellingConfig.price.amount
+        // }
+        // await NFT.findByIdAndUpdate(
+        //     { _id: payload.nftId },
+        //     {
+        //         $set: {
+        //             activeAuction: nftAuction._id,
+        //             currentPrice: price
+        //                 ? Number(payload.sellingConfig.startPrice.amount)
+        //                 : 0,
+        //         },
+        //     },
+        //     { new: true }
+        // )
 
         return res.status(HTTP_STATUS_CODE.CREATED).send({
             success: SUCCESS_STATUS.TRUE,
@@ -358,9 +361,10 @@ exports.buyNow = async (req, res, next) => {
                     const findUserDetail = await Users.findOne({
                         _id: nftUpdate.ownerId,
                     })
-                   
+
                     const newTotalETH =
-                        findUserDetail.totalETH + Number(buyNftDetail.currentPrice)
+                        findUserDetail.totalETH +
+                        Number(buyNftDetail.currentPrice)
 
                     await Users.findByIdAndUpdate(
                         { _id: nftUpdate.ownerId },
@@ -394,10 +398,10 @@ exports.buyNow = async (req, res, next) => {
                     const findUserDetail = await Users.findOne({
                         _id: nftUpdate.ownerId,
                     })
-                   
 
                     const newTotalETH =
-                        findUserDetail.totalETH + Number(buyNftDetail.currentPrice)
+                        findUserDetail.totalETH +
+                        Number(buyNftDetail.currentPrice)
 
                     await Users.findByIdAndUpdate(
                         { _id: nftUpdate.ownerId },
