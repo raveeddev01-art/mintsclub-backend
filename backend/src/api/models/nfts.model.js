@@ -54,40 +54,40 @@ const NFTSchema = new mongoose.Schema(
     { timestamps: true, collection: 'nfts' }
 )
 
-NFTSchema.post('save', async function (next) {
-    try {
-        // const err = new Error('something went wrong');
-        const collectionRecord = await Collection.findOne({
-            _id: this.collectionId,
-        })
+// NFTSchema.post('save', async function (next) {
+//     try {
+//         // const err = new Error('something went wrong');
+//         const collectionRecord = await Collection.findOne({
+//             _id: this.collectionId,
+//         })
 
-        collectionRecord.nft.push(this?._id)
-        collectionRecord.save()
+//         collectionRecord.nft.push(this?._id)
+//         collectionRecord.save()
 
-        const nftTokenPayload = {
-            nftToken: this.token,
-            nftId: this._id,
-            tokenStandard: this.tokenStandard ? this.tokenStandard : 'ERC-1155',
-        }
+//         const nftTokenPayload = {
+//             nftToken: this.token,
+//             nftId: this._id,
+//             tokenStandard: this.tokenStandard ? this.tokenStandard : 'ERC-1155',
+//         }
 
-        await NftTokens.create(nftTokenPayload)
+//         await NftTokens.create(nftTokenPayload)
 
-        //add activity
-        const activityPayload = {
-            ownerId: this.ownerId,
-            toAddress: this.ownerAddress,
-            nftId: this._id,
-            activityType: 'Mint',
-        }
+//         //add activity
+//         const activityPayload = {
+//             ownerId: this.ownerId,
+//             toAddress: this.ownerAddress,
+//             nftId: this._id,
+//             activityType: 'Mint',
+//         }
 
-        await ActivityModal.create(activityPayload)
-        // next(err);
-        // throw new Error('!!!!!!!!something went wrong')
-    } catch (error) {
-        console.log('error', error)
-        // next(error)
-    }
-})
+//         await ActivityModal.create(activityPayload)
+//         // next(err);
+//         // throw new Error('!!!!!!!!something went wrong')
+//     } catch (error) {
+//         console.log('error', error)
+//         // next(error)
+//     }
+// })
 
 /**
  * @typedef NFT
