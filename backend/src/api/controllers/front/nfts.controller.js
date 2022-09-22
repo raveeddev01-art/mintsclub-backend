@@ -108,9 +108,8 @@ exports.storeDataInDb = async (req, res, next) => {
         // createNFTPayload.auctionEnded = false
 
         createNFTPayload.tokenId = Number(req.body.nftToken)
-        if (req?.body?.lazyMinted) {
-            createNFTPayload.lazyMinted = req.body.lazyMinted
-        }
+        createNFTPayload.lazyMinted = req.body.lazyMinted
+   
         const nft = await NFT.create(createNFTPayload)
         // console.log('nft', nft)
 
@@ -163,6 +162,7 @@ exports.get = async (req, res, next) => {
         const payload = {
             nftId: nftId,
         }
+        console.log(payload, 'payload==>')
         const { error } = validation.validateNftId(payload)
 
         if (error) {
@@ -690,4 +690,3 @@ exports.myNftListing = async (req, res, next) => {
         return next(error)
     }
 }
-

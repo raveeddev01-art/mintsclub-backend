@@ -60,6 +60,7 @@ const extracturrentMetaData = async (data) => {
 
 ///////// ipfs
 const pinFileToIPFS = async (fileToFetch, metaDataContent, fileName) => {
+    console.log(fileToFetch,fileName,"fileToFetch and fileName==>")
     try {
         let data = new FormData()
         data.append(
@@ -70,6 +71,7 @@ const pinFileToIPFS = async (fileToFetch, metaDataContent, fileName) => {
         )
         const fileData = await uploadFileToIpfs(data)
         const fileUrl = `https://gateway.pinata.cloud/ipfs/${fileData.data.IpfsHash}`
+        console.log(fileUrl,"fileUrl==>")
         const fileOutputData = { fileUrl, hash: fileData.data.IpfsHash }
         const metaData = await uploadJsonToIpfs(
             fileOutputData,
