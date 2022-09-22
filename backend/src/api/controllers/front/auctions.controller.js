@@ -254,22 +254,22 @@ exports.create = async (req, res, next) => {
             payload.bid = []
         }
         const nftAuction = await nftAuctions.create(payload)
-        let price = 0
-        if (Number(payload.sellingMethod) === 1) {
-            price = payload.sellingConfig.price.amount
-        } else {
-            price = payload?.sellingConfig?.startPrice?.amount
-        }
-        await NFT.findByIdAndUpdate(
-            { _id: payload.nftId },
-            {
-                $set: {
-                    activeAuction: nftAuction._id,
-                    currentPrice: price,
-                },
-            },
-            { new: true }
-        )
+        // let price = 0
+        // if (Number(payload.sellingMethod) === 1) {
+        //     price = payload.sellingConfig.price.amount
+        // } else {
+        //     price = payload?.sellingConfig?.startPrice?.amount
+        // }
+        // await NFT.findByIdAndUpdate(
+        //     { _id: payload.nftId },
+        //     {
+        //         $set: {
+        //             activeAuction: nftAuction._id,
+        //             currentPrice: price,
+        //         },
+        //     },
+        //     { new: true }
+        // )
         return res.status(HTTP_STATUS_CODE.CREATED).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.NFT_PUT_ON_SELL,
