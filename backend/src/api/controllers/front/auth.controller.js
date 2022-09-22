@@ -1,6 +1,5 @@
 const User = require('../../models/users.model')
 const validation = require('../../middlewares/front/validation')
-const Approval = require('../../models/approvals.model')
 const {
     SUCCESS_MESSAGE,
     ERROR_MESSAGE,
@@ -48,13 +47,6 @@ exports.register = async (req, res, next) => {
             totalETH,
             isApproved,
         })
-
-        // const approvalPayload = {
-        //     userId: user._id,
-        //     isApproved: false,
-        // }
-
-        // await Approval.create(approvalPayload)
 
         const accessToken = await user.token()
         user = user.transform()

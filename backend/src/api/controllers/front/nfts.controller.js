@@ -1,7 +1,4 @@
 const fs = require('fs')
-// const moment = require('moment')
-// const Users = require('../../models/users.model')
-// const Bid = require('../../models/bids.model')
 const Collection = require('../../models/collection.model')
 const NFT = require('../../models/nfts.model')
 const NFTAuction = require('../../models/auctions.model')
@@ -9,9 +6,7 @@ const NftTokens = require('../../models/nftTokens.model')
 const { addImage, addContent } = require('../../utils/upload')
 const ObjectId = require('mongoose').Types.ObjectId
 const validation = require('../../middlewares/front/nftValidation')
-
 const Likes = require('../../models/likes.model')
-// const ActivityModal = require('../../models/item-activity.modal')
 const { userDefaultImage } = require('../../../config/vars')
 const {
     ERROR_MESSAGE,
@@ -101,55 +96,16 @@ exports.storeDataInDb = async (req, res, next) => {
 
         const createNFTPayload = req.body.data
         createNFTPayload.image = req.body.image
-        //for auction collectio
-        // createNFTPayload.highestBid = 0
-        // createNFTPayload.currentPrice = 0
-        //for auction collectio
-        // createNFTPayload.auctionEnded = false
-
         createNFTPayload.tokenId = Number(req.body.nftToken)
         createNFTPayload.lazyMinted = req.body.lazyMinted
-   
+
         const nft = await NFT.create(createNFTPayload)
-        // console.log('nft', nft)
 
-        // if (nft) {
-        //     const collectionRecord = await Collection.findOne({
-        //         _id: req.body.data.collectionId,
-        //     })
-
-        //     collectionRecord.nft.push(nft._id)
-        //     collectionRecord.save()
-        // }
-
-        // const nftTokenPayload = {
-        //     nftToken: req.body.nftToken,
-        //     nftId: nft._id,
-        //     tokenStandard: req.body.tokenStandard,
-        // }
-
-        // if (!nftTokenPayload.tokenStandard) {
-        //     nftTokenPayload.tokenStandard = 'ERC-1155'
-        // }
-
-        // const nftToken = await NftTokens.create(nftTokenPayload)
-
-        // //add activity
-        // const activityPayload = {
-        //     ownerId: nft.ownerId,
-        //     toAddress: nft.ownerAddress,
-        //     nftId: nft._id,
-        //     activityType: 'Mint',
-        // }
-
-        // await ActivityModal.create(activityPayload)
-        // if (nftToken) {
         return res.status(HTTP_STATUS_CODE.CREATED).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.NFT_CREATED,
             nft,
         })
-        // }
     } catch (error) {
         return next(error)
     }
@@ -162,7 +118,7 @@ exports.get = async (req, res, next) => {
         const payload = {
             nftId: nftId,
         }
-        console.log(payload, 'payload==>')
+
         const { error } = validation.validateNftId(payload)
 
         if (error) {
@@ -577,9 +533,6 @@ exports.getNFTsbyCollection = async (req, res) => {
                 nft.likeCount = findCount.count
             }
         }
-
-        // const nftLikes = await Likes.findOne({ collectionId: req.body.collectionId });
-        // NFTs.likesCount=nftLikes['count']
         res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.NFTS_BY_COLLECTION,

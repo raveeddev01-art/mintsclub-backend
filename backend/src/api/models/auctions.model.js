@@ -55,7 +55,6 @@ AuctionSchema.post('save', async function (next) {
         )
     } catch (error) {
         console.log('error', error)
-        // next(error)
     }
 })
 

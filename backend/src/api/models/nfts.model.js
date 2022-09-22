@@ -35,59 +35,44 @@ const NFTSchema = new mongoose.Schema(
         levels: { type: Array },
         stats: { type: Array },
         copies: { type: Number, default: 0 },
-        lazyMinted:{type:Boolean},
-        lazyInfo:{type:Object},
-
-        // status: { type: Number, default: 1 }, // 1 = Put on Sale, 2 = Instant Sale Price, 3 = Unlock Purchased
-        // sold: { type: Number, default: 0 },
-        // sellingMethod: { type: Number }, // 1 = Fixed Price, 2 = Timed Auction
-        // sellingConfig: { type: Object },
-        // auctionStartDate: { type: Date },
-        // auctionEndDate: { type: Date },
+        lazyMinted: { type: Boolean },
+        lazyInfo: { type: Object },
         metaData: { type: String }, // ipfs link
-        // highestBid: { type: Number },
-        // copiesForAuction: { type: Number },
         remainingCopies: { type: Number },
-        // auctionEnded: { type: Boolean },
         sellId: { type: Number },
     },
     { timestamps: true, collection: 'nfts' }
 )
 
-// NFTSchema.post('save', async function (next) {
-//     try {
-//         // const err = new Error('something went wrong');
-//         const collectionRecord = await Collection.findOne({
-//             _id: this.collectionId,
-//         })
+NFTSchema.post('save', async function (next) {
+    try {
+        const collectionRecord = await Collection.findOne({
+            _id: this.collectionId,
+        })
 
-//         collectionRecord.nft.push(this?._id)
-//         collectionRecord.save()
+        collectionRecord.nft.push(this?._id)
+        collectionRecord.save()
 
-//         const nftTokenPayload = {
-//             nftToken: this.token,
-//             nftId: this._id,
-//             tokenStandard: this.tokenStandard ? this.tokenStandard : 'ERC-1155',
-//         }
+        const nftTokenPayload = {
+            nftToken: this.token,
+            nftId: this._id,
+            tokenStandard: this.tokenStandard ? this.tokenStandard : 'ERC-1155',
+        }
 
-//         await NftTokens.create(nftTokenPayload)
+        await NftTokens.create(nftTokenPayload)
 
-//         //add activity
-//         const activityPayload = {
-//             ownerId: this.ownerId,
-//             toAddress: this.ownerAddress,
-//             nftId: this._id,
-//             activityType: 'Mint',
-//         }
+        const activityPayload = {
+            ownerId: this.ownerId,
+            toAddress: this.ownerAddress,
+            nftId: this._id,
+            activityType: 'Mint',
+        }
 
-//         await ActivityModal.create(activityPayload)
-//         // next(err);
-//         // throw new Error('!!!!!!!!something went wrong')
-//     } catch (error) {
-//         console.log('error', error)
-//         // next(error)
-//     }
-// })
+        await ActivityModal.create(activityPayload)
+    } catch (error) {
+        console.log('error', error)
+    }
+})
 
 /**
  * @typedef NFT

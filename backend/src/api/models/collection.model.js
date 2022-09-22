@@ -30,24 +30,10 @@ const CollectionSchema = new mongoose.Schema(
     { timestamps: true }
 )
 
-// bookSchema.pre('findOne', function() {
-//     let keys = this.getPopulatedPaths(); // ['author']
-//   });
-
 // CollectionSchema.post('findOne', async function (doc, next) {
 //     // const doc = await this.model.findOne(this.getQuery())
 //     console.log('docccccc', doc)
-//     let collection = doc
-//     collection.items = await NFT.countDocuments({
-//         collectionId: collection?._id,
-//     })
-
-//     let owners = await NFT.find({ collectionId: collection?._id }).distinct(
-//         'collectionId'
-//     )
-//     collection.owners = owners?.length || 0
-
-//     return collection
+//
 // })
 
 /**
