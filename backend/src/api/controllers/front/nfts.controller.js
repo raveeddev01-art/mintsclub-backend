@@ -39,7 +39,6 @@ exports.create = async (req, res, next) => {
             copies: req.body.copies,
             activeAuction: req.body.activeAuction,
         }
-     
 
         const { error } = validation.validateNFTSchema(payload)
         if (error) {
@@ -100,8 +99,6 @@ exports.storeDataInDb = async (req, res, next) => {
             })
         }
 
-     
-
         const createNFTPayload = req.body.data
         createNFTPayload.image = req.body.image
         //for auction collectio
@@ -109,10 +106,10 @@ exports.storeDataInDb = async (req, res, next) => {
         // createNFTPayload.currentPrice = 0
         //for auction collectio
         // createNFTPayload.auctionEnded = false
-       
+
         createNFTPayload.tokenId = Number(req.body.nftToken)
-        if(req?.body?.lazyMinted){
-            createNFTPayload.lazyMinted=req.body.lazyMinted
+        if (req?.body?.lazyMinted) {
+            createNFTPayload.lazyMinted = req.body.lazyMinted
         }
         const nft = await NFT.create(createNFTPayload)
         // console.log('nft', nft)
@@ -442,7 +439,7 @@ exports.list = async (req, res, next) => {
                 pagination: {
                     page,
                     limit,
-                    total: allNfts.length,
+                    total: nftLiting[0],
                     pages:
                         Math.ceil(nftLiting[0] / limit) <= 0
                             ? 1

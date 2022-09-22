@@ -21,7 +21,7 @@ const AuctionSchema = new mongoose.Schema(
         copiesForAuction: { type: Number },
         auctionEnded: { type: Boolean },
         sellId: { type: Number },
-        signature:{type:String},
+        signature: { type: String },
         bids: [{ type: mongoose.Schema.Types.ObjectId, ref: Bid }],
         // bids: [
         //     { bidId: { type: mongoose.Schema.Types.ObjectId, ref: Bid } },
@@ -37,16 +37,16 @@ const AuctionSchema = new mongoose.Schema(
 
 // AuctionSchema.post('save', async function (next) {
 //     try {
-//         // payload.highestBid = payload.sellingConfig.startPrice.amount
-//         //     ? Number(payload.sellingConfig.startPrice.amount)
-//         //     : 0
-//         console.log('this', this)
+//         let price = this.sellingConfig.startPrice.amount
+//         if (Number(this.sellingMethod) === 1) {
+//             price = this.sellingConfig.price.amount
+//         }
 //         await NFT.findByIdAndUpdate(
 //             { _id: this.nftId },
 //             {
 //                 $set: {
 //                     activeAuction: this._id,
-//                     currentPrice: Number(this.sellingConfig.startPrice.amount),
+//                     currentPrice: price,
 //                 },
 //             },
 //             { new: true }
