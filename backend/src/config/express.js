@@ -9,6 +9,7 @@ const path = require('path')
 const rateLimit = require('express-rate-limit')
 const bearerToken = require('express-bearer-token')
 const compression = require('compression')
+const job=require('../cron-jobs/batchUpload')
 
 /**
  * Express instance
@@ -79,5 +80,6 @@ app.use(error.handler)
 
 //start cron jobs
 // job.startCron();
+job.batchCrone()
 
 module.exports = app

@@ -30,11 +30,6 @@ const UserSchema = new mongoose.Schema(
             type: Number,
             defaultValue: () => Math.floor(Math.random() * 1000000),
         },
-        // publicAddress: {
-        //     type: String,
-        //     unique: true,
-        //     //   validate: { isLowercase: true },
-        // },
     },
     { timestamps: true }
 )
@@ -89,7 +84,6 @@ UserSchema.post('save', async function (next) {
         }
 
         await Approval.create(approvalPayload)
-        // return next()
     } catch (error) {
         console.log('error', error)
         // next(error)

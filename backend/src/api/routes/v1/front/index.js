@@ -12,6 +12,7 @@ const fixedPriceTokens = require('./fixedPriceTokens.route')
 const likesRoutes = require('./likes.route')
 const activityRoute = require('./item-activity.route')
 const itemsListingRoute = require('./itemsListing.route')
+const batchUploadRoute=require('./batchUpload.route')
 const router = express.Router()
 /**
  * GET v1/status
@@ -29,4 +30,5 @@ router.use('/nftFixedTokens', fixedPriceTokens)
 router.use('/nftLikes', likesRoutes)
 router.use('/activity', activityRoute)
 router.use('/itemsListing', itemsListingRoute)
+router.use('/batchUpload',batchUploadRoute)
 module.exports = router
