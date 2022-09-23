@@ -7,6 +7,7 @@ const s3 = new AWS.S3({
     secretAccessKey: AWS_SECRET_ACCESS_KEY,
 })
 exports.getS3Object = async (Key, fileName) => {
+    console.log(fileName,"fileName here===>")
     return new Promise((resolve, reject) => {
         let params = {
             Bucket: AWS_S3_BUCKET,
@@ -37,6 +38,7 @@ exports.getS3Object = async (Key, fileName) => {
 }
 
 const unzipFile = async (fileKey, fileName) => {
+    console.log("unzipping folder===>")
     return new Promise(async (resolve,reject)=>{
         console.log(fileKey, 'fileKey')
         const fileContent = fs.readFileSync(

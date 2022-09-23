@@ -5,11 +5,12 @@ const fs = require('fs')
 const axios = require('axios')
 var FormData = require('form-data')
 const NFT = require('../api/models/nfts.model')
-const {deleteFromS3} =require('../api/utils/s3Bucket')
+const { deleteFromS3 } = require('../api/utils/s3Bucket')
 const BatchUpload = require('../api/models/batchUpload.model')
 
 const extracturrentMetaData = async (data) => {
-    const { fileName, fileToFetch, metaDataToFetch, index, files,key ,id} = data
+    const { fileName, fileToFetch, metaDataToFetch, index, files, key, id } =
+        data
 
     try {
         //need to change sample to dynamic file name
@@ -26,7 +27,6 @@ const extracturrentMetaData = async (data) => {
                     JSON.parse(jsonString),
                     fileName
                 )
-
                 let payload = {
                     ...data,
                     nftToken: (Math.floor(Math.random() * 10000) + 10000)
@@ -39,15 +39,14 @@ const extracturrentMetaData = async (data) => {
                     remainingCopies: JSON.parse(jsonString).copies,
                     activeAuction: null,
                     name: JSON.parse(jsonString).name,
-                    categoryId: '625569a22b58bd0bf3480572',
                     currentPrice: 0,
                     metaData: uploadedFile.dataInput.metaDataUrl,
                     image: uploadedFile.image,
                 }
                 await NFT.create(payload)
-                await deleteUploadedFile(fileToFetch, metaDataToFetch, fileName)
+                // await deleteUploadedFile(fileToFetch, metaDataToFetch, fileName)
                 if (index + 1 === files.length) {
-                    await deleteUnZipedFolder(fileName,key,id)
+                    await deleteUnZipedFolder(fileName, key, id)
                 }
                 return true
             }
@@ -60,7 +59,7 @@ const extracturrentMetaData = async (data) => {
 
 ///////// ipfs
 const pinFileToIPFS = async (fileToFetch, metaDataContent, fileName) => {
-    console.log(fileToFetch,fileName,"fileToFetch and fileName==>")
+    // console.log(fileToFetch, fileName, 'fileToFetch and fileName==>')
     try {
         let data = new FormData()
         data.append(
@@ -71,7 +70,7 @@ const pinFileToIPFS = async (fileToFetch, metaDataContent, fileName) => {
         )
         const fileData = await uploadFileToIpfs(data)
         const fileUrl = `https://gateway.pinata.cloud/ipfs/${fileData.data.IpfsHash}`
-        console.log(fileUrl,"fileUrl==>")
+        // console.log(fileUrl, 'fileUrl==>')
         const fileOutputData = { fileUrl, hash: fileData.data.IpfsHash }
         const metaData = await uploadJsonToIpfs(
             fileOutputData,
@@ -100,6 +99,7 @@ const uploadFileToIpfs = async (formData) => {
         throw new Error(err)
     }
 }
+
 uploadJsonToIpfs = async (dataInput, image, metaDataContent) => {
     console.log('uploading metadata files')
     const url = `https://api.pinata.cloud/pinning/pinJSONToIPFS`
@@ -132,8 +132,7 @@ uploadJsonToIpfs = async (dataInput, image, metaDataContent) => {
     }
 }
 
-const deleteUnZipedFolder = (fileName,key,id) => {
-    console.log("deleting zipped folder==>")
+const deleteUnZipedFolder = (fileName, key, id) => {
     return new Promise(async (resolve, reject) => {
         fs.rmdir(
             `./src/uploads/files/${fileName}`,
@@ -142,38 +141,39 @@ const deleteUnZipedFolder = (fileName,key,id) => {
                 if (err) {
                     throw err
                 }
-                await  deleteFromS3(key)
-                await  BatchUpload.deleteOne({_id:id})
-                resolve(true)
-            }
-        )
-     
-    })
-}
-const deleteUploadedFile = (fileName, metaDataFileName, folderName) => {
-    return new Promise(async (resolve, reject) => {
-        //delete image file
-        fs.unlink(
-            `./src/uploads/files/${folderName}/images/${fileName}`,
-            async (err) => {
-                if (err) {
-                    throw new Error(err)
-                }
-                resolve(true)
-            }
-        )
-        //delete metaData file
-        fs.unlink(
-            `./src/uploads/files/${folderName}/metaData/${metaDataFileName}`,
-            async (err) => {
-                if (err) {
-                    throw new Error(err)
-                }
+                console.log('deleting un-zipped folder==>')
+
+                await deleteFromS3(key)
+                await BatchUpload.deleteOne({ _id: id })
                 resolve(true)
             }
         )
     })
 }
+// const deleteUploadedFile = (fileName, metaDataFileName, folderName) => {
+//     return new Promise(async (resolve, reject) => {
+//         //delete image file
+//         fs.unlink(
+//             `./src/uploads/files/${folderName}/images/${fileName}`,
+//             async (err) => {
+//                 if (err) {
+//                     throw new Error(err)
+//                 }
+//                 //delete metaData file
+//                 fs.unlink(
+//                     `./src/uploads/files/${folderName}/metaData/${metaDataFileName}`,
+//                     async (err) => {
+//                         console.log('deleting Files')
+//                         if (err) {
+//                             throw new Error(err)
+//                         }
+//                         resolve(true)
+//                     }
+//                 )
+//             }
+//         )
+//     })
+// }
 
 const NftQueue = {
     async run(job) {
@@ -186,11 +186,7 @@ const NftQueue = {
         // Check if order already processed, return Success
         // If no NFT available, then issue refund and sendNFTUnSuccessEmail
         // If any error occurs in sendNFT, then throw error, bull will handle retry
-        console.log(
-            job.attemptsMade,
-            job.data.data.data.fileToFetch,
-            'job.attemptsMade'
-        )
+        console.log(job.attemptsMade, 'job.attemptsMade')
         await extracturrentMetaData(job.data.data.data)
         return true
     },

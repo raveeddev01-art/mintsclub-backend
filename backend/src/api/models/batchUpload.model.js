@@ -20,7 +20,7 @@ const BatchUploadSchema = new mongoose.Schema(
         key:{type:String},
         fileType:{type:String},
         status:{type:String},
-        currentFile:{type:Number}
+        currentFile:{type:Number},
     },
     { timestamps: true }
 )

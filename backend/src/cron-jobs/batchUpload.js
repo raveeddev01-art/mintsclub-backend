@@ -19,17 +19,18 @@ module.exports.batchCrone = async () => {
                 } = result[0]
                 let res = await getS3Object(key, fileName)
                 if (res) {
+                    console.log(fileName,'fileName')
                     const files = await promises.readdir(
-                        './src/uploads/files/Sample/images'
+                        `./src/uploads/files/${fileName}/images`
                     )
                     const metaData = await promises.readdir(
-                        './src/uploads/files/Sample/metaData'
+                        `./src/uploads/files/${fileName}/metaData`
                     )
                     await BatchUpload.findByIdAndUpdate(
                         { _id: result[0]._id },
                         { $set: { status: 'inProgress' } }
                     )
-
+                    console.log("hereeeeeeee")
                     console.log(files, metaData, 'files==>')
                     files.map(async (item, index) => {
                         try {
