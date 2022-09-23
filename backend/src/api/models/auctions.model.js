@@ -38,6 +38,7 @@ const AuctionSchema = new mongoose.Schema(
 AuctionSchema.post('save', async function (next) {
     try {
         let price = 0
+
         if (Number(this.sellingMethod) === 1) {
             price = this.sellingConfig.price.amount
         } else {
@@ -55,7 +56,6 @@ AuctionSchema.post('save', async function (next) {
         )
     } catch (error) {
         console.log('error', error)
-        // next(error)
     }
 })
 

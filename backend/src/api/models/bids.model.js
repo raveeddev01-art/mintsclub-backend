@@ -65,43 +65,7 @@ BidSchema.pre('save', async function (next) {
 
 // BidSchema.post('findOneAndUpdate', async function (next) {
 //     const docToUpdate = await this.model.findOne(this.getQuery())
-
-//     await this.model.updateMany(
-//         { _id: { $ne: ObjectId(docToUpdate?._id) }, nftId: docToUpdate?.nftId },
-//         { $set: { isClaimable: true, isExpired: true } }
-//     )
-
-//     await Nft.findById({ _id: docToUpdate?.nftId })
-
-//     await Auction.findByIdAndUpdate(
-//         { nftId: docToUpdate?.nftId },
-//         {
-//             $unset: {
-//                 sellingMethod: null,
-//                 sellingConfig: null,
-//                 auctionEndDate: null,
-//                 auctionEndTime: null,
-//                 auctionStartDate: null,
-//                 auctionStartTime: null,
-//             },
-//             $set: {
-//                 ownerId: docToUpdate?.bidBy,
-//                 nftOwnerId: docToUpdate?.bidBy,
-//             },
-//         }
-//     )
-
-//     await Nft.updateOne(
-//         { _id: docToUpdate?.nftId },
-//         {
-//             $set: {
-//                 ownerId: docToUpdate?.bidBy,
-//                 nftOwnerId: docToUpdate?.bidBy,
-//             },
-//         }
-//     )
-// })
-
+// }
 /**
  * @typedef Bid
  */

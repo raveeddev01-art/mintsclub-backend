@@ -1,7 +1,6 @@
 const Bid = require('../../models/bids.model')
 const Nft = require('../../models/nfts.model')
 const Auction = require('../../models/auctions.model')
-// const User = require('../../models/users.model')
 const ObjectId = require('mongoose').Types.ObjectId
 const validation = require('../../middlewares/front/bidValidation')
 const nftValidation = require('../../middlewares/front/nftValidation')

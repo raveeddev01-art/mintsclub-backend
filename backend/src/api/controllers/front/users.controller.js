@@ -1,8 +1,6 @@
 /* eslint-disable no-undef */
-// const fs = require('fs')
 const ObjectId = require('mongoose').Types.ObjectId
 const UserModal = require('../../models/users.model')
-// const { addImage } = require('../../utils/uploadImage')
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
 const validation = require('../../middlewares/front/validation')
@@ -253,13 +251,7 @@ exports.subscribeUser = async (req, res, next) => {
 exports.signUser = async (req, res, next) => {
     try {
         const { address } = req.params
-        // const { error } = validation.validateAddress({ address })
-        // if (error) {
-        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-        //         success: SUCCESS_STATUS.FALSE,
-        //         message: error?.details[0]?.message,
-        //     })
-        // }
+
         const result = await UserModal.find({ address })
         res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
@@ -299,14 +291,7 @@ exports.createUser = async (req, res, next) => {
 exports.authenticate = async (req, res, next) => {
     try {
         let address = req.body.publicAddress
-        // let payload=req.body
-        // const { error } = validation.validateAucthentication(payload)
-        // if (error) {
-        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-        //         success: SUCCESS_STATUS.FALSE,
-        //         message: error?.details[0]?.message,
-        //     })
-        // }
+
         let user = await UserModal.findOne({ address })
         if (!user) {
             return res.status(HTTP_STATUS_CODE.OK).send({
@@ -328,7 +313,6 @@ exports.authenticate = async (req, res, next) => {
             data: msgBuffer,
             sig: req.body.signature,
         })
-        // ecrecover matches the initial publicAddress
 
         if (signAddress.toLowerCase() === address.toLowerCase()) {
             user.nounce = Math.floor(Math.random() * 1000000)
