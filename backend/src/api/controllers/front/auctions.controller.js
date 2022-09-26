@@ -47,6 +47,7 @@ exports.live = async (req, res, next) => {
                 },
                 auctionEndDate: { $gte: dateTime },
                 'nft.categoryId': ObjectId(newFilter),
+                auctionEnded: false,
             }
         } else {
             filter = {
@@ -55,6 +56,7 @@ exports.live = async (req, res, next) => {
                     $lt: dateTime,
                 },
                 auctionEndDate: { $gte: dateTime },
+                auctionEnded: false,
             }
         }
 
