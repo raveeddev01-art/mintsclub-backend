@@ -21,6 +21,8 @@ module.exports = {
   collectionDefaultImage: '/img/placeholder.png',
   globalImgPlaceholder: '/img/placeholder.png',
   pinataJWT:process.env.PINATA_JWT,
+  pinataKey:process.env.PINATA_KEY,
+  pinataSecret:process.env.PINATA_SECRET,
   mailChimp: {
     apiKey: process.env.MAILCHIMP_APIKEY,
     server: process.env.MAILCHIMP_SERVER,

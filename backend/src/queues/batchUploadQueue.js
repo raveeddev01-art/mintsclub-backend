@@ -1,6 +1,6 @@
 const Queue = require('./queue')
-const { pinataJWT } = require('../config/vars')
-const nftQueue = Queue.getQuById('insert-batch-uploadFile')
+const { pinataJWT, pinataSecret, pinataKey } = require('../config/vars')
+const nftQueue = Queue.getQuById('batchUpload')
 const fs = require('fs')
 const axios = require('axios')
 var FormData = require('form-data')
@@ -8,128 +8,161 @@ const NFT = require('../api/models/nfts.model')
 const { deleteFromS3 } = require('../api/utils/s3Bucket')
 const BatchUpload = require('../api/models/batchUpload.model')
 
+function sleep(ms) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms)
+    })
+}
+
 const extracturrentMetaData = async (data) => {
-    const { fileName, fileToFetch, metaDataToFetch, index, files, key, id } =
-        data
+    return new Promise(async (resolve, reject) => {
+        const {
+            fileName,
+            fileToFetch,
+            metaDataToFetch,
+            index,
+            files,
+            key,
+            id,
+        } = data
+        try {
+            //need to change sample to dynamic file name
 
-    try {
-        //need to change sample to dynamic file name
-
-        fs.readFile(
-            `./src/uploads/files/${fileName}/metaData/${metaDataToFetch}`,
-            'utf8',
-            async (err, jsonString) => {
-                if (err) {
-                    return console.log(err, 'error=======>')
+            fs.readFile(
+                `./src/uploads/files/${fileName}/metaData/${metaDataToFetch}`,
+                'utf8',
+                async (err, jsonString) => {
+                    if (err) {
+                        return console.log(err, 'error=======>')
+                    }
+                    await sleep(1000)
+                    let uploadedFile = await pinFileToIPFS(
+                        fileToFetch,
+                        JSON.parse(jsonString),
+                        fileName,
+                        index
+                    )
+                    await sleep(1000)
+                    let payload = {
+                        ...data,
+                        tokenId: (Math.floor(Math.random() * 10000) + 10000)
+                            .toString()
+                            .substring(1),
+                        properties: JSON.parse(jsonString).properties,
+                        levels: JSON.parse(jsonString).levels,
+                        stats: JSON.parse(jsonString).stats,
+                        copies: JSON.parse(jsonString).copies,
+                        remainingCopies: JSON.parse(jsonString).copies,
+                        activeAuction: null,
+                        name: JSON.parse(jsonString).name,
+                        currentPrice: 0,
+                        metaData: uploadedFile.dataInput.metaDataUrl,
+                        image: uploadedFile.image,
+                    }
+                    await NFT.create(payload)
+                    // await deleteUploadedFile(fileToFetch, metaDataToFetch, fileName)
+                    if (index + 1 === files.length) {
+                        await deleteUnZipedFolder(fileName, key, id)
+                    }
+                    resolve(true)
                 }
-                let uploadedFile = await pinFileToIPFS(
-                    fileToFetch,
-                    JSON.parse(jsonString),
-                    fileName
-                )
-                let payload = {
-                    ...data,
-                    nftToken: (Math.floor(Math.random() * 10000) + 10000)
-                        .toString()
-                        .substring(1),
-                    properties: JSON.parse(jsonString).properties,
-                    levels: JSON.parse(jsonString).levels,
-                    stats: JSON.parse(jsonString).stats,
-                    copies: JSON.parse(jsonString).copies,
-                    remainingCopies: JSON.parse(jsonString).copies,
-                    activeAuction: null,
-                    name: JSON.parse(jsonString).name,
-                    currentPrice: 0,
-                    metaData: uploadedFile.dataInput.metaDataUrl,
-                    image: uploadedFile.image,
-                }
-                await NFT.create(payload)
-                // await deleteUploadedFile(fileToFetch, metaDataToFetch, fileName)
-                if (index + 1 === files.length) {
-                    await deleteUnZipedFolder(fileName, key, id)
-                }
-                return true
-            }
-        )
-    } catch (err) {
-        console.log(err, 'error====>.')
-        throw new Error(err)
-    }
+            )
+        } catch (err) {
+            console.log(err, 'error====>.')
+            throw new Error(err)
+        }
+    })
 }
 
 ///////// ipfs
-const pinFileToIPFS = async (fileToFetch, metaDataContent, fileName) => {
+const pinFileToIPFS = async (fileToFetch, metaDataContent, fileName, index) => {
     // console.log(fileToFetch, fileName, 'fileToFetch and fileName==>')
-    try {
-        let data = new FormData()
-        data.append(
-            'file',
-            fs.createReadStream(
-                `./src/uploads/files/${fileName}/images/${fileToFetch}`
+
+    return new Promise(async (resolve, reject) => {
+        try {
+            let data = new FormData()
+            data.append(
+                'file',
+                fs.createReadStream(
+                    `./src/uploads/files/${fileName}/images/${fileToFetch}`
+                )
             )
-        )
-        const fileData = await uploadFileToIpfs(data)
-        const fileUrl = `https://gateway.pinata.cloud/ipfs/${fileData.data.IpfsHash}`
-        // console.log(fileUrl, 'fileUrl==>')
-        const fileOutputData = { fileUrl, hash: fileData.data.IpfsHash }
-        const metaData = await uploadJsonToIpfs(
-            fileOutputData,
-            fileUrl,
-            metaDataContent
-        )
-        return metaData
-    } catch (err) {
-        console.log(err, 'error while pinning file to ipfs')
-        throw new Error(err)
-    }
+            const fileData = await uploadFileToIpfs(data)
+
+            const fileUrl = `https://mintsclub.mypinata.cloud/ipfs/${fileData.data.IpfsHash}`
+
+            const fileOutputData = { fileUrl, hash: fileData.data.IpfsHash }
+            const metaData = await uploadJsonToIpfs(
+                fileOutputData,
+                fileUrl,
+                metaDataContent,
+                index
+            )
+            resolve(metaData)
+        } catch (err) {
+            console.log(err, 'error while pinning file to ipfs')
+            throw new Error(err)
+        }
+    })
 }
 
 const uploadFileToIpfs = async (formData) => {
-    try {
-        const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`
-        const response = await axios.post(url, formData, {
-            headers: {
-                'Content-Type': `multipart/form-data; boundary= ${formData._boundary}`,
-                Authorization: `Bearer ${pinataJWT}`,
-            },
-        })
-        return response
-    } catch (err) {
-        console.log(err, 'error while uploading files to ipfs')
-        throw new Error(err)
-    }
+    return new Promise(async (resolve, reject) => {
+        try {
+            const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`
+            const response = await axios.post(url, formData, {
+                headers: {
+                    'Content-Type': `multipart/form-data; boundary= ${formData._boundary}`,
+                    Authorization: `Bearer ${pinataJWT}`,
+                    pinata_api_key: pinataKey,
+                    pinata_secret_api_key: pinataSecret,
+                },
+            })
+            resolve(response)
+        } catch (err) {
+            console.log(err, 'error while uploading files to ipfs')
+            throw new Error(err)
+        }
+    })
 }
 
-uploadJsonToIpfs = async (dataInput, image, metaDataContent) => {
-    console.log('uploading metadata files')
-    const url = `https://api.pinata.cloud/pinning/pinJSONToIPFS`
-    let properties = {
-        properties: metaDataContent.properties,
-        levels: metaDataContent.levels,
-        stats: metaDataContent.stats,
-    }
-    const data = {
-        name: metaDataContent.name,
-        symbol: 'mintsclub',
-        sellerFeeBasisPoints: 0,
-        image: dataInput.fileUrl,
-        description: metaDataContent.description,
-        properties: properties,
-    }
-    try {
-        const response = await axios.post(url, data, {
-            headers: {
-                Authorization: `Bearer ${pinataJWT}`,
-            },
-        })
-        dataInput.ipfsJsonData = data
-        dataInput.metaDataUrl =
-            'https://gateway.pinata.cloud/ipfs/' + response.data.IpfsHash
-        return { dataInput, image }
-    } catch (err) {
-        console.log('error while uploading jsons')
-        throw new Error(err)
-    }
+uploadJsonToIpfs = async (dataInput, image, metaDataContent, index) => {
+    return new Promise(async (resolve, reject) => {
+        console.log('uploading json file index', index)
+
+        console.log('uploading metadata files')
+        const url = `https://api.pinata.cloud/pinning/pinJSONToIPFS`
+        let properties = {
+            properties: metaDataContent.properties,
+            levels: metaDataContent.levels,
+            stats: metaDataContent.stats,
+        }
+        const data = {
+            name: metaDataContent.name,
+            symbol: 'mintsclub',
+            sellerFeeBasisPoints: 0,
+            image: dataInput.fileUrl,
+            description: metaDataContent.description,
+            properties: properties,
+        }
+        try {
+            const response = await axios.post(url, data, {
+                headers: {
+                    Authorization: `Bearer ${pinataJWT}`,
+                    pinata_api_key: pinataKey,
+                    pinata_secret_api_key: pinataSecret,
+                },
+            })
+            dataInput.ipfsJsonData = data
+            dataInput.metaDataUrl =
+                'https://mintsclub.mypinata.cloud/ipfs/' +
+                response.data.IpfsHash
+            resolve({ dataInput, image })
+        } catch (err) {
+            console.log(err, 'error while uploading jsons')
+            throw new Error(err)
+        }
+    })
 }
 
 const deleteUnZipedFolder = (fileName, key, id) => {
@@ -192,10 +225,10 @@ const NftQueue = {
     },
 
     async add(data, jobId) {
-        return nftQueue.add('insert-batch-uploadFile', { data }, { jobId })
+        return nftQueue.add('batchUpload', { data }, { jobId })
     },
 }
 
-nftQueue.process('insert-batch-uploadFile', 1, NftQueue.run.bind(NftQueue))
+nftQueue.process('batchUpload', 1, NftQueue.run.bind(NftQueue))
 
 module.exports = NftQueue
