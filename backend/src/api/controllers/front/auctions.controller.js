@@ -570,9 +570,6 @@ exports.endAuction = async (req, res, next) => {
                 }
             }
         }
-        const payloadUpdateNFT = {
-            activeAuction: null,
-        }
 
         const payloadUpdateAuctionStatus = {
             auctionEnded: true,
@@ -582,6 +579,11 @@ exports.endAuction = async (req, res, next) => {
             { _id: auctionEndNft[0]?._id },
             { $set: payloadUpdateAuctionStatus }
         )
+
+        
+        const payloadUpdateNFT = {
+            activeAuction: null,
+        }
 
         await NFT.findByIdAndUpdate(
             { _id: auctionEndNft[0]?.nftId?._id },
