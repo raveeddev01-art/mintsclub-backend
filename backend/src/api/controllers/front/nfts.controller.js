@@ -279,7 +279,7 @@ exports.list = async (req, res, next) => {
                 ],
             }),
         }
-        // get NFTs for given collection
+
         if (collectionId) filter.collectionId = ObjectId(collectionId)
 
         page = page !== undefined && page !== '' ? parseInt(page) : 1
@@ -297,8 +297,6 @@ exports.list = async (req, res, next) => {
                     name: 1,
                 },
             },
-            { $skip: limit * (page - 1) },
-            { $limit: limit },
             {
                 $lookup: {
                     from: 'auctions',
@@ -327,21 +325,9 @@ exports.list = async (req, res, next) => {
                     preserveNullAndEmptyArrays: true,
                 },
             },
-            {
-                $lookup: {
-                    from: 'users',
-                    foreignField: '_id',
-                    localField: 'ownerId',
-                    as: 'owner',
-                },
-            },
-            {
-                $unwind: {
-                    path: '$owner',
-                    preserveNullAndEmptyArrays: true,
-                },
-            },
             { $match: filter },
+            { $skip: limit * (page - 1) },
+            { $limit: limit },
             {
                 $project: {
                     _id: 1,
