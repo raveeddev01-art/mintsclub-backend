@@ -7,7 +7,7 @@ const fs = require('fs')
 
 module.exports.batchCrone = async () => {
     try {
-        cron.schedule('*/5 * * * * ', async () => {
+        cron.schedule('*/70 * * * * ', async () => {
             // for (let i = 2; i <= 400; i++) {
             //     fs.readFile(
             //         './src/uploads/bulk/1.json',
