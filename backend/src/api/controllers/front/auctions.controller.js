@@ -453,13 +453,11 @@ exports.endAuction = async (req, res, next) => {
                 }
 
                 const NFTCreated = await NFT.create(payload)
-
                 const auctionPayload = {
                     nftId: NFTCreated?._id,
                     auctionEnded: false,
                     highestBid: 0,
                 }
-
                 await nftAuctions.create(auctionPayload)
                 const nftTokenDetail = await NftTokens.findOne({
                     nftId: auctionEndNft[0]?.nftId?._id,
