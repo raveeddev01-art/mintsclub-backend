@@ -290,7 +290,7 @@ exports.buyNow = async (req, res, next) => {
                     ownerId: payload.userId,
                     userId: payload.userId,
                     ownerAddress: payload.ownerAddress,
-                    copies: buyNftDetail.copiesForAuction,
+                    copies: nftAuctionDetail.copiesForAuction,
                     name: buyNftDetail.name,
                     description: buyNftDetail.description,
                     fileType: buyNftDetail.fileType,
@@ -302,18 +302,10 @@ exports.buyNow = async (req, res, next) => {
                     image: buyNftDetail.image,
                     remainingCopies: nftAuctionDetail?.copiesForAuction,
                     activeAuction: null,
+                    tokenId : buyNftDetail.tokenId,
                 }
 
                 const nft = await NFT.create(newPayload)
-                if (nft) {
-                    let collectionRecord = await Collection.findOne({
-                        _id: buyNftDetail.collectionId,
-                    })
-
-                    collectionRecord.nft.push(nft._id)
-                    collectionRecord.save()
-                }
-
                 const nftTokenDetail = await NftTokens.findOne({
                     nftId: payload.nftId,
                 })
@@ -469,14 +461,6 @@ exports.endAuction = async (req, res, next) => {
                 }
 
                 await nftAuctions.create(auctionPayload)
-
-                const collectionRecord = await Collection.findOne({
-                    _id: auctionEndNft[0]?.nftId?.collectionId,
-                })
-
-                collectionRecord.nft.push(NFTCreated._id)
-                collectionRecord.save()
-
                 const nftTokenDetail = await NftTokens.findOne({
                     nftId: auctionEndNft[0]?.nftId?._id,
                 })
