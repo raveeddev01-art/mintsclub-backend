@@ -2,7 +2,7 @@
 mintsclub-back-v2:
   stage: deploy
   tags:
-    - mintsclub-be-self
+    - mintsclub-be-aws-self
   before_script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - mkdir -p ~/.ssh
