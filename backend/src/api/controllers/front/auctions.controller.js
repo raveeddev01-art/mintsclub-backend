@@ -183,7 +183,7 @@ exports.live = async (req, res, next) => {
 exports.create = async (req, res, next) => {
     try {
         const payload = req.body
-
+        payload.auctionEnded = false
         if (!payload.sellingMethod) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.FALSE,
@@ -219,7 +219,6 @@ exports.create = async (req, res, next) => {
                 })
             }
             payload.currentPrice = Number(payload.sellingConfig.price.amount)
-            payload.auctionEnded = false
         } else {
             const { error } = validation.validateNFTimedTAuctionSchema(payload)
 
@@ -250,7 +249,6 @@ exports.create = async (req, res, next) => {
             payload.auctionStartDate = startDate
             payload.auctionEndDate = endDate
             payload.highestBid = 0
-            payload.auctionEnded = false
             payload.bid = []
         }
         const nftAuction = await nftAuctions.create(payload)
