@@ -138,6 +138,14 @@ exports.get = async (req, res, next) => {
                     foreignField: 'nftId',
                     localField: '_id',
                     as: 'auction',
+                    pipeline: [
+                        { $match:
+                           { $expr:
+                                   { $eq: [ "$auctionEnded",  false ] },
+                           }
+                        },
+                       
+                     ],
                 },
             },
             {
