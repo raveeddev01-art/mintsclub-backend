@@ -320,7 +320,6 @@ exports.list = async (req, res, next) => {
 
     let ownerId1 = ObjectId(ownerId);
     let search;
-
     if (keyword) {
       search = true;
     }
