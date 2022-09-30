@@ -183,7 +183,6 @@ exports.live = async (req, res, next) => {
 exports.create = async (req, res, next) => {
     try {
         const payload = req.body
-        payload.auctionEnded = false
         if (!payload.sellingMethod) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.FALSE,
@@ -219,6 +218,7 @@ exports.create = async (req, res, next) => {
                 })
             }
             payload.currentPrice = Number(payload.sellingConfig.price.amount)
+            payload.auctionEnded = false
         } else {
             const { error } = validation.validateNFTimedTAuctionSchema(payload)
 
@@ -250,6 +250,7 @@ exports.create = async (req, res, next) => {
             payload.auctionEndDate = endDate
             payload.highestBid = 0
             payload.bid = []
+            payload.auctionEnded = false
         }
         const nftAuction = await nftAuctions.create(payload)
         return res.status(HTTP_STATUS_CODE.CREATED).send({
@@ -301,7 +302,7 @@ exports.buyNow = async (req, res, next) => {
                     image: buyNftDetail.image,
                     remainingCopies: nftAuctionDetail?.copiesForAuction,
                     activeAuction: null,
-                    tokenId : buyNftDetail.tokenId,
+                    tokenId: buyNftDetail.tokenId,
                 }
                 const nft = await NFT.create(newPayload)
                 const nftTokenDetail = await NftTokens.findOne({
@@ -311,9 +312,9 @@ exports.buyNow = async (req, res, next) => {
                 const payloadUpdateAuctionStatus = {
                     auctionEnded: true,
                 }
-        
+
                 await nftAuctions.findOneAndUpdate(
-                    {  nftId: payload.nftId },
+                    { nftId: payload.nftId },
                     { $set: payloadUpdateAuctionStatus }
                 )
 
@@ -390,14 +391,14 @@ exports.buyNow = async (req, res, next) => {
                         { _id: buyNftDetail._id },
                         { $set: { nftAuction: null } }
                     )
-                const payloadUpdateAuctionStatus = {
-                    auctionEnded: true,
-                }
-        
-                await nftAuctions.findOneAndUpdate(
-                    {  nftId: payload.nftId},
-                    { $set: payloadUpdateAuctionStatus }
-                )
+                    const payloadUpdateAuctionStatus = {
+                        auctionEnded: true,
+                    }
+
+                    await nftAuctions.findOneAndUpdate(
+                        { nftId: payload.nftId },
+                        { $set: payloadUpdateAuctionStatus }
+                    )
 
                     return res.status(HTTP_STATUS_CODE.OK).send({
                         success: SUCCESS_STATUS.TRUE,
@@ -411,7 +412,6 @@ exports.buyNow = async (req, res, next) => {
                 message: ERROR_MESSAGE.NOT_ON_SALE,
             })
         }
-
     } catch (error) {
         return next(error)
     }
