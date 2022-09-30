@@ -139,13 +139,12 @@ exports.get = async (req, res, next) => {
                     localField: '_id',
                     as: 'auction',
                     pipeline: [
-                        { $match:
-                           { $expr:
-                                   { $eq: [ "$auctionEnded",  false ] },
-                           }
+                        {
+                            $match: {
+                                $expr: { $eq: ['$auctionEnded', false] },
+                            },
                         },
-                       
-                     ],
+                    ],
                 },
             },
             {
@@ -272,8 +271,8 @@ exports.list = async (req, res, next) => {
             }),
             ...(collectionId && { collectionId }),
             ...(categoryId && { categoryId }),
-            ...(buy && { 'auction.sellingMethod': { $eq: 1 } }),
-            ...(auction && { 'auction.sellingMethod': { $eq: 2 } }),
+            ...(buy && { $and: [ { 'auction.sellingMethod': { $eq: 1 } } , { 'auction.auctionEnded': false } ] }),
+            ...(auction && { $and: [ { 'auction.sellingMethod': { $eq: 2 } } , { 'auction.auctionEnded': false } ] }),
             ...(search && {
                 $or: [
                     { name: { $regex: '.*' + keyword + '.*', $options: 'i' } },
