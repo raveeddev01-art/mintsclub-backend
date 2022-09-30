@@ -7,25 +7,7 @@ const fs = require('fs')
 
 module.exports.batchCrone = async () => {
     try {
-        cron.schedule('*/70 * * * * ', async () => {
-            // for (let i = 2; i <= 400; i++) {
-            //     fs.readFile(
-            //         './src/uploads/bulk/1.json',
-            //         'utf-8',
-            //         (err, data) => {
-            //             if(err){
-            //                 console.log(err,"Error")
-            //             }
-            //             // console.log(data,"data")
-            //             fs.writeFile(`./src/uploads/bulk/${i}.json`, data, (err) => {
-            //                 if (err) console.log(err)
-            //                 console.log('Successfully Written to File.')
-            //             })
-            //             console.log(data)
-            //         }
-            //     )
-            // }
-            // return ''
+        cron.schedule('*/70 * * * * * ', async () => {
             const result = await BatchUpload.find({ status: 'pending' })
             console.log(result, 'result==>')
             if (result && result.length > 0) {
@@ -56,7 +38,7 @@ module.exports.batchCrone = async () => {
                     // console.log('hereeeeeeee')
                     // console.log(files, metaData, 'files==>')
                     files.map(async (item, index) => {
-                            console.log(index,"index================>")
+                            // console.log(index,"index================>")
                             try {
                                 let initialPayload = {
                                     userId,
