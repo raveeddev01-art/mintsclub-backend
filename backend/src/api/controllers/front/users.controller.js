@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 const ObjectId = require('mongoose').Types.ObjectId
 const UserModal = require('../../models/users.model')
+const Bid = require('../../models/bids.model')
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
 const validation = require('../../middlewares/front/validation')
@@ -103,9 +104,24 @@ exports.updateProfile = async (req, res, next) => {
             { $set: newPayload },
             { new: true }
         )
+
+        let userbids = await Bid.find({bidBy:user._id});
+        
+        for (const bid of userbids) {
+            // console.log(bid.bidBy);
+            const UpdateBidProfile = {
+                bidByProfile: user.profileImage,
+            }
+            await Bid.updateMany(
+                { bidBy: user._id},
+                { $set: UpdateBidProfile }
+            )
+          }
+       
         return res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             user,
+           
             message: SUCCESS_MESSAGE.PROFILE_UPDATED,
         })
     } catch (error) {
