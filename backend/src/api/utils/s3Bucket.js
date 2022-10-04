@@ -39,7 +39,7 @@ const unzipFile = async (fileKey, fileName) => {
             `./src/uploads/files/${fileName}.zip`
         )
         const jsZipInstance = new jszip()
-        const result = Promise.resolve(jsZipInstance.loadAsync(fileContent))
+        const result = jsZipInstance.loadAsync(fileContent)
         const Keys = Object.keys(result.files)
         fs.unlink(`./src/uploads/files/${fileName}.zip`, async (err) => {
             if (err) {
