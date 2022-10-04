@@ -5,7 +5,6 @@ const Categories = require('../../models/categories.model')
 const nftAuctions = require('../../models/auctions.model')
 const Users = require('../../models/users.model')
 const Bid = require('../../models/bids.model')
-const Collection = require('../../models/collection.model')
 const ActivityModal = require('../../models/item-activity.modal')
 const NftTokens = require('../../models/nftTokens.model')
 const {

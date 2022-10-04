@@ -32,6 +32,7 @@ exports.create = async (req, res, next) => {
 
 exports.updateProfile = async (req, res, next) => {
     try {
+        
         if (req.body.isApproved) {
             let payload = {
                 userId: req.body.userId,
@@ -107,13 +108,14 @@ exports.updateProfile = async (req, res, next) => {
 
         let userbids = await Bid.find({bidBy:user._id});
         
-        for (const bid of userbids) {
-            // console.log(bid.bidBy);
+        for (let bid of userbids) {
+            console.log(bid);
+
             const UpdateBidProfile = {
                 bidByProfile: user.profileImage,
             }
             await Bid.updateMany(
-                { bidBy: user._id},
+                { bidBy: bid.bidBy},
                 { $set: UpdateBidProfile }
             )
           }
@@ -216,7 +218,7 @@ exports.getUser = async (req, res, next) => {
             })
         }
         const user = await UserModal.findOne({ _id: ObjectId(payload.userId) })
-
+        
         if (user) {
             return res.status(HTTP_STATUS_CODE.OK).send({
                 success: SUCCESS_STATUS.TRUE,
