@@ -15,7 +15,7 @@ exports.sendEmail = async (
         if (getTemplate) {
             const { api, domain } = await Settings.findOne()
 
-            var mailgun = require('mailgun-js')({ apiKey: api, domain: domain })
+            let mailgun = require('mailgun-js')({ apiKey: api, domain })
 
             let sub = ''
 
@@ -42,7 +42,7 @@ function getHtml(getTemplate, content) {
     let text = getTemplate.text
     if (content) {
         for (let key in content) {
-            text = text.replace(`${key}`, "'" + `${content[key]}` + "'")
+            text = text.replace(`${key}`, `${content[key]}`)
         }
     }
     return text

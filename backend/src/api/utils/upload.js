@@ -5,7 +5,7 @@ const uploadsDir = './src/uploads/'
 const imagesDir = `${uploadsDir}images`
 
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
+    destination(req, file, cb) {
         // make uploads directory if do not exist
         if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir)
 
@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
 
         cb(null, imagesDir)
     },
-    filename: function (req, file, cb) {
+    filename(req, file, cb) {
         let fileExtension = file.mimetype.split('/')[1]
         if (
             !file.originalname

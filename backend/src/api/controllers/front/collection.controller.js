@@ -335,7 +335,7 @@ exports.list = async (req, res, next) => {
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.COLLECTIONS_FETCHED,
             data: {
-                collections: collections,
+                collections,
 
                 pagination: {
                     page,
@@ -443,8 +443,8 @@ exports.myCollectionList = async (req, res, next) => {
                 message: SUCCESS_MESSAGE.MY_COLLECTIONS_FETCHED,
                 data: {
                     collections: {
-                        totalRecords: totalRecords,
-                        Collections: Collections,
+                        totalRecords,
+                        Collections,
                     },
                     pagination: {
                         page,
@@ -610,7 +610,7 @@ exports.popular = async (req, res, next) => {
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.POPULAR_COLLECTIONS_FETCHED,
             data: {
-                collectionsList: collectionsList,
+                collectionsList,
                 pagination: {
                     page,
                     limit,

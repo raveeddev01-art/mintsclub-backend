@@ -58,7 +58,7 @@ exports.register = async (req, res, next) => {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.USER_REGISTERED,
-            data: data,
+            data,
         })
     } catch (error) {
         next(error)
@@ -84,7 +84,7 @@ exports.login = async (req, res, next) => {
             })
         }
         const address = payload.address
-        let user = await User.findOne({ address: address })
+        let user = await User.findOne({ address })
         if (!user) {
             return res.status(HTTP_STATUS_CODE.OK).send({
                 success: SUCCESS_STATUS.FALSE,

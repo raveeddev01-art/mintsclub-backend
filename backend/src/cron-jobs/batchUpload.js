@@ -3,13 +3,13 @@ const BatchUpload = require('../api/models/batchUpload.model')
 const batchUploadQueue = require('../queues/batchUploadQueue')
 const { getS3Object } = require('../api/utils/s3Bucket')
 const { promises } = require('fs')
-const fs = require('fs')
+
 
 module.exports.batchCrone = async () => {
     try {
         cron.schedule('*/70 * * * * * ', async () => {
             const result = await BatchUpload.find({ status: 'pending' })
-            console.log(result, 'result==>')
+           
             if (result && result.length > 0) {
                 const {
                     userId,
@@ -21,14 +21,14 @@ module.exports.batchCrone = async () => {
                 } = result[0]
                 let res = await getS3Object(key, fileName)
                 if (res) {
-                    console.log(fileName, 'fileName')
+                    
                     let files = await promises.readdir(
                         `./src/uploads/files/${fileName}/images`
                     )
                     if(files.length&&files.length>350){
                         files=files.slice(0,350)
                     }
-                    const metaData = await promises.readdir(
+                    await promises.readdir(
                         `./src/uploads/files/${fileName}/metaData`
                     )
                     await BatchUpload.findByIdAndUpdate(
@@ -44,7 +44,7 @@ module.exports.batchCrone = async () => {
                                     userId,
                                     creatorId: userId,
                                     ownerId: userId,
-                                    ownerAddress: ownerAddress,
+                                    ownerAddress,
                                     lazyMinted: true,
                                     collectionId,
                                     key,
@@ -56,21 +56,19 @@ module.exports.batchCrone = async () => {
                                     files,
                                     id: result[0]._id,
                                 }
-                                console.log('cron is running')
                                 await batchUploadQueue.add({
                                     data: initialPayload,
                                 })
                                 //Change status pending to inProgress
                             } catch (err) {
-                                console.log(
-                                    err,
-                                    'error coccurrred==============>'
-                                )
+                                return err
                             }
                     })
                     ////////////////////
                 }
             }
         })
-    } catch (err) {}
+    } catch (err) {
+        return err
+    }
 }

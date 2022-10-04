@@ -28,9 +28,8 @@
         "no-confusing-arrow": "error",
         "no-duplicate-imports": "error",
         "no-var": "error",
-        "object-shorthand": "off"
-        // "semi": ["error", "always"]
-        // "indent": ["error","tab"]
+        "object-shorthand": ["error", "always"]
+        
        
     }
 }
