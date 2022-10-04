@@ -8,12 +8,7 @@ const validation = require('../../middlewares/front/validation')
 const validUrl = require('valid-url')
 const mailchimp = require('@mailchimp/mailchimp_marketing')
 const { mailChimp } = require('../../../config/vars')
-const {
-    ERROR_MESSAGE,
-    SUCCESS_MESSAGE,
-    SUCCESS_STATUS,
-    HTTP_STATUS_CODE,
-} = require('../../../config/constants')
+const { ERROR_MESSAGE,SUCCESS_MESSAGE,SUCCESS_STATUS,HTTP_STATUS_CODE} = require('../../../config/constants')
 
 mailchimp.setConfig({
     apiKey: mailChimp.apiKey,
@@ -32,7 +27,6 @@ exports.create = async (req, res, next) => {
 
 exports.updateProfile = async (req, res, next) => {
     try {
-        
         if (req.body.isApproved) {
             let payload = {
                 userId: req.body.userId,
@@ -99,18 +93,13 @@ exports.updateProfile = async (req, res, next) => {
         }
 
         const newPayload = { ...payload, ...imagesPayload }
-
         let user = await UserModal.findByIdAndUpdate(
             { _id: ObjectId(newPayload.userId) },
             { $set: newPayload },
             { new: true }
         )
-
         let userbids = await Bid.find({bidBy:user._id});
-        
         for (let bid of userbids) {
-            console.log(bid);
-
             const UpdateBidProfile = {
                 bidByProfile: user.profileImage,
             }
