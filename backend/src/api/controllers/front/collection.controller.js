@@ -1,3 +1,4 @@
+const fs = require('fs')
 const ObjectId = require('mongoose').Types.ObjectId
 const NFT = require('../../models/nfts.model')
 const Collection = require('../../models/collection.model')
@@ -11,6 +12,13 @@ const {
     HTTP_STATUS_CODE,
 } = require('../../../config/constants')
 
+const {
+    compilingPreperations,
+    createConfiguration,
+    errorHandling,
+    writeOutput,
+    compileSources,
+} = require('../../utils/contractDeployment')
 // API to create collection
 exports.create = async (req, res, next) => {
     try {
@@ -21,7 +29,9 @@ exports.create = async (req, res, next) => {
             url: req.body.url,
             description: req.body.description,
             ownerAddress: req.body.ownerAddress,
+            deploy: req.body.deploy ? req.body.deploy : false,
         }
+
         const { error } = validation.validateCollectionSchema(payload)
 
         if (error) {
@@ -57,6 +67,11 @@ exports.create = async (req, res, next) => {
                 success: SUCCESS_STATUS.FALSE,
                 message: ERROR_MESSAGE.COLLECTION_EXIST_ALREADY,
             })
+        }
+        if (payload.deploy) {
+            const { abi, bytecode, buildFile } = this.getAbi()
+            payload.abi = abi
+            payload.bytecode = bytecode
         }
         const collection = await Collection.create(payload)
         return res.status(HTTP_STATUS_CODE.CREATED).send({
@@ -273,19 +288,14 @@ exports.list = async (req, res, next) => {
                     foreignField: '_id',
                     as: 'nfts',
                     pipeline: [
-                        { $match:
-                           { $expr:
-                                   { $eq: [ "$fileType",  'image' ] },
-                           }
-                        },
-                        { $limit: 3 }
-                     ],
+                        { $match: { $expr: { $eq: ['$fileType', 'image'] } } },
+                        { $limit: 3 },
+                    ],
                 },
             },
             {
                 $addFields: {
                     NftsCount: { $size: '$totalnft' },
-                    
                 },
             },
 
@@ -536,20 +546,15 @@ exports.popular = async (req, res, next) => {
                     localField: 'nft',
                     as: 'nft',
                     pipeline: [
-                        { $match:
-                           { $expr:
-                                   { $eq: [ "$fileType",  'image' ] },
-                           }
-                        },
-                        { $limit: 3 }
-                     ],
+                        { $match: { $expr: { $eq: ['$fileType', 'image'] } } },
+                        { $limit: 3 },
+                    ],
                 },
             },
 
             {
                 $addFields: {
                     NftsCount: { $size: '$totalnft' },
-                   
                 },
             },
 
@@ -625,4 +630,12 @@ exports.popular = async (req, res, next) => {
     } catch (error) {
         return next(error)
     }
+}
+
+exports.getAbi = () => {
+    const buildPath = compilingPreperations()
+    const config = createConfiguration()
+    const compiled = compileSources(config)
+    errorHandling(compiled)
+    return writeOutput(compiled, buildPath)
 }
