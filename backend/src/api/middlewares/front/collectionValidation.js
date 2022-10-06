@@ -10,7 +10,7 @@ const validateCollectionSchema = (data) => {
         ownerAddress: Joi.string()
             .regex(/^0x[a-fA-F0-9]{40}$/)
             .required(),
-        // category: Joi.string().allow(''),
+        deploy: Joi.boolean().default(false),
     })
     const options = {
         errors: {
