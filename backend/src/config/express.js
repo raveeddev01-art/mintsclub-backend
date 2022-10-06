@@ -9,7 +9,7 @@ const path = require('path')
 const rateLimit = require('express-rate-limit')
 const bearerToken = require('express-bearer-token')
 const compression = require('compression')
-const job=require('../cron-jobs/batchUpload')
+const job = require('../cron-jobs/batchUpload')
 
 /**
  * Express instance
@@ -19,7 +19,6 @@ const app = express()
 
 app.use(bodyParser.json({ limit: '50mb' }))
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
-app.use(cors())
 
 app.use(bearerToken())
 
@@ -31,11 +30,11 @@ const apiRequestLimiterAll = rateLimit({
 
 app.use('/v1/', apiRequestLimiterAll)
 
-// var corsOptions = {
-//     origin: '*',
-//     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-// }
-// app.use(cors(corsOptions))
+let corsOptions = {
+    origin: '*',
+    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
+app.use(cors(corsOptions))
 
 // error handler
 // eslint-disable-next-line no-unused-vars
