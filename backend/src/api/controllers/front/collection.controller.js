@@ -11,7 +11,6 @@ const {
     SUCCESS_STATUS,
     HTTP_STATUS_CODE,
 } = require('../../../config/constants')
-
 const {
     compilingPreperations,
     createConfiguration,
@@ -67,11 +66,6 @@ exports.create = async (req, res, next) => {
                 success: SUCCESS_STATUS.FALSE,
                 message: ERROR_MESSAGE.COLLECTION_EXIST_ALREADY,
             })
-        }
-        if (payload.deploy) {
-            const { abi, bytecode, buildFile } = this.getAbi()
-            payload.abi = abi
-            payload.bytecode = bytecode
         }
         const collection = await Collection.create(payload)
         return res.status(HTTP_STATUS_CODE.CREATED).send({
@@ -627,6 +621,94 @@ exports.popular = async (req, res, next) => {
                 },
             },
         })
+    } catch (error) {
+        return next(error)
+    }
+}
+
+exports.deploy = async (req, res, next) => {
+    try {
+        let payload = {}
+        // let payload = {
+        //     name: req.body.name,
+        //     attributes: req.body.attributes,
+        //     levels: req.body.levels,
+        //     symbol: req.body.symbol,
+        //     externalLink: req.body.externalLink,
+        //     email: req.body.email,
+        //     description: req.body.description,
+        // }
+        //console.log(payload,"payload==>")
+        // const { error } = validation.validateContractSchema(payload)
+
+        // if (error) {
+        //     let errorMsg = error.details[0].message
+        //     return res.status(400).send({ status: false, data: errorMsg })
+        // }
+        // if (req.file && req.file.filename) {
+        //     const imgData = fs.readFileSync(req.file.path)
+        //     payload.image = await addImage(imgData)
+        // }
+        // payload.metaData = await addContent({
+        //     name: payload.name,
+        //     description: payload.description,
+        //     image: payload.image,
+        //     properties: payload.attributes,
+        //     nftOwnerId: payload.nftOwnerId,
+        //     ownerAddress: payload.ownerAddress,
+        // })
+
+        // if (req.file && req.file.filename) {
+        //     const imgData = fs.readFileSync(req.file.path)
+        //     payload.image = await uploadFileToIpfs(imgData)
+        // }
+
+        // payload.metaData = await uploadFileToIpfs({
+        //     name: payload.name,
+        //     description: payload.description,
+        //     image: payload.image,
+        //     properties: payload.attributes,
+        //     nftOwnerId: payload.nftOwnerId,
+        //     ownerAddress: payload.ownerAddress,
+        // })
+        const { abi, bytecode, buildFile } = this.getAbi()
+        payload.abi = abi
+        payload.bytecode = bytecode
+        if (payload?.abi) {
+            return res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.TRUE,
+                message: SUCCESS_MESSAGE.ABI_CREATED,
+                data: payload,
+            })
+        }
+        return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: ERROR_MESSAGE.WENT_WRONG,
+        })
+
+        // const user = await UserModal.findOne({
+        //   email: payload.email,
+        // });
+        // if (!user) {
+        //   payload.count = 1;
+        //   const newUser = await UserModal.create(payload);
+        //   const email = await emailToOne(payload.email);
+        //   const addedContact = await addContact(payload.email);
+        //   return res.send({ status: true, data: payload });
+        // }
+        // if (user && user.count > 5) {
+        //   return res.send({
+        //     status: false,
+        //     data: 'You have reached the maximum deployment limit',
+        //   });
+        // let newCount = user.count;
+        // newCount++;
+        // const update = await UserModal.findOneAndUpdate(
+        //   { _id: mongoose.Types.ObjectId(user._id) },
+        //   { $set: { count: newCount } }
+        // );
+        // return res.send({ status: true, data: payload });
+        // }
     } catch (error) {
         return next(error)
     }

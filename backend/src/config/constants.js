@@ -84,6 +84,7 @@ const SUCCESS_MESSAGE = {
     SUBSCRIBED_SUCCESSFULLY: 'Subscribed successfully',
     USER_CREATED: 'user is created successfully',
     USER_AUTHENTICATED: 'user authenticated successfully',
+    ABI_CREATED: 'ABI created successfully',
 }
 const SUCCESS_STATUS = {
     TRUE: true,
