@@ -31,12 +31,8 @@ const apiRequestLimiterAll = rateLimit({
 app.use('/v1/', apiRequestLimiterAll)
 
 let corsOptions = {
-    origin: [
-        'https://mintsclub-v3-marketplace.invo.zone',
-        'http://localhost:3000',
-        'https://mintsclub.io',
-    ],
-    optionsSuccessStatus: 200, // For legacy browser support
+    origin: '*',
+    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 app.use(cors(corsOptions))
 
