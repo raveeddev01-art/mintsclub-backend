@@ -15,7 +15,7 @@ router.route('/editNft').patch(middleware.userValidation, controller.editNft)
 router.route('/storeNFTData').post(cpUpload, controller.storeDataInDb)
 router
     .route('/updateNft')
-    .put(middleware.userValidation, cpUpload, controller.updateNft)
+    .put(middleware.userValidation, controller.updateNft)
 router
     .route('/delete/:nftId')
     .delete(middleware.userValidation, controller.delete)

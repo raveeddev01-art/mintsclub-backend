@@ -34,6 +34,7 @@ exports.create = async (req, res, next) => {
             copies: req.body.copies,
             activeAuction: req.body.activeAuction,
         }
+        console.log(payload,"payload of create nft")
 
         const { error } = validation.validateNFTSchema(payload)
         if (error) {
@@ -98,6 +99,9 @@ exports.storeDataInDb = async (req, res, next) => {
         createNFTPayload.image = req.body.image
         createNFTPayload.tokenId = Number(req.body.nftToken)
         createNFTPayload.lazyMinted = req.body.lazyMinted
+        createNFTPayload.properties=JSON.parse(req.body.data.properties)
+        createNFTPayload.levels= JSON.parse(req.body.data.levels)
+        createNFTPayload.stats=JSON.parse(req.body.data.stats)
 
         const nft = await NFT.create(createNFTPayload)
 
@@ -421,34 +425,52 @@ exports.editNft = async (req, res, next) => {
 }
 
 exports.updateNft = async (req, res, next) => {
+    console.log(req.body,"req.body==>")
     try {
         const payload = {
             nftId: req.body.nftId,
             name: req.body.name,
+            image:req.body.image,
             description: req.body.description,
-            attributes: JSON.parse(req.body.attributes),
+            properties: JSON.parse(req.body.properties),
             levels: JSON.parse(req.body.levels),
             stats: JSON.parse(req.body.stats),
             fileType: req.body.fileType,
             userId: req.body.userId,
             ownerAddress: req.body.ownerAddress,
             collectionId: req.body.collectionId,
-            currentPrice: req.body.currentPrice,
             copies: req.body.copies,
+            metaData:req.body.metaData,
         }
-        const { error } = validation.validateEditNftSchema(payload)
+        // nft: {
+        //     userId: ENV.getUserKeys("_id")._id,
+        //     ownerId: ENV.getUserKeys("_id")._id,
+        //     creatorId: ENV.getUserKeys("_id")._id,
+        //     properties: [],
+        //     levels: [],
+        //     stats: [],
+        //     image: "",
+        //     name: "",
+        //     description: "",
+        //     copies: "",
+        //     collectionId: "",
+        //     ownerAddress: "",
+        //     categoryId: "",
+        //     status: 1, // 1 = put on sale, 2 = instant sale price, 3 = unlock purchased
+        //   }
+        // const { error } = validation.validateEditNftSchema(payload)
 
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
-        if (req.files && req.files.image) {
-            const image = req.files.image[0]
-            const imgData = fs.readFileSync(image.path)
-            payload.image = await addImage(imgData)
-        }
+        // if (error) {
+        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+        //         success: SUCCESS_STATUS.FALSE,
+        //         message: error?.details[0]?.message,
+        //     })
+        // }
+        // if (req.files && req.files.image) {
+        //     const image = req.files.image[0]
+        //     const imgData = fs.readFileSync(image.path)
+        //     payload.image = await addImage(imgData)
+        // }
 
         if (!payload.image) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
@@ -456,7 +478,7 @@ exports.updateNft = async (req, res, next) => {
                 message: ERROR_MESSAGE.IMAGE_REQUIRED,
             })
         }
-        const ownerId = payload.userId
+        // const ownerId = payload.userId
 
         // let payloadProperties = {
         //   attributes: payload.attributes,
@@ -464,14 +486,14 @@ exports.updateNft = async (req, res, next) => {
         //   stats: payload.stats,
         // };
 
-        payload.metaData = await addContent({
-            name: payload.name,
-            description: payload.description,
-            image: payload.image,
-            // properties: payloadProperties,
-            nftOwnerId: ownerId,
-            ownerAddress: payload.ownerAddress,
-        })
+        // payload.metaData = await addContent({
+        //     name: payload.name,
+        //     description: payload.description,
+        //     image: payload.image,
+        //     // properties: payloadProperties,
+        //     nftOwnerId: ownerId,
+        //     ownerAddress: payload.ownerAddress,
+        // })
 
         const updateNft = await NFT.findByIdAndUpdate(
             { _id: payload.nftId },

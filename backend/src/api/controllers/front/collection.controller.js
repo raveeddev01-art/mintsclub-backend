@@ -1,3 +1,4 @@
+const fs = require('fs')
 const ObjectId = require('mongoose').Types.ObjectId
 const NFT = require('../../models/nfts.model')
 const Collection = require('../../models/collection.model')
@@ -10,7 +11,13 @@ const {
     SUCCESS_STATUS,
     HTTP_STATUS_CODE,
 } = require('../../../config/constants')
-
+const {
+    compilingPreperations,
+    createConfiguration,
+    errorHandling,
+    writeOutput,
+    compileSources,
+} = require('../../utils/contractDeployment')
 // API to create collection
 exports.create = async (req, res, next) => {
     try {
@@ -21,7 +28,9 @@ exports.create = async (req, res, next) => {
             url: req.body.url,
             description: req.body.description,
             ownerAddress: req.body.ownerAddress,
+            deploy: req.body.deploy ? req.body.deploy : false,
         }
+
         const { error } = validation.validateCollectionSchema(payload)
 
         if (error) {
@@ -80,6 +89,7 @@ exports.edit = async (req, res, next) => {
             url: req.body.url,
             description: req.body.description,
         }
+        console.log(payload,"payload in edit collection")
 
         const { error } = validation.validateEditCollectionSchema(payload)
 
@@ -103,6 +113,7 @@ exports.edit = async (req, res, next) => {
                 message: ERROR_MESSAGE.LOGO_REQUIRED,
             })
         }
+
 
         if (payload.name) {
             const existingCollection = await Collection.findOne({
@@ -136,6 +147,7 @@ exports.edit = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
     try {
         const { collectionId } = req.params
+        console.log(collectionId,"collecctionId==>")
 
         const { error } = validation.validateCollectionId({ collectionId })
 
@@ -168,7 +180,7 @@ exports.get = async (req, res, next) => {
     try {
         const { collectionId } = req.params
         const { error } = validation.validateCollectionId({ collectionId })
-
+        console.log(collectionId, 'collectionId==>')
         if (error) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.FALSE,
@@ -273,19 +285,14 @@ exports.list = async (req, res, next) => {
                     foreignField: '_id',
                     as: 'nfts',
                     pipeline: [
-                        { $match:
-                           { $expr:
-                                   { $eq: [ "$fileType",  'image' ] },
-                           }
-                        },
-                        { $limit: 3 }
-                     ],
+                        { $match: { $expr: { $eq: ['$fileType', 'image'] } } },
+                        { $limit: 3 },
+                    ],
                 },
             },
             {
                 $addFields: {
                     NftsCount: { $size: '$totalnft' },
-                    
                 },
             },
 
@@ -536,20 +543,15 @@ exports.popular = async (req, res, next) => {
                     localField: 'nft',
                     as: 'nft',
                     pipeline: [
-                        { $match:
-                           { $expr:
-                                   { $eq: [ "$fileType",  'image' ] },
-                           }
-                        },
-                        { $limit: 3 }
-                     ],
+                        { $match: { $expr: { $eq: ['$fileType', 'image'] } } },
+                        { $limit: 3 },
+                    ],
                 },
             },
 
             {
                 $addFields: {
                     NftsCount: { $size: '$totalnft' },
-                   
                 },
             },
 
@@ -625,4 +627,100 @@ exports.popular = async (req, res, next) => {
     } catch (error) {
         return next(error)
     }
+}
+
+exports.deploy = async (req, res, next) => {
+    try {
+        let payload = {}
+        // let payload = {
+        //     name: req.body.name,
+        //     attributes: req.body.attributes,
+        //     levels: req.body.levels,
+        //     symbol: req.body.symbol,
+        //     externalLink: req.body.externalLink,
+        //     email: req.body.email,
+        //     description: req.body.description,
+        // }
+        //console.log(payload,"payload==>")
+        // const { error } = validation.validateContractSchema(payload)
+
+        // if (error) {
+        //     let errorMsg = error.details[0].message
+        //     return res.status(400).send({ status: false, data: errorMsg })
+        // }
+        // if (req.file && req.file.filename) {
+        //     const imgData = fs.readFileSync(req.file.path)
+        //     payload.image = await addImage(imgData)
+        // }
+        // payload.metaData = await addContent({
+        //     name: payload.name,
+        //     description: payload.description,
+        //     image: payload.image,
+        //     properties: payload.attributes,
+        //     nftOwnerId: payload.nftOwnerId,
+        //     ownerAddress: payload.ownerAddress,
+        // })
+
+        // if (req.file && req.file.filename) {
+        //     const imgData = fs.readFileSync(req.file.path)
+        //     payload.image = await uploadFileToIpfs(imgData)
+        // }
+
+        // payload.metaData = await uploadFileToIpfs({
+        //     name: payload.name,
+        //     description: payload.description,
+        //     image: payload.image,
+        //     properties: payload.attributes,
+        //     nftOwnerId: payload.nftOwnerId,
+        //     ownerAddress: payload.ownerAddress,
+        // })
+        const { abi, bytecode, buildFile } = this.getAbi()
+        payload.abi = abi
+        payload.bytecode = bytecode
+        if (payload?.abi) {
+            return res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.TRUE,
+                message: SUCCESS_MESSAGE.ABI_CREATED,
+                data: payload,
+            })
+        }
+        return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: ERROR_MESSAGE.WENT_WRONG,
+        })
+
+        // const user = await UserModal.findOne({
+        //   email: payload.email,
+        // });
+        // if (!user) {
+        //   payload.count = 1;
+        //   const newUser = await UserModal.create(payload);
+        //   const email = await emailToOne(payload.email);
+        //   const addedContact = await addContact(payload.email);
+        //   return res.send({ status: true, data: payload });
+        // }
+        // if (user && user.count > 5) {
+        //   return res.send({
+        //     status: false,
+        //     data: 'You have reached the maximum deployment limit',
+        //   });
+        // let newCount = user.count;
+        // newCount++;
+        // const update = await UserModal.findOneAndUpdate(
+        //   { _id: mongoose.Types.ObjectId(user._id) },
+        //   { $set: { count: newCount } }
+        // );
+        // return res.send({ status: true, data: payload });
+        // }
+    } catch (error) {
+        return next(error)
+    }
+}
+
+exports.getAbi = () => {
+    const buildPath = compilingPreperations()
+    const config = createConfiguration()
+    const compiled = compileSources(config)
+    errorHandling(compiled)
+    return writeOutput(compiled, buildPath)
 }
