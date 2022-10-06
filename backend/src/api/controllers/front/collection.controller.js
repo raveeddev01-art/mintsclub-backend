@@ -89,6 +89,7 @@ exports.edit = async (req, res, next) => {
             url: req.body.url,
             description: req.body.description,
         }
+        console.log(payload,"payload in edit collection")
 
         const { error } = validation.validateEditCollectionSchema(payload)
 
@@ -112,6 +113,7 @@ exports.edit = async (req, res, next) => {
                 message: ERROR_MESSAGE.LOGO_REQUIRED,
             })
         }
+
 
         if (payload.name) {
             const existingCollection = await Collection.findOne({
@@ -145,6 +147,7 @@ exports.edit = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
     try {
         const { collectionId } = req.params
+        console.log(collectionId,"collecctionId==>")
 
         const { error } = validation.validateCollectionId({ collectionId })
 
@@ -177,7 +180,7 @@ exports.get = async (req, res, next) => {
     try {
         const { collectionId } = req.params
         const { error } = validation.validateCollectionId({ collectionId })
-
+        console.log(collectionId, 'collectionId==>')
         if (error) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.FALSE,

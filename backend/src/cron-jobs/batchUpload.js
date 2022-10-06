@@ -7,7 +7,7 @@ const fs = require('fs')
 
 module.exports.batchCrone = async () => {
     try {
-        cron.schedule('*/70 * * * * * ', async () => {
+        cron.schedule('*/5 * * * * ', async () => {
             const result = await BatchUpload.find({ status: 'pending' })
             console.log(result, 'result==>')
             if (result && result.length > 0) {
