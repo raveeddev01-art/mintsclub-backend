@@ -32,7 +32,7 @@ app.use('/v1/', apiRequestLimiterAll)
 
 let corsOptions = {
     origin: [
-        'http://mintsclub-v3-marketplace.invo.zone',
+        'https://mintsclub-v3-marketplace.invo.zone',
         'http://localhost:3000',
         'https://mintsclub.io',
     ],

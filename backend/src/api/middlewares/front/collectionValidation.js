@@ -11,6 +11,8 @@ const validateCollectionSchema = (data) => {
             .regex(/^0x[a-fA-F0-9]{40}$/)
             .required(),
         deploy: Joi.boolean().default(false),
+        abi: Joi.required(),
+        contractAddress: Joi.required(),
     })
     const options = {
         errors: {
