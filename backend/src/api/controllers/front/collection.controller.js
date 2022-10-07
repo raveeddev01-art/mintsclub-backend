@@ -29,6 +29,10 @@ exports.create = async (req, res, next) => {
             description: req.body.description,
             ownerAddress: req.body.ownerAddress,
             deploy: req.body.deploy ? req.body.deploy : false,
+            abi: req.body.abi ? req.body.abi : null,
+            contractAddress: req.body.contractAddress
+                ? req.body.contractAddress
+                : null,
         }
 
         const { error } = validation.validateCollectionSchema(payload)
@@ -67,6 +71,7 @@ exports.create = async (req, res, next) => {
                 message: ERROR_MESSAGE.COLLECTION_EXIST_ALREADY,
             })
         }
+        // console.log('payload', payload)
         const collection = await Collection.create(payload)
         return res.status(HTTP_STATUS_CODE.CREATED).send({
             success: SUCCESS_STATUS.TRUE,
@@ -89,7 +94,7 @@ exports.edit = async (req, res, next) => {
             url: req.body.url,
             description: req.body.description,
         }
-        console.log(payload,"payload in edit collection")
+        console.log(payload, 'payload in edit collection')
 
         const { error } = validation.validateEditCollectionSchema(payload)
 
@@ -113,7 +118,6 @@ exports.edit = async (req, res, next) => {
                 message: ERROR_MESSAGE.LOGO_REQUIRED,
             })
         }
-
 
         if (payload.name) {
             const existingCollection = await Collection.findOne({
@@ -147,7 +151,7 @@ exports.edit = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
     try {
         const { collectionId } = req.params
-        console.log(collectionId,"collecctionId==>")
+        console.log(collectionId, 'collecctionId==>')
 
         const { error } = validation.validateCollectionId({ collectionId })
 
