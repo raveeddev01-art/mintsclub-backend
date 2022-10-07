@@ -32,9 +32,9 @@ exports.create = async (req, res, next) => {
             abi: req.body.abi ? req.body.abi : null,
             contractAddress: req.body.contractAddress
                 ? req.body.contractAddress
-                : null,
+                : '',
         }
-
+        console.log('paload checking', payload)
         const { error } = validation.validateCollectionSchema(payload)
 
         if (error) {
@@ -71,7 +71,7 @@ exports.create = async (req, res, next) => {
                 message: ERROR_MESSAGE.COLLECTION_EXIST_ALREADY,
             })
         }
-        // console.log('payload', payload)
+        console.log('payload insertion', payload)
         const collection = await Collection.create(payload)
         return res.status(HTTP_STATUS_CODE.CREATED).send({
             success: SUCCESS_STATUS.TRUE,
