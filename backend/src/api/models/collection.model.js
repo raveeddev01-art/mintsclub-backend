@@ -26,7 +26,7 @@ const CollectionSchema = new mongoose.Schema(
                 ref: NFT,
             },
         ],
-        abi: { type: Object },
+        abi: { type: Array },
         deploy: { type: Boolean, required: true, default: false },
         contractAddress: { type: String, default: '' },
     },
