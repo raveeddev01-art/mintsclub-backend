@@ -6,7 +6,7 @@ mongoose.Promise = Promise
 
 // Exit application on error
 mongoose.connection.on('error', (err) => {
-    console.error(`MongoDB connection error: ${err}`)
+    return err,
     process.exit(-1)
 })
 

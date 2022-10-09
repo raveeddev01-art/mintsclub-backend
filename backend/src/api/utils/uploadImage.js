@@ -5,7 +5,7 @@ const uploadsDir = './src/uploads/'
 const imagesDir = `${uploadsDir}images`
 
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
+    destination(req, file, cb) {
         // make uploads directory if do not exist
         if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir)
 
@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
 
         cb(null, imagesDir)
     },
-    filename: function (req, file, cb) {
+    filename(req, file, cb) {
         let fileExtension = file.mimetype.split('/')[1]
         if (!file.originalname.toLowerCase().match(/\.(jpg|jpeg|png)$/)) {
             return cb(new Error('Only image files are allowed.'))
@@ -53,7 +53,7 @@ exports.uploadFileToIpfs = async (formData) => {
     // console.log('formData=====>', formData.get('file'));
     const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`
     try {
-        console.log(formData, 'formData')
+       
         const response = await axios.post(url, formData, {
             headers: {
                 'Content-Type': `multipart/form-data; boundary= ${formData._boundary}`,
@@ -65,7 +65,7 @@ exports.uploadFileToIpfs = async (formData) => {
         // console.log('response=========>', response);
         return response
     } catch (err) {
-        console.log('error=======>', err)
+       return err
     }
 }
 exports.addContent = async (data) => {

@@ -120,7 +120,7 @@ exports.get = async (req, res, next) => {
     try {
         const { nftId } = req.params
         const payload = {
-            nftId: nftId,
+            nftId,
         }
 
         const { error } = validation.validateNftId(payload)
@@ -579,8 +579,8 @@ exports.delete = async (req, res, next) => {
         const nft = NFT.deleteOne({ _id: nftId })
         const nftDelete = await Promise.all([nftDetail, nft])
         if (nftDelete[1]?.deletedCount) {
-            const nftToken = await NftTokens.deleteOne({ nftId: nftId })
-            await NFTAuction.deleteOne({ nftId: nftId })
+            const nftToken = await NftTokens.deleteOne({ nftId })
+            await NFTAuction.deleteOne({ nftId })
             const updateCollection = await Collection.updateOne(
                 { _id: nftDelete[0][0]['collectionId'] },
                 { $pull: { nft: nftId } }
@@ -638,13 +638,13 @@ exports.myNftListing = async (req, res, next) => {
         if (endIndex < myNfts.length) {
             data.next = {
                 page: page + 1,
-                limit: limit,
+                limit,
             }
         }
         if (startIndex > 0) {
             data.previous = {
                 page: page - 1,
-                limit: limit,
+                limit,
             }
         }
         data.NFTs = myNfts.slice(startIndex, endIndex)

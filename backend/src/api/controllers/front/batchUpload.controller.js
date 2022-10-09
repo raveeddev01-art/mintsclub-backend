@@ -1,5 +1,5 @@
 const BatchUpload = require('../../models/batchUpload.model')
-const {getS3Object} =require('../../utils/s3Bucket')
+
 exports.batchUpload = async (req, res, next) => {
     try {
         await BatchUpload.create(req.body)

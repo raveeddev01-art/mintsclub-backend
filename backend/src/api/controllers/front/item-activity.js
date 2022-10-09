@@ -93,7 +93,7 @@ exports.delete = async (req, res, next) => {
             })
         }
 
-        let result = await ItemActivity.deleteMany({ nftId: nftId })
+        let result = await ItemActivity.deleteMany({ nftId })
         if (result) {
             res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.TRUE,

@@ -1,4 +1,3 @@
-const NFT = require('../../models/nfts.model')
 const Offer = require('../../models/offer.model')
 const ObjectId = require('mongoose').Types.ObjectId
 const validation = require('../../middlewares/front/offerValidation')
