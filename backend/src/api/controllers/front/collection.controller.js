@@ -11,7 +11,6 @@ const {
     SUCCESS_STATUS,
     HTTP_STATUS_CODE,
 } = require('../../../config/constants')
-
 const {
     compilingPreperations,
     createConfiguration,
@@ -30,10 +29,13 @@ exports.create = async (req, res, next) => {
             description: req.body.description,
             ownerAddress: req.body.ownerAddress,
             deploy: req.body.deploy ? req.body.deploy : false,
+            abi: req.body.abi ? req.body.abi : null,
+            contractAddress: req.body.contractAddress
+                ? req.body.contractAddress
+                : '',
         }
-
         const { error } = validation.validateCollectionSchema(payload)
-
+        console.log("abi",payload);
         if (error) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.FALSE,
@@ -68,11 +70,6 @@ exports.create = async (req, res, next) => {
                 message: ERROR_MESSAGE.COLLECTION_EXIST_ALREADY,
             })
         }
-        if (payload.deploy) {
-            const { abi, bytecode, buildFile } = this.getAbi()
-            payload.abi = abi
-            payload.bytecode = bytecode
-        }
         const collection = await Collection.create(payload)
         return res.status(HTTP_STATUS_CODE.CREATED).send({
             success: SUCCESS_STATUS.TRUE,
@@ -95,7 +92,7 @@ exports.edit = async (req, res, next) => {
             url: req.body.url,
             description: req.body.description,
         }
-        console.log(payload,"payload in edit collection")
+        console.log(payload, 'payload in edit collection')
 
         const { error } = validation.validateEditCollectionSchema(payload)
 
@@ -119,7 +116,6 @@ exports.edit = async (req, res, next) => {
                 message: ERROR_MESSAGE.LOGO_REQUIRED,
             })
         }
-
 
         if (payload.name) {
             const existingCollection = await Collection.findOne({
@@ -153,7 +149,7 @@ exports.edit = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
     try {
         const { collectionId } = req.params
-        console.log(collectionId,"collecctionId==>")
+        console.log(collectionId, 'collecctionId==>')
 
         const { error } = validation.validateCollectionId({ collectionId })
 
@@ -348,7 +344,7 @@ exports.list = async (req, res, next) => {
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.COLLECTIONS_FETCHED,
             data: {
-                collections: collections,
+                collections,
 
                 pagination: {
                     page,
@@ -456,8 +452,8 @@ exports.myCollectionList = async (req, res, next) => {
                 message: SUCCESS_MESSAGE.MY_COLLECTIONS_FETCHED,
                 data: {
                     collections: {
-                        totalRecords: totalRecords,
-                        Collections: Collections,
+                        totalRecords,
+                        Collections,
                     },
                     pagination: {
                         page,
@@ -618,7 +614,7 @@ exports.popular = async (req, res, next) => {
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.POPULAR_COLLECTIONS_FETCHED,
             data: {
-                collectionsList: collectionsList,
+                collectionsList,
                 pagination: {
                     page,
                     limit,
@@ -629,6 +625,28 @@ exports.popular = async (req, res, next) => {
                             : Math.ceil(totalRecords / limit),
                 },
             },
+        })
+    } catch (error) {
+        return next(error)
+    }
+}
+
+exports.deploy = async (req, res, next) => {
+    try {
+        let payload = {}
+        const { abi, bytecode, buildFile } = this.getAbi()
+        payload.abi = abi
+        payload.bytecode = bytecode
+        if (payload?.abi) {
+            return res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.TRUE,
+                message: SUCCESS_MESSAGE.ABI_CREATED,
+                data: payload,
+            })
+        }
+        return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: ERROR_MESSAGE.WENT_WRONG,
         })
     } catch (error) {
         return next(error)

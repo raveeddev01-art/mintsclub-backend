@@ -1,7 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
-const cors = require('cors')
+// const cors = require('cors')
 const adminRoutes = require('../api/routes/v1/admin/index')
 const frontRoutes = require('../api/routes/v1/front/index')
 const error = require('../api/middlewares/error')
@@ -9,7 +9,7 @@ const path = require('path')
 const rateLimit = require('express-rate-limit')
 const bearerToken = require('express-bearer-token')
 const compression = require('compression')
-const job=require('../cron-jobs/batchUpload')
+const job = require('../cron-jobs/batchUpload')
 
 /**
  * Express instance
@@ -19,7 +19,6 @@ const app = express()
 
 app.use(bodyParser.json({ limit: '50mb' }))
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
-app.use(cors())
 
 app.use(bearerToken())
 
@@ -31,7 +30,16 @@ const apiRequestLimiterAll = rateLimit({
 
 app.use('/v1/', apiRequestLimiterAll)
 
-// var corsOptions = {
+// let corsOptions = {
+//     origin: [
+//         'https://mintsclub-v3-marketplace.invo.zone',
+//         'http://localhost:3000',
+//         'https://mintsclub.io',
+//     ],
+//     optionsSuccessStatus: 200, // For legacy browser support
+// }
+// app.use(cors(corsOptions))
+// let corsOptions = {
 //     origin: '*',
 //     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 // }

@@ -5,7 +5,6 @@ const Categories = require('../../models/categories.model')
 const nftAuctions = require('../../models/auctions.model')
 const Users = require('../../models/users.model')
 const Bid = require('../../models/bids.model')
-const Collection = require('../../models/collection.model')
 const ActivityModal = require('../../models/item-activity.modal')
 const NftTokens = require('../../models/nftTokens.model')
 const {
@@ -331,9 +330,10 @@ exports.buyNow = async (req, res, next) => {
                     buyNftDetail.remainingCopies -
                     nftAuctionDetail?.copiesForAuction
 
-                const newPayloadCopies = {
-                    remainingCopies: remainingCopies,
-                }
+                    const newPayloadCopies = {remainingCopies}
+                // const newPayloadCopies = {
+                //     "remainingCopies": remainingCopies,
+                // }
 
                 const nftUpdate = await NFT.findByIdAndUpdate(
                     { _id: buyNftDetail._id },
@@ -489,9 +489,7 @@ exports.endAuction = async (req, res, next) => {
                     auctionEndNft[0]?.nftId?.remainingCopies -
                     auctionEndNft[0]?.copiesForAuction
 
-                const nftUpdateNewPayload = {
-                    remainingCopies: remainingCopies,
-                }
+                const nftUpdateNewPayload = {remainingCopies}
                 const nftUpdate = await NFT.findByIdAndUpdate(
                     { _id: auctionEndNft[0]?.nftId?._id },
                     { $set: nftUpdateNewPayload }

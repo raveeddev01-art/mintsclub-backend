@@ -119,7 +119,7 @@ exports.get = async (req, res, next) => {
     try {
         const { nftId } = req.params
         const payload = {
-            nftId: nftId,
+            nftId,
         }
 
         const { error } = validation.validateNftId(payload)
@@ -612,6 +612,7 @@ exports.delete = async (req, res, next) => {
     }
 }
 
+
 // API to get user NFTs listing
 exports.myNftListing = async (req, res, next) => {
     try {
@@ -648,13 +649,13 @@ exports.myNftListing = async (req, res, next) => {
         if (endIndex < myNfts.length) {
             data.next = {
                 page: page + 1,
-                limit: limit,
+                limit,
             }
         }
         if (startIndex > 0) {
             data.previous = {
                 page: page - 1,
-                limit: limit,
+                limit,
             }
         }
         data.NFTs = myNfts.slice(startIndex, endIndex)

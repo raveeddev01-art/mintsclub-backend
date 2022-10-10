@@ -82,7 +82,7 @@ module.exports.startCron = () => {
 
                                 const newPayload = {
                                     copiesForAuction: 0,
-                                    remainingCopies: remainingCopies,
+                                    remainingCopies,
                                     auctionEndDate: null,
                                     auctionStartDate: null,
                                     auctionEnded: false,
@@ -222,6 +222,6 @@ module.exports.startCron = () => {
             }
         })
     } catch (err) {
-        console.log(err)
+        return err
     }
 }

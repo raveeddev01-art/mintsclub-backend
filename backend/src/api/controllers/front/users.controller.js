@@ -1,18 +1,14 @@
 /* eslint-disable no-undef */
 const ObjectId = require('mongoose').Types.ObjectId
 const UserModal = require('../../models/users.model')
+const Bid = require('../../models/bids.model')
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
 const validation = require('../../middlewares/front/validation')
 const validUrl = require('valid-url')
 const mailchimp = require('@mailchimp/mailchimp_marketing')
 const { mailChimp } = require('../../../config/vars')
-const {
-    ERROR_MESSAGE,
-    SUCCESS_MESSAGE,
-    SUCCESS_STATUS,
-    HTTP_STATUS_CODE,
-} = require('../../../config/constants')
+const { ERROR_MESSAGE,SUCCESS_MESSAGE,SUCCESS_STATUS,HTTP_STATUS_CODE} = require('../../../config/constants')
 
 mailchimp.setConfig({
     apiKey: mailChimp.apiKey,
@@ -97,15 +93,26 @@ exports.updateProfile = async (req, res, next) => {
         }
 
         const newPayload = { ...payload, ...imagesPayload }
-
         let user = await UserModal.findByIdAndUpdate(
             { _id: ObjectId(newPayload.userId) },
             { $set: newPayload },
             { new: true }
         )
+        let userbids = await Bid.find({bidBy:user._id});
+        for (let bid of userbids) {
+            const UpdateBidProfile = {
+                bidByProfile: user.profileImage,
+            }
+            await Bid.updateMany(
+                { bidBy: bid.bidBy},
+                { $set: UpdateBidProfile }
+            )
+          }
+       
         return res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             user,
+           
             message: SUCCESS_MESSAGE.PROFILE_UPDATED,
         })
     } catch (error) {
@@ -200,7 +207,7 @@ exports.getUser = async (req, res, next) => {
             })
         }
         const user = await UserModal.findOne({ _id: ObjectId(payload.userId) })
-
+        
         if (user) {
             return res.status(HTTP_STATUS_CODE.OK).send({
                 success: SUCCESS_STATUS.TRUE,

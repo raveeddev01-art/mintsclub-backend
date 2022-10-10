@@ -138,7 +138,7 @@ const IERC165 = fs.readFileSync(
 )
 exports.compilingPreperations = () => {
     const buildPath = path.resolve(__dirname, '../../build')
-    console.log('build path', buildPath)
+    // console.log('build path', buildPath)
     fs.removeSync(buildPath)
     return buildPath
 }
@@ -355,9 +355,9 @@ exports.writeOutput = (compiled, buildPath) => {
     const byteCodeData = evm.bytecode.object
     // const evm = Object.values(contractnameMeta)[2].bytecode.object;
 
-    console.log('evm', byteCodeData)
+    // console.log('evm', byteCodeData)
     const content = JSON.stringify(abi, null, 2)
-    console.log('content', content)
+    // console.log('content', content)
     // console.log('abi', abi, 'Contact Name:', contractName);
     // let [contractName] = Object.values(compiled.contracts).slice(0);
     // console.log('contractnameMeta', contractName);
