@@ -45,7 +45,6 @@ let corsOptions = {
 }
 app.use(cors(corsOptions))
 
-
 // error handler
 // eslint-disable-next-line no-unused-vars
 app.use(function (err, req, res, next) {

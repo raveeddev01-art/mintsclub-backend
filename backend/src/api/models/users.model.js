@@ -30,6 +30,7 @@ const UserSchema = new mongoose.Schema(
             type: Number,
             defaultValue: () => Math.floor(Math.random() * 1000000),
         },
+        blockchainType: { type: String, required: true },
     },
     { timestamps: true }
 )
