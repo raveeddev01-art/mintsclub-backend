@@ -22,7 +22,7 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
 
 app.use(bearerToken())
 
-app.use(methodOverride())
+// app.use(methodOverride())
 const apiRequestLimiterAll = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 90000,
@@ -30,15 +30,15 @@ const apiRequestLimiterAll = rateLimit({
 
 app.use('/v1/', apiRequestLimiterAll)
 
-// let corsOptions = {
-//     origin: [
-//         'https://mintsclub-v3-marketplace.invo.zone',
-//         'http://localhost:3000',
-//         'https://mintsclub.io',
-//     ],
-//     optionsSuccessStatus: 200, // For legacy browser support
-// }
-// app.use(cors(corsOptions))
+ let corsOptions = {
+     origin: [
+         'https://mintsclub-v3-marketplace.invo.zone',
+         'http://localhost:3000',
+         'https://mintsclub.io',
+     ],
+     optionsSuccessStatus: 200, // For legacy browser support
+ }
+ app.use(cors(corsOptions))
 // let corsOptions = {
 //     origin: '*',
 //     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
@@ -72,10 +72,10 @@ app.use('/v1/admin', adminRoutes)
 app.use('/v1/front', frontRoutes)
 
 // Admin Site Build Path
-app.use('/admin/', express.static(path.join(__dirname, '../../admin')))
-app.get('/admin/*', function (req, res) {
-    res.sendFile(path.join(__dirname, '../../admin', 'index.html'))
-})
+//app.use('/admin/', express.static(path.join(__dirname, '../../admin')))
+//app.get('/admin/*', function (req, res) {
+//    res.sendFile(path.join(__dirname, '../../admin', 'index.html'))
+//})
 // TODO: Handle errors with centralized way.
 
 // if error is not an instanceOf APIError, convert it.
