@@ -149,6 +149,7 @@ exports.live = async (req, res, next) => {
                     nftId: { $first: '$nft._id' },
                     nftName: { $first: '$nft.name' },
                     nftImage: { $first: '$nft.image' },
+                    compressedFile:{$first: '$nft.compressedFile'},
                     currentPrice: { $first: '$nft.currentPrice' },
                     fileType: { $first: '$nft.fileType' },
                 },
