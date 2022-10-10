@@ -15,5 +15,6 @@ router.route('/subscribe').post(controller.subscribeUser)
 router.route('/validate/:address').post(controller.signUser)
 router.route('/createUser').post(controller.createUser)
 router.route('/authenticate').post(controller.authenticate)
+router.route('/sign-nonce').post(controller.signNonce)
 
 module.exports = router
