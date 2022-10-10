@@ -284,14 +284,17 @@ exports.createUser = async (req, res, next) => {
             address: req.body.address,
         }
         const { error } = validation.validateAddress(payload)
+
         if (error) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.FALSE,
                 message: error?.details[0]?.message,
             })
         }
+
         payload.profileImage = null
         payload.totalETH = 0
+        payload.blockchainType = req.body.blockchainType
 
         payload.nounce = Math.floor(Math.random() * 1000000)
         let user = await UserModal.create(payload)
