@@ -1,12 +1,16 @@
 /* eslint-disable no-undef */
 const ObjectId = require('mongoose').Types.ObjectId
 const UserModal = require('../../models/users.model')
+const Bid = require('../../models/bids.model')
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
 const validation = require('../../middlewares/front/validation')
 const validUrl = require('valid-url')
 const mailchimp = require('@mailchimp/mailchimp_marketing')
 const { mailChimp } = require('../../../config/vars')
+const nacl = require('tweetnacl')
+const { base58_to_binary } = require('base58-js')
+
 const {
     ERROR_MESSAGE,
     SUCCESS_MESSAGE,
@@ -97,15 +101,26 @@ exports.updateProfile = async (req, res, next) => {
         }
 
         const newPayload = { ...payload, ...imagesPayload }
-
         let user = await UserModal.findByIdAndUpdate(
             { _id: ObjectId(newPayload.userId) },
             { $set: newPayload },
             { new: true }
         )
+        let userbids = await Bid.find({ bidBy: user._id })
+        for (let bid of userbids) {
+            const UpdateBidProfile = {
+                bidByProfile: user.profileImage,
+            }
+            await Bid.updateMany(
+                { bidBy: bid.bidBy },
+                { $set: UpdateBidProfile }
+            )
+        }
+
         return res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             user,
+
             message: SUCCESS_MESSAGE.PROFILE_UPDATED,
         })
     } catch (error) {
@@ -251,11 +266,13 @@ exports.subscribeUser = async (req, res, next) => {
 exports.signUser = async (req, res, next) => {
     try {
         const { address } = req.params
+        const { blockchainType } = req.body
 
         const result = await UserModal.find({ address })
         res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             users: result,
+            blockchainType,
         })
     } catch (error) {
         return next(error)
@@ -267,14 +284,17 @@ exports.createUser = async (req, res, next) => {
             address: req.body.address,
         }
         const { error } = validation.validateAddress(payload)
+
         if (error) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.FALSE,
                 message: error?.details[0]?.message,
             })
         }
+
         payload.profileImage = null
         payload.totalETH = 0
+        payload.blockchainType = req.body.blockchainType
 
         payload.nounce = Math.floor(Math.random() * 1000000)
         let user = await UserModal.create(payload)
@@ -290,15 +310,22 @@ exports.createUser = async (req, res, next) => {
 
 exports.authenticate = async (req, res, next) => {
     try {
-        let address = req.body.publicAddress
+        let { publicAddress: address, blockchainType, signature } = req.body
+        console.log(
+            '🚀 ~ file: users.controller.js ~ line 299 ~ exports.authenticate= ~ addresss',
+            address,
+            req.body
+        )
 
         let user = await UserModal.findOne({ address })
+
         if (!user) {
             return res.status(HTTP_STATUS_CODE.OK).send({
                 success: SUCCESS_STATUS.FALSE,
                 message: ERROR_MESSAGE.NO_ACCOUNT_EXIST,
             })
         }
+
         const accessToken = await user.token()
         user = user.transform()
         user.isApproved = true
@@ -306,34 +333,78 @@ exports.authenticate = async (req, res, next) => {
             ...user,
             accessToken,
         }
-        // --snip--
         const msg = `I am signing my one-time nonce: ${user.nounce}`
-        const msgBuffer = ethUtil.bufferToHex(Buffer.from(msg, 'utf8'))
-        const signAddress = sigUtil.recoverPersonalSignature({
-            data: msgBuffer,
-            sig: req.body.signature,
-        })
+        if (blockchainType?.toLowerCase() !== 'solana') {
+            const msgBuffer = ethUtil.bufferToHex(Buffer.from(msg, 'utf8'))
+            const signAddress = sigUtil.recoverPersonalSignature({
+                data: msgBuffer,
+                sig: signature,
+            })
 
-        if (signAddress.toLowerCase() === address.toLowerCase()) {
+            if (signAddress.toLowerCase() === address.toLowerCase()) {
+                user.nounce = Math.floor(Math.random() * 1000000)
+                await UserModal.findByIdAndUpdate(
+                    { _id: user._id },
+                    { $set: user },
+                    { new: true }
+                )
+
+                return res.status(HTTP_STATUS_CODE.OK).send({
+                    success: SUCCESS_STATUS.TRUE,
+                    message: SUCCESS_MESSAGE.USER_AUTHENTICATED,
+                    data,
+                })
+            }
+            return res.status(HTTP_STATUS_CODE.UNAUTHORIZED).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.SIGNATURE_VERIFICATION_FAILED,
+            })
+        }
+
+        const signatureUint8 = new Uint8Array(
+            atob(signature)
+                .split('')
+                .map((c) => c.charCodeAt(0))
+        )
+        const messageUint8 = new TextEncoder().encode(msg)
+        const pubKeyUint8 = base58_to_binary(address)
+
+        const result = nacl.sign.detached.verify(
+            messageUint8,
+            signatureUint8,
+            pubKeyUint8
+        )
+
+        if (result) {
             user.nounce = Math.floor(Math.random() * 1000000)
             await UserModal.findByIdAndUpdate(
                 { _id: user._id },
                 { $set: user },
                 { new: true }
             )
-
             return res.status(HTTP_STATUS_CODE.OK).send({
                 success: SUCCESS_STATUS.TRUE,
                 message: SUCCESS_MESSAGE.USER_AUTHENTICATED,
                 data,
             })
-        } else {
-            return res.status(HTTP_STATUS_CODE.UNAUTHORIZED).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: ERROR_MESSAGE.SIGNATURE_VERIFICATION_FAILED,
-            })
         }
+
+        return res.status(HTTP_STATUS_CODE.UNAUTHORIZED).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: ERROR_MESSAGE.SIGNATURE_VERIFICATION_FAILED,
+        })
+        // --snip--
     } catch (err) {
         return next(err)
+    }
+}
+
+exports.signNonce = async (request, response, next) => {
+    try {
+    } catch (err) {
+        return res.status(HTTP_STATUS_CODE.UNAUTHORIZED).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: ERROR_MESSAGE.SIGNATURE_VERIFICATION_FAILED,
+        })
     }
 }

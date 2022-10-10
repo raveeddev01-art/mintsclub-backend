@@ -27,6 +27,7 @@ const NFTSchema = new mongoose.Schema(
         },
         currentPrice: { type: Number, default: 0 },
         ownerAddress: { type: String },
+        compressedFile:{type:String},
         txHash: { type: String },
         tokenId: { type: Number },
         image: { type: String },

@@ -34,7 +34,6 @@ exports.create = async (req, res, next) => {
             copies: req.body.copies,
             activeAuction: req.body.activeAuction,
         }
-        console.log(payload,"payload of create nft")
 
         const { error } = validation.validateNFTSchema(payload)
         if (error) {
@@ -99,9 +98,9 @@ exports.storeDataInDb = async (req, res, next) => {
         createNFTPayload.image = req.body.image
         createNFTPayload.tokenId = Number(req.body.nftToken)
         createNFTPayload.lazyMinted = req.body.lazyMinted
-        createNFTPayload.properties=JSON.parse(req.body.data.properties)
-        createNFTPayload.levels= JSON.parse(req.body.data.levels)
-        createNFTPayload.stats=JSON.parse(req.body.data.stats)
+        createNFTPayload.properties = JSON.parse(req.body.data.properties)
+        createNFTPayload.levels = JSON.parse(req.body.data.levels)
+        createNFTPayload.stats = JSON.parse(req.body.data.stats)
 
         const nft = await NFT.create(createNFTPayload)
 
@@ -120,7 +119,7 @@ exports.get = async (req, res, next) => {
     try {
         const { nftId } = req.params
         const payload = {
-            nftId: nftId,
+            nftId,
         }
 
         const { error } = validation.validateNftId(payload)
@@ -275,8 +274,18 @@ exports.list = async (req, res, next) => {
             }),
             ...(collectionId && { collectionId }),
             ...(categoryId && { categoryId }),
-            ...(buy && { $and: [ { 'auction.sellingMethod': { $eq: 1 } } , { 'auction.auctionEnded': false } ] }),
-            ...(auction && { $and: [ { 'auction.sellingMethod': { $eq: 2 } } , { 'auction.auctionEnded': false } ] }),
+            ...(buy && {
+                $and: [
+                    { 'auction.sellingMethod': { $eq: 1 } },
+                    { 'auction.auctionEnded': false },
+                ],
+            }),
+            ...(auction && {
+                $and: [
+                    { 'auction.sellingMethod': { $eq: 2 } },
+                    { 'auction.auctionEnded': false },
+                ],
+            }),
             ...(search && {
                 $or: [
                     { name: { $regex: '.*' + keyword + '.*', $options: 'i' } },
@@ -354,6 +363,7 @@ exports.list = async (req, res, next) => {
                     userId: 1,
                     remainingCopies: 1,
                     ownerAddress: 1,
+                    compressedFile: 1,
                     owner: {
                         _id: '$owner._id',
                         username: '$owner.username',
@@ -425,12 +435,11 @@ exports.editNft = async (req, res, next) => {
 }
 
 exports.updateNft = async (req, res, next) => {
-    console.log(req.body,"req.body==>")
     try {
         const payload = {
             nftId: req.body.nftId,
             name: req.body.name,
-            image:req.body.image,
+            image: req.body.image,
             description: req.body.description,
             properties: JSON.parse(req.body.properties),
             levels: JSON.parse(req.body.levels),
@@ -440,7 +449,7 @@ exports.updateNft = async (req, res, next) => {
             ownerAddress: req.body.ownerAddress,
             collectionId: req.body.collectionId,
             copies: req.body.copies,
-            metaData:req.body.metaData,
+            metaData: req.body.metaData,
         }
         // nft: {
         //     userId: ENV.getUserKeys("_id")._id,
@@ -575,16 +584,17 @@ exports.delete = async (req, res, next) => {
             })
         }
 
-        const nftDetail = NFT.find({ _id: nftId })
-        const nft = NFT.deleteOne({ _id: nftId })
-        const nftDelete = await Promise.all([nftDetail, nft])
-        if (nftDelete[1]?.deletedCount) {
+        const nftDetail = await NFT.find({ _id: nftId })
+        const nft = await NFT.deleteOne({ _id: nftId })
+        // const nftDelete = await Promise.all([nftDetail, nft])
+        if (nft?.deletedCount) {
             const nftToken = await NftTokens.deleteOne({ nftId: nftId })
             await NFTAuction.deleteOne({ nftId: nftId })
+            
             const updateCollection = await Collection.updateOne(
-                { _id: nftDelete[0][0]['collectionId'] },
+                { _id: nftDetail[0].collectionId },
                 { $pull: { nft: nftId } }
-            )
+                )
 
             if (nftToken && updateCollection) {
                 return res.status(HTTP_STATUS_CODE.OK).send({
@@ -601,6 +611,7 @@ exports.delete = async (req, res, next) => {
         return next(error)
     }
 }
+
 
 // API to get user NFTs listing
 exports.myNftListing = async (req, res, next) => {
@@ -638,13 +649,13 @@ exports.myNftListing = async (req, res, next) => {
         if (endIndex < myNfts.length) {
             data.next = {
                 page: page + 1,
-                limit: limit,
+                limit,
             }
         }
         if (startIndex > 0) {
             data.previous = {
                 page: page - 1,
-                limit: limit,
+                limit,
             }
         }
         data.NFTs = myNfts.slice(startIndex, endIndex)

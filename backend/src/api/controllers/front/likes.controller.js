@@ -113,7 +113,7 @@ exports.likeDislike = async (req, res, next) => {
         } catch (error) {
             res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
                 success: SUCCESS_STATUS.FALSE,
-                error: error,
+                error,
             })
         }
     }
@@ -129,7 +129,7 @@ exports.get = async (req, res) => {
     } catch (error) {
         res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
             success: SUCCESS_STATUS.FALSE,
-            error: error,
+           error,
         })
     }
 }
@@ -137,7 +137,6 @@ exports.get = async (req, res) => {
 exports.userNftLikes = async (req, res, next) => {
     try {
         const { userId } = req.query
-
         const { error } = validation.validateId(req.query)
 
         if (error) {

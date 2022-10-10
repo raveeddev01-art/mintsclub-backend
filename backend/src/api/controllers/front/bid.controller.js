@@ -61,7 +61,7 @@ exports.delete = async (req, res, next) => {
     try {
         const { bidId } = req.params
         const payload = {
-            bidId: bidId,
+           bidId,
         }
         const { error } = validation.validateBidId(payload)
 
@@ -113,13 +113,13 @@ exports.list = async (req, res, next) => {
         if (endIndex < allBids.length) {
             data.next = {
                 page: page + 1,
-                limit: limit,
+                limit,
             }
         }
         if (startIndex > 0) {
             data.previous = {
                 page: page - 1,
-                limit: limit,
+                limit,
             }
         }
 
@@ -156,7 +156,7 @@ exports.claimableBidListbyNftId = async (req, res, next) => {
         const startIndex = (page - 1) * limit
         const endIndex = page * limit
 
-        const bidsByNftId = await Bid.find({ nftId: nftId })
+        const bidsByNftId = await Bid.find({ nftId })
 
         const data = {}
 
@@ -165,13 +165,13 @@ exports.claimableBidListbyNftId = async (req, res, next) => {
         if (endIndex < bidsByNftId.length) {
             data.next = {
                 page: page + 1,
-                limit: limit,
+               limit,
             }
         }
         if (startIndex > 0) {
             data.previous = {
                 page: page - 1,
-                limit: limit,
+               limit,
             }
         }
 
