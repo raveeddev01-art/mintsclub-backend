@@ -39,11 +39,11 @@ app.use('/v1/', apiRequestLimiterAll)
 //     optionsSuccessStatus: 200, // For legacy browser support
 // }
 // app.use(cors(corsOptions))
-let corsOptions = {
-    origin: '*',
-    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-}
-app.use(cors(corsOptions))
+// let corsOptions = {
+//     origin: '*',
+//     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+// }
+// app.use(cors(corsOptions))
 
 // error handler
 // eslint-disable-next-line no-unused-vars
@@ -79,12 +79,12 @@ app.get('/admin/*', function (req, res) {
 // TODO: Handle errors with centralized way.
 
 // if error is not an instanceOf APIError, convert it.
-app.use(error.converter)
+// app.use(error.converter)
 
 // catch 404 and forward to error handler
-app.use(error.notFound)
+// app.use(error.notFound)
 // error handler, send stacktrace only during development
-app.use(error.handler)
+// app.use(error.handler)
 
 //start cron jobs
 // job.startCron();
