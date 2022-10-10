@@ -1,7 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
-// const cors = require('cors')
+const cors = require('cors')
 const adminRoutes = require('../api/routes/v1/admin/index')
 const frontRoutes = require('../api/routes/v1/front/index')
 const error = require('../api/middlewares/error')
@@ -39,11 +39,12 @@ app.use('/v1/', apiRequestLimiterAll)
 //     optionsSuccessStatus: 200, // For legacy browser support
 // }
 // app.use(cors(corsOptions))
-// let corsOptions = {
-//     origin: '*',
-//     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-// }
-// app.use(cors(corsOptions))
+let corsOptions = {
+    origin: '*',
+    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
+app.use(cors(corsOptions))
+
 
 // error handler
 // eslint-disable-next-line no-unused-vars
