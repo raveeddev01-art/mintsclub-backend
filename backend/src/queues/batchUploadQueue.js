@@ -1,6 +1,6 @@
 const Queue = require('./queue')
 const { pinataJWT, pinataSecret, pinataKey } = require('../config/vars')
-const nftQueue = Queue.getQuById('batchUploadTest3')
+const nftQueue = Queue.getQuById('mintsclub-version3')
 const fs = require('fs')
 const axios = require('axios')
 const FormData = require('form-data')
@@ -222,10 +222,10 @@ const NftQueue = {
     },
 
     async add(data, jobId) {
-        return nftQueue.add('batchUploadTest3', { data }, { jobId })
+        return nftQueue.add('mintsclub-version3', { data }, { jobId })
     },
 }
 
-nftQueue.process('batchUploadTest3', 1, NftQueue.run.bind(NftQueue))
+nftQueue.process('mintsclub-version3', 1, NftQueue.run.bind(NftQueue))
 
 module.exports = NftQueue
