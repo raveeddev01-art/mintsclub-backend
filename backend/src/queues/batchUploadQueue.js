@@ -24,6 +24,7 @@ const extracturrentMetaData = async (data) => {
             files,
             key,
             id,
+            metaDataFiles
         } = data
         try {
             //need to change sample to dynamic file name
@@ -154,7 +155,7 @@ const uploadFileToIpfs = async (formData) => {
                     pinata_secret_api_key: pinataSecret,
                 },
             })
-            console.log(response,"response of uploading ipfs")
+            // console.log(response,"response of uploading ipfs")
             resolve(response)
         } catch (err) {
             throw new Error(err)

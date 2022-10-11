@@ -25,9 +25,8 @@ module.exports.batchCrone = async () => {
                 )
                 let res = await getS3Object(key, fileName)
                 if (res) {
-                    console.log(isDirExist(fileName),"isDirExist(fileName)")
+                    console.log(isDirExist(fileName), 'isDirExist(fileName)')
                     if (isDirExist(fileName)) {
-                        await setStatus(result[0]._id, 'inProgress')
 
                         let files = await promises.readdir(
                             `./src/uploads/files/${fileName}/images`
@@ -53,15 +52,40 @@ module.exports.batchCrone = async () => {
                             files.length > 0 &&
                             files.map(async (item, index) => {
                                 // console.log(index,"index================>")
-                                console.log({imageName:item.substr(0, item.lastIndexOf('.')),metaData: `${index + 1}`,typeOfImage:typeof item.substr(0, item.lastIndexOf('.'))})
-                        
-                                console.log(    item.substr(0, item.lastIndexOf('.')) ===
-                                `${index + 1}`,"validation")
+                                console.log({
+                                    imageName: item.substr(
+                                        0,
+                                        item.lastIndexOf('.')
+                                    ),
+                                    metaData: `${index + 1}`,
+                                    typeOfImage: typeof item.substr(
+                                        0,
+                                        item.lastIndexOf('.')
+                                    ),
+                                })
 
-                                // if (
-                                //     item.substr(0, item.lastIndexOf('.')) ===
-                                //     `${index + 1}`
-                                // ) {
+                                console.log(
+                                    item.substr(0, item.lastIndexOf('.')) ===
+                                        `${index + 1}`,
+                                    'validation'
+                                )
+                                console.log(
+                                    fs.existsSync(
+                                        `./src/uploads/files/${fileName}/metaData/${item.substr(
+                                            0,
+                                            item.lastIndexOf('.')
+                                        )}.json`
+                                    ),
+                                    'true or flase'
+                                )
+                                if (
+                                    fs.existsSync(
+                                        `./src/uploads/files/${fileName}/metaData/${item.substr(
+                                            0,
+                                            item.lastIndexOf('.')
+                                        )}.json`
+                                    )
+                                ) {
                                     try {
                                         let initialPayload = {
                                             userId,
@@ -74,11 +98,13 @@ module.exports.batchCrone = async () => {
                                             fileName,
                                             fileType,
                                             fileToFetch: item,
-                                            metaDataToFetch: `${
-                                                index + 1
-                                            }.json`,
+                                            metaDataToFetch: `${item.substr(
+                                                0,
+                                                item.lastIndexOf('.')
+                                            )}.json`,
                                             index,
                                             files,
+                                            metaDataFiles,
                                             id: result[0]._id,
                                         }
                                         await batchUploadQueue.add({
@@ -86,7 +112,7 @@ module.exports.batchCrone = async () => {
                                         })
                                         //Change status pending to inProgress
                                     } catch (err) {
-                                        console.log(err,"error exist")
+                                        console.log(err, 'error exist')
                                         await setStatus(
                                             result[0]._id,
                                             'rejected'
@@ -94,21 +120,20 @@ module.exports.batchCrone = async () => {
 
                                         return err
                                     }
-                                // }
+                                }
                             })
 
                         ////////////////////
                     } else {
                         await setStatus(result[0]._id, 'rejected')
                     }
-                }else {
+                } else {
                     await setStatus(result[0]._id, 'rejected')
-
                 }
             }
         })
     } catch (err) {
-        console.log(err,"error second catch")
+        console.log(err, 'error second catch')
 
         return err
     }
