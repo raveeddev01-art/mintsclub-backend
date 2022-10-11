@@ -7,7 +7,7 @@ const { promises } = require('fs')
 
 module.exports.batchCrone = async () => {
     try {
-        cron.schedule('*/80 * * * * ', async () => {
+        cron.schedule('*/20 * * * * ', async () => {
             const result = await BatchUpload.find({ status: 'pending' })
            
             if (result && result.length > 0) {
@@ -38,7 +38,7 @@ module.exports.batchCrone = async () => {
                     // console.log('hereeeeeeee')
                     // console.log(files, metaData, 'files==>')
                     files.map(async (item, index) => {
-                            // console.log(index,"index================>")
+                            console.log(index,"index================>")
                             try {
                                 let initialPayload = {
                                     userId,
@@ -61,6 +61,7 @@ module.exports.batchCrone = async () => {
                                 })
                                 //Change status pending to inProgress
                             } catch (err) {
+                                console.log(err,"error first catch")
                                 return err
                             }
                     })
@@ -69,6 +70,8 @@ module.exports.batchCrone = async () => {
             }
         })
     } catch (err) {
+        console.log(err,"error second catch")
+
         return err
     }
 }

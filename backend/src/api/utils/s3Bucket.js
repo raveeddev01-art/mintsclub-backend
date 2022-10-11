@@ -33,13 +33,13 @@ exports.getS3Object = async (Key, fileName) => {
 
 const unzipFile = async (fileKey, fileName) => {
     
-    return new Promise( (resolve) => {
+    return new Promise(async (resolve) => {
         
         const fileContent = fs.readFileSync(
             `./src/uploads/files/${fileName}.zip`
         )
         const jsZipInstance = new jszip()
-        const result = jsZipInstance.loadAsync(fileContent)
+        const result =await jsZipInstance.loadAsync(fileContent)
         const Keys = Object.keys(result.files)
         fs.unlink(`./src/uploads/files/${fileName}.zip`, async (err) => {
             if (err) {
