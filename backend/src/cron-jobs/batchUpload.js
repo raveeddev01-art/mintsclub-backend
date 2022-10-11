@@ -7,9 +7,9 @@ const { promises } = require('fs')
 
 module.exports.batchCrone = async () => {
     try {
-        cron.schedule('*/80 * * * * ', async () => {
+        cron.schedule('*/20 * * * * ', async () => {
             const result = await BatchUpload.find({ status: 'pending' })
-           
+       
             if (result && result.length > 0) {
                 const {
                     userId,
@@ -19,6 +19,10 @@ module.exports.batchCrone = async () => {
                     collectionId,
                     fileType,
                 } = result[0]
+                await BatchUpload.findByIdAndUpdate(
+                    { _id: result[0]._id },
+                    { $set: { status: 'inProgress' } }
+                )
                 let res = await getS3Object(key, fileName)
                 if (res) {
                     
@@ -31,14 +35,14 @@ module.exports.batchCrone = async () => {
                     await promises.readdir(
                         `./src/uploads/files/${fileName}/metaData`
                     )
-                    await BatchUpload.findByIdAndUpdate(
-                        { _id: result[0]._id },
-                        { $set: { status: 'inProgress' } }
-                    )
+                    // await BatchUpload.findByIdAndUpdate(
+                    //     { _id: result[0]._id },
+                    //     { $set: { status: 'inProgress' } }
+                    // )
                     // console.log('hereeeeeeee')
                     // console.log(files, metaData, 'files==>')
                     files.map(async (item, index) => {
-                            // console.log(index,"index================>")
+                            console.log(index,"index================>")
                             try {
                                 let initialPayload = {
                                     userId,
@@ -61,6 +65,7 @@ module.exports.batchCrone = async () => {
                                 })
                                 //Change status pending to inProgress
                             } catch (err) {
+                                console.log(err,"error first catch")
                                 return err
                             }
                     })
@@ -69,6 +74,8 @@ module.exports.batchCrone = async () => {
             }
         })
     } catch (err) {
+        console.log(err,"error second catch")
+
         return err
     }
 }
