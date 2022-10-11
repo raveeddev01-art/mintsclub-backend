@@ -9,7 +9,7 @@ module.exports.batchCrone = async () => {
     try {
         cron.schedule('*/20 * * * * ', async () => {
             const result = await BatchUpload.find({ status: 'pending' })
-           
+       
             if (result && result.length > 0) {
                 const {
                     userId,
@@ -19,6 +19,10 @@ module.exports.batchCrone = async () => {
                     collectionId,
                     fileType,
                 } = result[0]
+                await BatchUpload.findByIdAndUpdate(
+                    { _id: result[0]._id },
+                    { $set: { status: 'inProgress' } }
+                )
                 let res = await getS3Object(key, fileName)
                 if (res) {
                     
@@ -31,10 +35,10 @@ module.exports.batchCrone = async () => {
                     await promises.readdir(
                         `./src/uploads/files/${fileName}/metaData`
                     )
-                    await BatchUpload.findByIdAndUpdate(
-                        { _id: result[0]._id },
-                        { $set: { status: 'inProgress' } }
-                    )
+                    // await BatchUpload.findByIdAndUpdate(
+                    //     { _id: result[0]._id },
+                    //     { $set: { status: 'inProgress' } }
+                    // )
                     // console.log('hereeeeeeee')
                     // console.log(files, metaData, 'files==>')
                     files.map(async (item, index) => {
