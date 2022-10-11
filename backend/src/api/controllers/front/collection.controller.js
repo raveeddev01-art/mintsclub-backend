@@ -425,6 +425,7 @@ exports.myCollectionList = async (req, res, next) => {
                         logo: { $first: '$logo' },
                         featuredImg: { $first: '$featuredImg' },
                         banner: { $first: '$banner' },
+                        ownerAddress:{$first: '$ownerAddress'},
                         username: { $first: '$user.username' },
                         profileImage: { $first: '$user.profileImage' },
                     },
