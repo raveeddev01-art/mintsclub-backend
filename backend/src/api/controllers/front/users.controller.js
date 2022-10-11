@@ -265,15 +265,39 @@ exports.subscribeUser = async (req, res, next) => {
 }
 exports.signUser = async (req, res, next) => {
     try {
-        const { address } = req.params
+        const address = req.body.address
         const { blockchainType } = req.body
 
-        const result = await UserModal.find({ address })
-        res.status(HTTP_STATUS_CODE.OK).send({
-            success: SUCCESS_STATUS.TRUE,
-            users: result,
-            blockchainType,
-        })
+        if (req.body.blockchainType == 'ethereum') {
+            const result = await UserModal.find({ address })
+            res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.TRUE,
+                users: result,
+                blockchainType,
+            })
+        }
+        if (req.body.blockchainType === 'algorand') {
+            const result = await UserModal.find({ address })
+
+            if (result.length == 0) {
+                let payload = {
+                    address: req.body.address,
+                    blockchainType: req.body.blockchainType,
+                }
+                let user = await UserModal.create(payload)
+                res.status(HTTP_STATUS_CODE.OK).send({
+                    success: SUCCESS_STATUS.TURE,
+                    data: user,
+                    message: SUCCESS_MESSAGE.USER_CREATED,
+                })
+            } else {
+                res.status(HTTP_STATUS_CODE.OK).send({
+                    success: SUCCESS_STATUS.TRUE,
+                    users: result,
+                    blockchainType,
+                })
+            }
+        }
     } catch (error) {
         return next(error)
     }
