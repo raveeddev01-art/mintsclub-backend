@@ -32,6 +32,7 @@ exports.getS3Object = async (Key, fileName) => {
 }
 
 const unzipFile = async (fileKey, fileName) => {
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve) => {
         const fileContent = fs.readFileSync(
             `./src/uploads/files/${fileName}.zip`

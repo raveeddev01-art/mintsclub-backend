@@ -1,0 +1,32 @@
+{
+    "name": "Testing #1",
+    "description": "testing nfts",
+    "image": "",
+    "edition": 1,
+    "copies":2,
+    "properties": [
+        {
+            "name": "name",
+            "type": "type"
+        },
+        {
+            "name": "name1",
+            "type": "type1"
+        }
+    ],
+    "levels": [
+        {
+            "name": "name",
+            "value": "value",
+            "total": "total"
+        }
+    ],
+    "stats": [
+        {
+            "name": "name",
+            "value": "value",
+            "total": "total"
+        }
+    ]
+}
+

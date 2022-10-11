@@ -79,6 +79,7 @@ const extracturrentMetaData = async (data) => {
 }
 
 const uploadJsonToIpfs = async (dataInput, image, metaDataContent, index) => {
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve) => {
         const url = `https://api.pinata.cloud/pinning/pinJSONToIPFS`
         let properties = {
@@ -115,6 +116,9 @@ const uploadJsonToIpfs = async (dataInput, image, metaDataContent, index) => {
 
 ///////// ipfs
 const pinFileToIPFS = async (fileToFetch, metaDataContent, fileName, index) => {
+    // console.log(fileToFetch, fileName, 'fileToFetch and fileName==>')
+
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve) => {
         try {
             let data = new FormData()
@@ -143,6 +147,7 @@ const pinFileToIPFS = async (fileToFetch, metaDataContent, fileName, index) => {
 }
 
 const uploadFileToIpfs = async (formData) => {
+    // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve) => {
         try {
             const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`
