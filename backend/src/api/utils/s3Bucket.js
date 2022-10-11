@@ -33,8 +33,8 @@ exports.getS3Object = async (Key, fileName) => {
 
 const unzipFile = async (fileKey, fileName) => {
     
-    return new Promise( async (resolve) => {
-        console.log(fileName,"fileName====>")
+    return new Promise(async (resolve) => {
+        
         const fileContent = fs.readFileSync(
             `./src/uploads/files/${fileName}.zip`
         )

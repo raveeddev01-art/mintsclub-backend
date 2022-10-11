@@ -1,6 +1,6 @@
 const Queue = require('./queue')
 const { pinataJWT, pinataSecret, pinataKey } = require('../config/vars')
-const nftQueue = Queue.getQuById('batchUpload')
+const nftQueue = Queue.getQuById('mintsclub-version3')
 const fs = require('fs')
 const axios = require('axios')
 const FormData = require('form-data')
@@ -69,13 +69,14 @@ const extracturrentMetaData = async (data) => {
                 }
             )
         } catch (err) {
+            console.log(err,"error")
             throw new Error(err)
         }
     })
 }
 
 const uploadJsonToIpfs = async (dataInput, image, metaDataContent, index) => {
-    return new Promise((resolve) => {
+    return new Promise(async (resolve) => {
 
         const url = `https://api.pinata.cloud/pinning/pinJSONToIPFS`
         let properties = {
@@ -92,7 +93,7 @@ const uploadJsonToIpfs = async (dataInput, image, metaDataContent, index) => {
             properties,
         }
         try {
-            const response =  axios.post(url, data, {
+            const response =await  axios.post(url, data, {
                 headers: {
                     Authorization: `Bearer ${pinataJWT}`,
                     pinata_api_key: pinataKey,
@@ -114,7 +115,7 @@ const uploadJsonToIpfs = async (dataInput, image, metaDataContent, index) => {
 const pinFileToIPFS = async (fileToFetch, metaDataContent, fileName, index) => {
     // console.log(fileToFetch, fileName, 'fileToFetch and fileName==>')
 
-    return new Promise((resolve) => {
+    return new Promise(async (resolve) => {
         try {
             let data = new FormData()
             data.append(
@@ -123,12 +124,12 @@ const pinFileToIPFS = async (fileToFetch, metaDataContent, fileName, index) => {
                     `./src/uploads/files/${fileName}/images/${fileToFetch}`
                 )
             )
-            const fileData =  uploadFileToIpfs(data)
-console.log(fileData,"fileData uploaded ifps data")
+            const fileData = await uploadFileToIpfs(data)
+
             const fileUrl = `https://mintsclub.mypinata.cloud/ipfs/${fileData.data.IpfsHash}`
 
             const fileOutputData = { fileUrl, hash: fileData.data.IpfsHash }
-            const metaData =  uploadJsonToIpfs(
+            const metaData = await uploadJsonToIpfs(
                 fileOutputData,
                 fileUrl,
                 metaDataContent,
@@ -142,10 +143,10 @@ console.log(fileData,"fileData uploaded ifps data")
 }
 
 const uploadFileToIpfs = async (formData) => {
-    return new Promise((resolve) => {
+    return new Promise(async (resolve) => {
         try {
             const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`
-            const response =  axios.post(url, formData, {
+            const response = await axios.post(url, formData, {
                 headers: {
                     'Content-Type': `multipart/form-data; boundary= ${formData._boundary}`,
                     Authorization: `Bearer ${pinataJWT}`,
@@ -153,6 +154,7 @@ const uploadFileToIpfs = async (formData) => {
                     pinata_secret_api_key: pinataSecret,
                 },
             })
+            console.log(response,"response of uploading ipfs")
             resolve(response)
         } catch (err) {
             throw new Error(err)
@@ -215,16 +217,16 @@ const NftQueue = {
         // Check if order already processed, return Success
         // If no NFT available, then issue refund and sendNFTUnSuccessEmail
         // If any error occurs in sendNFT, then throw error, bull will handle retry
-        console.log(job.attemptsMade,"job attempt")
+        console.log(job.attemptsMade,"job.attemptsMade")
         await extracturrentMetaData(job.data.data.data)
         return true
     },
 
     async add(data, jobId) {
-        return nftQueue.add('batchUpload', { data }, { jobId })
+        return nftQueue.add('mintsclub-version3', { data }, { jobId })
     },
 }
 
-nftQueue.process('batchUpload', 1, NftQueue.run.bind(NftQueue))
+nftQueue.process('mintsclub-version3', 1, NftQueue.run.bind(NftQueue))
 
 module.exports = NftQueue

@@ -19,6 +19,10 @@ module.exports.batchCrone = async () => {
                     collectionId,
                     fileType,
                 } = result[0]
+                await BatchUpload.findByIdAndUpdate(
+                    { _id: result[0]._id },
+                    { $set: { status: 'inProgress' } }
+                )
                 let res = await getS3Object(key, fileName)
                 if (res) {
                     console.log(isDirExist(fileName),"isDirExist(fileName)")
@@ -104,6 +108,8 @@ module.exports.batchCrone = async () => {
             }
         })
     } catch (err) {
+        console.log(err,"error second catch")
+
         return err
     }
 }
