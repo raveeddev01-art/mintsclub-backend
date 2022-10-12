@@ -33,9 +33,10 @@ exports.create = async (req, res, next) => {
             contractAddress: req.body.contractAddress
                 ? req.body.contractAddress
                 : '',
+            blockchainType: req.body.blockchainType,
         }
         const { error } = validation.validateCollectionSchema(payload)
-        console.log("abi",payload);
+
         if (error) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.FALSE,

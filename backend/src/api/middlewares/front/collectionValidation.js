@@ -8,11 +8,12 @@ const validateCollectionSchema = (data) => {
         url: Joi.string().allow(''),
         description: Joi.string().min(3).max(500).allow(''),
         ownerAddress: Joi.string()
-            .regex(/^0x[a-fA-F0-9]{40}$/)
+            // .regex(/^0x[a-fA-F0-9]{40}$/)
             .required(),
         deploy: Joi.boolean().default(false),
         abi: Joi.required(),
         contractAddress: Joi.required(),
+        blockchainType: Joi.string().required(),
     })
     const options = {
         errors: {
