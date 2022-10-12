@@ -590,11 +590,11 @@ exports.delete = async (req, res, next) => {
         if (nft?.deletedCount) {
             const nftToken = await NftTokens.deleteOne({ nftId: nftId })
             await NFTAuction.deleteOne({ nftId: nftId })
-            
+
             const updateCollection = await Collection.updateOne(
                 { _id: nftDetail[0].collectionId },
                 { $pull: { nft: nftId } }
-                )
+            )
 
             if (nftToken && updateCollection) {
                 return res.status(HTTP_STATUS_CODE.OK).send({
@@ -611,7 +611,6 @@ exports.delete = async (req, res, next) => {
         return next(error)
     }
 }
-
 
 // API to get user NFTs listing
 exports.myNftListing = async (req, res, next) => {
