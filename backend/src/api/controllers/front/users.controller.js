@@ -265,39 +265,15 @@ exports.subscribeUser = async (req, res, next) => {
 }
 exports.signUser = async (req, res, next) => {
     try {
-        const address = req.body.address
+        const { address } = req.params
         const { blockchainType } = req.body
 
-        if (req.body.blockchainType == 'ethereum') {
-            const result = await UserModal.find({ address })
-            res.status(HTTP_STATUS_CODE.OK).send({
-                success: SUCCESS_STATUS.TRUE,
-                users: result,
-                blockchainType,
-            })
-        }
-        if (req.body.blockchainType === 'algorand') {
-            const result = await UserModal.find({ address })
-
-            if (result.length == 0) {
-                let payload = {
-                    address: req.body.address,
-                    blockchainType: req.body.blockchainType,
-                }
-                let user = await UserModal.create(payload)
-                res.status(HTTP_STATUS_CODE.OK).send({
-                    success: SUCCESS_STATUS.TURE,
-                    data: user,
-                    message: SUCCESS_MESSAGE.USER_CREATED,
-                })
-            } else {
-                res.status(HTTP_STATUS_CODE.OK).send({
-                    success: SUCCESS_STATUS.TRUE,
-                    users: result,
-                    blockchainType,
-                })
-            }
-        }
+        const result = await UserModal.find({ address })
+        res.status(HTTP_STATUS_CODE.OK).send({
+            success: SUCCESS_STATUS.TRUE,
+            users: result,
+            blockchainType,
+        })
     } catch (error) {
         return next(error)
     }
@@ -357,6 +333,15 @@ exports.authenticate = async (req, res, next) => {
             ...user,
             accessToken,
         }
+
+        if (blockchainType == 'algorand') {
+            return res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.TRUE,
+                message: SUCCESS_MESSAGE.USER_AUTHENTICATED,
+                data,
+            })
+        }
+
         const msg = `I am signing my one-time nonce: ${user.nounce}`
         if (blockchainType?.toLowerCase() !== 'solana') {
             const msgBuffer = ethUtil.bufferToHex(Buffer.from(msg, 'utf8'))
