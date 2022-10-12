@@ -125,10 +125,11 @@ exports.get = async (req, res, next) => {
         const { error } = validation.validateNftId(payload)
 
         if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
+            // return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            //     success: SUCCESS_STATUS.FALSE,
+            //     message: error?.details[0]?.message,
+            // })
+            console.log('error in api', error)
         }
 
         const pipeline = [
