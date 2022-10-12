@@ -125,10 +125,11 @@ exports.get = async (req, res, next) => {
         const { error } = validation.validateNftId(payload)
 
         if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
+            // return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            //     success: SUCCESS_STATUS.FALSE,
+            //     message: error?.details[0]?.message,
+            // })
+            console.log('error in api', error)
         }
 
         const pipeline = [
@@ -590,11 +591,11 @@ exports.delete = async (req, res, next) => {
         if (nft?.deletedCount) {
             const nftToken = await NftTokens.deleteOne({ nftId: nftId })
             await NFTAuction.deleteOne({ nftId: nftId })
-            
+
             const updateCollection = await Collection.updateOne(
                 { _id: nftDetail[0].collectionId },
                 { $pull: { nft: nftId } }
-                )
+            )
 
             if (nftToken && updateCollection) {
                 return res.status(HTTP_STATUS_CODE.OK).send({
@@ -611,7 +612,6 @@ exports.delete = async (req, res, next) => {
         return next(error)
     }
 }
-
 
 // API to get user NFTs listing
 exports.myNftListing = async (req, res, next) => {
