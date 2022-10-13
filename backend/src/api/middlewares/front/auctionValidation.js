@@ -4,14 +4,16 @@ const validateNFTFixedTAuctionSchema = (data) => {
     const schema = Joi.object().keys({
         nftId: Joi.string().alphanum().min(12).max(24).required(),
         copiesForAuction: Joi.number().min(0).max(100000).required(),
-        sellId: Joi.number().required(),
+        sellId: Joi.number(),
+        sellerTradeState: Joi.string(),
         sellingMethod: Joi.number().valid(1, 2).required(),
-        signature:Joi.string(),
+        signature: Joi.string(),
+        blockchainType: Joi.string(),
         sellingConfig: Joi.object()
             .keys({
                 price: Joi.object()
                     .keys({
-                        currency: Joi.string().valid('ETH').required(),
+                        currency: Joi.string().required(),
                         amount: Joi.number().max(100000).invalid(0).required(),
                     })
                     .required(),
@@ -42,7 +44,7 @@ const validateNFTimedTAuctionSchema = (data) => {
             .keys({
                 startPrice: Joi.object()
                     .keys({
-                        currency: Joi.string().valid('ETH').required(),
+                        currency: Joi.string().required(),
                         amount: Joi.number().max(100000).invalid(0).required(),
                     })
                     .required(),
@@ -70,7 +72,7 @@ const validateBuyNowSchema = (data) => {
         userId: Joi.string().alphanum().min(12).max(24).required(),
         nftId: Joi.string().alphanum().min(12).max(24).required(),
         ownerAddress: Joi.string()
-            .regex(/^0x[a-fA-F0-9]{40}$/)
+            // .regex(/^0x[a-fA-F0-9]{40}$/)
             .required(),
     })
     const options = {
