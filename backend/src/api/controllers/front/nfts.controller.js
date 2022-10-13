@@ -359,6 +359,7 @@ exports.list = async (req, res, next) => {
                     copies: 1,
                     currentPrice: 1,
                     collectionId: 1,
+                    blockchainType: 1,
                     ownerId: 1,
                     creatorId: 1,
                     userId: 1,
