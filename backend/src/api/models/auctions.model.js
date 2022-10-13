@@ -23,6 +23,8 @@ const AuctionSchema = new mongoose.Schema(
         sellId: { type: Number },
         signature: { type: String },
         bids: [{ type: mongoose.Schema.Types.ObjectId, ref: Bid }],
+        sellerTradeState: { type: String },
+        blockchainType: { type: String },
         // bids: [
         //     { bidId: { type: mongoose.Schema.Types.ObjectId, ref: Bid } },
         //     { bidAmount: { type: Number } },
