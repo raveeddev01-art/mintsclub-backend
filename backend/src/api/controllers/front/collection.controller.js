@@ -320,6 +320,7 @@ exports.list = async (req, res, next) => {
                     categoryId: { $first: '$categoryId' },
                     name: { $first: '$name' },
                     description: { $first: '$description' },
+                    blockchainType: { $first: '$blockchainType' },
                     logo: { $first: '$logo' },
                     featuredImg: { $first: '$featuredImg' },
                     ownerAddress: { $first: '$ownerAddress' },
@@ -428,6 +429,7 @@ exports.myCollectionList = async (req, res, next) => {
                         banner: { $first: '$banner' },
                         username: { $first: '$user.username' },
                         profileImage: { $first: '$user.profileImage' },
+                        blockchainType: { $first: '$blockchainType' },
                     },
                 },
             ]
