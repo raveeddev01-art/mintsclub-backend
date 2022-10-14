@@ -327,8 +327,10 @@ exports.list = async (req, res, next) => {
                     banner: { $first: '$banner' },
                     username: { $first: '$user.username' },
                     profileImage: { $first: '$user.profileImage' },
+                    createdAt: { $first: '$createdAt' }
                 },
             },
+            { $sort: { createdAt: -1 } }
         ]
 
         const newTotal = await Collection.aggregate(pipeline)
