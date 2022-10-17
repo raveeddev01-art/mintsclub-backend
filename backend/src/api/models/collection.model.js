@@ -29,6 +29,7 @@ const CollectionSchema = new mongoose.Schema(
         abi: { type: Array },
         deploy: { type: Boolean, required: true, default: false },
         contractAddress: { type: String, default: '' },
+        blockchainType: { type: String, required: true },
     },
     { timestamps: true }
 )

@@ -10,6 +10,9 @@ const validateContractSchema = (contract) => {
             name: Joi.string().allow(''),
             value: Joi.string().allow(''),
         }),
+
+        blockchainType: Joi.string().required(),
+
         levels: Joi.array().items({
             name: Joi.string().allow(''),
             value: Joi.number().allow(''),

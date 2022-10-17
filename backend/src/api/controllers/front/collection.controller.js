@@ -33,9 +33,10 @@ exports.create = async (req, res, next) => {
             contractAddress: req.body.contractAddress
                 ? req.body.contractAddress
                 : '',
+            blockchainType: req.body.blockchainType,
         }
         const { error } = validation.validateCollectionSchema(payload)
-        console.log("abi",payload);
+
         if (error) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.FALSE,
@@ -319,14 +320,17 @@ exports.list = async (req, res, next) => {
                     categoryId: { $first: '$categoryId' },
                     name: { $first: '$name' },
                     description: { $first: '$description' },
+                    blockchainType: { $first: '$blockchainType' },
                     logo: { $first: '$logo' },
                     featuredImg: { $first: '$featuredImg' },
                     ownerAddress: { $first: '$ownerAddress' },
                     banner: { $first: '$banner' },
                     username: { $first: '$user.username' },
                     profileImage: { $first: '$user.profileImage' },
+                    createdAt: { $first: '$createdAt' }
                 },
             },
+            { $sort: { createdAt: -1 } }
         ]
 
         const newTotal = await Collection.aggregate(pipeline)
@@ -428,6 +432,7 @@ exports.myCollectionList = async (req, res, next) => {
                         ownerAddress:{$first: '$ownerAddress'},
                         username: { $first: '$user.username' },
                         profileImage: { $first: '$user.profileImage' },
+                        blockchainType: { $first: '$blockchainType' },
                     },
                 },
             ]

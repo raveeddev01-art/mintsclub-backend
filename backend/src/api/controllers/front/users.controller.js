@@ -333,6 +333,15 @@ exports.authenticate = async (req, res, next) => {
             ...user,
             accessToken,
         }
+
+        if (blockchainType == 'algorand') {
+            return res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.TRUE,
+                message: SUCCESS_MESSAGE.USER_AUTHENTICATED,
+                data,
+            })
+        }
+
         const msg = `I am signing my one-time nonce: ${user.nounce}`
         if (blockchainType?.toLowerCase() !== 'solana') {
             const msgBuffer = ethUtil.bufferToHex(Buffer.from(msg, 'utf8'))
