@@ -17,6 +17,18 @@ exports.batchUpload = async (req, res, next) => {
             ownerAddress: req.body.ownerAddress,
             userId: req.body.userId,
         }
+        let blockchainType;
+        if(payload?.chainId === 1)
+        {
+            blockchainType = 'ethereum';
+        }else if(payload?.chainId === 2)
+        {
+            blockchainType = 'polygon';
+        }
+        else
+        {
+            blockchainType = 'bsc';
+        }
         const result = await BatchUpload.create(payload);
         if (result) {
             const {
@@ -80,6 +92,7 @@ exports.batchUpload = async (req, res, next) => {
                                         ownerId: userId,
                                         ownerAddress,
                                         lazyMinted: true,
+                                        blockchainType,
                                         collectionId,
                                         key,
                                         fileName,
