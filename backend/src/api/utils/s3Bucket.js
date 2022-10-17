@@ -1,3 +1,4 @@
+/* eslint-disable no-async-promise-executor */
 const AWS = require('aws-sdk')
 const fs = require('fs')
 const jszip = require('jszip')
@@ -14,9 +15,8 @@ exports.getS3Object = async (Key, fileName) => {
         }
         s3.getObject(params, async (err, data) => {
             if (err) return err
-             // an error occurred
+            // an error occurred
             else {
-                
                 fs.writeFile(
                     `./src/uploads/files/${fileName}.zip`,
                     data.Body,
@@ -32,23 +32,20 @@ exports.getS3Object = async (Key, fileName) => {
 }
 
 const unzipFile = async (fileKey, fileName) => {
-    
     return new Promise(async (resolve) => {
-        
         const fileContent = fs.readFileSync(
             `./src/uploads/files/${fileName}.zip`
         )
         const jsZipInstance = new jszip()
         const result = await jsZipInstance.loadAsync(fileContent)
-        console.log(result,"result")
-        if(!result.files){
-            console.log("reject while unzipping====>",result?.files)
+        console.log(result, 'result')
+        if (!result.files) {
+            console.log('reject while unzipping====>', result?.files)
             return resolve(false)
         }
         const Keys = Object.keys(result.files)
         fs.unlink(`./src/uploads/files/${fileName}.zip`, async (err) => {
             if (err) {
-               
                 return err
             }
             for (let key of Keys) {

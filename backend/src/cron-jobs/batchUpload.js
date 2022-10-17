@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 const cron = require('node-cron')
 const BatchUpload = require('../api/models/batchUpload.model')
 const batchUploadQueue = require('../queues/batchUploadQueue')
@@ -7,7 +8,7 @@ const fs = require('fs')
 
 module.exports.batchCrone = async () => {
     try {
-        cron.schedule('*/5 * * * * ', async () => {
+        cron.schedule('*/3 * * * *', async () => {
             const result = await BatchUpload.find({ status: 'pending' })
             if (result && result.length > 0) {
                 await setStatus(result[0]._id, 'inProgress')
@@ -27,7 +28,6 @@ module.exports.batchCrone = async () => {
                 if (res) {
                     console.log(isDirExist(fileName), 'isDirExist(fileName)')
                     if (isDirExist(fileName)) {
-
                         let files = await promises.readdir(
                             `./src/uploads/files/${fileName}/images`
                         )
