@@ -9,6 +9,7 @@ const validUrl = require('valid-url')
 const mailchimp = require('@mailchimp/mailchimp_marketing')
 const { mailChimp } = require('../../../config/vars')
 const nacl = require('tweetnacl')
+const algosdk = require('algosdk')
 const { base58_to_binary } = require('base58-js')
 
 const {
@@ -318,7 +319,6 @@ exports.authenticate = async (req, res, next) => {
         )
 
         let user = await UserModal.findOne({ address })
-
         if (!user) {
             return res.status(HTTP_STATUS_CODE.OK).send({
                 success: SUCCESS_STATUS.FALSE,
@@ -334,15 +334,33 @@ exports.authenticate = async (req, res, next) => {
             accessToken,
         }
 
+        const msg = `I am signing my one-time nonce: ${user.nounce}`
         if (blockchainType == 'algorand') {
-            return res.status(HTTP_STATUS_CODE.OK).send({
-                success: SUCCESS_STATUS.TRUE,
-                message: SUCCESS_MESSAGE.USER_AUTHENTICATED,
-                data,
+            const data = new TextEncoder().encode(msg)
+
+            let sig = Object.values(signature)
+            sig = Uint8Array.from(sig)
+            const result = algosdk.verifyBytes(data, sig, address)
+
+            if (result) {
+                user.nounce = Math.floor(Math.random() * 1000000)
+                await UserModal.findByIdAndUpdate(
+                    { _id: user._id },
+                    { $set: user },
+                    { new: true }
+                )
+                return res.status(HTTP_STATUS_CODE.OK).send({
+                    success: SUCCESS_STATUS.TRUE,
+                    message: SUCCESS_MESSAGE.USER_AUTHENTICATED,
+                    data,
+                })
+            }
+            return res.status(HTTP_STATUS_CODE.UNAUTHORIZED).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.SIGNATURE_VERIFICATION_FAILED,
             })
         }
 
-        const msg = `I am signing my one-time nonce: ${user.nounce}`
         if (blockchainType?.toLowerCase() !== 'solana') {
             const msgBuffer = ethUtil.bufferToHex(Buffer.from(msg, 'utf8'))
             const signAddress = sigUtil.recoverPersonalSignature({
