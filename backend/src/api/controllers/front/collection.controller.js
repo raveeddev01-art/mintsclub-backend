@@ -227,7 +227,7 @@ exports.get = async (req, res, next) => {
 exports.list = async (req, res, next) => {
     try {
         let { page, limit, myFilter, all } = req.query
-
+        
         let filter = {}
 
         if (myFilter) {
@@ -252,9 +252,12 @@ exports.list = async (req, res, next) => {
 
         if (!all) {
             page = page !== undefined && page !== '' ? parseInt(page) : 1
-            limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
-
+            // limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
             total = await Collection.countDocuments({})
+            limit = limit !== undefined && limit !== '' ? parseInt(limit) : total
+
+            // total = await Collection.countDocuments({})
+            
 
             if (page > Math.ceil(total / limit) && total > 0)
                 page = Math.ceil(total / limit)
@@ -327,10 +330,10 @@ exports.list = async (req, res, next) => {
                     banner: { $first: '$banner' },
                     username: { $first: '$user.username' },
                     profileImage: { $first: '$user.profileImage' },
-                    createdAt: { $first: '$createdAt' }
+                    createdAt: { $first: '$createdAt' },
                 },
             },
-            { $sort: { createdAt: -1 } }
+            { $sort: { createdAt: -1 } },
         ]
 
         const newTotal = await Collection.aggregate(pipeline)
