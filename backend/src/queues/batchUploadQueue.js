@@ -1,3 +1,4 @@
+/* eslint-disable no-async-promise-executor */
 const Queue = require('./queue')
 const { pinataJWT, pinataSecret, pinataKey } = require('../config/vars')
 const nftQueue = Queue.getQuById('mintsclub-version3')
@@ -24,15 +25,16 @@ const extracturrentMetaData = async (data) => {
             files,
             key,
             id,
+            metaDataFiles,
         } = data
         try {
             //need to change sample to dynamic file name
-
             fs.readFile(
                 `./src/uploads/files/${fileName}/metaData/${metaDataToFetch}`,
                 'utf8',
                 async (err, jsonString) => {
                     if (err) {
+                        console.log(err, 'error 1')
                         return err
                     }
                     await sleep(1000)
@@ -68,7 +70,7 @@ const extracturrentMetaData = async (data) => {
                 }
             )
         } catch (err) {
-            console.log(err,"error")
+            console.log(err, 'error')
             throw new Error(err)
         }
     })
@@ -76,7 +78,6 @@ const extracturrentMetaData = async (data) => {
 
 const uploadJsonToIpfs = async (dataInput, image, metaDataContent, index) => {
     return new Promise(async (resolve) => {
-
         const url = `https://api.pinata.cloud/pinning/pinJSONToIPFS`
         let properties = {
             properties: metaDataContent.properties,
@@ -92,7 +93,7 @@ const uploadJsonToIpfs = async (dataInput, image, metaDataContent, index) => {
             properties,
         }
         try {
-            const response =await  axios.post(url, data, {
+            const response = await axios.post(url, data, {
                 headers: {
                     Authorization: `Bearer ${pinataJWT}`,
                     pinata_api_key: pinataKey,
@@ -112,8 +113,6 @@ const uploadJsonToIpfs = async (dataInput, image, metaDataContent, index) => {
 
 ///////// ipfs
 const pinFileToIPFS = async (fileToFetch, metaDataContent, fileName, index) => {
-    // console.log(fileToFetch, fileName, 'fileToFetch and fileName==>')
-
     return new Promise(async (resolve) => {
         try {
             let data = new FormData()
@@ -153,15 +152,12 @@ const uploadFileToIpfs = async (formData) => {
                     pinata_secret_api_key: pinataSecret,
                 },
             })
-            console.log(response,"response of uploading ipfs")
             resolve(response)
         } catch (err) {
             throw new Error(err)
         }
     })
 }
-
-
 
 const deleteUnZipedFolder = (fileName, key, id) => {
     return new Promise((resolve) => {
@@ -172,14 +168,17 @@ const deleteUnZipedFolder = (fileName, key, id) => {
                 if (err) {
                     throw err
                 }
-
                 await deleteFromS3(key)
-                await BatchUpload.deleteOne({ _id: id })
+                await BatchUpload.findByIdAndUpdate(
+                    { _id: id },
+                    { $set: { status: 'completed' } }
+                )
                 resolve(true)
             }
         )
     })
 }
+
 // const deleteUploadedFile = (fileName, metaDataFileName, folderName) => {
 //     return new Promise(async (resolve, reject) => {
 //         //delete image file
@@ -216,7 +215,7 @@ const NftQueue = {
         // Check if order already processed, return Success
         // If no NFT available, then issue refund and sendNFTUnSuccessEmail
         // If any error occurs in sendNFT, then throw error, bull will handle retry
-        console.log(job.attemptsMade,"job.attemptsMade")
+        console.log(job.attemptsMade, 'job.attemptsMade')
         await extracturrentMetaData(job.data.data.data)
         return true
     },
