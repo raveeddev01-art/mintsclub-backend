@@ -336,11 +336,11 @@ exports.authenticate = async (req, res, next) => {
 
         const msg = `I am signing my one-time nonce: ${user.nounce}`
         if (blockchainType == 'algorand') {
-            const data = new TextEncoder().encode(msg)
+            const message = new TextEncoder().encode(msg)
 
             let sig = Object.values(signature)
             sig = Uint8Array.from(sig)
-            const result = algosdk.verifyBytes(data, sig, address)
+            const result = algosdk.verifyBytes(message, sig, address)
 
             if (result) {
                 user.nounce = Math.floor(Math.random() * 1000000)
@@ -349,6 +349,7 @@ exports.authenticate = async (req, res, next) => {
                     { $set: user },
                     { new: true }
                 )
+
                 return res.status(HTTP_STATUS_CODE.OK).send({
                     success: SUCCESS_STATUS.TRUE,
                     message: SUCCESS_MESSAGE.USER_AUTHENTICATED,
