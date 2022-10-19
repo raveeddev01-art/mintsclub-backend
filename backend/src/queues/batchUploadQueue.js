@@ -122,8 +122,8 @@ const pinFileToIPFS = async (fileToFetch, metaDataContent, fileName, index) => {
                     `./src/uploads/files/${fileName}/images/${fileToFetch}`
                 )
             )
-            const fileData = await uploadFileToIpfs(data)
-
+            const fileData = uploadFileToIpfs(data)
+            console.log(fileData, 'fileData uploaded ifps data')
             const fileUrl = `https://mintsclub.mypinata.cloud/ipfs/${fileData.data.IpfsHash}`
 
             const fileOutputData = { fileUrl, hash: fileData.data.IpfsHash }
@@ -152,6 +152,7 @@ const uploadFileToIpfs = async (formData) => {
                     pinata_secret_api_key: pinataSecret,
                 },
             })
+            console.log(response, 'response of uploading ipfs')
             resolve(response)
         } catch (err) {
             throw new Error(err)
@@ -215,12 +216,13 @@ const NftQueue = {
         // Check if order already processed, return Success
         // If no NFT available, then issue refund and sendNFTUnSuccessEmail
         // If any error occurs in sendNFT, then throw error, bull will handle retry
-        console.log(job.attemptsMade, 'job.attemptsMade')
+        console.log(job.attemptsMade, 'job attempt')
         await extracturrentMetaData(job.data.data.data)
         return true
     },
 
     async add(data, jobId) {
+        console.log('data', data)
         return nftQueue.add('mintsclub-version3', { data }, { jobId })
     },
 }
