@@ -1,20 +1,22 @@
 // --------- Install bull, ioredis, and redis instance--------- //
 const Queue = require('bull')
 const Redis = require('ioredis')
+const { redis } = require('../config/vars')
+
 const redisCreds = {
-    host: '127.0.0.1',
-    port: 6379,
+    host: redis.host,
+    port: redis.port,
     // db: process.env.REDIS_DB || 0,
     no_ready_check: true,
-    password: 'Linuxhint098',
+    password: redis.password,
     maxRetriesPerRequest: null,
     enableReadyCheck: false,
 }
 
 const client = new Redis(redisCreds)
-// console.log('client', client)
+console.log('client', client)
 const subscriber = new Redis(redisCreds)
-// console.log('subscriber', subscriber)
+console.log('subscriber', subscriber)
 const opts = {
     defaultJobOptions: {
         // backoff: {

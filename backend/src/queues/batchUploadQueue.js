@@ -62,8 +62,10 @@ const extracturrentMetaData = async (data) => {
                         image: uploadedFile.image,
                     }
                     await NFT.create(payload)
+                    console.log('deletion', index + 1, files.length)
                     // await deleteUploadedFile(fileToFetch, metaDataToFetch, fileName)
                     if (index + 1 === files.length) {
+                        console.log('conming inside deletion 1')
                         await deleteUnZipedFolder(fileName, key, id)
                     }
                     resolve(true)
