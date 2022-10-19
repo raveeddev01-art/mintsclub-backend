@@ -88,6 +88,6 @@ app.use(error.handler)
 
 //start cron jobs
 // job.startCron();
-job.batchCrone()
+// job.batchCrone()
 
 module.exports = app

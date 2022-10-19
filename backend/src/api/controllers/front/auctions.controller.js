@@ -303,6 +303,7 @@ exports.buyNow = async (req, res, next) => {
                     remainingCopies: nftAuctionDetail?.copiesForAuction,
                     activeAuction: null,
                     tokenId: buyNftDetail.tokenId,
+                    blockchainType : buyNftDetail.blockchainType,
                 }
                 const nft = await NFT.create(newPayload)
                 const nftTokenDetail = await NftTokens.findOne({
@@ -464,6 +465,8 @@ exports.endAuction = async (req, res, next) => {
                     image: auctionEndNft[0]?.nftId?.image,
                     remainingCopies: auctionEndNft[0]?.copiesForAuction,
                     tokenId: auctionEndNft[0]?.nftId?.tokenId,
+                    blockchainType: auctionEndNft[0]?.nftId?.blockchainType,
+
                 }
 
                 const NFTCreated = await NFT.create(payload)
