@@ -20,25 +20,25 @@ const app = express()
 app.use(bodyParser.json({ limit: '50mb' }))
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
 
-app.use(bearerToken())
+// app.use(bearerToken())
 
 // app.use(methodOverride())
-const apiRequestLimiterAll = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 90000,
-})
+// const apiRequestLimiterAll = rateLimit({
+//     windowMs: 15 * 60 * 1000, // 15 minutes
+//     max: 90000,
+// })
 
-app.use('/v1/', apiRequestLimiterAll)
+// app.use('/v1/', apiRequestLimiterAll)
 
-let corsOptions = {
-    origin: [
-        'https://mintsclub-v3-marketplace.invo.zone',
-        'http://localhost:3000',
-        'https://mintsclub.io',
-    ],
-    optionsSuccessStatus: 200, // For legacy browser support
-}
-app.use(cors(corsOptions))
+// let corsOptions = {
+//     origin: [
+//         'https://mintsclub-v3-marketplace.invo.zone',
+//         'http://localhost:3000',
+//         'https://mintsclub.io',
+//     ],
+//     optionsSuccessStatus: 200, // For legacy browser support
+// }
+// app.use(cors(corsOptions))
 let corsOptions = {
     origin: '*',
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
@@ -47,13 +47,13 @@ app.use(cors(corsOptions))
 
 // error handler
 // eslint-disable-next-line no-unused-vars
-app.use(function (err, req, res, next) {
-    res.status(err.status || 500).send({
-        status: err.status,
-        message: err.message,
-        data: {},
-    })
-})
+// app.use(function (err, req, res, next) {
+//     res.status(err.status || 500).send({
+//         status: err.status,
+//         message: err.message,
+//         data: {},
+//     })
+// })
 // compress all responses
 app.use(compression())
 // app.use((req, res, next) => {
