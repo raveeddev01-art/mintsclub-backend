@@ -269,7 +269,7 @@ exports.signUser = async (req, res, next) => {
         const { address } = req.params
         const { blockchainType } = req.body
 
-        const result = await UserModal.find({ address })
+        const result = await UserModal.find({ address,blockchainType })
         res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             users: result,
@@ -300,7 +300,7 @@ exports.createUser = async (req, res, next) => {
         payload.nounce = Math.floor(Math.random() * 1000000)
         let user = await UserModal.create(payload)
         res.status(HTTP_STATUS_CODE.OK).send({
-            success: SUCCESS_STATUS.TURE,
+            success: SUCCESS_STATUS.TRUE,
             data: user,
             message: SUCCESS_MESSAGE.USER_CREATED,
         })
@@ -318,7 +318,8 @@ exports.authenticate = async (req, res, next) => {
             req.body
         )
 
-        let user = await UserModal.findOne({ address })
+        let user = await UserModal.findOne({ address,blockchainType })
+        console.log(user,"user")
         if (!user) {
             return res.status(HTTP_STATUS_CODE.OK).send({
                 success: SUCCESS_STATUS.FALSE,
@@ -344,10 +345,9 @@ exports.authenticate = async (req, res, next) => {
 
             if (result) {
                 user.nounce = Math.floor(Math.random() * 1000000)
-                await UserModal.findByIdAndUpdate(
-                    { _id: user._id },
-                    { $set: user },
-                    { new: true }
+                await UserModal.findOneAndUpdate(
+                    { _id: user._id ,blockchainType},
+                    {  nounce:user.nounce },
                 )
 
                 return res.status(HTTP_STATUS_CODE.OK).send({
@@ -371,10 +371,12 @@ exports.authenticate = async (req, res, next) => {
 
             if (signAddress.toLowerCase() === address.toLowerCase()) {
                 user.nounce = Math.floor(Math.random() * 1000000)
-                await UserModal.findByIdAndUpdate(
-                    { _id: user._id },
-                    { $set: user },
-                    { new: true }
+            console.log(user,"setting user")
+
+                //need to update
+                await UserModal.findOneAndUpdate(
+                    { _id: user._id ,blockchainType},
+                    { nounce:user.nounce },
                 )
 
                 return res.status(HTTP_STATUS_CODE.OK).send({
@@ -402,13 +404,12 @@ exports.authenticate = async (req, res, next) => {
             signatureUint8,
             pubKeyUint8
         )
-
         if (result) {
             user.nounce = Math.floor(Math.random() * 1000000)
-            await UserModal.findByIdAndUpdate(
-                { _id: user._id },
-                { $set: user },
-                { new: true }
+            //need to update
+            await UserModal.findOneAndUpdate(
+                { _id: user._id,blockchainType },
+                {  nounce:user.nounce },
             )
             return res.status(HTTP_STATUS_CODE.OK).send({
                 success: SUCCESS_STATUS.TRUE,
