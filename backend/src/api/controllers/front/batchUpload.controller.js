@@ -17,19 +17,15 @@ exports.batchUpload = async (req, res, next) => {
             ownerAddress: req.body.ownerAddress,
             userId: req.body.userId,
         }
-        let blockchainType;
-        if(payload?.chainId === 1)
-        {
-            blockchainType = 'ethereum';
-        }else if(payload?.chainId === 2)
-        {
-            blockchainType = 'polygon';
+        let blockchainType
+        if (payload?.chainId === 1) {
+            blockchainType = 'ethereum'
+        } else if (payload?.chainId === 2) {
+            blockchainType = 'polygon'
+        } else {
+            blockchainType = 'bsc'
         }
-        else
-        {
-            blockchainType = 'bsc';
-        }
-        const result = await BatchUpload.create(payload);
+        const result = await BatchUpload.create(payload)
         if (result) {
             const {
                 userId,
@@ -47,7 +43,7 @@ exports.batchUpload = async (req, res, next) => {
                     )
                     if (!files?.length > 0) {
                         await setStatus(result._id, 'rejected')
-                        res.status(200).send({
+                        return res.status(200).send({
                             success: false,
                             message: 'nft Images directory should not be empty',
                         })
@@ -77,6 +73,7 @@ exports.batchUpload = async (req, res, next) => {
                                 )
                             ) {
                                 files.length--
+                                console.log("it's decrement")
                             } else if (
                                 fs.existsSync(
                                     `./src/uploads/files/${fileName}/metaData/${item.substr(
@@ -114,7 +111,8 @@ exports.batchUpload = async (req, res, next) => {
                                     await setStatus(result._id, 'rejected')
                                     return res.status(200).send({
                                         success: false,
-                                        message: 'Please upload zip as per mentioned conditions',
+                                        message:
+                                            'Please upload zip as per mentioned conditions',
                                     })
                                 }
                             }
