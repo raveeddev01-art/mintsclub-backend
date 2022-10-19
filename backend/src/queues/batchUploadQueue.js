@@ -152,7 +152,6 @@ const uploadFileToIpfs = async (formData) => {
                     pinata_secret_api_key: pinataSecret,
                 },
             })
-            // console.log(response,"response of uploading ipfs")
             resolve(response)
         } catch (err) {
             throw new Error(err)
@@ -216,7 +215,7 @@ const NftQueue = {
         // Check if order already processed, return Success
         // If no NFT available, then issue refund and sendNFTUnSuccessEmail
         // If any error occurs in sendNFT, then throw error, bull will handle retry
-        console.log(job.attemptsMade, 'job attempt')
+        console.log(job.attemptsMade, 'job.attemptsMade')
         await extracturrentMetaData(job.data.data.data)
         return true
     },
