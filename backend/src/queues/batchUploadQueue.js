@@ -61,18 +61,12 @@ const extracturrentMetaData = async (data) => {
                         metaData: uploadedFile.dataInput.metaDataUrl,
                         image: uploadedFile.image,
                     }
-                    console.log('adding data in the quque 2', payload)
                     await NFT.create(payload)
-                    console.log('counter 2', index + 1, files.length)
-
+                    console.log('deletion', index + 1, files.length)
                     // await deleteUploadedFile(fileToFetch, metaDataToFetch, fileName)
                     if (index + 1 === files.length) {
-                        console.log('deleting condition')
+                        console.log('conming inside deletion 1')
                         await deleteUnZipedFolder(fileName, key, id)
-                        // await BatchUpload.findByIdAndUpdate(
-                        //     { _id: id },
-                        //     { $set: { status: 'completed' } }
-                        // )
                     }
                     resolve(true)
                 }
@@ -130,8 +124,8 @@ const pinFileToIPFS = async (fileToFetch, metaDataContent, fileName, index) => {
                     `./src/uploads/files/${fileName}/images/${fileToFetch}`
                 )
             )
-            const fileData = uploadFileToIpfs(data)
-            console.log(fileData, 'fileData uploaded ifps data')
+            const fileData = await uploadFileToIpfs(data)
+
             const fileUrl = `https://mintsclub.mypinata.cloud/ipfs/${fileData.data.IpfsHash}`
 
             const fileOutputData = { fileUrl, hash: fileData.data.IpfsHash }
@@ -229,7 +223,6 @@ const NftQueue = {
     },
 
     async add(data, jobId) {
-        console.log('data', data)
         return nftQueue.add('mintsclub-version3', { data }, { jobId })
     },
 }

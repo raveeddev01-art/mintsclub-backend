@@ -58,7 +58,8 @@ exports.batchUpload = async (req, res, next) => {
                         await setStatus(result._id, 'rejected')
                         return res.status(200).send({
                             success: false,
-                            message: 'nft metadata directory should not be empty',
+                            message:
+                                'nft metadata directory should not be empty',
                         })
                     }
                     files &&
@@ -133,7 +134,7 @@ exports.batchUpload = async (req, res, next) => {
                 })
             }
         }
-        res.status(201).send({
+        return res.status(201).send({
             success: true,
             message: 'Batch uploading is added to the queue successfully',
         })

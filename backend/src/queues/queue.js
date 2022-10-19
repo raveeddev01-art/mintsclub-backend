@@ -14,9 +14,9 @@ const redisCreds = {
 }
 
 const client = new Redis(redisCreds)
-// console.log('client', client)
+console.log('client', client)
 const subscriber = new Redis(redisCreds)
-// console.log('subscriber', subscriber)
+console.log('subscriber', subscriber)
 const opts = {
     defaultJobOptions: {
         // backoff: {
