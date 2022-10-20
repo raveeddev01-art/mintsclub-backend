@@ -14,6 +14,7 @@ exports.likeDislike = async (req, res, next) => {
                 nftId: req.body.nftId,
                 userId: req.body.userId,
             }
+            
                 const { error } = validation.validateLikesDislikeSchema(Payload)
                 if(error){
                     throw error
