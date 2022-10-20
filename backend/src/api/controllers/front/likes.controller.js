@@ -1,6 +1,6 @@
 const LikesModal = require('../../models/likes.model')
 let ObjectId = require('mongodb').ObjectId
-const validation = require('../../middlewares/front/likes')
+// const validation = require('../../middlewares/front/likes')
 const {
     ERROR_MESSAGE,
     SUCCESS_MESSAGE,
@@ -8,17 +8,13 @@ const {
     HTTP_STATUS_CODE,
 } = require('../../../config/constants')
 
-exports.likeDislike = async (req, res, next) => {
+exports.likeDislike = async (req, res) => {
     try{
         const Payload = {
                 nftId: req.body.nftId,
                 userId: req.body.userId,
             }
             
-                const { error } = validation.validateLikesDislikeSchema(Payload)
-                if(error){
-                    throw error
-                }
                 const checkAlreadyExist = await LikesModal.find({...Payload})
                 if(checkAlreadyExist.length === 0){
                     //TODO: Add like
