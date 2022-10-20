@@ -71,6 +71,7 @@ NFTSchema.post('save', async function (next) {
             nftId: this._id,
             activityType: 'Mint',
         }
+        
 
         await ActivityModal.create(activityPayload)
     } catch (error) {
