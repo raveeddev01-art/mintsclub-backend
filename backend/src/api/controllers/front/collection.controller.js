@@ -331,6 +331,8 @@ exports.list = async (req, res, next) => {
                     username: { $first: '$user.username' },
                     profileImage: { $first: '$user.profileImage' },
                     createdAt: { $first: '$createdAt' },
+                    contractAddress:{$first: '$contractAddress' }
+
                 },
             },
             { $sort: { createdAt: -1 } },
@@ -436,7 +438,8 @@ exports.myCollectionList = async (req, res, next) => {
                         username: { $first: '$user.username' },
                         profileImage: { $first: '$user.profileImage' },
                         blockchainType: { $first: '$blockchainType' },
-                        createdAt: { $first: '$createdAt'}
+                        createdAt: { $first: '$createdAt'},
+                        contractAddress:{$first: '$contractAddress' }
                     },
                 },
                 { $sort: { createdAt: -1 } },

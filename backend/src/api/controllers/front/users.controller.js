@@ -328,12 +328,16 @@ exports.authenticate = async (req, res, next) => {
         }
 
         const accessToken = await user.token()
-        user = user.transform()
+        console.log(accessToken,"accessToken before")
+        user = user._doc
+        console.log(user,"user after")
+
         user.isApproved = true
         const data = {
             ...user,
             accessToken,
         }
+        console.log(data,"data==>")
 
         const msg = `I am signing my one-time nonce: ${user.nounce}`
         if (blockchainType == 'algorand') {
@@ -382,7 +386,7 @@ exports.authenticate = async (req, res, next) => {
                 return res.status(HTTP_STATUS_CODE.OK).send({
                     success: SUCCESS_STATUS.TRUE,
                     message: SUCCESS_MESSAGE.USER_AUTHENTICATED,
-                    data,
+                    data:{...user,accessToken},
                 })
             }
             return res.status(HTTP_STATUS_CODE.UNAUTHORIZED).send({
@@ -437,3 +441,4 @@ exports.signNonce = async (request, response, next) => {
         })
     }
 }
+

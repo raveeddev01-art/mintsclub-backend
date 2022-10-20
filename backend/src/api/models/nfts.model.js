@@ -44,6 +44,7 @@ const NFTSchema = new mongoose.Schema(
         blockchainType: { type: String, required: true },
         txnHash: { type: String },
         mint: { type: String },
+        contractAddress:{type:String}
     },
     { timestamps: true, collection: 'nfts' }
 )
