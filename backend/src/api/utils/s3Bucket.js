@@ -39,8 +39,9 @@ const unzipFile = async (fileKey, fileName) => {
         )
         const jsZipInstance = new jszip()
         const result = await jsZipInstance.loadAsync(fileContent)
-        console.log(result, 'result')
-        if (!result.files) {
+        console.log('checking result', result)
+
+        if (!result?.files) {
             console.log('reject while unzipping====>', result?.files)
             return resolve(false)
         }
@@ -52,6 +53,7 @@ const unzipFile = async (fileKey, fileName) => {
             if (err) {
                 return err
             }
+
             for (let key of Keys) {
                 const item = result.files[key]
                 if (item.dir) {

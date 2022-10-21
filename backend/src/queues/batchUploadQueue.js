@@ -63,6 +63,7 @@ const extracturrentMetaData = async (data) => {
                     }
                     await NFT.create(payload)
                     console.log('deletion', index + 1, files.length)
+
                     // await deleteUploadedFile(fileToFetch, metaDataToFetch, fileName)
                     if (index + 1 === files.length) {
                         console.log('conming inside deletion 1')
