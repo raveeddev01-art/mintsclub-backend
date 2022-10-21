@@ -90,6 +90,7 @@ exports.batchUpload = async (req, res, next) => {
                                         ownerId: userId,
                                         ownerAddress,
                                         lazyMinted: true,
+                                        isApproved: true,
                                         blockchainType,
                                         collectionId,
                                         key,
