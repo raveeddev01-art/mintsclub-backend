@@ -36,7 +36,7 @@ exports.likeDislike = async (req, res) => {
     
 }
 
-exports.getNftLikes = async (req, res) => {
+exports.getNftLikes = async (req, res ) => {
     try {
         const payload = {
             nftId: req.query.nftId,
@@ -57,14 +57,7 @@ exports.getNftLikes = async (req, res) => {
 
 exports.userNftLikes = async (req, res, next) => {
     try {
-        const { userId } = req.query
-        const { error } = validation.validateId(req.query)
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
+        const {userId}=req.query
         if (!userId)
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.FALSE,
