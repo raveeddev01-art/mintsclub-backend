@@ -82,6 +82,57 @@ exports.create = async (req, res, next) => {
     }
 }
 
+// API to create default collection
+exports.createDefault = async (req, res, next) => {
+    let num = Math.floor(Math.random() * 1000000)
+    console.log('req.body.userId', req.body)
+    try {
+        let payload = {
+            userId: req.body.userId,
+            categoryId: '625579af2b58bd0bf348057d',
+            name: 'Default Collection' + '#' + num,
+            url: '',
+            description: '',
+            ownerAddress: req.body.ownerAddress,
+            deploy: false,
+            abi: [],
+            contractAddress: req.body.contractAddress
+                ? req.body.contractAddress
+                : '',
+            blockchainType: req.body.blockchainType,
+            logo: 'null',
+            featuredImg: '',
+            banner: '',
+        }
+
+        let existingCollection = await Collection.findOne({
+            name: new RegExp(payload.name, 'gi'),
+            userId: payload.userId,
+        })
+
+        if (existingCollection) {
+            do {
+                num = Math.floor(Math.random() * 1000000)
+                payload.name = 'Default Collection' + '#' + num
+
+                existingCollection = await Collection.findOne({
+                    name: new RegExp(payload.name, 'gi'),
+                    userId: payload.userId,
+                })
+            } while (existingCollection)
+        }
+
+        const collection = await Collection.create(payload)
+        return res.status(HTTP_STATUS_CODE.CREATED).send({
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.COLLECTION_CREATED,
+            collection,
+        })
+    } catch (error) {
+        return next(error)
+    }
+}
+
 // API to edit collection
 exports.edit = async (req, res, next) => {
     try {
@@ -227,7 +278,7 @@ exports.get = async (req, res, next) => {
 exports.list = async (req, res, next) => {
     try {
         let { page, limit, myFilter, all } = req.query
-        
+
         let filter = {}
 
         if (myFilter) {
@@ -252,12 +303,9 @@ exports.list = async (req, res, next) => {
 
         if (!all) {
             page = page !== undefined && page !== '' ? parseInt(page) : 1
-            // limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
-            total = await Collection.countDocuments({})
-            limit = limit !== undefined && limit !== '' ? parseInt(limit) : total
+            limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
 
-            // total = await Collection.countDocuments({})
-            
+            total = await Collection.countDocuments({})
 
             if (page > Math.ceil(total / limit) && total > 0)
                 page = Math.ceil(total / limit)
@@ -432,7 +480,7 @@ exports.myCollectionList = async (req, res, next) => {
                         logo: { $first: '$logo' },
                         featuredImg: { $first: '$featuredImg' },
                         banner: { $first: '$banner' },
-                        ownerAddress:{$first: '$ownerAddress'},
+                        ownerAddress: { $first: '$ownerAddress' },
                         username: { $first: '$user.username' },
                         profileImage: { $first: '$user.profileImage' },
                         blockchainType: { $first: '$blockchainType' },
