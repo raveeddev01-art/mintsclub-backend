@@ -7,8 +7,9 @@ const mongoose = require('mongoose')
 const LikesSchema = new mongoose.Schema(
     {
         nftId: { type: mongoose.Schema.Types.ObjectId, ref: 'NFT' },
-        count: { type: Number },
-        likes: [{ userId: String }],
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        // count: { type: Number },
+        // likes: [{ userId: String }],
     },
     { timestamps: true }
 )
@@ -17,4 +18,4 @@ const LikesSchema = new mongoose.Schema(
  * @typedef LikesSchema
  */
 
-module.exports = mongoose.model('LikesSchema', LikesSchema)
+module.exports = mongoose.model('Likes', LikesSchema)

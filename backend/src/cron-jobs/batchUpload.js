@@ -48,6 +48,7 @@ module.exports.batchCrone = async () => {
 
                         // console.log('hereeeeeeee')
                         // console.log(files, metaData, 'files==>')
+                        // eslint-disable-next-line no-unused-expressions
                         files &&
                             files.length > 0 &&
                             files.map(async (item, index) => {
