@@ -63,6 +63,7 @@ const extracturrentMetaData = async (data) => {
                     }
                     await NFT.create(payload)
                     console.log('deletion', index + 1, files.length)
+
                     // await deleteUploadedFile(fileToFetch, metaDataToFetch, fileName)
                     if (index + 1 === files.length) {
                         console.log('conming inside deletion 1')
@@ -125,7 +126,7 @@ const pinFileToIPFS = async (fileToFetch, metaDataContent, fileName, index) => {
                 )
             )
             const fileData = await uploadFileToIpfs(data)
-
+            console.log(fileData, 'fileData uploaded ifps data')
             const fileUrl = `https://mintsclub.mypinata.cloud/ipfs/${fileData.data.IpfsHash}`
 
             const fileOutputData = { fileUrl, hash: fileData.data.IpfsHash }
@@ -154,6 +155,7 @@ const uploadFileToIpfs = async (formData) => {
                     pinata_secret_api_key: pinataSecret,
                 },
             })
+            console.log(response, 'response of uploading ipfs')
             resolve(response)
         } catch (err) {
             throw new Error(err)
@@ -223,6 +225,7 @@ const NftQueue = {
     },
 
     async add(data, jobId) {
+        console.log('data', data)
         return nftQueue.add('mintsclub-version3', { data }, { jobId })
     },
 }
