@@ -14,7 +14,7 @@ const CollectionSchema = new mongoose.Schema(
         },
         categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
         name: { type: String, required: true },
-        isApproved:{type:Boolean,required:true},
+        isApproved: { type: Boolean, required: true },
         logo: { type: String, required: true },
         featuredImg: { type: String },
         banner: { type: String },
@@ -30,7 +30,7 @@ const CollectionSchema = new mongoose.Schema(
         abi: { type: Array },
         deploy: { type: Boolean, required: true, default: false },
         contractAddress: { type: String, default: '' },
-        blockchainType: { type: String },
+        blockchainType: { type: String, required: true },
     },
     { timestamps: true }
 )
