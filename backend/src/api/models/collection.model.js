@@ -14,6 +14,7 @@ const CollectionSchema = new mongoose.Schema(
         },
         categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
         name: { type: String, required: true },
+        isApproved:{type:Boolean,required:true},
         logo: { type: String, required: true },
         featuredImg: { type: String },
         banner: { type: String },

@@ -7,6 +7,7 @@ const validateCollectionSchema = (data) => {
         name: Joi.string().min(1).max(55).required(),
         url: Joi.string().allow(''),
         description: Joi.string().min(3).max(500).allow(''),
+        isApproved:Joi.boolean().required(),
         ownerAddress: Joi.string()
             // .regex(/^0x[a-fA-F0-9]{40}$/)
             .required(),

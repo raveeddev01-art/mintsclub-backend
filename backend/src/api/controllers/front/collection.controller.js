@@ -34,6 +34,7 @@ exports.create = async (req, res, next) => {
                 ? req.body.contractAddress
                 : '',
             blockchainType: req.body.blockchainType,
+            isApproved: req.body.isApproved,
         }
         const { error } = validation.validateCollectionSchema(payload)
 
@@ -85,6 +86,22 @@ exports.create = async (req, res, next) => {
 // API to edit collection
 exports.edit = async (req, res, next) => {
     try {
+        if (req.body.isApproved) {
+            await Collection.findByIdAndUpdate(
+                { _id: ObjectId(req.body.collectionId) },
+                { $set: { isApproved: true } },
+                { new: true }
+            )
+            await NFT.findByIdAndUpdate(
+                { _id: ObjectId(req.body.nftId) },
+                { $set: { isApproved: true } },
+                { new: true }
+            )
+            return res.send({
+                success: SUCCESS_STATUS.TRUE,
+                message: SUCCESS_MESSAGE.COLLECTION_UPDATED,
+            })
+        }
         let payload = {
             userId: req.body.userId,
             _id: req.body._id,
@@ -227,7 +244,7 @@ exports.get = async (req, res, next) => {
 exports.list = async (req, res, next) => {
     try {
         let { page, limit, myFilter, all } = req.query
-        
+
         let filter = {}
 
         if (myFilter) {
@@ -254,10 +271,10 @@ exports.list = async (req, res, next) => {
             page = page !== undefined && page !== '' ? parseInt(page) : 1
             // limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
             total = await Collection.countDocuments({})
-            limit = limit !== undefined && limit !== '' ? parseInt(limit) : total
+            limit =
+                limit !== undefined && limit !== '' ? parseInt(limit) : total
 
             // total = await Collection.countDocuments({})
-            
 
             if (page > Math.ceil(total / limit) && total > 0)
                 page = Math.ceil(total / limit)
@@ -331,8 +348,8 @@ exports.list = async (req, res, next) => {
                     username: { $first: '$user.username' },
                     profileImage: { $first: '$user.profileImage' },
                     createdAt: { $first: '$createdAt' },
-                    contractAddress:{$first: '$contractAddress' }
-
+                    contractAddress: { $first: '$contractAddress' },
+                    isApproved: { $first: '$isApproved' },
                 },
             },
             { $sort: { createdAt: -1 } },
@@ -434,12 +451,13 @@ exports.myCollectionList = async (req, res, next) => {
                         logo: { $first: '$logo' },
                         featuredImg: { $first: '$featuredImg' },
                         banner: { $first: '$banner' },
-                        ownerAddress:{$first: '$ownerAddress'},
+                        ownerAddress: { $first: '$ownerAddress' },
                         username: { $first: '$user.username' },
                         profileImage: { $first: '$user.profileImage' },
                         blockchainType: { $first: '$blockchainType' },
                         createdAt: { $first: '$createdAt'},
-                        contractAddress:{$first: '$contractAddress' }
+                        contractAddress:{$first: '$contractAddress' },
+                        isApproved: { $first: '$isApproved' },
                     },
                 },
                 { $sort: { createdAt: -1 } },
