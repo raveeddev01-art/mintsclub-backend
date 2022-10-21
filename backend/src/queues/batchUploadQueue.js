@@ -154,7 +154,7 @@ const uploadFileToIpfs = async (formData) => {
                     pinata_secret_api_key: pinataSecret,
                 },
             })
-            console.log(response, 'response of uploading ipfs')
+            // console.log(response,"response of uploading ipfs")
             resolve(response)
         } catch (err) {
             throw new Error(err)
