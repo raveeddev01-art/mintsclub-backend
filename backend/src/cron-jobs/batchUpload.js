@@ -1,10 +1,12 @@
 /* eslint-disable no-unused-expressions */
-const BatchUpload = require('../../models/batchUpload.model')
-const batchUploadQueue = require('../../../queues/batchUploadQueue')
-const { getS3Object } = require('../../utils/s3Bucket')
+const cron = require('node-cron')
+const BatchUpload = require('../api/models/batchUpload.model')
+const batchUploadQueue = require('../queues/batchUploadQueue')
+const { getS3Object } = require('../api/utils/s3Bucket')
 const { promises } = require('fs')
 const fs = require('fs')
-exports.batchUpload = async (req, res, next) => {
+
+module.exports.batchCrone = async () => {
     try {
         cron.schedule('*/3 * * * *', async () => {
             const result = await BatchUpload.find({ status: 'pending' })
@@ -61,12 +63,6 @@ exports.batchUpload = async (req, res, next) => {
                                         item.lastIndexOf('.')
                                     ),
                                 })
-
-                                console.log(
-                                    item.substr(0, item.lastIndexOf('.')) ===
-                                        `${index + 1}`,
-                                    'validation'
-                                )
 
                                 console.log(
                                     item.substr(0, item.lastIndexOf('.')) ===
@@ -131,99 +127,15 @@ exports.batchUpload = async (req, res, next) => {
                     } else {
                         await setStatus(result[0]._id, 'rejected')
                     }
-                    if (files.length && files.length > 350) {
-                        files = files.slice(0, 350)
-                    }
-                    let metaDataFiles = await promises.readdir(
-                        `./src/uploads/files/${fileName}/metaData`
-                    )
-                    if (!metaDataFiles?.length > 0) {
-                        await setStatus(result._id, 'rejected')
-                        return res.status(200).send({
-                            success: false,
-                            message:
-                                'nft metadata directory should not be empty',
-                        })
-                    }
-                    files &&
-                        files.length > 0 &&
-                        files.map(async (item, index) => {
-                            if (
-                                !fs.existsSync(
-                                    `./src/uploads/files/${fileName}/metaData/${item.substr(
-                                        0,
-                                        item.lastIndexOf('.')
-                                    )}.json`
-                                )
-                            ) {
-                                files.length--
-                                console.log("it's decrementing")
-                            } else if (
-                                fs.existsSync(
-                                    `./src/uploads/files/${fileName}/metaData/${item.substr(
-                                        0,
-                                        item.lastIndexOf('.')
-                                    )}.json`
-                                )
-                            ) {
-                                try {
-                                    let initialPayload = {
-                                        userId,
-                                        creatorId: userId,
-                                        ownerId: userId,
-                                        ownerAddress,
-                                        lazyMinted: true,
-                                        blockchainType,
-                                        collectionId,
-                                        key,
-                                        fileName,
-                                        fileType,
-                                        fileToFetch: item,
-                                        metaDataToFetch: `${item.substr(
-                                            0,
-                                            item.lastIndexOf('.')
-                                        )}.json`,
-                                        index,
-                                        files,
-                                        metaDataFiles,
-                                        id: result._id,
-                                    }
-                                    await batchUploadQueue.add({
-                                        data: initialPayload,
-                                    })
-                                } catch (err) {
-                                    await setStatus(result._id, 'rejected')
-                                    return res.status(200).send({
-                                        success: false,
-                                        message:
-                                            'Please upload zip as per mentioned conditions',
-                                    })
-                                }
-                            }
-                        })
-                    ////////////////////
                 } else {
-                    await setStatus(result._id, 'rejected')
-                    return res.status(200).send({
-                        success: false,
-                        message: 'Please follow file upload standards',
-                    })
+                    await setStatus(result[0]._id, 'rejected')
                 }
-            } else {
-                await setStatus(result._id, 'rejected')
-                return res.status(200).send({
-                    success: false,
-                    message: 'Please follow file upload standards',
-                })
             }
-        }
-        return res.status(201).send({
-            success: true,
-            message: 'Batch uploading is added to the queue successfully',
         })
     } catch (err) {
-        console.log('error', err)
-        next(err)
+        console.log(err, 'error second catch')
+
+        return err
     }
 }
 
