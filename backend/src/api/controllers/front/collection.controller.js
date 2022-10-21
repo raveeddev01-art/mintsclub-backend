@@ -436,8 +436,10 @@ exports.myCollectionList = async (req, res, next) => {
                         username: { $first: '$user.username' },
                         profileImage: { $first: '$user.profileImage' },
                         blockchainType: { $first: '$blockchainType' },
+                        createdAt: { $first: '$createdAt'}
                     },
                 },
+                { $sort: { createdAt: -1 } },
             ]
 
             const newTotal = Collection.aggregate(pipeline)
@@ -601,6 +603,7 @@ exports.popular = async (req, res, next) => {
                     profileImage: { $first: '$user.profileImage' },
                 },
             },
+            { $sort: { _id: 1 } },
         ]
 
         const newTotal = Collection.aggregate(pipeline)

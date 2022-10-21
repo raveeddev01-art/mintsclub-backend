@@ -590,8 +590,8 @@ exports.delete = async (req, res, next) => {
         const nft = await NFT.deleteOne({ _id: nftId })
         // const nftDelete = await Promise.all([nftDetail, nft])
         if (nft?.deletedCount) {
-            const nftToken = await NftTokens.deleteOne({ nftId: nftId })
-            await NFTAuction.deleteOne({ nftId: nftId })
+            const nftToken = await NftTokens.deleteOne({ nftId })
+            await NFTAuction.deleteOne({ nftId })
 
             const updateCollection = await Collection.updateOne(
                 { _id: nftDetail[0].collectionId },
