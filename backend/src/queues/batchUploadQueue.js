@@ -124,8 +124,8 @@ const pinFileToIPFS = async (fileToFetch, metaDataContent, fileName, index) => {
                     `./src/uploads/files/${fileName}/images/${fileToFetch}`
                 )
             )
-            const fileData = await uploadFileToIpfs(data)
-
+            const fileData = uploadFileToIpfs(data)
+            console.log(fileData, 'fileData uploaded ifps data')
             const fileUrl = `https://mintsclub.mypinata.cloud/ipfs/${fileData.data.IpfsHash}`
 
             const fileOutputData = { fileUrl, hash: fileData.data.IpfsHash }
@@ -154,6 +154,7 @@ const uploadFileToIpfs = async (formData) => {
                     pinata_secret_api_key: pinataSecret,
                 },
             })
+            console.log(response, 'response of uploading ipfs')
             resolve(response)
         } catch (err) {
             throw new Error(err)

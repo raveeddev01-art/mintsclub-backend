@@ -33,6 +33,7 @@ exports.getS3Object = async (Key, fileName) => {
 
 const unzipFile = async (fileKey, fileName) => {
     return new Promise(async (resolve) => {
+        console.log(fileName, 'fileName====>')
         const fileContent = fs.readFileSync(
             `./src/uploads/files/${fileName}.zip`
         )
@@ -43,7 +44,10 @@ const unzipFile = async (fileKey, fileName) => {
             console.log('reject while unzipping====>', result?.files)
             return resolve(false)
         }
-        const Keys = Object.keys(result.files)
+        const Keys = Object.keys(result?.files).filter((value) => {
+            return !value.match(/^__MACOSX\//) && !value.match(/.DS_Store/)
+        })
+
         fs.unlink(`./src/uploads/files/${fileName}.zip`, async (err) => {
             if (err) {
                 return err
