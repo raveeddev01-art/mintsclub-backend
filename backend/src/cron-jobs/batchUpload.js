@@ -69,6 +69,12 @@ module.exports.batchCrone = async () => {
                                         `${index + 1}`,
                                     'validation'
                                 )
+
+                                console.log(
+                                    item.substr(0, item.lastIndexOf('.')) ===
+                                        `${index + 1}`,
+                                    'validation'
+                                )
                                 console.log(
                                     fs.existsSync(
                                         `./src/uploads/files/${fileName}/metaData/${item.substr(
