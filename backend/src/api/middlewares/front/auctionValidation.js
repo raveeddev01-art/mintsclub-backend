@@ -7,11 +7,12 @@ const validateNFTFixedTAuctionSchema = (data) => {
         sellId: Joi.number().required(),
         sellingMethod: Joi.number().valid(1, 2).required(),
         signature:Joi.string(),
+        blockchainType:Joi.string().allow(''),
         sellingConfig: Joi.object()
             .keys({
                 price: Joi.object()
                     .keys({
-                        currency: Joi.string().valid('ETH').required(),
+                        currency: Joi.string().required(),
                         amount: Joi.number().max(100000).invalid(0).required(),
                     })
                     .required(),
@@ -42,7 +43,7 @@ const validateNFTimedTAuctionSchema = (data) => {
             .keys({
                 startPrice: Joi.object()
                     .keys({
-                        currency: Joi.string().valid('ETH').required(),
+                        currency: Joi.string().required(),
                         amount: Joi.number().max(100000).invalid(0).required(),
                     })
                     .required(),
