@@ -39,6 +39,7 @@
         "@mailchimp/mailchimp_marketing": "^3.0.72",
         "@openzeppelin/contracts": "^4.4.0",
         "algosdk": "^1.22.0",
+        "atob": "^2.1.2",
         "aws-sdk": "^2.1211.0",
         "axios": "^0.27.2",
         "base58-js": "^1.0.4",
