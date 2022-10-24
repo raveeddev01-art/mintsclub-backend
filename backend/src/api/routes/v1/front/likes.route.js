@@ -6,6 +6,6 @@ const middleware = require('../../../middlewares/front/likes')
 router.route('/likeDislike').post(middleware.validateLikesDislikeSchema,controller.likeDislike)
 router.route('/getNftLikes').get(controller.getNftLikes)
 router.route('/userNftLikes').get(middleware.validateId ,controller.userNftLikes)
-
+router.route('/checkNftLikes').get(controller.checkNftLikes)
 
 module.exports = router
