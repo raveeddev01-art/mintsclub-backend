@@ -92,11 +92,7 @@ exports.edit = async (req, res, next) => {
                 { $set: { isApproved: true } },
                 { new: true }
             )
-            await NFT.findByIdAndUpdate(
-                { _id: ObjectId(req.body.nftId) },
-                { $set: { isApproved: true } },
-                { new: true }
-            )
+            await NFT.updateMany({userId:req.body.userId},{isApproved:true})
             return res.send({
                 success: SUCCESS_STATUS.TRUE,
                 message: SUCCESS_MESSAGE.COLLECTION_UPDATED,
