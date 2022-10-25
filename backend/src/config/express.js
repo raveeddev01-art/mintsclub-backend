@@ -44,11 +44,6 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
 //     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 // }
 // app.use(cors(corsOptions))
-app.use(
-    cors({
-        methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH'],
-    })
-)
 // app.use(cors({
 //     origin: '*'
 // }));
@@ -71,13 +66,13 @@ app.use(compression())
 //         'OPTIONS, GET, POST, PUT, PATCH, DELETE' // what matters here is that OPTIONS is present
 //     )
 //     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-//     next()
 // })
+app.options('*', cors())
 // mount admin api v1 routes
-app.use('/v1/admin', adminRoutes)
+app.use('/v1/admin',cors(), adminRoutes)
 
 // mount admin api v1 routes
-app.use('/v1/front', frontRoutes)
+app.use('/v1/front',cors(), frontRoutes)
 
 // Admin Site Build Path
 //app.use('/admin/', express.static(path.join(__dirname, '../../admin')))
