@@ -7,6 +7,10 @@ const middleware = require('../../../middlewares/front/auth')
 router
     .route('/create')
     .post(middleware.userValidation, collectionUpload, controller.create)
+router
+    .route('/createDefault')
+    .post(middleware.userValidation, controller.createDefault)
+
 router.route('/edit').put(collectionUpload, controller.edit)
 router.route('/delete/:collectionId').delete(controller.delete)
 router.route('/get/:collectionId').get(controller.get)

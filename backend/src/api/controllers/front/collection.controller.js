@@ -4,6 +4,8 @@ const NFT = require('../../models/nfts.model')
 const Collection = require('../../models/collection.model')
 const Categories = require('../../models/categories.model')
 const User = require('../../models/users.model')
+const Category = require('../../models/categories.model')
+
 const validation = require('../../middlewares/front/collectionValidation')
 const {
     SUCCESS_MESSAGE,
@@ -83,6 +85,63 @@ exports.create = async (req, res, next) => {
     }
 }
 
+const getDefaultCategory = async () => {
+    return await Category.findOne({ default: true })
+}
+
+// API to create default collection
+exports.createDefault = async (req, res, next) => {
+    let num = Math.floor(Math.random() * 1000000)
+    const category = await getDefaultCategory()
+
+    try {
+        let payload = {
+            userId: req.body.userId,
+            categoryId: category.id,
+            name: category.name + '#' + num,
+            url: '',
+            description: '',
+            ownerAddress: req.body.ownerAddress,
+            deploy: false,
+            abi: [],
+            contractAddress: req.body.contractAddress
+                ? req.body.contractAddress
+                : '',
+            blockchainType: req.body.blockchainType,
+            logo: 'null',
+            featuredImg: '',
+            banner: '',
+            isApproved: true,
+        }
+
+        let existingCollection = await Collection.findOne({
+            name: new RegExp(payload.name, 'gi'),
+            userId: payload.userId,
+        })
+
+        if (existingCollection) {
+            do {
+                num = Math.floor(Math.random() * 1000000)
+                payload.name = 'Default Collection' + '#' + num
+
+                existingCollection = await Collection.findOne({
+                    name: new RegExp(payload.name, 'gi'),
+                    userId: payload.userId,
+                })
+            } while (existingCollection)
+        }
+
+        const collection = await Collection.create(payload)
+        return res.status(HTTP_STATUS_CODE.CREATED).send({
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.COLLECTION_CREATED,
+            collection,
+        })
+    } catch (error) {
+        return next(error)
+    }
+}
+
 // API to edit collection
 exports.edit = async (req, res, next) => {
     try {
@@ -92,7 +151,10 @@ exports.edit = async (req, res, next) => {
                 { $set: { isApproved: true } },
                 { new: true }
             )
-            await NFT.updateMany({userId:req.body.userId},{isApproved:true})
+            await NFT.updateMany(
+                { userId: req.body.userId },
+                { isApproved: true }
+            )
             return res.send({
                 success: SUCCESS_STATUS.TRUE,
                 message: SUCCESS_MESSAGE.COLLECTION_UPDATED,
@@ -451,8 +513,8 @@ exports.myCollectionList = async (req, res, next) => {
                         username: { $first: '$user.username' },
                         profileImage: { $first: '$user.profileImage' },
                         blockchainType: { $first: '$blockchainType' },
-                        createdAt: { $first: '$createdAt'},
-                        contractAddress:{$first: '$contractAddress' },
+                        createdAt: { $first: '$createdAt' },
+                        contractAddress: { $first: '$contractAddress' },
                         isApproved: { $first: '$isApproved' },
                     },
                 },
