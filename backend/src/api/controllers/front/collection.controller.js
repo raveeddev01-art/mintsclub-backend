@@ -85,14 +85,14 @@ exports.create = async (req, res, next) => {
     }
 }
 
-const defaultCategoryHelper = async () => {
+const getDefaultCategory = async () => {
     return await Category.findOne({ default: true })
 }
 
 // API to create default collection
 exports.createDefault = async (req, res, next) => {
     let num = Math.floor(Math.random() * 1000000)
-    const category = await defaultCategoryHelper()
+    const category = await getDefaultCategory()
 
     try {
         let payload = {
