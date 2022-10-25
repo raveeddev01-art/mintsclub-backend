@@ -148,7 +148,7 @@ exports.live = async (req, res, next) => {
                     nftId: { $first: '$nft._id' },
                     nftName: { $first: '$nft.name' },
                     nftImage: { $first: '$nft.image' },
-                    compressedFile:{$first: '$nft.compressedFile'},
+                    compressedFile: { $first: '$nft.compressedFile' },
                     currentPrice: { $first: '$nft.currentPrice' },
                     fileType: { $first: '$nft.fileType' },
                 },
@@ -280,7 +280,15 @@ exports.buyNow = async (req, res, next) => {
         const nftAuctionDetail = await nftAuctions.findOne({
             nftId: payload.nftId,
         })
-
+        
+        //in lazy minting case
+        if (req.body?.tokenId) {
+            await NFT.findByIdAndUpdate(
+                { _id: payload.nftId },
+                { $set: { tokenId: req.body.tokenId } },
+                { new: true }
+            )
+        }
         if (buyNftDetail && nftAuctionDetail?.copiesForAuction > 0) {
             if (
                 buyNftDetail.remainingCopies >
@@ -330,7 +338,7 @@ exports.buyNow = async (req, res, next) => {
                     buyNftDetail.remainingCopies -
                     nftAuctionDetail?.copiesForAuction
 
-                    const newPayloadCopies = {remainingCopies}
+                const newPayloadCopies = { remainingCopies }
                 // const newPayloadCopies = {
                 //     "remainingCopies": remainingCopies,
                 // }
@@ -489,7 +497,7 @@ exports.endAuction = async (req, res, next) => {
                     auctionEndNft[0]?.nftId?.remainingCopies -
                     auctionEndNft[0]?.copiesForAuction
 
-                const nftUpdateNewPayload = {remainingCopies}
+                const nftUpdateNewPayload = { remainingCopies }
                 const nftUpdate = await NFT.findByIdAndUpdate(
                     { _id: auctionEndNft[0]?.nftId?._id },
                     { $set: nftUpdateNewPayload }

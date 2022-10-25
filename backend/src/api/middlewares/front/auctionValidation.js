@@ -4,7 +4,7 @@ const validateNFTFixedTAuctionSchema = (data) => {
     const schema = Joi.object().keys({
         nftId: Joi.string().alphanum().min(12).max(24).required(),
         copiesForAuction: Joi.number().min(0).max(100000).required(),
-        sellId: Joi.number().required(),
+        sellId: Joi.number().allow(null),
         sellingMethod: Joi.number().valid(1, 2).required(),
         signature:Joi.string(),
         blockchainType:Joi.string().allow(''),
@@ -73,6 +73,7 @@ const validateBuyNowSchema = (data) => {
         ownerAddress: Joi.string()
             .regex(/^0x[a-fA-F0-9]{40}$/)
             .required(),
+        tokenId:Joi.number().optional()    
     })
     const options = {
         errors: {
