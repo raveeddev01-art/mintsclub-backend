@@ -4,6 +4,8 @@ const NFT = require('../../models/nfts.model')
 const Collection = require('../../models/collection.model')
 const Categories = require('../../models/categories.model')
 const User = require('../../models/users.model')
+const Category = require('../../models/categories.model')
+
 const validation = require('../../middlewares/front/collectionValidation')
 const {
     SUCCESS_MESSAGE,
@@ -83,14 +85,20 @@ exports.create = async (req, res, next) => {
     }
 }
 
+const defaultCategoryHelper = async () => {
+    return await Category.findOne({ default: true })
+}
+
 // API to create default collection
 exports.createDefault = async (req, res, next) => {
     let num = Math.floor(Math.random() * 1000000)
+    const category = await defaultCategoryHelper()
+
     try {
         let payload = {
             userId: req.body.userId,
-            categoryId: req.body.categoryId,
-            name: req.body.name + '#' + num,
+            categoryId: category.id,
+            name: category.name + '#' + num,
             url: '',
             description: '',
             ownerAddress: req.body.ownerAddress,

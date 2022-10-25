@@ -10,6 +10,7 @@ const CategorySchema = new mongoose.Schema(
         description: { type: String },
         image: { type: String, required: true },
         status: { type: Boolean, required: true, default: false },
+        default: { type: Boolean, default: false },
     },
     { timestamps: true }
 )
