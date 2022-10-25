@@ -86,7 +86,6 @@ exports.create = async (req, res, next) => {
 // API to create default collection
 exports.createDefault = async (req, res, next) => {
     let num = Math.floor(Math.random() * 1000000)
-    console.log('req.body.userId', req.body)
     try {
         let payload = {
             userId: req.body.userId,
@@ -104,6 +103,7 @@ exports.createDefault = async (req, res, next) => {
             logo: 'null',
             featuredImg: '',
             banner: '',
+            isApproved: true,
         }
 
         let existingCollection = await Collection.findOne({
