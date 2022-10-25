@@ -39,11 +39,19 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
 //     optionsSuccessStatus: 200, // For legacy browser support
 // }
 // app.use(cors(corsOptions))
-let corsOptions = {
-    origin: '*',
-    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-}
-app.use(cors(corsOptions))
+// let corsOptions = {
+//     origin: '*',
+//     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+// }
+// app.use(cors(corsOptions))
+app.use(
+    cors({
+        methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH'],
+    })
+)
+// app.use(cors({
+//     origin: '*'
+// }));
 
 // error handler
 // eslint-disable-next-line no-unused-vars
