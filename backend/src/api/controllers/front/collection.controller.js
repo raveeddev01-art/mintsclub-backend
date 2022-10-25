@@ -89,8 +89,8 @@ exports.createDefault = async (req, res, next) => {
     try {
         let payload = {
             userId: req.body.userId,
-            categoryId: '625579af2b58bd0bf348057d',
-            name: 'Default Collection' + '#' + num,
+            categoryId: req.body.categoryId,
+            name: req.body.name + '#' + num,
             url: '',
             description: '',
             ownerAddress: req.body.ownerAddress,
