@@ -136,60 +136,6 @@ exports.get = async (req, res, next) => {
         payload.nftId = ObjectId(payload.nftId)
 
         let nftDetail = await helpers.nft.getNftDetailPipeline(payload.nftId)
-        // const pipeline = [
-        //     {
-        //         $match: { _id: ObjectId(payload.nftId) },
-        //     },
-        //     {
-        //         $lookup: {
-        //             from: 'auctions',
-        //             foreignField: 'nftId',
-        //             localField: '_id',
-        //             as: 'auction',
-        //             pipeline: [
-        //                 {
-        //                     $match: {
-        //                         $expr: { $eq: ['$auctionEnded', false] },
-        //                     },
-        //                 },
-        //             ],
-        //         },
-        //     },
-        //     {
-        //         $unwind: {
-        //             path: '$auction',
-        //             preserveNullAndEmptyArrays: true,
-        //         },
-        //     },
-        //     {
-        //         $lookup: {
-        //             from: 'users',
-        //             foreignField: '_id',
-        //             localField: 'userId',
-        //             as: 'user',
-        //         },
-        //     },
-        //     {
-        //         $unwind: {
-        //             path: '$user',
-        //         },
-        //     },
-        //     {
-        //         $lookup: {
-        //             from: 'collections',
-        //             foreignField: '_id',
-        //             localField: 'collectionId',
-        //             as: 'collection',
-        //         },
-        //     },
-        //     {
-        //         $unwind: {
-        //             path: '$collection',
-        //         },
-        //     },
-        // ]
-
-        // let nftDetail = await NFT.aggregate(pipeline)
 
         nftDetail = nftDetail[0]
         if (!nftDetail) {
@@ -327,89 +273,6 @@ exports.list = async (req, res, next) => {
             total,
             userDefaultImage
         )
-
-        // const nfts = NFT.aggregate([
-        //     {
-        //         $sort: sortFilters,
-        //     },
-        //     {
-        //         $lookup: {
-        //             from: 'auctions',
-        //             foreignField: 'nftId',
-        //             localField: '_id',
-        //             as: 'auction',
-        //         },
-        //     },
-        //     {
-        //         $unwind: {
-        //             path: '$auction',
-        //             preserveNullAndEmptyArrays: true,
-        //         },
-        //     },
-        //     {
-        //         $lookup: {
-        //             from: 'users',
-        //             foreignField: '_id',
-        //             localField: 'ownerId',
-        //             as: 'owner',
-        //         },
-        //     },
-        //     {
-        //         $unwind: {
-        //             path: '$owner',
-        //             preserveNullAndEmptyArrays: true,
-        //         },
-        //     },
-        //     { $match: filter },
-        //     { $skip: limit * (page - 1) },
-        //     { $limit: limit },
-        //     {
-        //         $project: {
-        //             _id: 1,
-        //             name: 1,
-        //             image: 1,
-        //             description: 1,
-        //             fileType: 1,
-        //             copies: 1,
-        //             currentPrice: 1,
-        //             collectionId: 1,
-        //             blockchainType: 1,
-        //             ownerId: 1,
-        //             creatorId: 1,
-        //             userId: 1,
-        //             remainingCopies: 1,
-        //             ownerAddress: 1,
-        //             compressedFile: 1,
-        //             owner: {
-        //                 _id: '$owner._id',
-        //                 username: '$owner.username',
-        //                 profilePhoto: {
-        //                     $ifNull: ['$owner.profileImage', userDefaultImage],
-        //                 },
-        //             },
-        //             auction: {
-        //                 _id: '$auction._id',
-        //                 highestBid: '$auction.highestBid',
-        //                 sellingMethod: '$auction.sellingMethod',
-        //                 copiesForAuction: '$auction.copiesForAuction',
-        //                 sellId: '$auction.sellId',
-        //                 auctionStartDate: '$auction.auctionStartDate',
-        //                 auctionEndDate: '$auction.auctionEndDate',
-        //                 auctionEnded: '$auction.auctionEnded',
-        //             },
-        //         },
-        //     },
-        // ])
-        // const nftLiting = await Promise.all([total, nfts])
-        // const allNfts = nftLiting[1]
-        // for (const nft of allNfts) {
-        //     const findCount = await Likes.findOne().where('nftId', nft._id)
-        //     nft.likeCount = 0
-        //     if (findCount) {
-        //         nft.likeCount = findCount.count
-        //     }
-        // }
-
         return res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.NFTs_FETCHED,
@@ -456,35 +319,6 @@ exports.updateNft = async (req, res, next) => {
             copies: req.body.copies,
             metaData: req.body.metaData,
         }
-        // nft: {
-        //     userId: ENV.getUserKeys("_id")._id,
-        //     ownerId: ENV.getUserKeys("_id")._id,
-        //     creatorId: ENV.getUserKeys("_id")._id,
-        //     properties: [],
-        //     levels: [],
-        //     stats: [],
-        //     image: "",
-        //     name: "",
-        //     description: "",
-        //     copies: "",
-        //     collectionId: "",
-        //     ownerAddress: "",
-        //     categoryId: "",
-        //     status: 1, // 1 = put on sale, 2 = instant sale price, 3 = unlock purchased
-        //   }
-        // const { error } = validation.validateEditNftSchema(payload)
-
-        // if (error) {
-        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-        //         success: SUCCESS_STATUS.FALSE,
-        //         message: error?.details[0]?.message,
-        //     })
-        // }
-        // if (req.files && req.files.image) {
-        //     const image = req.files.image[0]
-        //     const imgData = fs.readFileSync(image.path)
-        //     payload.image = await addImage(imgData)
-        // }
 
         if (!payload.image) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
@@ -492,22 +326,6 @@ exports.updateNft = async (req, res, next) => {
                 message: ERROR_MESSAGE.IMAGE_REQUIRED,
             })
         }
-        // const ownerId = payload.userId
-
-        // let payloadProperties = {
-        //   attributes: payload.attributes,
-        //   levels: payload.levels,
-        //   stats: payload.stats,
-        // };
-
-        // payload.metaData = await addContent({
-        //     name: payload.name,
-        //     description: payload.description,
-        //     image: payload.image,
-        //     // properties: payloadProperties,
-        //     nftOwnerId: ownerId,
-        //     ownerAddress: payload.ownerAddress,
-        // })
 
         const updateNft = await NFT.findByIdAndUpdate(
             { _id: payload.nftId },
