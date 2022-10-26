@@ -1,7 +1,8 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
-const cors = require('cors')
+// const cors = require('cors')
+const helmet = require('helmet')
 const adminRoutes = require('../api/routes/v1/admin/index')
 const frontRoutes = require('../api/routes/v1/front/index')
 const error = require('../api/middlewares/error')
@@ -39,11 +40,11 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
 //     optionsSuccessStatus: 200, // For legacy browser support
 // }
 // app.use(cors(corsOptions))
-let corsOptions = {
-    origin: '*',
-    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-}
-app.use(cors(corsOptions))
+// let corsOptions = {
+//     origin: '*',
+//     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+// }
+// app.use(cors(corsOptions))
 
 // error handler
 // eslint-disable-next-line no-unused-vars
@@ -54,6 +55,7 @@ app.use(cors(corsOptions))
 //         data: {},
 //     })
 // })
+app.use(helmet())
 // compress all responses
 app.use(compression())
 // app.use((req, res, next) => {
