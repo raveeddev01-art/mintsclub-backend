@@ -1,8 +1,8 @@
-const helmet = require('helmet')
 const express = require('express')
+const helmet = require('helmet')
 const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
-// const cors = require('cors')
+const cors = require('cors')
 const adminRoutes = require('../api/routes/v1/admin/index')
 const frontRoutes = require('../api/routes/v1/front/index')
 const error = require('../api/middlewares/error')
@@ -23,13 +23,19 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
 
 // app.use(bearerToken())
 
-// app.use(methodOverride())
-// const apiRequestLimiterAll = rateLimit({
-//     windowMs: 15 * 60 * 1000, // 15 minutes
-//     max: 90000,
-// })
+app.use(methodOverride())
+const apiRequestLimiterAll = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 90000,
+})
 
-// app.use('/v1/', apiRequestLimiterAll)
+app.use('/v1/', apiRequestLimiterAll)
+
+let corsOptions = {
+    origin: '*',
+    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
+app.use(cors(corsOptions))
 
 // let corsOptions = {
 //     origin: [
@@ -39,12 +45,6 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
 //     ],
 //     optionsSuccessStatus: 200, // For legacy browser support
 // }
-// app.use(cors(corsOptions))
-// let corsOptions = {
-//     origin: '*',
-//     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-// }
-// app.use(cors(corsOptions))
 
 // error handler
 // eslint-disable-next-line no-unused-vars
@@ -55,6 +55,7 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
 //         data: {},
 //     })
 // })
+
 app.use(helmet.contentSecurityPolicy())
 app.use(helmet.crossOriginEmbedderPolicy())
 app.use(helmet.crossOriginOpenerPolicy())
@@ -70,17 +71,18 @@ app.use(helmet.originAgentCluster())
 app.use(helmet.permittedCrossDomainPolicies())
 app.use(helmet.referrerPolicy())
 app.use(helmet.xssFilter())
+
 // compress all responses
 app.use(compression())
-// app.use((req, res, next) => {
-//     res.setHeader('Access-Control-Allow-Origin', '*')
-//     res.setHeader(
-//         'Access-Control-Allow-Methods',
-//         'OPTIONS, GET, POST, PUT, PATCH, DELETE' // what matters here is that OPTIONS is present
-//     )
-//     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-//     next()
-// })
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader(
+        'Access-Control-Allow-Methods',
+        'OPTIONS, GET, POST, PUT, PATCH, DELETE' // what matters here is that OPTIONS is present
+    )
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    next()
+})
 // mount admin api v1 routes
 app.use('/v1/admin', adminRoutes)
 
