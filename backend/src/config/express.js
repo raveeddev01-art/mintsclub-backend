@@ -1,5 +1,4 @@
 const express = require('express')
-const helmet = require('helmet')
 const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
 const cors = require('cors')
@@ -21,7 +20,7 @@ const app = express()
 app.use(bodyParser.json({ limit: '50mb' }))
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
 
-// app.use(bearerToken())
+app.use(bearerToken())
 
 app.use(methodOverride())
 const apiRequestLimiterAll = rateLimit({
@@ -36,41 +35,6 @@ let corsOptions = {
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 app.use(cors(corsOptions))
-
-// let corsOptions = {
-//     origin: [
-//         'https://mintsclub-v3-marketplace.invo.zone',
-//         'http://localhost:3000',
-//         'https://mintsclub.io',
-//     ],
-//     optionsSuccessStatus: 200, // For legacy browser support
-// }
-
-// error handler
-// eslint-disable-next-line no-unused-vars
-// app.use(function (err, req, res, next) {
-//     res.status(err.status || 500).send({
-//         status: err.status,
-//         message: err.message,
-//         data: {},
-//     })
-// })
-
-app.use(helmet.contentSecurityPolicy())
-app.use(helmet.crossOriginEmbedderPolicy())
-app.use(helmet.crossOriginOpenerPolicy())
-app.use(helmet.crossOriginResourcePolicy())
-app.use(helmet.dnsPrefetchControl())
-app.use(helmet.expectCt())
-app.use(helmet.frameguard())
-app.use(helmet.hidePoweredBy())
-app.use(helmet.hsts())
-app.use(helmet.ieNoOpen())
-app.use(helmet.noSniff())
-app.use(helmet.originAgentCluster())
-app.use(helmet.permittedCrossDomainPolicies())
-app.use(helmet.referrerPolicy())
-app.use(helmet.xssFilter())
 
 // compress all responses
 app.use(compression())
@@ -90,22 +54,21 @@ app.use('/v1/admin', adminRoutes)
 app.use('/v1/front', frontRoutes)
 
 // Admin Site Build Path
-//app.use('/admin/', express.static(path.join(__dirname, '../../admin')))
-//app.get('/admin/*', function (req, res) {
-//    res.sendFile(path.join(__dirname, '../../admin', 'index.html'))
-//})
-// TODO: Handle errors with centralized way.
+app.use('/admin/', express.static(path.join(__dirname, '../../admin')))
+app.get('/admin/*', function (req, res) {
+    res.sendFile(path.join(__dirname, '../../admin', 'index.html'))
+})
 
 // if error is not an instanceOf APIError, convert it.
-// app.use(error.converter)
+app.use(error.converter)
 
 // catch 404 and forward to error handler
-// app.use(error.notFound)
+app.use(error.notFound)
+
 // error handler, send stacktrace only during development
-// app.use(error.handler)
+app.use(error.handler)
 
 //start cron jobs
 // job.startCron();
-// job.batchCrone()
 
 module.exports = app
