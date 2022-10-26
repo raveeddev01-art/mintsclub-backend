@@ -54,19 +54,19 @@ app.use('/v1/admin', adminRoutes)
 app.use('/v1/front', frontRoutes)
 
 // Admin Site Build Path
-app.use('/admin/', express.static(path.join(__dirname, '../../admin')))
-app.get('/admin/*', function (req, res) {
-    res.sendFile(path.join(__dirname, '../../admin', 'index.html'))
-})
+// app.use('/admin/', express.static(path.join(__dirname, '../../admin')))
+// app.get('/admin/*', function (req, res) {
+//     res.sendFile(path.join(__dirname, '../../admin', 'index.html'))
+// })
 
 // if error is not an instanceOf APIError, convert it.
-app.use(error.converter)
+// app.use(error.converter)
 
 // catch 404 and forward to error handler
-app.use(error.notFound)
+// app.use(error.notFound)
 
 // error handler, send stacktrace only during development
-app.use(error.handler)
+// app.use(error.handler)
 
 //start cron jobs
 // job.startCron();
