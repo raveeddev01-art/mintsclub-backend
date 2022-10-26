@@ -1,7 +1,6 @@
 /* eslint-disable no-undef */
 const ObjectId = require('mongoose').Types.ObjectId
 const UserModal = require('../../models/users.model')
-const Bid = require('../../models/bids.model')
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
 const validation = require('../../middlewares/front/validation')
@@ -11,6 +10,7 @@ const { mailChimp } = require('../../../config/vars')
 const nacl = require('tweetnacl')
 const algosdk = require('algosdk')
 const { base58_to_binary } = require('base58-js')
+const helpers = require('../../helpers')
 
 const {
     ERROR_MESSAGE,
@@ -37,16 +37,7 @@ exports.create = async (req, res, next) => {
 exports.updateProfile = async (req, res, next) => {
     try {
         if (req.body.isApproved) {
-            let payload = {
-                userId: req.body.userId,
-                isApproved: true,
-            }
-
-            const user = await UserModal.findByIdAndUpdate(
-                { _id: ObjectId(payload.userId) },
-                { $set: payload },
-                { new: true }
-            )
+            let user = await helpers.user.approvedUserProfileUpdate(req.body)
             return res.status(HTTP_STATUS_CODE.OK).send({
                 success: SUCCESS_STATUS.TRUE,
                 user,
@@ -102,26 +93,10 @@ exports.updateProfile = async (req, res, next) => {
         }
 
         const newPayload = { ...payload, ...imagesPayload }
-        let user = await UserModal.findByIdAndUpdate(
-            { _id: ObjectId(newPayload.userId) },
-            { $set: newPayload },
-            { new: true }
-        )
-        let userbids = await Bid.find({ bidBy: user._id })
-        for (let bid of userbids) {
-            const UpdateBidProfile = {
-                bidByProfile: user.profileImage,
-            }
-            await Bid.updateMany(
-                { bidBy: bid.bidBy },
-                { $set: UpdateBidProfile }
-            )
-        }
-
+        let user = await helpers.user.updateUserProfile(newPayload)
         return res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             user,
-
             message: SUCCESS_MESSAGE.PROFILE_UPDATED,
         })
     } catch (error) {
@@ -269,7 +244,7 @@ exports.signUser = async (req, res, next) => {
         const { address } = req.params
         const { blockchainType } = req.body
 
-        const result = await UserModal.find({ address,blockchainType })
+        const result = await UserModal.find({ address, blockchainType })
         res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             users: result,
@@ -318,8 +293,8 @@ exports.authenticate = async (req, res, next) => {
             req.body
         )
 
-        let user = await UserModal.findOne({ address,blockchainType })
-        console.log(user,"user")
+        let user = await UserModal.findOne({ address, blockchainType })
+        console.log(user, 'user')
         if (!user) {
             return res.status(HTTP_STATUS_CODE.OK).send({
                 success: SUCCESS_STATUS.FALSE,
@@ -328,16 +303,16 @@ exports.authenticate = async (req, res, next) => {
         }
 
         const accessToken = await user.token()
-        console.log(accessToken,"accessToken before")
+        console.log(accessToken, 'accessToken before')
         user = user._doc
-        console.log(user,"user after")
+        console.log(user, 'user after')
 
         user.isApproved = true
         const data = {
             ...user,
             accessToken,
         }
-        console.log(data,"data==>")
+        console.log(data, 'data==>')
 
         const msg = `I am signing my one-time nonce: ${user.nounce}`
         if (blockchainType == 'algorand') {
@@ -350,8 +325,8 @@ exports.authenticate = async (req, res, next) => {
             if (result) {
                 user.nounce = Math.floor(Math.random() * 1000000)
                 await UserModal.findOneAndUpdate(
-                    { _id: user._id ,blockchainType},
-                    {  nounce:user.nounce },
+                    { _id: user._id, blockchainType },
+                    { nounce: user.nounce }
                 )
 
                 return res.status(HTTP_STATUS_CODE.OK).send({
@@ -375,18 +350,18 @@ exports.authenticate = async (req, res, next) => {
 
             if (signAddress.toLowerCase() === address.toLowerCase()) {
                 user.nounce = Math.floor(Math.random() * 1000000)
-            console.log(user,"setting user")
+                console.log(user, 'setting user')
 
                 //need to update
                 await UserModal.findOneAndUpdate(
-                    { _id: user._id ,blockchainType},
-                    { nounce:user.nounce },
+                    { _id: user._id, blockchainType },
+                    { nounce: user.nounce }
                 )
 
                 return res.status(HTTP_STATUS_CODE.OK).send({
                     success: SUCCESS_STATUS.TRUE,
                     message: SUCCESS_MESSAGE.USER_AUTHENTICATED,
-                    data:{...user,accessToken},
+                    data: { ...user, accessToken },
                 })
             }
             return res.status(HTTP_STATUS_CODE.UNAUTHORIZED).send({
@@ -412,8 +387,8 @@ exports.authenticate = async (req, res, next) => {
             user.nounce = Math.floor(Math.random() * 1000000)
             //need to update
             await UserModal.findOneAndUpdate(
-                { _id: user._id,blockchainType },
-                {  nounce:user.nounce },
+                { _id: user._id, blockchainType },
+                { nounce: user.nounce }
             )
             return res.status(HTTP_STATUS_CODE.OK).send({
                 success: SUCCESS_STATUS.TRUE,
@@ -441,4 +416,3 @@ exports.signNonce = async (request, response, next) => {
         })
     }
 }
-

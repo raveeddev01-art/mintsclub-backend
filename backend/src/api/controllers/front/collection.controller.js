@@ -7,6 +7,8 @@ const User = require('../../models/users.model')
 const Category = require('../../models/categories.model')
 
 const validation = require('../../middlewares/front/collectionValidation')
+const helpers = require('../../helpers')
+
 const {
     SUCCESS_MESSAGE,
     ERROR_MESSAGE,
@@ -337,109 +339,17 @@ exports.list = async (req, res, next) => {
             if (page > Math.ceil(total / limit) && total > 0)
                 page = Math.ceil(total / limit)
         }
-
-        const pipeline = [
-            {
-                $match: filter,
-            },
-            { $sort: { name: 1 } },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'userId',
-                    foreignField: '_id',
-                    as: 'user',
-                },
-            },
-            {
-                $lookup: {
-                    from: 'nfts',
-                    localField: 'nft',
-                    foreignField: '_id',
-                    as: 'totalnft',
-                },
-            },
-            {
-                $lookup: {
-                    from: 'nfts',
-                    localField: 'nft',
-                    foreignField: '_id',
-                    as: 'nfts',
-                    pipeline: [
-                        { $match: { $expr: { $eq: ['$fileType', 'image'] } } },
-                        { $limit: 3 },
-                    ],
-                },
-            },
-            {
-                $addFields: {
-                    NftsCount: { $size: '$totalnft' },
-                },
-            },
-
-            {
-                $unwind: {
-                    path: '$nfts',
-                    preserveNullAndEmptyArrays: true,
-                },
-            },
-
-            {
-                $group: {
-                    _id: '$_id',
-                    nftDetail: {
-                        $push: {
-                            image: '$nfts.image',
-                            fileType: '$nfts.fileType',
-                        },
-                    },
-                    TotalNfts: { $first: '$NftsCount' },
-                    userId: { $first: '$userId' },
-                    categoryId: { $first: '$categoryId' },
-                    name: { $first: '$name' },
-                    description: { $first: '$description' },
-                    blockchainType: { $first: '$blockchainType' },
-                    logo: { $first: '$logo' },
-                    featuredImg: { $first: '$featuredImg' },
-                    ownerAddress: { $first: '$ownerAddress' },
-                    banner: { $first: '$banner' },
-                    username: { $first: '$user.username' },
-                    profileImage: { $first: '$user.profileImage' },
-                    createdAt: { $first: '$createdAt' },
-                    contractAddress: { $first: '$contractAddress' },
-                    isApproved: { $first: '$isApproved' },
-                },
-            },
-            { $sort: { createdAt: -1 } },
-        ]
-
-        const newTotal = await Collection.aggregate(pipeline)
-
-        const totalRecords = newTotal.length
-
-        if (!all) {
-            pipeline.push({ $skip: limit * (page - 1) })
-            pipeline.push({ $limit: limit })
-        }
-
-        const collections = await Collection.aggregate(pipeline)
+        const data = await helpers.collection.collectionListPipeline(
+            filter,
+            all,
+            limit,
+            page
+        )
 
         return res.send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.COLLECTIONS_FETCHED,
-            data: {
-                collections,
-
-                pagination: {
-                    page,
-                    limit,
-                    totalRecords,
-                    pages:
-                        Math.ceil(totalRecords / limit) <= 0
-                            ? 1
-                            : Math.ceil(totalRecords / limit),
-                },
-            },
+            data,
         })
     } catch (error) {
         return next(error)
@@ -466,95 +376,17 @@ exports.myCollectionList = async (req, res, next) => {
             limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
 
             total = Collection.find({}).where('userId', userId)
-
-            const pipeline = [
-                {
-                    $match: { userId: ObjectId(userId) },
-                },
-                {
-                    $lookup: {
-                        from: 'users',
-                        localField: 'userId',
-                        foreignField: '_id',
-                        as: 'user',
-                    },
-                },
-                {
-                    $lookup: {
-                        from: 'nfts',
-                        foreignField: '_id',
-                        localField: 'nft',
-                        as: 'nfts',
-                    },
-                },
-                {
-                    $unwind: {
-                        path: '$nfts',
-                        preserveNullAndEmptyArrays: true,
-                    },
-                },
-                {
-                    $group: {
-                        _id: '$_id',
-                        nftDetail: {
-                            $push: {
-                                image: '$nfts.image',
-                                fileType: '$nfts.fileType',
-                            },
-                        },
-                        userId: { $first: '$userId' },
-                        categoryId: { $first: '$categoryId' },
-                        name: { $first: '$name' },
-                        description: { $first: '$description' },
-                        logo: { $first: '$logo' },
-                        featuredImg: { $first: '$featuredImg' },
-                        banner: { $first: '$banner' },
-                        ownerAddress: { $first: '$ownerAddress' },
-                        username: { $first: '$user.username' },
-                        profileImage: { $first: '$user.profileImage' },
-                        blockchainType: { $first: '$blockchainType' },
-                        createdAt: { $first: '$createdAt' },
-                        contractAddress: { $first: '$contractAddress' },
-                        isApproved: { $first: '$isApproved' },
-                    },
-                },
-                { $sort: { createdAt: -1 } },
-            ]
-
-            const newTotal = Collection.aggregate(pipeline)
-            const collectionList = await Promise.all([total, newTotal])
-
-            if (
-                page > Math.ceil(collectionList[0] / limit) &&
-                collectionList[0] > 0
+            userId = ObjectId(userId)
+            const data = await helpers.collection.collectionListByUserId(
+                total,
+                userId,
+                limit,
+                page
             )
-                page = Math.ceil(collectionList[0] / limit)
-
-            const totalRecords = collectionList[1]?.length
-
-            pipeline.push({ $skip: limit * (page - 1) })
-            pipeline.push({ $limit: limit })
-
-            const Collections = await Collection.aggregate(pipeline)
-
             return res.status(HTTP_STATUS_CODE.OK).send({
                 success: SUCCESS_STATUS.TRUE,
                 message: SUCCESS_MESSAGE.MY_COLLECTIONS_FETCHED,
-                data: {
-                    collections: {
-                        totalRecords,
-                        Collections,
-                    },
-                    pagination: {
-                        page,
-                        limit,
-                        totalRecords,
-                        pages:
-                            Math.ceil(totalRecords / limit) <= 0
-                                ? 1
-                                : Math.ceil(totalRecords / limit),
-                    },
-                },
+                data,
             })
         }
         return res.status(HTTP_STATUS_CODE.OK).send({
@@ -597,125 +429,17 @@ exports.popular = async (req, res, next) => {
         limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
 
         total = Collection.countDocuments({})
-
-        const pipeline = [
-            {
-                $match: filter,
-            },
-            {
-                $lookup: {
-                    from: 'likesschemas',
-                    foreignField: 'nftId',
-                    localField: 'nft',
-                    as: 'likesschemas',
-                },
-            },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'userId',
-                    foreignField: '_id',
-                    as: 'user',
-                },
-            },
-
-            {
-                $lookup: {
-                    from: 'nfts',
-                    localField: 'nft',
-                    foreignField: '_id',
-                    as: 'totalnft',
-                },
-            },
-
-            {
-                $lookup: {
-                    from: 'nfts',
-                    foreignField: '_id',
-                    localField: 'nft',
-                    as: 'nft',
-                    pipeline: [
-                        { $match: { $expr: { $eq: ['$fileType', 'image'] } } },
-                        { $limit: 3 },
-                    ],
-                },
-            },
-
-            {
-                $addFields: {
-                    NftsCount: { $size: '$totalnft' },
-                },
-            },
-
-            {
-                $unwind: {
-                    path: '$nft',
-                    preserveNullAndEmptyArrays: true,
-                },
-            },
-
-            {
-                $group: {
-                    _id: '$_id',
-                    likesCount: { $first: '$likesschemas.count' },
-                    nftDetail: {
-                        $push: {
-                            image: '$nft.image',
-                            fileType: '$nft.fileType',
-                        },
-                    },
-                    TotalNfts: { $first: '$NftsCount' },
-                    userId: { $first: '$userId' },
-                    categoryId: { $first: '$categoryId' },
-                    name: { $first: '$name' },
-                    description: { $first: '$description' },
-                    logo: { $first: '$logo' },
-                    featuredImg: { $first: '$featuredImg' },
-                    banner: { $first: '$banner' },
-                    ownerAddress: { $first: '$ownerAddress' },
-                    soldCopies: {
-                        $push: {
-                            $subtract: ['$nft.copies', '$nft.remainingCopies'],
-                        },
-                    },
-                    username: { $first: '$user.username' },
-                    profileImage: { $first: '$user.profileImage' },
-                },
-            },
-            { $sort: { _id: 1 } },
-        ]
-
-        const newTotal = Collection.aggregate(pipeline)
-
-        const popularCollections = await Promise.all([total, newTotal])
-        if (
-            page > Math.ceil(popularCollections[0] / limit) &&
-            popularCollections[0] > 0
+        const data = await helpers.collection.collectionListPopular(
+            filter,
+            total,
+            limit,
+            page
         )
-            page = Math.ceil(popularCollections[0] / limit)
-
-        const totalRecords = popularCollections[1]?.length
-
-        pipeline.push({ $skip: limit * (page - 1) })
-        pipeline.push({ $limit: limit })
-
-        const collectionsList = await Collection.aggregate(pipeline)
 
         return res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.POPULAR_COLLECTIONS_FETCHED,
-            data: {
-                collectionsList,
-                pagination: {
-                    page,
-                    limit,
-                    totalRecords,
-                    pages:
-                        Math.ceil(totalRecords / limit) <= 0
-                            ? 1
-                            : Math.ceil(totalRecords / limit),
-                },
-            },
+            data,
         })
     } catch (error) {
         return next(error)
