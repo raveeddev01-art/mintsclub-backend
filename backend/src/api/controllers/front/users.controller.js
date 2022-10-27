@@ -3,7 +3,7 @@ const ObjectId = require('mongoose').Types.ObjectId
 const UserModal = require('../../models/users.model')
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
-const validation = require('../../middlewares/front/validation')
+// const validation = require('../../middlewares/front/validation')
 const validUrl = require('valid-url')
 const mailchimp = require('@mailchimp/mailchimp_marketing')
 const { mailChimp } = require('../../../config/vars')
@@ -53,14 +53,14 @@ exports.updateProfile = async (req, res, next) => {
             bio: req.body.bio,
         }
 
-        const { error } = validation.validateUserProfile(payload)
+        // const { error } = validation.validateUserProfile(payload)
         payload.profileImage = req.body.profileImage
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
+        // if (error) {
+        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+        //         success: SUCCESS_STATUS.FALSE,
+        //         message: error?.details[0]?.message,
+        //     })
+        // }
 
         if (req.body.twitterLink && !validUrl.isUri(req.body.twitterLink)) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
@@ -183,14 +183,14 @@ exports.getUser = async (req, res, next) => {
 
         const payload = { userId }
 
-        const { error } = validation.validateUser(payload)
+        // const { error } = validation.validateUser(payload)
 
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
+        // if (error) {
+        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+        //         success: SUCCESS_STATUS.FALSE,
+        //         message: error?.details[0]?.message,
+        //     })
+        // }
         const user = await UserModal.findOne({ _id: ObjectId(payload.userId) })
 
         if (user) {
@@ -260,14 +260,14 @@ exports.createUser = async (req, res, next) => {
         let payload = {
             address: req.body.address,
         }
-        const { error } = validation.validateAddress(payload)
+        // const { error } = validation.validateAddress(payload)
 
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
+        // if (error) {
+        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+        //         success: SUCCESS_STATUS.FALSE,
+        //         message: error?.details[0]?.message,
+        //     })
+        // }
 
         payload.profileImage = null
         payload.totalETH = 0
@@ -410,6 +410,7 @@ exports.authenticate = async (req, res, next) => {
 }
 
 exports.signNonce = async (request, response, next) => {
+    // eslint-disable-next-line no-empty
     try {
         console.log('check')
     } catch (err) {

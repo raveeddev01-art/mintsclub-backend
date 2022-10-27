@@ -5,7 +5,7 @@ const NFTAuction = require('../../models/auctions.model')
 const NftTokens = require('../../models/nftTokens.model')
 const { addImage, addContent } = require('../../utils/upload')
 const ObjectId = require('mongoose').Types.ObjectId
-const validation = require('../../middlewares/front/nftValidation')
+// const validation = require('../../middlewares/front/nftValidation')
 const Likes = require('../../models/likes.model')
 const { userDefaultImage } = require('../../../config/vars')
 const helpers = require('../../helpers')
@@ -37,13 +37,13 @@ exports.create = async (req, res, next) => {
             activeAuction: req.body.activeAuction,
         }
 
-        const { error } = validation.validateNFTSchema(payload)
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
+        // const { error } = validation.validateNFTSchema(payload)
+        // if (error) {
+        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+        //         success: SUCCESS_STATUS.FALSE,
+        //         message: error?.details[0]?.message,
+        //     })
+        // }
 
         if (req.files && req.files.image) {
             const image = req.files.image[0]
@@ -124,16 +124,19 @@ exports.get = async (req, res, next) => {
             nftId,
         }
 
-        const { error } = validation.validateNftId(payload)
+        // const { error } = validation.validateNftId(payload)
 
-        if (error) {
+        // if (error) {
+
+
             // return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
             //     success: SUCCESS_STATUS.FALSE,
             //     message: error?.details[0]?.message,
             // })
-            console.log('error in api', error)
-        }
-        payload.nftId = ObjectId(payload.nftId)
+
+
+        //     console.log('error in api', error)
+        // }
 
         let nftDetail = await helpers.nft.getNftDetailPipeline(payload.nftId)
 
@@ -398,14 +401,14 @@ exports.delete = async (req, res, next) => {
     try {
         const { nftId } = req.params
 
-        const { error } = validation.validateNftId({ nftId })
+        // const { error } = validation.validateNftId({ nftId })
 
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
+        // if (error) {
+        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+        //         success: SUCCESS_STATUS.FALSE,
+        //         message: error?.details[0]?.message,
+        //     })
+        // }
 
         const nftDetail = await NFT.find({ _id: nftId })
         const nft = await NFT.deleteOne({ _id: nftId })

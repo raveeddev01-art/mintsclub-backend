@@ -40,14 +40,14 @@ exports.create = async (req, res, next) => {
             blockchainType: req.body.blockchainType,
             isApproved: req.body.isApproved,
         }
-        const { error } = validation.validateCollectionSchema(payload)
+        // const { error } = validation.validateCollectionSchema(payload)
 
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
+        // if (error) {
+        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+        //         success: SUCCESS_STATUS.FALSE,
+        //         message: error?.details[0]?.message,
+        //     })
+        // }
 
         payload = {
             ...payload,
@@ -124,7 +124,7 @@ exports.createDefault = async (req, res, next) => {
         if (existingCollection) {
             do {
                 num = Math.floor(Math.random() * 1000000)
-                payload.name = 'Default Collection' + '#' + num
+                payload.name = 'Default Collection #' + num
 
                 existingCollection = await Collection.findOne({
                     name: new RegExp(payload.name, 'gi'),
@@ -172,14 +172,14 @@ exports.edit = async (req, res, next) => {
         }
         console.log(payload, 'payload in edit collection')
 
-        const { error } = validation.validateEditCollectionSchema(payload)
+        // const { error } = validation.validateEditCollectionSchema(payload)
 
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
+        // if (error) {
+        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+        //         success: SUCCESS_STATUS.FALSE,
+        //         message: error?.details[0]?.message,
+        //     })
+        // }
         payload = {
             ...payload,
             logo: req.body.logo,
@@ -229,14 +229,14 @@ exports.delete = async (req, res, next) => {
         const { collectionId } = req.params
         console.log(collectionId, 'collecctionId==>')
 
-        const { error } = validation.validateCollectionId({ collectionId })
+        // const { error } = validation.validateCollectionId({ collectionId })
 
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
+        // if (error) {
+        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+        //         success: SUCCESS_STATUS.FALSE,
+        //         message: error?.details[0]?.message,
+        //     })
+        // }
 
         const collection = await Collection.deleteOne({ _id: collectionId })
         if (collection.deletedCount)
@@ -259,14 +259,14 @@ exports.delete = async (req, res, next) => {
 exports.get = async (req, res, next) => {
     try {
         const { collectionId } = req.params
-        const { error } = validation.validateCollectionId({ collectionId })
-        console.log(collectionId, 'collectionId==>')
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
+        // const { error } = validation.validateCollectionId({ collectionId })
+        // console.log(collectionId, 'collectionId==>')
+        // if (error) {
+        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+        //         success: SUCCESS_STATUS.FALSE,
+        //         message: error?.details[0]?.message,
+        //     })
+        // }
 
         let collection = await Collection.findOne({ _id: collectionId })
             .populate([

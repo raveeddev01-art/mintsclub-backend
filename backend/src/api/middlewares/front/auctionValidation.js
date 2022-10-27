@@ -1,6 +1,11 @@
 const Joi = require('@hapi/joi').extend(require('@joi/date'))
-
-const validateNFTFixedTAuctionSchema = (data) => {
+const {
+    SUCCESS_MESSAGE,
+    SUCCESS_STATUS,
+    HTTP_STATUS_CODE,
+    ERROR_MESSAGE,
+} = require('../../../config/constants')
+const validateNFTFixedTAuctionSchema = (req,res,next) => {
     const schema = Joi.object().keys({
         nftId: Joi.string().alphanum().min(12).max(24).required(),
         copiesForAuction: Joi.number().min(0).max(100000).required(),
@@ -28,10 +33,20 @@ const validateNFTFixedTAuctionSchema = (data) => {
             },
         },
     }
-    return schema.validate(data, options)
+
+    const payload = req.body
+
+    const{error} = schema.validate(payload, options)
+    if (error) {
+        return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: error?.details[0]?.message,
+        })
+    }
+    next()
 }
 
-const validateNFTimedTAuctionSchema = (data) => {
+const validateNFTimedTAuctionSchema = (req,res,next) => {
     const schema = Joi.object().keys({
         blockchainType: Joi.string().required().valid('ethereum', 'solana'),
         nftId: Joi.string().alphanum().min(12).max(24).required(),
@@ -78,10 +93,19 @@ const validateNFTimedTAuctionSchema = (data) => {
             },
         },
     }
-    return schema.validate(data, options)
+    const payload = req.body
+
+    const{error} = schema.validate(payload, options)
+    if (error) {
+        return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: error?.details[0]?.message,
+        })
+    }
+    next()
 }
 
-const validateBuyNowSchema = (data) => {
+const validateBuyNowSchema = (req,res,next) => {
     const schema = Joi.object().keys({
         userId: Joi.string().alphanum().min(12).max(24).required(),
         nftId: Joi.string().alphanum().min(12).max(24).required(),
@@ -97,10 +121,18 @@ const validateBuyNowSchema = (data) => {
             },
         },
     }
-    return schema.validate(data, options)
+    const payload = req.body
+    const { error } =  schema.validate(payload, options)
+    if (error) {
+        return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: error?.details[0]?.message,
+        })
+    }
+    next()
 }
 
-const validateAuctionEndSchema = (data) => {
+const validateAuctionEndSchema = (req,res,next) => {
     const schema = Joi.object().keys({
         auctionId: Joi.string().alphanum().min(12).max(24).required(),
     })
@@ -111,7 +143,16 @@ const validateAuctionEndSchema = (data) => {
             },
         },
     }
-    return schema.validate(data, options)
+    const payload = req.body
+ 
+    const { error } =  schema.validate(payload, options)
+    if (error) {
+        return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: error?.details[0]?.message,
+        })
+    }
+    next()
 }
 
 module.exports = {

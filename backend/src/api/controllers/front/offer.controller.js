@@ -1,6 +1,6 @@
 const Offer = require('../../models/offer.model')
 const ObjectId = require('mongoose').Types.ObjectId
-const validation = require('../../middlewares/front/offerValidation')
+// const validation = require('../../middlewares/front/offerValidation')
 const validator = require('../../middlewares/front/validation')
 const {
     ERROR_MESSAGE,
@@ -13,14 +13,14 @@ exports.create = async (req, res, next) => {
     try {
         const payload = req.body
 
-        const { error } = validation.validateOfferSchema(payload)
+        // const { error } = validation.validateOfferSchema(payload)
 
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
+        // if (error) {
+        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+        //         success: SUCCESS_STATUS.FALSE,
+        //         message: error?.details[0]?.message,
+        //     })
+        // }
         const offer = await Offer.create(payload)
 
         return res.status(HTTP_STATUS_CODE.OK).send({
@@ -38,13 +38,13 @@ exports.delete = async (req, res, next) => {
     try {
         const { offerId } = req.params
 
-        const { error } = validator.validateId({ offerId })
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
+        // const { error } = validator.validateId({ offerId })
+        // if (error) {
+        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+        //         success: SUCCESS_STATUS.FALSE,
+        //         message: error?.details[0]?.message,
+        //     })
+        // }
 
         const offer = await Offer.deleteOne({ _id: offerId })
         if (offer && offer.deletedCount)
@@ -109,13 +109,13 @@ exports.list = async (req, res, next) => {
 exports.accept = async (req, res, next) => {
     try {
         const { offerId } = req.body
-        const { error } = validator.validateId({ offerId })
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
+        // const { error } = validator.validateId({ offerId })
+        // if (error) {
+        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+        //         success: SUCCESS_STATUS.FALSE,
+        //         message: error?.details[0]?.message,
+        //     })
+        // }
 
         const offer = await Offer.findOneAndUpdate(
             { _id: offerId },

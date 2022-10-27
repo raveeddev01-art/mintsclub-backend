@@ -1,5 +1,5 @@
 const User = require('../../models/users.model')
-const validation = require('../../middlewares/front/validation')
+// const validation = require('../../middlewares/front/validation')
 const {
     SUCCESS_MESSAGE,
     ERROR_MESSAGE,
@@ -15,14 +15,14 @@ exports.register = async (req, res, next) => {
             isApproved: req.body.isApproved,
         }
 
-        const { error } = validation.validateSignUpSchema(payload)
+        // const { error } = validation.validateSignUpSchema(payload)
 
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
+        // if (error) {
+        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+        //         success: SUCCESS_STATUS.FALSE,
+        //         message: error?.details[0]?.message,
+        //     })
+        // }
 
         const email = payload.email.toLowerCase()
         const address = payload.address
@@ -75,14 +75,14 @@ exports.login = async (req, res, next) => {
             address: req.body.address,
         }
 
-        const { error } = validation.validateAddress(payload)
+        // const { error } = validation.validateAddress(payload)
 
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                data: error?.details[0]?.message,
-            })
-        }
+        // if (error) {
+        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+        //         success: SUCCESS_STATUS.FALSE,
+        //         data: error?.details[0]?.message,
+        //     })
+        // }
         const address = payload.address
         let user = await User.findOne({ address })
         if (!user) {
