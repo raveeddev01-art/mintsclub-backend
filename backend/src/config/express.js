@@ -10,6 +10,7 @@ const rateLimit = require('express-rate-limit')
 const bearerToken = require('express-bearer-token')
 const compression = require('compression')
 const job = require('../cron-jobs/batchUpload')
+const cookieParser = require('cookie-parser') // parse cookie header
 
 /**
  * Express instance
@@ -30,11 +31,23 @@ const apiRequestLimiterAll = rateLimit({
 
 app.use('/v1/', apiRequestLimiterAll)
 
-let corsOptions = {
-    origin: '*',
-    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-}
-app.use(cors(corsOptions))
+// let corsOptions = {
+//     origin: '*',
+//     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+// }
+// app.use(cors(corsOptions))
+
+app.use(cookieParser())
+app.use(
+    cors({
+        origin: [
+            'http://localhost:3000',
+            'https://mintsclub-v3-marketplace.invo.zone',
+        ], // allow to server to accept request from different origin
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+        credentials: true, // allow session cookie from browser to pass through
+    })
+)
 
 // compress all responses
 app.use(compression())
@@ -54,19 +67,19 @@ app.use('/v1/admin', adminRoutes)
 app.use('/v1/front', frontRoutes)
 
 // Admin Site Build Path
-app.use('/admin/', express.static(path.join(__dirname, '../../admin')))
-app.get('/admin/*', function (req, res) {
-    res.sendFile(path.join(__dirname, '../../admin', 'index.html'))
-})
+// app.use('/admin/', express.static(path.join(__dirname, '../../admin')))
+// app.get('/admin/*', function (req, res) {
+//     res.sendFile(path.join(__dirname, '../../admin', 'index.html'))
+// })
 
 // if error is not an instanceOf APIError, convert it.
-app.use(error.converter)
+// app.use(error.converter)
 
 // catch 404 and forward to error handler
-app.use(error.notFound)
+// app.use(error.notFound)
 
 // error handler, send stacktrace only during development
-app.use(error.handler)
+// app.use(error.handler)
 
 //start cron jobs
 // job.startCron();
