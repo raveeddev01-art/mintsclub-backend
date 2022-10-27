@@ -271,6 +271,7 @@ exports.createUser = async (req, res, next) => {
         payload.profileImage = null
         payload.totalETH = 0
         payload.blockchainType = req.body.blockchainType
+        payload.isApproved=false
 
         payload.nounce = Math.floor(Math.random() * 1000000)
         let user = await UserModal.create(payload)
