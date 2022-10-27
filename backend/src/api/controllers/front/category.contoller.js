@@ -4,16 +4,11 @@ exports.list = async (req, res, next) => {
     try {
         let categories = await Category.find({
             status: true,
+            name: { $ne: 'Default Collection' },
         }).sort({
             name: 1,
         })
-        let updatedCategories = []
-        for (let i = 0; i < categories.length; i++) {
-            if (categories[i].name !== 'Default Collection') {
-                updatedCategories.push(categories[i])
-            }
-        }
-        categories = updatedCategories
+
         const total = categories ? categories?.length : 0
         return res.status(200).send({
             success: SUCCESS_STATUS.TRUE,
