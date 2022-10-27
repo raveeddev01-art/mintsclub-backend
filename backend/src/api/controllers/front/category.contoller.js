@@ -10,15 +10,15 @@ exports.list = async (req, res, next) => {
         let updatedCategories = []
         for (let i = 0; i < categories.length; i++) {
             if (categories[i].name !== 'Default Collection') {
-                updatedCollections.push(categories[i])
+                updatedCategories.push(categories[i])
             }
         }
-
-        const total = updatedCollections ? updatedCollections?.length : 0
+        categories = updatedCategories
+        const total = categories ? categories?.length : 0
         return res.status(200).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.CATEGORIES_FETCHED,
-            updatedCategories,
+            categories,
             count: total,
         })
     } catch (error) {
