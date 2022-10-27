@@ -42,6 +42,7 @@ app.use(
     cors({
         origin: [
             'http://localhost:3000',
+            'http://localhost:3001',
             'https://mintsclub-v3-marketplace.invo.zone',
         ], // allow to server to accept request from different origin
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
