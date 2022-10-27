@@ -2,7 +2,10 @@ const Category = require('../../models/categories.model')
 const { SUCCESS_MESSAGE, SUCCESS_STATUS } = require('../../../config/constants')
 exports.list = async (req, res, next) => {
     try {
-        const categories = await Category.find({ status: true }).sort({
+        let categories = await Category.find({
+            status: true,
+            name: { $ne: 'Default Collection' },
+        }).sort({
             name: 1,
         })
 
