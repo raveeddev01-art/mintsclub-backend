@@ -10,10 +10,10 @@ const validateCreateBid = (data) => {
         auctionId: Joi.string().alphanum().min(12).max(24).required(),
         expiryDate: Joi.date().allow(''),
         fromAddress: Joi.string()
-            .regex(/^0x[a-fA-F0-9]{40}$/)
+            // .regex(/^0x[a-fA-F0-9]{40}$/)
             .required(),
         toAddress: Joi.string()
-            .regex(/^0x[a-fA-F0-9]{40}$/)
+            // .regex(/^0x[a-fA-F0-9]{40}$/)
             .required(),
     })
     const options = {
