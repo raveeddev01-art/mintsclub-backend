@@ -218,7 +218,15 @@ exports.create = async (req, res, next) => {
             }
             helpers.auction.addFixedAuction(payload)
         } else {
+            console.log(
+                '🚀 ~ file: auctions.controller.js ~ line 224 ~ exports.create= ~ payload',
+                payload
+            )
             const { error } = validation.validateNFTimedTAuctionSchema(payload)
+            console.log(
+                '🚀 ~ file: auctions.controller.js ~ line 228 ~ exports.create= ~ error',
+                error
+            )
 
             if (error) {
                 return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
@@ -229,6 +237,10 @@ exports.create = async (req, res, next) => {
             helpers.auction.addTimedAuction(payload)
         }
         const nftAuction = await nftAuctions.create(payload)
+        console.log(
+            '🚀 ~ file: auctions.controller.js ~ line 260 ~ exports.create= ~ nftAuction',
+            nftAuction
+        )
         return res.status(HTTP_STATUS_CODE.CREATED).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.NFT_PUT_ON_SELL,

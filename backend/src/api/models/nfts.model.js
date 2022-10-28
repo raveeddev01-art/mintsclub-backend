@@ -42,10 +42,10 @@ const NFTSchema = new mongoose.Schema(
         remainingCopies: { type: Number },
         sellId: { type: Number },
         blockchainType: { type: String, required: true },
-        isApproved:{type:Boolean,required:true},
+        isApproved: { type: Boolean, required: false },
         txnHash: { type: String },
         mint: { type: String },
-        contractAddress:{type:String}
+        contractAddress: { type: String },
     },
     { timestamps: true, collection: 'nfts' }
 )

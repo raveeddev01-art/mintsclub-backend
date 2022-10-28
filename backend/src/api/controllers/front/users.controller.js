@@ -11,6 +11,7 @@ const nacl = require('tweetnacl')
 const algosdk = require('algosdk')
 const { base58_to_binary } = require('base58-js')
 const helpers = require('../../helpers')
+const atob = require('atob')
 
 const {
     ERROR_MESSAGE,
@@ -271,7 +272,7 @@ exports.createUser = async (req, res, next) => {
         payload.profileImage = null
         payload.totalETH = 0
         payload.blockchainType = req.body.blockchainType
-        payload.isApproved=false
+        payload.isApproved = false
 
         payload.nounce = Math.floor(Math.random() * 1000000)
         let user = await UserModal.create(payload)
@@ -410,6 +411,7 @@ exports.authenticate = async (req, res, next) => {
 
 exports.signNonce = async (request, response, next) => {
     try {
+        console.log('check')
     } catch (err) {
         return res.status(HTTP_STATUS_CODE.UNAUTHORIZED).send({
             success: SUCCESS_STATUS.FALSE,
