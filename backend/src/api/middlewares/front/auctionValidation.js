@@ -14,7 +14,7 @@ const validateNFTFixedTAuctionSchema = (data) => {
                 price: Joi.object()
                     .keys({
                         currency: Joi.string().required(),
-                        amount: Joi.number().max(100000).invalid(0).required(),
+                        amount: Joi.number().max(10000000).invalid(0).required(),
                     })
                     .required(),
                 // reserveFor: Joi.string().allow(''),
@@ -59,7 +59,7 @@ const validateNFTimedTAuctionSchema = (data) => {
                 startPrice: Joi.object()
                     .keys({
                         currency: Joi.string().required(),
-                        amount: Joi.number().max(100000).invalid(0).required(),
+                        amount: Joi.number().invalid(0).required(),
                     })
                     .required(),
                 duration: Joi.object()
