@@ -150,8 +150,10 @@ exports.live = async (req, res, next) => {
                     compressedFile: { $first: '$nft.compressedFile' },
                     currentPrice: { $first: '$nft.currentPrice' },
                     fileType: { $first: '$nft.fileType' },
+                    createdAt: { $first: '$createdAt' },
                 },
             },
+            { $sort: { createdAt: -1 }}
         ]
 
         const auctions = nftAuctions.aggregate(pipeline)
