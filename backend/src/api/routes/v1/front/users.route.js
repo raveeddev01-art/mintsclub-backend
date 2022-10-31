@@ -16,13 +16,23 @@ router
     )
 router.route('/creators').post(controller.getCreators)
 router.route('/top-sellers').get(controller.topSellers)
-router.route('/:userId').get(validatorMiddleware.validateUser, controller.getUser)
+router
+    .route('/:userId')
+    .get(validatorMiddleware.validateUser, controller.getUser)
 router.route('/subscribe').post(controller.subscribeUser)
-router.route('/validate/:address').post(controller.signUser)
+router
+    .route('/validate/:address')
+    .post(middleware.authenticate, controller.signUser)
 router
     .route('/createUser')
-    .post(validatorMiddleware.validateAddress, controller.createUser)
-router.route('/authenticate').post(controller.authenticate)
+    .post(
+        middleware.authenticate,
+        validatorMiddleware.validateAddress,
+        controller.createUser
+    )
+router
+    .route('/authenticate')
+    .post(middleware.authenticate, controller.authenticate)
 router.route('/sign-nonce').post(controller.signNonce)
 
 module.exports = router

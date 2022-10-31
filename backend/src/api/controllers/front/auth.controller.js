@@ -15,15 +15,6 @@ exports.register = async (req, res, next) => {
             isApproved: req.body.isApproved,
         }
 
-        // const { error } = validation.validateSignUpSchema(payload)
-
-        // if (error) {
-        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-        //         success: SUCCESS_STATUS.FALSE,
-        //         message: error?.details[0]?.message,
-        //     })
-        // }
-
         const email = payload.email.toLowerCase()
         const address = payload.address
         const username = payload.username
@@ -74,15 +65,6 @@ exports.login = async (req, res, next) => {
         const payload = {
             address: req.body.address,
         }
-
-        // const { error } = validation.validateAddress(payload)
-
-        // if (error) {
-        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-        //         success: SUCCESS_STATUS.FALSE,
-        //         data: error?.details[0]?.message,
-        //     })
-        // }
         const address = payload.address
         let user = await User.findOne({ address })
         if (!user) {

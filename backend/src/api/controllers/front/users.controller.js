@@ -36,6 +36,7 @@ exports.create = async (req, res, next) => {
 }
 
 exports.updateProfile = async (req, res, next) => {
+    console.log('controller test update profile', req.body)
     try {
         if (req.body.isApproved) {
             let user = await helpers.user.approvedUserProfileUpdate(req.body)
@@ -45,7 +46,8 @@ exports.updateProfile = async (req, res, next) => {
                 message: SUCCESS_MESSAGE.PROFILE_UPDATED,
             })
         }
-
+        console.log('loging resq', req.body)
+        console.log('consileing req.files', files)
         payload = {
             email: req.body.email,
             username: req.body.username,
@@ -53,14 +55,7 @@ exports.updateProfile = async (req, res, next) => {
             bio: req.body.bio,
         }
 
-        // const { error } = validation.validateUserProfile(payload)
         payload.profileImage = req.body.profileImage
-        // if (error) {
-        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-        //         success: SUCCESS_STATUS.FALSE,
-        //         message: error?.details[0]?.message,
-        //     })
-        // }
 
         if (req.body.twitterLink && !validUrl.isUri(req.body.twitterLink)) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
@@ -182,15 +177,6 @@ exports.getUser = async (req, res, next) => {
         let { userId } = req.params
 
         const payload = { userId }
-
-        // const { error } = validation.validateUser(payload)
-
-        // if (error) {
-        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-        //         success: SUCCESS_STATUS.FALSE,
-        //         message: error?.details[0]?.message,
-        //     })
-        // }
         const user = await UserModal.findOne({ _id: ObjectId(payload.userId) })
 
         if (user) {
@@ -260,14 +246,6 @@ exports.createUser = async (req, res, next) => {
         let payload = {
             address: req.body.address,
         }
-        // const { error } = validation.validateAddress(payload)
-
-        // if (error) {
-        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-        //         success: SUCCESS_STATUS.FALSE,
-        //         message: error?.details[0]?.message,
-        //     })
-        // }
 
         payload.profileImage = null
         payload.totalETH = 0

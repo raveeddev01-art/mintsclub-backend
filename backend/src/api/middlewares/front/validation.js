@@ -149,7 +149,10 @@ const validateUser = (req,res,next) => {
     next();
 }
 
-const validateUserProfile = (req,res,next) => {
+const validateUserProfile = async (req,res,next) => {
+    console.log('checking= validateUserProfile==', req.userId )
+    console.log('checking= validateUserProfile== files', req.file )
+
     const schema = Joi.object().keys({
         userId: Joi.string().alphanum().min(12).max(24).required(),
         email: Joi.string().email().allow(''),
@@ -164,11 +167,14 @@ const validateUserProfile = (req,res,next) => {
         },
     }
    let payload = {
-        email: req.body.email,
-        username: req.body.username,
-        userId: req.body.userId,
-        bio: req.body.bio,
+           email: req.body.email,
+            username: req.body.username,
+            userId: req.body.userId,
+            bio: req.body.bio,
     }
+    console.log('data of updateeeee:', req.body)
+    console.log('req.files-========', req.file)
+
     const {error} = schema.validate(payload, options)
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({

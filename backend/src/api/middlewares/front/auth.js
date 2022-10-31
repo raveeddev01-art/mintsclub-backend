@@ -45,6 +45,7 @@ exports.authenticate = async (req, res, next) => {
 }
 
 exports.userValidation = async (req, res, next) => {
+    console.log('user middleware:', req.body)
     let flag = true
     req.user = 0
     if (req.headers['x-access-token']) {

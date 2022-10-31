@@ -5,18 +5,10 @@ const {
     SUCCESS_STATUS,
     HTTP_STATUS_CODE,
 } = require('../../../config/constants')
-// const validation = require('../../middlewares/front/itemActivity');
 exports.create = async (req, res, next) => {
     try {
         const payload = req.body
-        // const { error } = validation.validateCreateItemActivity(payload)
 
-        // if (error) {
-        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-        //         success: SUCCESS_STATUS.FALSE,
-        //         message: error?.details[0]?.message,
-        //     })
-        // }
         const result = await ItemActivity.create(payload)
         if (result) {
             res.status(HTTP_STATUS_CODE.OK).send({
@@ -35,14 +27,6 @@ exports.get = async (req, res, next) => {
         const payload = {
             nftId: req.query.nftId,
         }
-        // const { error } = validation.validateNFTid(payload)
-
-        // if (error) {
-        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-        //         success: SUCCESS_STATUS.FALSE,
-        //         message: error?.details[0]?.message,
-        //     })
-        // }
         const activities = await ItemActivity.find(payload)
 
         res.status(HTTP_STATUS_CODE.OK).send({
@@ -58,14 +42,6 @@ exports.get = async (req, res, next) => {
 exports.update = async (req, res, next) => {
     try {
         const payload = req.body
-        // const { error } = validation.validateUpdateItemActivity(payload)
-
-        // if (error) {
-        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-        //         success: SUCCESS_STATUS.FALSE,
-        //         message: error?.details[0]?.message,
-        //     })
-        // }
         const updatedActivity = await ItemActivity.findByIdAndUpdate(
             { _id: payload?.activityId },
             { $set: payload },
@@ -84,14 +60,6 @@ exports.update = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
     try {
         const nftId = req.body.nftId
-        // const { error } = validation.validateNFTid({ nftId })
-
-        // if (error) {
-        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-        //         success: SUCCESS_STATUS.FALSE,
-        //         message: error?.details[0]?.message,
-        //     })
-        // }
 
         let result = await ItemActivity.deleteMany({ nftId })
         if (result) {

@@ -208,26 +208,9 @@ exports.create = async (req, res, next) => {
         }
 
         if (Number(payload.sellingMethod) === 1) {
-            // const { error } = validation.validateNFTFixedTAuctionSchema(payload)
-
-            // if (error) {
-            //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-            //         success: SUCCESS_STATUS.FALSE,
-            //         message: error?.details[0]?.message,
-            //     })
-            // }
             payload.currentPrice = Number(payload.sellingConfig.price.amount)
             payload.auctionEnded = false
         } else {
-            // const { error } = validation.validateNFTimedTAuctionSchema(payload)
-
-            // if (error) {
-            //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-            //         success: SUCCESS_STATUS.FALSE,
-            //         message: error?.details[0]?.message,
-            //     })
-            // }
-
             payload.currentPrice = Number(
                 payload.sellingConfig.startPrice.amount
             )
@@ -269,13 +252,6 @@ exports.create = async (req, res, next) => {
 exports.buyNow = async (req, res, next) => {
     try {
         const payload = req.body
-        // const { error } = validation.validateBuyNowSchema(payload)
-        // if (error) {
-        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-        //         success: SUCCESS_STATUS.FALSE,
-        //         message: error?.details[0]?.message,
-        //     })
-        // }
 
         const buyNftDetail = await NFT.findOne({
             _id: payload.nftId,
@@ -337,15 +313,6 @@ exports.buyNow = async (req, res, next) => {
 exports.endAuction = async (req, res, next) => {
     try {
         const payload = req.body
-
-        // const { error } = validation.validateAuctionEndSchema(payload)
-
-        // if (error) {
-        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-        //         success: SUCCESS_STATUS.FALSE,
-        //         message: error?.details[0]?.message,
-        //     })
-        // }
 
         const auctionEndNft = await nftAuctions
             .find({})
