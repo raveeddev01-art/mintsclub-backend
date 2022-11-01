@@ -20,11 +20,14 @@ exports.batchUpload = async (req, res, next) => {
         let blockchainType
         if (payload?.chainId === 1) {
             blockchainType = 'ethereum'
-        } else if (payload?.chainId === 2) {
+        } else if (payload?.chainId === 137) {
             blockchainType = 'polygon'
-        } else {
+        } else if (payload?.chainId === 0) {
             blockchainType = 'bsc'
+        } else {
+            blockchainType = 'solana'
         }
+
         const result = await BatchUpload.create(payload)
         if (result) {
             const {
@@ -43,6 +46,7 @@ exports.batchUpload = async (req, res, next) => {
                     )
                     if (!files?.length > 0) {
                         await setStatus(result._id, 'rejected')
+                        removeDirctory(fileName)
                         return res.status(200).send({
                             success: false,
                             message: 'nft Images directory should not be empty',
@@ -56,6 +60,7 @@ exports.batchUpload = async (req, res, next) => {
                     )
                     if (!metaDataFiles?.length > 0) {
                         await setStatus(result._id, 'rejected')
+                        removeDirctory(fileName)
                         return res.status(200).send({
                             success: false,
                             message:
@@ -159,4 +164,17 @@ const isDirExist = (fileName) => {
 const setStatus = async (id, status) => {
     await BatchUpload.findByIdAndUpdate({ _id: id }, { $set: { status } })
     return true
+}
+
+const removeDirctory = (fileName) => {
+    fs.rmdir(
+        `./src/uploads/files/${fileName}`,
+        { recursive: true },
+        async (err) => {
+            if (err) {
+                throw err
+            }
+            return true
+        }
+    )
 }
