@@ -6,8 +6,9 @@ const NftTokens = require('../../models/nftTokens.model')
 const { addImage, addContent } = require('../../utils/upload')
 const ObjectId = require('mongoose').Types.ObjectId
 const Likes = require('../../models/likes.model')
-const { userDefaultImage } = require('../../../config/vars')
+const { userDefaultImage, pinataJWT } = require('../../../config/vars')
 const helpers = require('../../helpers')
+const { pinFileToIPFS, uploadJsonToIpfs } = require('../../utils/ipfs')
 
 const {
     ERROR_MESSAGE,
@@ -18,62 +19,38 @@ const {
 
 // API to create NFT
 exports.create = async (req, res, next) => {
-    try {
-        const payload = {
-            name: req.body.name,
-            description: req.body.description,
-            properties: JSON.parse(req.body.properties),
-            levels: JSON.parse(req.body.levels),
-            stats: JSON.parse(req.body.stats),
-            fileType: req.body.fileType,
-            ownerId: req.body.ownerId,
-            userId: req.body.userId,
-            collectionId: req.body.collectionId,
-            categoryId: req.body.categoryId,
-            currentPrice: 0,
-            ownerAddress: req.body.ownerAddress,
-            copies: req.body.copies,
-            activeAuction: req.body.activeAuction,
+    try{
+        
+        let result = null
+        // let payload = {
+        //     ...req.body,
+        // }
+        // payload.properties = JSON.parse(req.body.properties)
+        // payload.levels = JSON.parse(req.body.levels)
+        // payload.stats = JSON.parse(req.body.stats)
+        // payload.collection = JSON.parse(payload.collection)
+        // payload.copies = Number(payload.copies)
+    
+        // const { error } = validation.validateNFTSchema(payload)
+        // if (error) {
+        //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+        //         success: SUCCESS_STATUS.FALSE,
+        //         message: error?.details[0]?.message,
+        //     })
+        // }
+        if (req.files?.image) {
+            result = await pinFileToIPFS(req.files, req.body)
+    
+        } else {
+            result = await uploadJsonToIpfs(req.body.image, req.body)
         }
-
-        if (req.files && req.files.image) {
-            const image = req.files.image[0]
-            const imgData = fs.readFileSync(image.path)
-            payload.image = await addImage(imgData)
-        }
-
-        if (!payload.image) {
-            return res.send({
-                success: SUCCESS_STATUS.FALSE,
-                message: ERROR_MESSAGE.IMAGE_REQUIRED,
-            })
-        }
-
-        const payloadProperties = {
-            properties: payload.properties,
-            levels: payload.levels,
-            stats: payload.stats,
-        }
-
-        payload.metaData = await addContent({
-            name: payload.name,
-            description: payload.description,
-            image: payload.image,
-            properties: payloadProperties,
-            nftOwnerId: payload.ownerId,
-            ownerAddress: payload.ownerAddress,
-        })
-
-        payload.creatorId = payload.userId
-        payload.remainingCopies = payload.copies
-
-        return res.send({
+        return res.status(HTTP_STATUS_CODE.CREATED).send({
             success: SUCCESS_STATUS.TRUE,
-            message: SUCCESS_MESSAGE.DATA_UPLOADED,
-            nft: payload,
+            message: SUCCESS_MESSAGE.NFT_CREATED,
+            data: result,
         })
-    } catch (error) {
-        return next(error)
+    }catch(err){
+        return next(err)
     }
 }
 

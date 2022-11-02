@@ -7,6 +7,35 @@ const s3 = new AWS.S3({
     accessKeyId: AWS_ACCESS_KEY_ID,
     secretAccessKey: AWS_SECRET_ACCESS_KEY,
 })
+
+exports.uploadFileToS3 = async (path, filename) => {
+    try {
+        const fileContent = fs.readFileSync(`${path}`)
+
+        return new Promise((resolve, reject) => {
+            let params = {
+                Bucket: AWS_S3_BUCKET,
+                Key: `${filename}`,
+                Body: fileContent,
+            }
+          
+            s3.upload(params, (err, data) => {
+                if (err) {
+                    reject({success:false,err})
+                }
+                fs.unlink(`${path}`, async (err) => {
+                    if (err) {
+                        reject({success:false,err})
+                    }
+                    resolve({success:true,file:data.Location}, 'data.location')
+                })
+              
+            })
+        })
+    } catch (err) {
+        console.log(err, 'error=>')
+    }
+}
 exports.getS3Object = async (Key, fileName) => {
     return new Promise((resolve) => {
         let params = {
@@ -33,7 +62,6 @@ exports.getS3Object = async (Key, fileName) => {
 
 const unzipFile = async (fileKey, fileName) => {
     return new Promise(async (resolve) => {
-        console.log(fileName, 'fileName====>')
         const fileContent = fs.readFileSync(
             `./src/uploads/files/${fileName}.zip`
         )

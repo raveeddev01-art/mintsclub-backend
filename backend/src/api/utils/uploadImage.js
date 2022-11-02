@@ -15,7 +15,10 @@ const storage = multer.diskStorage({
     },
     filename(req, file, cb) {
         let fileExtension = file.mimetype.split('/')[1]
-        if (!file.originalname.toLowerCase().match(/\.(jpg|jpeg|png)$/)) {
+        if (
+            !file.originalname.toLowerCase().match(/\.(jpg|jpeg|png)$/) &&
+            !file.orignalname === 'blob'
+        ) {
             return cb(new Error('Only image files are allowed.'))
         }
         cb(null, +Date.now() + '.' + fileExtension)
@@ -29,16 +32,19 @@ const upload = multer({
 })
 exports.cpUpload = upload.fields([{ name: 'image', maxCount: 1 }])
 exports.uploadSingle = upload.single('image')
+
+///Used////////////////
 exports.collectionUpload = upload.fields([
     { name: 'logo', maxCount: 1 },
     { name: 'featuredImg', maxCount: 1 },
-    { name: 'banner', maxCount: 1 },
 ])
-exports.profileUpload = upload.fields([
-    { name: 'profileImage', maxCount: 1 },
-    { name: 'bannerImage', maxCount: 1 },
+exports.profileUpload = upload.single('profileImage')
+exports.uploadDataOnIpfs = upload.fields([
+    { name: 'image', maxCount: 1 },
+    { name: 'compressedFile', maxCount: 1 },
 ])
-exports.uploadSingle = upload.single('image')
+
+//////////
 // ipfs
 const { create } = require('ipfs-http-client')
 const { ipfsServerUrl, ipfsBaseUrl, pinataJWT } = require('../../config/vars')
@@ -53,7 +59,6 @@ exports.uploadFileToIpfs = async (formData) => {
     // console.log('formData=====>', formData.get('file'));
     const url = `https://api.pinata.cloud/pinning/pinFileToIPFS`
     try {
-       
         const response = await axios.post(url, formData, {
             headers: {
                 'Content-Type': `multipart/form-data; boundary= ${formData._boundary}`,
@@ -65,7 +70,7 @@ exports.uploadFileToIpfs = async (formData) => {
         // console.log('response=========>', response);
         return response
     } catch (err) {
-       return err
+        return err
     }
 }
 exports.addContent = async (data) => {
