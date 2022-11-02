@@ -1,5 +1,4 @@
 const User = require('../../models/users.model')
-// const validation = require('../../middlewares/front/validation')
 const {
     SUCCESS_MESSAGE,
     ERROR_MESSAGE,

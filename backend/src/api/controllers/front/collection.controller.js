@@ -162,8 +162,6 @@ exports.edit = async (req, res, next) => {
             url: req.body.url,
             description: req.body.description,
         }
-        console.log(payload, 'payload in edit collection')
-
         payload = {
             ...payload,
             logo: req.body.logo,
@@ -211,8 +209,6 @@ exports.edit = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
     try {
         const { collectionId } = req.params
-        console.log(collectionId, 'collecctionId==>')
-
         const collection = await Collection.deleteOne({ _id: collectionId })
         if (collection.deletedCount)
             return res.send({

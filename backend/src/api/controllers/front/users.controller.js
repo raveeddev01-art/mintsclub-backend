@@ -3,7 +3,6 @@ const ObjectId = require('mongoose').Types.ObjectId
 const UserModal = require('../../models/users.model')
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
-// const validation = require('../../middlewares/front/validation')
 const validUrl = require('valid-url')
 const mailchimp = require('@mailchimp/mailchimp_marketing')
 const { mailChimp } = require('../../../config/vars')
@@ -36,7 +35,6 @@ exports.create = async (req, res, next) => {
 }
 
 exports.updateProfile = async (req, res, next) => {
-    console.log('controller test update profile', req.body)
     try {
         if (req.body.isApproved) {
             let user = await helpers.user.approvedUserProfileUpdate(req.body)
@@ -46,8 +44,6 @@ exports.updateProfile = async (req, res, next) => {
                 message: SUCCESS_MESSAGE.PROFILE_UPDATED,
             })
         }
-        console.log('loging resq', req.body)
-        console.log('checking req.files', files)
         payload = {
             email: req.body.email,
             username: req.body.username,
@@ -274,7 +270,6 @@ exports.authenticate = async (req, res, next) => {
         )
 
         let user = await UserModal.findOne({ address, blockchainType })
-        console.log(user, 'user')
         if (!user) {
             return res.status(HTTP_STATUS_CODE.OK).send({
                 success: SUCCESS_STATUS.FALSE,
@@ -283,17 +278,13 @@ exports.authenticate = async (req, res, next) => {
         }
 
         const accessToken = await user.token()
-        console.log(accessToken, 'accessToken before')
         user = user._doc
-        console.log(user, 'user after')
 
         user.isApproved = true
         const data = {
             ...user,
             accessToken,
         }
-        console.log(data, 'data==>')
-
         const msg = `I am signing my one-time nonce: ${user.nounce}`
         if (blockchainType == 'algorand') {
             const message = new TextEncoder().encode(msg)
@@ -330,8 +321,6 @@ exports.authenticate = async (req, res, next) => {
 
             if (signAddress.toLowerCase() === address.toLowerCase()) {
                 user.nounce = Math.floor(Math.random() * 1000000)
-                console.log(user, 'setting user')
-
                 //need to update
                 await UserModal.findOneAndUpdate(
                     { _id: user._id, blockchainType },
@@ -390,7 +379,6 @@ exports.authenticate = async (req, res, next) => {
 exports.signNonce = async (request, response, next) => {
     // eslint-disable-next-line no-empty
     try {
-        console.log('check')
     } catch (err) {
         return res.status(HTTP_STATUS_CODE.UNAUTHORIZED).send({
             success: SUCCESS_STATUS.FALSE,

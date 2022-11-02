@@ -123,7 +123,6 @@ const validateNftId = (req,res,next) => {
         nftId
     }
     const {error} = schema.validate(payload, options)
-    console.log('checking payload' , payload)
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
             success: SUCCESS_STATUS.FALSE,

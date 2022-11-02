@@ -74,7 +74,6 @@ exports.batchUpload = async (req, res, next) => {
                                 )
                             ) {
                                 files.length--
-                                console.log("it's decrement")
                             } else if (
                                 fs.existsSync(
                                     `./src/uploads/files/${fileName}/metaData/${item.substr(
@@ -140,7 +139,6 @@ exports.batchUpload = async (req, res, next) => {
             message: 'Batch uploading is added to the queue successfully',
         })
     } catch (err) {
-        console.log('error', err)
         next(err)
     }
 }

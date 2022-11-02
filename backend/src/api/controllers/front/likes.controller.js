@@ -1,6 +1,5 @@
 const LikesModal = require('../../models/likes.model')
 let ObjectId = require('mongodb').ObjectId
-// const validation = require('../../middlewares/front/likes')
 const {
     ERROR_MESSAGE,
     SUCCESS_MESSAGE,
@@ -37,7 +36,6 @@ exports.getNftLikes = async (req, res) => {
         const payload = {
             nftId: req.query.nftId,
         }
-        console.log('payload check', payload)
         const likes = await LikesModal.find(payload)
         res.status(HTTP_STATUS_CODE.OK).json({
             success: SUCCESS_STATUS.TRUE,

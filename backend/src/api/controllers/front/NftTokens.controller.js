@@ -1,5 +1,4 @@
 const NftTokens = require('../../models/nftTokens.model')
-// const validation = require('../../middlewares/front/nftTokens')
 const {
     SUCCESS_MESSAGE,
     SUCCESS_STATUS,

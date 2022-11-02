@@ -4,8 +4,7 @@ const controller = require('../../../controllers/front/nfts.controller')
 const { cpUpload } = require('../../../utils/upload')
 const middleware = require('../../../middlewares/front/auth')
 const validatorMiddleware = require('../../../middlewares/front/nftValidation')
-// const validate = require('express-joi-validate')
-// const { validateNftId } = require('../../../middlewares/front/nftValidation')
+
 router
     .route('/create')
     .post(

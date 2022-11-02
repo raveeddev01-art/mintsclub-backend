@@ -5,7 +5,6 @@ const NFTAuction = require('../../models/auctions.model')
 const NftTokens = require('../../models/nftTokens.model')
 const { addImage, addContent } = require('../../utils/upload')
 const ObjectId = require('mongoose').Types.ObjectId
-// const validation = require('../../middlewares/front/nftValidation')
 const Likes = require('../../models/likes.model')
 const { userDefaultImage } = require('../../../config/vars')
 const helpers = require('../../helpers')
@@ -156,7 +155,6 @@ exports.get = async (req, res, next) => {
         if (nftList[1]) {
             returnData.likesCount = nftList[1]['count']
         }
-        console.log('return data=====', returnData)
         return res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.NFT_FETCHED,
@@ -380,7 +378,6 @@ exports.delete = async (req, res, next) => {
         const { nftId } = req.params
         const nftDetail = await NFT.find({ _id: nftId })
         const nft = await NFT.deleteOne({ _id: nftId })
-        // const nftDelete = await Promise.all([nftDetail, nft])
         if (nft?.deletedCount) {
             const nftToken = await NftTokens.deleteOne({ nftId })
             await NFTAuction.deleteOne({ nftId })

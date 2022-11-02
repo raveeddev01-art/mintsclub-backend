@@ -10,7 +10,6 @@ const validateLikesDislikeSchema = (req,res,next) => {
     const schema = Joi.object().keys({
         nftId: Joi.string().alphanum().min(12).max(24).required(),
         userId: Joi.string().alphanum().min(12).max(24).required(),
-        // count: Joi.number().required(),
     })
     const options = {
         errors: {

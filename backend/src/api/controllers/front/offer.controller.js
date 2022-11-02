@@ -1,7 +1,5 @@
 const Offer = require('../../models/offer.model')
 const ObjectId = require('mongoose').Types.ObjectId
-// const validation = require('../../middlewares/front/offerValidation')
-const validator = require('../../middlewares/front/validation')
 const {
     ERROR_MESSAGE,
     SUCCESS_MESSAGE,

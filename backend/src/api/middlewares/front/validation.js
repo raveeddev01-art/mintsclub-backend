@@ -43,7 +43,7 @@ const validateContractSchema = (contract) => {
     return schema.validate(contract, options)
 }
 
-const validateSignUpSchema = (req,res,next) => {
+const validateSignUpSchema = (req, res, next) => {
     const schema = Joi.object().keys({
         address: Joi.string().max(600).required(),
         email: Joi.string()
@@ -71,7 +71,7 @@ const validateSignUpSchema = (req,res,next) => {
         isApproved: req.body.isApproved,
     }
 
-    const { error } =  schema.validate(payload, options)
+    const { error } = schema.validate(payload, options)
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
             success: SUCCESS_STATUS.FALSE,
@@ -80,7 +80,7 @@ const validateSignUpSchema = (req,res,next) => {
     }
     next()
 }
-const validateAddress = (req,res, next) => {
+const validateAddress = (req, res, next) => {
     const schema = Joi.object().keys({
         address: Joi.string().max(600).required(),
     })
@@ -94,15 +94,14 @@ const validateAddress = (req,res, next) => {
     let payload = {
         address: req.body.address,
     }
-    const{error} = schema.validate(payload, options)
-     if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
-        next()
-
+    const { error } = schema.validate(payload, options)
+    if (error) {
+        return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: error?.details[0]?.message,
+        })
+    }
+    next()
 }
 const validateEmail = (email) => {
     const schema = Joi.object().keys({
@@ -124,7 +123,7 @@ const validateEmail = (email) => {
     }
     return schema.validate(email, options)
 }
-const validateUser = (req,res,next) => {
+const validateUser = (req, res, next) => {
     const schema = Joi.object().keys({
         userId: Joi.string().alphanum().min(12).max(24).required(),
     })
@@ -139,20 +138,17 @@ const validateUser = (req,res,next) => {
 
     const payload = { userId }
 
-    const {error} =schema.validate(payload, options)
+    const { error } = schema.validate(payload, options)
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
             success: SUCCESS_STATUS.FALSE,
             message: error?.details[0]?.message,
         })
     }
-    next();
+    next()
 }
 
-const validateUserProfile = async (req,res,next) => {
-    console.log('checking= validateUserProfile==', req.userId )
-    console.log('checking= validateUserProfile== files', req.file )
-
+const validateUserProfile = async (req, res, next) => {
     const schema = Joi.object().keys({
         userId: Joi.string().alphanum().min(12).max(24).required(),
         email: Joi.string().email().allow(''),
@@ -166,16 +162,14 @@ const validateUserProfile = async (req,res,next) => {
             },
         },
     }
-   let payload = {
-            userId: req.body.userId,
-            email: req.body.email,
-            username: req.body.username,
-            bio: req.body.bio,
+    let payload = {
+        userId: req.body.userId,
+        email: req.body.email,
+        username: req.body.username,
+        bio: req.body.bio,
     }
-    console.log('data of updateeeee:', req.body)
-    console.log('req.files-========', req.file)
 
-    const {error} = schema.validate(payload, options)
+    const { error } = schema.validate(payload, options)
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
             success: SUCCESS_STATUS.FALSE,
@@ -185,7 +179,7 @@ const validateUserProfile = async (req,res,next) => {
     next()
 }
 
-const validateId = (req,res,next) => {
+const validateId = (req, res, next) => {
     const schema = Joi.object().keys({
         id: Joi.string().alphanum().min(12).max(24).required(),
     })
@@ -198,7 +192,7 @@ const validateId = (req,res,next) => {
     }
     const { offerId } = req.params
 
-    const {error} = schema.validate({offerId}, options)
+    const { error } = schema.validate({ offerId }, options)
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
             success: SUCCESS_STATUS.FALSE,

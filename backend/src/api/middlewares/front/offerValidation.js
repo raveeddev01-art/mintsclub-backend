@@ -16,7 +16,6 @@ const validateOfferSchema = (req,res,next) => {
         price: Joi.number().required(),
         isAccepted: Joi.boolean().required(),
         isExpired: Joi.boolean().required(),
-        // expiryDate:Joi.date().allow(null)
     })
     const options = {
         errors: {

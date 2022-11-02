@@ -13,8 +13,6 @@ const {
     ERROR_MESSAGE,
 } = require('../../../config/constants')
 
-// const validation = require('../../middlewares/front/auctionValidation')
-
 // API to get live auctions
 exports.live = async (req, res, next) => {
     try {
