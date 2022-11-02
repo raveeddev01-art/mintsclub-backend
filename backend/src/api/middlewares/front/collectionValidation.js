@@ -16,8 +16,8 @@ const validateCollectionSchema = (req,res,next) => {
             // .regex(/^0x[a-fA-F0-9]{40}$/)
             .required(),
         deploy: Joi.boolean().default(false),
-        abi: Joi.required(),
-        contractAddress: Joi.required(),
+        abi: Joi.required().allow(null),
+        contractAddress: Joi.required().allow(''),
         blockchainType: Joi.string().required(),
     })
     const options = {
@@ -40,6 +40,7 @@ const validateCollectionSchema = (req,res,next) => {
             ? req.body.contractAddress
             : '',
         blockchainType: req.body.blockchainType,
+        isApproved : req.body.isApproved
     }
     const { error } =  schema.validate(payload, options)
     if (error) {

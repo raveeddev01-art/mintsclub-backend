@@ -7,7 +7,7 @@ const validatorMiddleware = require('../../../middlewares/front/collectionValida
 
 router
     .route('/create')
-    .post(middleware.userValidation, validatorMiddleware.validateCollectionSchema ,collectionUpload, controller.create)
+    .post(middleware.userValidation,collectionUpload,  validatorMiddleware.validateCollectionSchema ,controller.create)
 router.route('/edit').put(collectionUpload,validatorMiddleware.validateEditCollectionSchema , controller.edit)
 router.route('/delete/:collectionId').delete(validatorMiddleware.validateCollectionId , controller.delete)
 router.route('/get/:collectionId').get(validatorMiddleware.validateCollectionId ,controller.get)

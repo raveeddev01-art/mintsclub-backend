@@ -115,21 +115,7 @@ exports.get = async (req, res, next) => {
         let payload = {
             nftId,
         }
-
-        // const { error } = validation.validateNftId(payload)
-
-        // if (error) {
-
-
-            // return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-            //     success: SUCCESS_STATUS.FALSE,
-            //     message: error?.details[0]?.message,
-            // })
-
-
-        //     console.log('error in api', error)
-        // }
-
+        payload.nftId = ObjectId(payload.nftId)
         let nftDetail = await helpers.nft.getNftDetailPipeline(payload.nftId)
 
         nftDetail = nftDetail[0]
@@ -170,7 +156,7 @@ exports.get = async (req, res, next) => {
         if (nftList[1]) {
             returnData.likesCount = nftList[1]['count']
         }
-
+        console.log('return data=====', returnData)
         return res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.NFT_FETCHED,

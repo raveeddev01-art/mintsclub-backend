@@ -47,7 +47,7 @@ exports.updateProfile = async (req, res, next) => {
             })
         }
         console.log('loging resq', req.body)
-        console.log('consileing req.files', files)
+        console.log('checking req.files', files)
         payload = {
             email: req.body.email,
             username: req.body.username,

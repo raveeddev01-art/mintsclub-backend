@@ -167,9 +167,9 @@ const validateUserProfile = async (req,res,next) => {
         },
     }
    let payload = {
-           email: req.body.email,
-            username: req.body.username,
             userId: req.body.userId,
+            email: req.body.email,
+            username: req.body.username,
             bio: req.body.bio,
     }
     console.log('data of updateeeee:', req.body)
