@@ -13,8 +13,6 @@ const {
     ERROR_MESSAGE,
 } = require('../../../config/constants')
 
-const validation = require('../../middlewares/front/auctionValidation')
-
 // API to get live auctions
 exports.live = async (req, res, next) => {
     try {
@@ -208,33 +206,31 @@ exports.create = async (req, res, next) => {
         }
 
         if (Number(payload.sellingMethod) === 1) {
-            const { error } = validation.validateNFTFixedTAuctionSchema(payload)
-
-            if (error) {
-                return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                    success: SUCCESS_STATUS.FALSE,
-                    message: error?.details[0]?.message,
-                })
-            }
-            helpers.auction.addFixedAuction(payload)
+            payload.currentPrice = Number(payload.sellingConfig.price.amount)
+            payload.auctionEnded = false
         } else {
-            console.log(
-                '🚀 ~ file: auctions.controller.js ~ line 224 ~ exports.create= ~ payload',
-                payload
+            payload.currentPrice = Number(
+                payload.sellingConfig.startPrice.amount
             )
-            const { error } = validation.validateNFTimedTAuctionSchema(payload)
-            console.log(
-                '🚀 ~ file: auctions.controller.js ~ line 228 ~ exports.create= ~ error',
-                error
+            const startDate = moment(
+                new Date(payload.sellingConfig.duration.startDate)
             )
+                .utc(false)
+                .toISOString()
 
-            if (error) {
-                return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                    success: SUCCESS_STATUS.FALSE,
-                    message: error?.details[0]?.message,
-                })
-            }
-            helpers.auction.addTimedAuction(payload)
+            const endDate = moment(
+                new Date(payload.sellingConfig.duration.endDate)
+            )
+                .utc(false)
+                .toISOString()
+
+            payload.sellingConfig.duration.startDate = startDate
+            payload.sellingConfig.duration.endDate = endDate
+            payload.auctionStartDate = startDate
+            payload.auctionEndDate = endDate
+            payload.highestBid = 0
+            payload.bid = []
+            payload.auctionEnded = false
         }
         const nftAuction = await nftAuctions.create(payload)
         console.log(
@@ -254,13 +250,6 @@ exports.create = async (req, res, next) => {
 exports.buyNow = async (req, res, next) => {
     try {
         const payload = req.body
-        const { error } = validation.validateBuyNowSchema(payload)
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
 
         const buyNftDetail = await NFT.findOne({
             _id: payload.nftId,
@@ -322,15 +311,6 @@ exports.buyNow = async (req, res, next) => {
 exports.endAuction = async (req, res, next) => {
     try {
         const payload = req.body
-
-        const { error } = validation.validateAuctionEndSchema(payload)
-
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
 
         const auctionEndNft = await nftAuctions
             .find({})

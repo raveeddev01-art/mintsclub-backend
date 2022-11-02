@@ -2,7 +2,6 @@ const Bid = require('../../models/bids.model')
 const Nft = require('../../models/nfts.model')
 const Auction = require('../../models/auctions.model')
 const ObjectId = require('mongoose').Types.ObjectId
-const validation = require('../../middlewares/front/bidValidation')
 const nftValidation = require('../../middlewares/front/nftValidation')
 const {
     SUCCESS_MESSAGE,
@@ -24,15 +23,6 @@ exports.create = async (req, res, next) => {
             fromAddress: req.body.fromAddress,
             toAddress: req.body.toAddress,
             auctionId: req.body.auctionId,
-        }
-
-        const { error } = validation.validateCreateBid(payload)
-
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
         }
 
         const bid = await Bid.create(payload)
@@ -61,15 +51,7 @@ exports.delete = async (req, res, next) => {
     try {
         const { bidId } = req.params
         const payload = {
-           bidId,
-        }
-        const { error } = validation.validateBidId(payload)
-
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
+            bidId,
         }
 
         const bid = await Bid.deleteOne({ _id: payload.bidId })
@@ -141,15 +123,6 @@ exports.claimableBidListbyNftId = async (req, res, next) => {
         let { page, limit } = req.query
         const { nftId } = req.query
 
-        const { error } = nftValidation.validateNftId({ nftId })
-
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                data: error?.details[0]?.message,
-            })
-        }
-
         page = page !== undefined && page !== '' ? parseInt(page) : 1
         limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
 
@@ -165,13 +138,13 @@ exports.claimableBidListbyNftId = async (req, res, next) => {
         if (endIndex < bidsByNftId.length) {
             data.next = {
                 page: page + 1,
-               limit,
+                limit,
             }
         }
         if (startIndex > 0) {
             data.previous = {
                 page: page - 1,
-               limit,
+                limit,
             }
         }
 
@@ -190,14 +163,8 @@ exports.claimableBidListbyNftId = async (req, res, next) => {
 // API to accept bid
 exports.accept = async (req, res, next) => {
     try {
-        const { bidId } = req.body
-        const { error } = validation.validateBidId({ bidId })
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                data: error?.details[0]?.message,
-            })
-        }
+        const { bidId } = req.params // changed from body to params for testing (hamza)
+
         const bid = await Bid.findOneAndUpdate(
             { _id: bidId },
             { isAccepted: true },

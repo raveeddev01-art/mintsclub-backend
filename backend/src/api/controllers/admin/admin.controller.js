@@ -80,6 +80,7 @@ exports.login = async (req, res, next) => {
                         { $set: { accessToken } },
                         { upsert: true }
                     )
+                    
                     return res.status(200).send({
                         success: true,
                         message: 'Admin logged in successfully',

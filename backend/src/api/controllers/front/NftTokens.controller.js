@@ -1,5 +1,4 @@
 const NftTokens = require('../../models/nftTokens.model')
-const validation = require('../../middlewares/front/nftTokens')
 const {
     SUCCESS_MESSAGE,
     SUCCESS_STATUS,
@@ -9,13 +8,7 @@ const {
 exports.addNftToken = async (req, res, next) => {
     try {
         const payload = req.body
-        const { error } = validation.validateAddNftToken(payload)
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
+
         const nftToken = await NftTokens.create(payload)
 
         res.status(HTTP_STATUS_CODE.OK).send({

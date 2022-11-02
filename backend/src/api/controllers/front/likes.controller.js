@@ -1,6 +1,5 @@
 const LikesModal = require('../../models/likes.model')
 let ObjectId = require('mongodb').ObjectId
-// const validation = require('../../middlewares/front/likes')
 const {
     ERROR_MESSAGE,
     SUCCESS_MESSAGE,
@@ -37,14 +36,13 @@ exports.getNftLikes = async (req, res) => {
         const payload = {
             nftId: req.query.nftId,
         }
-        console.log('payload check', payload)
         const likes = await LikesModal.find(payload)
         res.status(HTTP_STATUS_CODE.OK).json({
             success: SUCCESS_STATUS.TRUE,
             data: likes,
         })
     } catch (error) {
-       return  res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
+        return res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
             success: SUCCESS_STATUS.FALSE,
             error,
         })
@@ -69,7 +67,8 @@ exports.userNftLikes = async (req, res, next) => {
         })
     } catch (error) {
         return res.status(HTTP_STATUS_CODE.INTERNAL_SERVER).send({
-            success: SUCCESS_STATUS.FALSE,error
+            success: SUCCESS_STATUS.FALSE,
+            error,
         })
     }
 }
@@ -80,15 +79,14 @@ exports.checkNftLikes = async (req, res) => {
             userId: req.query.userId,
         }
         const likedNft = await LikesModal.find(Payload)
-        
 
         return res
             .status(HTTP_STATUS_CODE.OK)
             .send({ likedByUser: likedNft.length > 0 })
     } catch (error) {
         return res.status(HTTP_STATUS_CODE.INTERNAL_SERVER).send({
-            success: SUCCESS_STATUS.FALSE,error
+            success: SUCCESS_STATUS.FALSE,
+            error,
         })
     }
-   
 }

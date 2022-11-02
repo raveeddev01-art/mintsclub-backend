@@ -1,4 +1,10 @@
 const Joi = require('@hapi/joi')
+const {
+    ERROR_MESSAGE,
+    SUCCESS_MESSAGE,
+    SUCCESS_STATUS,
+    HTTP_STATUS_CODE,
+} = require('../../../config/constants')
 
 const validateContractSchema = (contract) => {
     const schema = Joi.object().keys({
@@ -37,7 +43,7 @@ const validateContractSchema = (contract) => {
     return schema.validate(contract, options)
 }
 
-const validateSignUpSchema = (data) => {
+const validateSignUpSchema = (req, res, next) => {
     const schema = Joi.object().keys({
         address: Joi.string().max(600).required(),
         email: Joi.string()
@@ -58,9 +64,23 @@ const validateSignUpSchema = (data) => {
             },
         },
     }
-    return schema.validate(data, options)
+    const payload = {
+        address: req.body.address,
+        username: req.body.username,
+        email: req.body.email,
+        isApproved: req.body.isApproved,
+    }
+
+    const { error } = schema.validate(payload, options)
+    if (error) {
+        return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: error?.details[0]?.message,
+        })
+    }
+    next()
 }
-const validateAddress = (address) => {
+const validateAddress = (req, res, next) => {
     const schema = Joi.object().keys({
         address: Joi.string().max(600).required(),
     })
@@ -71,7 +91,17 @@ const validateAddress = (address) => {
             },
         },
     }
-    return schema.validate(address, options)
+    let payload = {
+        address: req.body.address,
+    }
+    const { error } = schema.validate(payload, options)
+    if (error) {
+        return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: error?.details[0]?.message,
+        })
+    }
+    next()
 }
 const validateEmail = (email) => {
     const schema = Joi.object().keys({
@@ -93,7 +123,7 @@ const validateEmail = (email) => {
     }
     return schema.validate(email, options)
 }
-const validateUser = (user) => {
+const validateUser = (req, res, next) => {
     const schema = Joi.object().keys({
         userId: Joi.string().alphanum().min(12).max(24).required(),
     })
@@ -104,10 +134,21 @@ const validateUser = (user) => {
             },
         },
     }
-    return schema.validate(user, options)
+    let { userId } = req.params
+
+    const payload = { userId }
+
+    const { error } = schema.validate(payload, options)
+    if (error) {
+        return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: error?.details[0]?.message,
+        })
+    }
+    next()
 }
 
-const validateUserProfile = (data) => {
+const validateUserProfile = async (req, res, next) => {
     const schema = Joi.object().keys({
         userId: Joi.string().alphanum().min(12).max(24).required(),
         email: Joi.string().email().allow(''),
@@ -121,10 +162,24 @@ const validateUserProfile = (data) => {
             },
         },
     }
-    return schema.validate(data, options)
+    let payload = {
+        userId: req.body.userId,
+        email: req.body.email,
+        username: req.body.username,
+        bio: req.body.bio,
+    }
+
+    const { error } = schema.validate(payload, options)
+    if (error) {
+        return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: error?.details[0]?.message,
+        })
+    }
+    next()
 }
 
-const validateId = (id) => {
+const validateId = (req, res, next) => {
     const schema = Joi.object().keys({
         id: Joi.string().alphanum().min(12).max(24).required(),
     })
@@ -135,7 +190,16 @@ const validateId = (id) => {
             },
         },
     }
-    return schema.validate(id, options)
+    const { offerId } = req.params
+
+    const { error } = schema.validate({ offerId }, options)
+    if (error) {
+        return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: error?.details[0]?.message,
+        })
+    }
+    next()
 }
 
 const validateAucthentication = (data) => {

@@ -1,5 +1,4 @@
 const FixedPriceTokens = require('../../models/fixedPriceTokens.model')
-const validation = require('../../middlewares/front/fixedPriceTokenValidation.js')
 const {
     SUCCESS_MESSAGE,
     ERROR_MESSAGE,
@@ -9,13 +8,7 @@ const {
 exports.addNftToken = async (req, res) => {
     try {
         const payload = req.body
-        const { error } = validation.validateAddFixedPriceToken(payload)
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
+
         const result = await FixedPriceTokens.create(payload)
 
         res.send({
@@ -52,14 +45,7 @@ exports.getNftTokens = async (req, res) => {
 
 exports.getNftToken = async (req, res) => {
     const id = req.params.id
-    const { error } = validation.validateNFTid({ id })
 
-    if (error) {
-        return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-            success: SUCCESS_STATUS.FALSE,
-            message: error?.details[0]?.message,
-        })
-    }
     try {
         const result = await FixedPriceTokens.findOne({ nftId: id })
 

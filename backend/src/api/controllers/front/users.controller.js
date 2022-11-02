@@ -3,7 +3,6 @@ const ObjectId = require('mongoose').Types.ObjectId
 const UserModal = require('../../models/users.model')
 const ethUtil = require('ethereumjs-util')
 const sigUtil = require('eth-sig-util')
-const validation = require('../../middlewares/front/validation')
 const validUrl = require('valid-url')
 const mailchimp = require('@mailchimp/mailchimp_marketing')
 const { mailChimp } = require('../../../config/vars')
@@ -45,7 +44,6 @@ exports.updateProfile = async (req, res, next) => {
                 message: SUCCESS_MESSAGE.PROFILE_UPDATED,
             })
         }
-
         payload = {
             email: req.body.email,
             username: req.body.username,
@@ -53,14 +51,7 @@ exports.updateProfile = async (req, res, next) => {
             bio: req.body.bio,
         }
 
-        const { error } = validation.validateUserProfile(payload)
         payload.profileImage = req.body.profileImage
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
 
         if (req.body.twitterLink && !validUrl.isUri(req.body.twitterLink)) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
@@ -182,15 +173,6 @@ exports.getUser = async (req, res, next) => {
         let { userId } = req.params
 
         const payload = { userId }
-
-        const { error } = validation.validateUser(payload)
-
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
         const user = await UserModal.findOne({ _id: ObjectId(payload.userId) })
 
         if (user) {
@@ -260,14 +242,6 @@ exports.createUser = async (req, res, next) => {
         let payload = {
             address: req.body.address,
         }
-        const { error } = validation.validateAddress(payload)
-
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
-        }
 
         payload.profileImage = null
         payload.totalETH = 0
@@ -296,7 +270,6 @@ exports.authenticate = async (req, res, next) => {
         )
 
         let user = await UserModal.findOne({ address, blockchainType })
-        console.log(user, 'user')
         if (!user) {
             return res.status(HTTP_STATUS_CODE.OK).send({
                 success: SUCCESS_STATUS.FALSE,
@@ -305,17 +278,13 @@ exports.authenticate = async (req, res, next) => {
         }
 
         const accessToken = await user.token()
-        console.log(accessToken, 'accessToken before')
         user = user._doc
-        console.log(user, 'user after')
 
         user.isApproved = true
         const data = {
             ...user,
             accessToken,
         }
-        console.log(data, 'data==>')
-
         const msg = `I am signing my one-time nonce: ${user.nounce}`
         if (blockchainType == 'algorand') {
             const message = new TextEncoder().encode(msg)
@@ -352,8 +321,6 @@ exports.authenticate = async (req, res, next) => {
 
             if (signAddress.toLowerCase() === address.toLowerCase()) {
                 user.nounce = Math.floor(Math.random() * 1000000)
-                console.log(user, 'setting user')
-
                 //need to update
                 await UserModal.findOneAndUpdate(
                     { _id: user._id, blockchainType },
@@ -410,8 +377,8 @@ exports.authenticate = async (req, res, next) => {
 }
 
 exports.signNonce = async (request, response, next) => {
+    // eslint-disable-next-line no-empty
     try {
-        console.log('check')
     } catch (err) {
         return res.status(HTTP_STATUS_CODE.UNAUTHORIZED).send({
             success: SUCCESS_STATUS.FALSE,
