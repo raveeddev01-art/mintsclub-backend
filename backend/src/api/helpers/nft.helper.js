@@ -14,9 +14,14 @@ const getNftDetailPipeline = async (nftId) => {
                     localField: '_id',
                     as: 'auction',
                     pipeline: [
+                        //     {
+                        //         // $match: {
+                        //         //     $expr: { $eq: ['$auctionEnded', true] },
+                        //         // },
+                        //     },
                         {
-                            $match: {
-                                $expr: { $eq: ['$auctionEnded', false] },
+                            $sort: {
+                                createdAt: -1,
                             },
                         },
                     ],
@@ -28,6 +33,7 @@ const getNftDetailPipeline = async (nftId) => {
                     preserveNullAndEmptyArrays: true,
                 },
             },
+
             {
                 $lookup: {
                     from: 'users',
@@ -57,6 +63,7 @@ const getNftDetailPipeline = async (nftId) => {
         ]
 
         let nftDetail = await NFT.aggregate(pipeline)
+
         return nftDetail
     } catch (error) {
         console.log('error', error)

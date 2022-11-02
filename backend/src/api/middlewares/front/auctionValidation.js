@@ -65,6 +65,10 @@ const validateNFTimedTAuctionSchema = (req,res,next) => {
             is: 'solana',
             then: Joi.string().required(),
         }),
+        highestBidder: Joi.alternatives().conditional('blockchainType', {
+            is: 'solana',
+            then: Joi.string().required(),
+        }),
         sellerPublicKey: Joi.alternatives().conditional('blockchainType', {
             is: 'solana',
             then: Joi.string().required(),

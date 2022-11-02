@@ -316,7 +316,21 @@ exports.endAuction = async (req, res, next) => {
             .find({})
             .where('_id', payload.auctionId)
             .populate('nftId')
-
+        const maxBidByAnotherUser =
+            await helpers.bid.getPendingHighestBigByAuctionId(payload.auctionId)
+        if (
+            maxBidByAnotherUser?.length > 0
+            // &&
+            // auctionEndNft.blockchainType === 'solana'
+        ) {
+            const data = {
+                status: 'winner',
+            }
+            const updateBid = await helpers.bid.updateBid(
+                maxBidByAnotherUser[0]?._id,
+                data
+            )
+        }
         const bid = await Bid.find({
             nftId: ObjectId(auctionEndNft[0]?.nftId?._id),
             bidAmount: auctionEndNft[0]?.highestBid,
@@ -342,6 +356,7 @@ exports.endAuction = async (req, res, next) => {
 
         const payloadUpdateAuctionStatus = {
             auctionEnded: true,
+            status: 'end',
         }
         await nftAuctions.findByIdAndUpdate(
             { _id: auctionEndNft[0]?._id },
@@ -355,7 +370,9 @@ exports.endAuction = async (req, res, next) => {
             { _id: auctionEndNft[0]?.nftId?._id },
             { $set: payloadUpdateNFT }
         )
-        await Bid.deleteMany({ nftId: auctionEndNft[0]?.nftId?._id })
+        // if (auctionEndNft.blockchainType !== 'solana') {
+        //     await Bid.deleteMany({ nftId: auctionEndNft[0]?.nftId?._id })
+        // }
         res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.AUCTION_ENDED,

@@ -10,6 +10,7 @@ const rateLimit = require('express-rate-limit')
 const bearerToken = require('express-bearer-token')
 const compression = require('compression')
 const job = require('../cron-jobs/batchUpload')
+const auctionStatusJob = require('../cron-jobs/AuctionStatusChangeJob')
 const cookieParser = require('cookie-parser') // parse cookie header
 
 /**
@@ -84,5 +85,6 @@ app.use('/v1/front', frontRoutes)
 
 //start cron jobs
 // job.startCron();
+auctionStatusJob.startCron()
 
 module.exports = app

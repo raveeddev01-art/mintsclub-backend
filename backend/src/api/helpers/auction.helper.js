@@ -5,6 +5,7 @@ const nftAuctions = require('../models/auctions.model')
 const Users = require('../models/users.model')
 const ActivityModal = require('../models/item-activity.modal')
 const Bid = require('../models/bids.model')
+const Auction = require('../models/auctions.model')
 
 const addFixedAuction = (request) => {
     request.currentPrice = Number(request.sellingConfig.price.amount)
@@ -298,6 +299,21 @@ const updateNFTforEndAuction = async (bidData, auctionEndNft) => {
         // return error
     }
 }
+
+const getAllActiveAuctionsForCronJob = async () => {
+    const auctions = await Auction.find({
+        status: 'active',
+        sellingMethod: 2,
+    }).lean()
+    return auctions
+}
+const updateAuction = async (auctionId, data) => {
+    const auctions = await Auction.findOneAndUpdate(
+        { _id: auctionId },
+        { status: data }
+    )
+    return auctions
+}
 module.exports = {
     addFixedAuction,
     addTimedAuction,
@@ -305,4 +321,6 @@ module.exports = {
     updateNFTForBuyNow,
     createNewNFTforEndAuction,
     updateNFTforEndAuction,
+    getAllActiveAuctionsForCronJob,
+    updateAuction,
 }

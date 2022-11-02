@@ -19,8 +19,7 @@ const {
 
 // API to create NFT
 exports.create = async (req, res, next) => {
-    try{
-        
+    try {
         let result = null
         // let payload = {
         //     ...req.body,
@@ -30,7 +29,7 @@ exports.create = async (req, res, next) => {
         // payload.stats = JSON.parse(req.body.stats)
         // payload.collection = JSON.parse(payload.collection)
         // payload.copies = Number(payload.copies)
-    
+
         // const { error } = validation.validateNFTSchema(payload)
         // if (error) {
         //     return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
@@ -40,7 +39,6 @@ exports.create = async (req, res, next) => {
         // }
         if (req.files?.image) {
             result = await pinFileToIPFS(req.files, req.body)
-    
         } else {
             result = await uploadJsonToIpfs(req.body.image, req.body)
         }
@@ -49,7 +47,7 @@ exports.create = async (req, res, next) => {
             message: SUCCESS_MESSAGE.NFT_CREATED,
             data: result,
         })
-    }catch(err){
+    } catch (err) {
         return next(err)
     }
 }
@@ -95,6 +93,7 @@ exports.get = async (req, res, next) => {
         let nftDetail = await helpers.nft.getNftDetailPipeline(payload.nftId)
 
         nftDetail = nftDetail[0]
+
         if (!nftDetail) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.FALSE,
