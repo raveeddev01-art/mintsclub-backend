@@ -10,8 +10,8 @@ router
     .route('/upload/ipfs')
     .post(
         middleware.userValidation,
-        validatorMiddleware.validateNFTSchema,
         uploadDataOnIpfs,
+        validatorMiddleware.validateNFTSchema,
         controller.create
     )
 // router.route('/edit').put(cpUpload, controller.edit)
