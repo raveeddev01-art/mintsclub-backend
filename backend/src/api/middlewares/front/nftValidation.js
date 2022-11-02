@@ -26,15 +26,20 @@ const validateNFTSchema = (req,res,next) => {
         }),
         fileType: Joi.string().valid('image', 'audio', 'video').required(),
         ownerId: Joi.string().alphanum().min(12).max(24).required(),
-        currentPrice: Joi.number().min(0).max(1000000).required(),
+        // currentPrice: Joi.number().min(0).max(1000000).required(),
         userId: Joi.string().alphanum().min(12).max(24).required(),
         categoryId: Joi.string().alphanum().min(12).max(24).allow(''),
         collectionId: Joi.string().alphanum().min(12).max(24).required(),
         ownerAddress: Joi.string()
-            .regex(/^0x[a-fA-F0-9]{40}$/)
+            // .regex(/^0x[a-fA-F0-9]{40}$/)
             .allow(''),
 
         copies: Joi.number().min(1).max(1000000).required(),
+        collection: Joi.object().optional(),
+        contractAddress: Joi.string().optional(),
+        isApproved:Joi.boolean().required(),
+        image:Joi.string().optional(),
+        compressedFile:Joi.string().optional()
     })
     const options = {
         errors: {

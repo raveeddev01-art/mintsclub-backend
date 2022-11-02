@@ -11,13 +11,14 @@ const algosdk = require('algosdk')
 const { base58_to_binary } = require('base58-js')
 const helpers = require('../../helpers')
 const atob = require('atob')
-
+const { uploadFileToS3 } = require('../../utils/s3Bucket.js')
 const {
     ERROR_MESSAGE,
     SUCCESS_MESSAGE,
     SUCCESS_STATUS,
     HTTP_STATUS_CODE,
 } = require('../../../config/constants')
+const fs = require('fs')
 
 mailchimp.setConfig({
     apiKey: mailChimp.apiKey,
@@ -51,7 +52,30 @@ exports.updateProfile = async (req, res, next) => {
             bio: req.body.bio,
         }
 
-        payload.profileImage = req.body.profileImage
+        const { error } = validation.validateUserProfile(payload)
+        //upload files
+        if (req.file) {
+            const profileRes = await uploadFileToS3(
+                req.file.path,
+                req.file.filename
+            )
+            if (!profileRes.success) {
+                return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                    success: SUCCESS_STATUS.FALSE,
+                    message: profileRes.err,
+                })
+            }
+            payload.profileImage = profileRes.file
+            console.log(profileRes.file, 'req.file')
+        } else {
+            payload.profileImage = req.body.profileImage
+        }
+        if (error) {
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: error?.details[0]?.message,
+            })
+        }
 
         if (req.body.twitterLink && !validUrl.isUri(req.body.twitterLink)) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
@@ -79,12 +103,12 @@ exports.updateProfile = async (req, res, next) => {
             payload.webLink = req.body.webLink
         }
 
-        let imagesPayload = {
-            profileImage: req.body.profileImage,
-            bannerImage: req.body.bannerImage,
-        }
+        // let imagesPayload = {
+        //     profileImage: req.body.profileImage,
+        //     bannerImage: req.body.bannerImage,
+        // }
 
-        const newPayload = { ...payload, ...imagesPayload }
+        const newPayload = { ...payload, }
         let user = await helpers.user.updateUserProfile(newPayload)
         return res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,

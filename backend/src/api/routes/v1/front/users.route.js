@@ -4,7 +4,7 @@ const router = express.Router()
 const middleware = require('../../../middlewares/front/auth')
 const validatorMiddleware = require('../../../middlewares/front/validation')
 
-const { profileUpload } = require('../../../utils/uploadImage')
+const {uploadSingle,profileUpload } = require('../../../utils/uploadImage')
 router.route('/').post(controller.create)
 router
     .route('/updateProfile')

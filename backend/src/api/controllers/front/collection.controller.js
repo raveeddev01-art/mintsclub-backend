@@ -5,7 +5,7 @@ const Collection = require('../../models/collection.model')
 const Categories = require('../../models/categories.model')
 const User = require('../../models/users.model')
 const Category = require('../../models/categories.model')
-
+const { uploadFileToS3 } = require('../../utils/s3Bucket.js')
 const validation = require('../../middlewares/front/collectionValidation')
 const helpers = require('../../helpers')
 
@@ -43,13 +43,40 @@ exports.create = async (req, res, next) => {
 
         payload = {
             ...payload,
-            logo: req.body.logo,
-            featuredImg: req.body.featuredImg,
             banner: req.body.bannerUrl,
         }
 
-        payload.categoryId = payload.categoryId ? payload.categoryId : null
+        if (req.files) {
+            console.log(req.files, 'req.files')
+            const logoRes = await uploadFileToS3(
+                req.files.logo[0].path,
+                req.files.logo[0].filename
+            )
+            const featuredRes = await uploadFileToS3(
+                req.files.featuredImg[0].path,
+                req.files.featuredImg[0].filename
+            )
+            if (!logoRes.success) {
+                return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                    success: SUCCESS_STATUS.FALSE,
+                    message: logoRes.err,
+                })
+            }
+            if (!featuredRes.success) {
+                return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                    success: SUCCESS_STATUS.FALSE,
+                    message: featuredRes.err,
+                })
+            }
+            console.log({ logoImg: logoRes.file, feat: featuredRes.file })
+            payload.logo = logoRes.file
+            payload.featuredImg = featuredRes.file
+        } else {
+            payload.logo = req.body.logo
+            payload.featuredImg = req.body.featuredImg
+        }
 
+        payload.categoryId = payload.categoryId ? payload.categoryId : null
         if (!payload?.logo) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.FALSE,
