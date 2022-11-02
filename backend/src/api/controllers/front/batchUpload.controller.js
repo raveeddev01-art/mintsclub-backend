@@ -24,10 +24,12 @@ exports.batchUpload = async (req, res, next) => {
             blockchainType = 'polygon'
         } else if (payload?.chainId === 0) {
             blockchainType = 'bsc'
-        } else {
+        } else if (payload?.chainId === 'solana') {
             blockchainType = 'solana'
+        } else {
+            blockchainType = 'algorand'
         }
-
+        console.log("payload",payload,blockchainType)
         const result = await BatchUpload.create(payload)
         if (result) {
             const {
