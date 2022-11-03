@@ -6,14 +6,11 @@ const middleware = require('../../../middlewares/front/auth')
 const validatorMiddleware = require('../../../middlewares/front/auctionValidation')
 
 router.route('/live').get(controller.live)
-router
-    .route('/create')
-    .post(
-        validatorMiddleware.validateNFTFixedTAuctionSchema,
-        validatorMiddleware.validateNFTimedTAuctionSchema,
-        cpUpload,
-        controller.create
-    )
+router.route('/create').post(
+    // cpUpload,
+    validatorMiddleware.auctionValidation,
+    controller.create
+)
 router
     .route('/buyNft')
     .post(

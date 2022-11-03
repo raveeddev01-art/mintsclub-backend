@@ -5,7 +5,7 @@ const {
     SUCCESS_STATUS,
     HTTP_STATUS_CODE,
 } = require('../../../config/constants')
-const validateCreateBid = (req,res,next) => {
+const validateCreateBid = (req, res, next) => {
     const schema = Joi.object().keys({
         bidBy: Joi.string().alphanum().min(12).max(24).required(),
         ownerId: Joi.string().alphanum().min(12).max(24).required(),
@@ -29,17 +29,8 @@ const validateCreateBid = (req,res,next) => {
             },
         },
     }
-    const payload = {
-        bidBy: req.body.bidBy,
-        ownerId: req.body.ownerId,
-        nftId: req.body.nftId,
-        bidAmount: req.body.bidAmount,
-        isAccepted: req.body.isAccepted,
-        expiryDate: req.body.expiryDate,
-        fromAddress: req.body.fromAddress,
-        toAddress: req.body.toAddress,
-        auctionId: req.body.auctionId,
-    }
+
+    const payload = req.body
 
     const { error } = schema.validate(payload, options)
     if (error) {
@@ -51,7 +42,7 @@ const validateCreateBid = (req,res,next) => {
     next()
 }
 
-const validateBidId = (req,res,next) => {
+const validateBidId = (req, res, next) => {
     const schema = Joi.object().keys({
         bidId: Joi.string().alphanum().min(12).max(24).required(),
     })
@@ -63,11 +54,8 @@ const validateBidId = (req,res,next) => {
         },
     }
     const { bidId } = req.params
- 
-   
 
-  
-    const { error } =  schema.validate({bidId}, options)
+    const { error } = schema.validate({ bidId }, options)
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
             success: SUCCESS_STATUS.FALSE,
