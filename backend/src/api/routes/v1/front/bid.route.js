@@ -21,9 +21,12 @@ router
     )
 router.route('/list').get(controller.list)
 
-router.route('/accept').put(validatorMiddleware.validateBidId ,controller.accept)
+router
+    .route('/accept')
+    .put(validatorMiddleware.validateBidId, controller.accept)
 router
     .route('/claimableBidListbyNftId')
     .get(validatorMiddleware.validateBidId, controller.claimableBidListbyNftId)
+router.route('/updateBid').post(controller.updateBid)
 
 module.exports = router

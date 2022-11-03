@@ -32,6 +32,12 @@ const BidSchema = new mongoose.Schema(
         toAddress: { type: String },
         isAccepted: { type: Boolean, default: false },
         expiryDate: { type: Date },
+        status: {
+            type: String,
+            enum: ['pending', 'claimable', 'outbid', 'winner', 'refunded'],
+            default: 'pending',
+        },
+        blockchainType: { type: String },
     },
     { timestamps: true }
 )

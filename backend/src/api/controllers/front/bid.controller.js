@@ -9,6 +9,7 @@ const {
     SUCCESS_STATUS,
     HTTP_STATUS_CODE,
 } = require('../../../config/constants')
+const helpers = require('../../helpers')
 
 // API to create bid validateNftId
 exports.create = async (req, res, next) => {
@@ -23,14 +24,38 @@ exports.create = async (req, res, next) => {
             fromAddress: req.body.fromAddress,
             toAddress: req.body.toAddress,
             auctionId: req.body.auctionId,
+            blockchainType: req.body.blockchainType,
         }
+
+        // helper function to fetch existing bid
+
+        const maxBidByAnotherUser =
+            await helpers.bid.getPendingHighestBigByAuctionId(payload.auctionId)
 
         const bid = await Bid.create(payload)
         await Auction.findOneAndUpdate(
             { _id: payload?.auctionId },
-            { $push: { bids: bid?._id }, highestBid: payload?.bidAmount }
+            {
+                $push: { bids: bid?._id },
+                highestBid: payload?.bidAmount,
+                highestBidder: payload?.fromAddress,
+            }
         )
         if (bid) {
+            // helper function to update existing bid
+            if (
+                maxBidByAnotherUser?.length > 0 &&
+                payload.blockchainType === 'solana'
+            ) {
+                const data = {
+                    status: 'claimable',
+                }
+                const updateBid = await helpers.bid.updateBid(
+                    maxBidByAnotherUser[0]?._id,
+                    data
+                )
+            }
+
             return res.send({
                 success: SUCCESS_STATUS.TRUE,
                 message: SUCCESS_MESSAGE.BID_PLACED_SUCCESSFULLY,
@@ -74,12 +99,14 @@ exports.delete = async (req, res, next) => {
 // API to get bids list
 exports.list = async (req, res, next) => {
     try {
-        let { page, limit, nftId } = req.query
+        let { page, limit, nftId, auctionId } = req.query
 
         page = page !== undefined && page !== '' ? parseInt(page) : 1
         limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
         const filter = {}
-        if (nftId) filter.nftId = ObjectId(nftId)
+        if (nftId) {
+            filter.nftId = ObjectId(nftId)
+        }
         const startIndex = (page - 1) * limit
         const endIndex = page * limit
 
@@ -196,6 +223,32 @@ exports.accept = async (req, res, next) => {
                 success: SUCCESS_STATUS.TRUE,
                 message: SUCCESS_MESSAGE.BID_ACCEPTED_SUCCESSFULLY,
             })
+        }
+    } catch (error) {
+        return next(error)
+    }
+}
+
+exports.updateBid = async (req, res, next) => {
+    try {
+        const payload = {
+            bidId: req.body.bidId,
+            bidStatus: req.body.status,
+        }
+
+        const bid = await Bid.find({ _id: payload.bidId })
+        if (!bid || bid === null) {
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.BID_NOT_FOUND,
+            })
+        } else {
+            const data = {
+                status: payload.bidStatus,
+            }
+            const updateBid = await helpers.bid.updateBid(payload.bidId, data)
+
+            return res.status(HTTP_STATUS_CODE.OK).json(updateBid)
         }
     } catch (error) {
         return next(error)

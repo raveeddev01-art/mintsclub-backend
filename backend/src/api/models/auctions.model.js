@@ -10,6 +10,18 @@ const AuctionSchema = new mongoose.Schema(
     {
         startDate: { type: Date },
         endDate: { type: Date },
+        status: {
+            type: String,
+            enum: [
+                'active',
+                'claimNft',
+                'claimPrice',
+                'end',
+                'cancelled',
+                'ended',
+            ],
+            default: 'active',
+        },
         nftId: { type: mongoose.Schema.Types.ObjectId, ref: 'NFT' },
         ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -25,6 +37,7 @@ const AuctionSchema = new mongoose.Schema(
         sellerPublicKey: { type: String },
         signature: { type: String },
         bids: [{ type: mongoose.Schema.Types.ObjectId, ref: Bid }],
+        highestBidder: { type: String },
         // bids: [
         //     { bidId: { type: mongoose.Schema.Types.ObjectId, ref: Bid } },
         //     { bidAmount: { type: Number } },

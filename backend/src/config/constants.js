@@ -41,6 +41,7 @@ const SUCCESS_MESSAGE = {
     BID_FETCHED: 'Bids fetched successfully',
     BID_BY_NFT_ID: 'Bids by NFT Id fetched successfully',
     BID_ACCEPTED_SUCCESSFULLY: 'Bid has been accepted successfully',
+    BID_UPDATED_SUCCESSFULLY: 'Bid has been updated successfully',
     CATEGORIES_FETCHED: 'Categories fetched successfully',
     COLLECTION_CREATED: 'Collection created successfully',
     COLLECTION_UPDATED: 'Collection updated successfully',

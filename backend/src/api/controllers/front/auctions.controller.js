@@ -233,10 +233,7 @@ exports.create = async (req, res, next) => {
             payload.auctionEnded = false
         }
         const nftAuction = await nftAuctions.create(payload)
-        console.log(
-            '🚀 ~ file: auctions.controller.js ~ line 260 ~ exports.create= ~ nftAuction',
-            nftAuction
-        )
+
         return res.status(HTTP_STATUS_CODE.CREATED).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.NFT_PUT_ON_SELL,
@@ -317,6 +314,20 @@ exports.endAuction = async (req, res, next) => {
             .where('_id', payload.auctionId)
             .populate('nftId')
 
+        const maxBidByAnotherUser =
+            await helpers.bid.getPendingHighestBigByAuctionId(payload.auctionId)
+        if (
+            maxBidByAnotherUser?.length > 0 &&
+            auctionEndNft[0]?.nftId?.blockchainType === 'solana'
+        ) {
+            const data = {
+                status: 'winner',
+            }
+            const updateBid = await helpers.bid.updateBid(
+                maxBidByAnotherUser[0]?._id,
+                data
+            )
+        }
         const bid = await Bid.find({
             nftId: ObjectId(auctionEndNft[0]?.nftId?._id),
             bidAmount: auctionEndNft[0]?.highestBid,
@@ -342,6 +353,7 @@ exports.endAuction = async (req, res, next) => {
 
         const payloadUpdateAuctionStatus = {
             auctionEnded: true,
+            status: 'end',
         }
         await nftAuctions.findByIdAndUpdate(
             { _id: auctionEndNft[0]?._id },
@@ -355,7 +367,9 @@ exports.endAuction = async (req, res, next) => {
             { _id: auctionEndNft[0]?.nftId?._id },
             { $set: payloadUpdateNFT }
         )
-        await Bid.deleteMany({ nftId: auctionEndNft[0]?.nftId?._id })
+        if (auctionEndNft[0]?.nftId?.blockchainType !== 'solana') {
+            await Bid.deleteMany({ nftId: auctionEndNft[0]?.nftId?._id })
+        }
         res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.AUCTION_ENDED,
