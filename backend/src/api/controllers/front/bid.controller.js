@@ -106,7 +106,6 @@ exports.list = async (req, res, next) => {
         const filter = {}
         if (nftId) {
             filter.nftId = ObjectId(nftId)
-            // filter.auctionId = ObjectId(auctionId)
         }
         const startIndex = (page - 1) * limit
         const endIndex = page * limit
@@ -232,8 +231,6 @@ exports.accept = async (req, res, next) => {
 
 exports.updateBid = async (req, res, next) => {
     try {
-        // const { bidId } = req.body.bidId
-        // const { bidStatus } = req.body.status
         const payload = {
             bidId: req.body.bidId,
             bidStatus: req.body.status,
@@ -252,11 +249,6 @@ exports.updateBid = async (req, res, next) => {
             const updateBid = await helpers.bid.updateBid(payload.bidId, data)
 
             return res.status(HTTP_STATUS_CODE.OK).json(updateBid)
-
-            // return res.send({
-            //     success: SUCCESS_STATUS.TRUE,
-            //     message: SUCCESS_MESSAGE.BID_UPDATED_SUCCESSFULLY,
-            // })
         }
     } catch (error) {
         return next(error)
