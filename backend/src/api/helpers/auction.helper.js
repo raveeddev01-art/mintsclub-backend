@@ -314,6 +314,18 @@ const updateAuction = async (auctionId, data) => {
     )
     return auctions
 }
+const updateActivityforCancelList = async (cancelListData) => {
+    const activityPayload = {
+        nftId: cancelListData?.nftId?._id,
+        ownerId: cancelListData?.nftId?.ownerId,
+        fromAddress: cancelListData?.nftId?.ownerAddress,
+        activityType: 'Canceled Listing',
+    }
+
+    const dataUpdated = await ActivityModal.create(activityPayload)
+
+    return dataUpdated
+}
 module.exports = {
     addFixedAuction,
     addTimedAuction,
@@ -323,4 +335,5 @@ module.exports = {
     updateNFTforEndAuction,
     getAllActiveAuctionsForCronJob,
     updateAuction,
+    updateActivityforCancelList,
 }

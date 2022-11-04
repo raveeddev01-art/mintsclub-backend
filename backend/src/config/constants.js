@@ -86,6 +86,7 @@ const SUCCESS_MESSAGE = {
     USER_CREATED: 'user is created successfully',
     USER_AUTHENTICATED: 'user authenticated successfully',
     ABI_CREATED: 'ABI created successfully',
+    CANCEL_LIST: 'List cancelled successfully',
 }
 const SUCCESS_STATUS = {
     TRUE: true,

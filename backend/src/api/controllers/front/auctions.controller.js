@@ -206,31 +206,33 @@ exports.create = async (req, res, next) => {
         }
 
         if (Number(payload.sellingMethod) === 1) {
-            payload.currentPrice = Number(payload.sellingConfig.price.amount)
-            payload.auctionEnded = false
+            // payload.currentPrice = Number(payload.sellingConfig.price.amount)
+            // payload.auctionEnded = false
+            helpers.auction.addFixedAuction(payload)
         } else {
-            payload.currentPrice = Number(
-                payload.sellingConfig.startPrice.amount
-            )
-            const startDate = moment(
-                new Date(payload.sellingConfig.duration.startDate)
-            )
-                .utc(false)
-                .toISOString()
+            // payload.currentPrice = Number(
+            //     payload.sellingConfig.startPrice.amount
+            // )
+            // const startDate = moment(
+            //     new Date(payload.sellingConfig.duration.startDate)
+            // )
+            //     .utc(false)
+            //     .toISOString()
 
-            const endDate = moment(
-                new Date(payload.sellingConfig.duration.endDate)
-            )
-                .utc(false)
-                .toISOString()
+            // const endDate = moment(
+            //     new Date(payload.sellingConfig.duration.endDate)
+            // )
+            //     .utc(false)
+            //     .toISOString()
 
-            payload.sellingConfig.duration.startDate = startDate
-            payload.sellingConfig.duration.endDate = endDate
-            payload.auctionStartDate = startDate
-            payload.auctionEndDate = endDate
-            payload.highestBid = 0
-            payload.bid = []
-            payload.auctionEnded = false
+            // payload.sellingConfig.duration.startDate = startDate
+            // payload.sellingConfig.duration.endDate = endDate
+            // payload.auctionStartDate = startDate
+            // payload.auctionEndDate = endDate
+            // payload.highestBid = 0
+            // payload.bid = []
+            // payload.auctionEnded = false
+            helpers.auction.addTimedAuction(payload)
         }
         const nftAuction = await nftAuctions.create(payload)
 
@@ -373,6 +375,52 @@ exports.endAuction = async (req, res, next) => {
         res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.AUCTION_ENDED,
+        })
+    } catch (err) {
+        return next(err)
+    }
+}
+
+exports.cancelList = async (req, res, next) => {
+    try {
+        const payload = req.body
+
+        const cancelList = await nftAuctions
+            .find({})
+            .where('_id', payload.auctionId)
+            .populate('nftId')
+
+        const updateNft = await NFT.findByIdAndUpdate(
+            { _id: ObjectId(cancelList[0]?.nftId?._id) },
+            { $set: { activeAuction: null, currentPrice: 0 } }
+        )
+        const payloadUpdateAuctionStatus = {
+            auctionEnded: true,
+            status: 'canceled',
+            sellingMethod: null,
+            sellingConfig: null,
+            copiesForAuction: null,
+            sellId: null,
+            auctionStartDate: null,
+            auctionEndDate: null,
+        }
+        await nftAuctions.findByIdAndUpdate(
+            { _id: payload.auctionId },
+            { $set: payloadUpdateAuctionStatus }
+        )
+        await helpers.auction.updateActivityforCancelList(cancelList[0])
+        // const activityPayload = {
+        //     nftId: cancelList[0]?.nftId?._id,
+        //     ownerId: cancelList[0]?.nftId?.ownerId,
+        //     fromAddress: cancelList[0]?.nftId?.ownerAddress,
+        //     activityType: 'Cancel Listing',
+        // }
+
+        // const dataUpdated = await ActivityModal.create(activityPayload)
+
+        res.status(HTTP_STATUS_CODE.OK).send({
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.CANCEL_LIST,
         })
     } catch (err) {
         return next(err)

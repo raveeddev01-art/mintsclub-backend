@@ -163,12 +163,13 @@ const validateAuctionEndSchema = (req, res, next) => {
 }
 
 const auctionValidation = (req, res, next) => {
+    console.log('auction selling methid', req.body)
     const sellingMethod = req.body.sellingMethod
-    if (sellingMethod === 1) {
+    if (sellingMethod === 2) {
         return validateNFTimedTAuctionSchema
     }
     next()
-    if (sellingMethod === 2) {
+    if (sellingMethod === 1) {
         return validateNFTFixedTAuctionSchema
     }
     next()

@@ -37,6 +37,7 @@ exports.create = async (req, res, next) => {
 
 exports.updateProfile = async (req, res, next) => {
     try {
+        console.log("isApproved", req.body.isApproved)
         if (req.body.isApproved) {
             let user = await helpers.user.approvedUserProfileUpdate(req.body)
             return res.status(HTTP_STATUS_CODE.OK).send({
@@ -51,8 +52,6 @@ exports.updateProfile = async (req, res, next) => {
             userId: req.body.userId,
             bio: req.body.bio,
         }
-
-        const { error } = validation.validateUserProfile(payload)
         //upload files
         if (req.file) {
             const profileRes = await uploadFileToS3(
@@ -69,12 +68,6 @@ exports.updateProfile = async (req, res, next) => {
             console.log(profileRes.file, 'req.file')
         } else {
             payload.profileImage = req.body.profileImage
-        }
-        if (error) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: error?.details[0]?.message,
-            })
         }
 
         if (req.body.twitterLink && !validUrl.isUri(req.body.twitterLink)) {
