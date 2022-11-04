@@ -149,7 +149,6 @@ const validateUser = (req, res, next) => {
 }
 
 const validateUserProfile = async (req, res, next) => {
-    console.log('testing', req, req.user)
     const schema = Joi.object().keys({
         userId: Joi.string().alphanum().min(12).max(24).required(),
         email: Joi.string().email().allow(''),
@@ -164,12 +163,11 @@ const validateUserProfile = async (req, res, next) => {
         },
     }
     let payload = {
-        userId: req.user,
+        userId: req.body ? req.body : req.user,
         email: req.body.email,
         username: req.body.username,
         bio: req.body.bio,
     }
-    // const payload = req.body
     const { error } = schema.validate(payload, options)
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({

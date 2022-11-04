@@ -37,7 +37,6 @@ exports.create = async (req, res, next) => {
 
 exports.updateProfile = async (req, res, next) => {
     try {
-        console.log("isApproved", req.body.isApproved)
         if (req.body.isApproved) {
             let user = await helpers.user.approvedUserProfileUpdate(req.body)
             return res.status(HTTP_STATUS_CODE.OK).send({
@@ -101,7 +100,7 @@ exports.updateProfile = async (req, res, next) => {
         //     bannerImage: req.body.bannerImage,
         // }
 
-        const newPayload = { ...payload, }
+        const newPayload = { ...payload }
         let user = await helpers.user.updateUserProfile(newPayload)
         return res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
