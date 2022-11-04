@@ -236,14 +236,14 @@ exports.buyNow = async (req, res, next) => {
         })
 
         //in lazy minting case
-        if (req.body?.tokenId) {
+        if (req.body?.tokenId) { 
             await NFT.findByIdAndUpdate(
                 { _id: payload.nftId },
                 { $set: { tokenId: req.body.tokenId } },
                 { new: true }
             )
         }
-        if (buyNftDetail && nftAuctionDetail?.copiesForAuction > 0) {
+        if (buyNftDetail && nftAuctionDetail?.copiesForAuction > 0) { 
             if (
                 buyNftDetail.remainingCopies >
                 nftAuctionDetail?.copiesForAuction
