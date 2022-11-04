@@ -179,6 +179,7 @@ exports.live = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
     try {
+        console.log('checking cntroller')
         const payload = req.body
         if (!payload.sellingMethod) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
@@ -191,6 +192,8 @@ exports.create = async (req, res, next) => {
             _id: payload.nftId,
         })
         if (!getNFT) {
+            console.log('get nft loging', getNFT)
+
             return res.status(HTTP_STATUS_CODE.NOT_FOUND).send({
                 success: SUCCESS_STATUS.FALSE,
                 message: ERROR_MESSAGE.COPIES_FOR_AUCTION_CHECK,

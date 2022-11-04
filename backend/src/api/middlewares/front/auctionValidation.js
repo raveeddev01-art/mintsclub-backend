@@ -8,7 +8,7 @@ const {
 const validateNFTFixedTAuctionSchema = (req, res, next) => {
     const schema = Joi.object().keys({
         nftId: Joi.string().alphanum().min(12).max(24).required(),
-        copiesForAuction: Joi.number().min(0).max(100000).required(),
+        copiesForAuction: Joi.number().min(0).max(100000).optional(),
         sellId: Joi.number().required(),
         sellingMethod: Joi.number().valid(1, 2).required(),
         signature: Joi.string(),
@@ -39,6 +39,7 @@ const validateNFTFixedTAuctionSchema = (req, res, next) => {
       const sellingConfig=JSON.parse(req.body.sellingConfig)
       const sellingMethod = req.body.sellingMethod
     const payload = {...req.body,sellingConfig,sellingMethod}
+    console.log('cheking payload====', payload)
 
     const { error } = schema.validate(payload, options)
     if (error) {
@@ -103,8 +104,8 @@ const validateNFTimedTAuctionSchema = (req, res, next) => {
     }
     const sellingConfig=JSON.parse(req.body.sellingConfig)
     const payload = {...req.body,sellingConfig}
-
-    const { error } = schema.validate(payload, options)
+    console.log('values =====', payload)
+    const{error} = schema.validate(payload, options)
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
             success: SUCCESS_STATUS.FALSE,
