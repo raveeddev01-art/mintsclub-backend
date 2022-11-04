@@ -38,7 +38,6 @@ const validateNFTFixedTAuctionSchema = (req, res, next) => {
     }
 
     const payload = req.body
-
     const { error } = schema.validate(payload, options)
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
@@ -101,7 +100,7 @@ const validateNFTimedTAuctionSchema = (req, res, next) => {
         },
     }
     const payload = req.body
-
+    payload.sellingConfig = JSON.parse(payload.sellingConfig)
     const { error } = schema.validate(payload, options)
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
@@ -163,10 +162,9 @@ const validateAuctionEndSchema = (req, res, next) => {
 }
 
 const auctionValidation = (req, res, next) => {
-    console.log('auction selling methid', req.body)
     const sellingMethod = req.body.sellingMethod
     if (sellingMethod === 2) {
-        return validateNFTimedTAuctionSchema
+        return validateNFTimedTAuctionSchema(req, res, next)
     }
     next()
     if (sellingMethod === 1) {

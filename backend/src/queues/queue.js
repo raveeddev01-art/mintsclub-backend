@@ -55,7 +55,7 @@ const Service = {
             queue
                 // An error occured.
                 .on('error', function () {
-                    console.log('queue on functions')
+                    // console.log('queue on functions')
                     // const stack = error.stack || error.stacktrace || error.trace;
                     //   logger.error(
                     //     `[Job Queue][${queueId}][error] Stack: ${stack} `,

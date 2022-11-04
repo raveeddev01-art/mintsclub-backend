@@ -8,9 +8,9 @@ const Bid = require('../models/bids.model')
 const Auction = require('../models/auctions.model')
 
 const addFixedAuction = (request) => {
-    request.currentPrice = Number(request.sellingConfig.price.amount)
+    request.currentPrice = Number(request.sellingConfig?.price?.amount)
     request.auctionEnded = false
-    return request
+    return request;
 }
 
 const addTimedAuction = (request) => {
@@ -323,7 +323,6 @@ const updateActivityforCancelList = async (cancelListData) => {
     }
 
     const dataUpdated = await ActivityModal.create(activityPayload)
-
     return dataUpdated
 }
 module.exports = {
