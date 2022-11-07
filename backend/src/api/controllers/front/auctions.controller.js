@@ -179,7 +179,6 @@ exports.live = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
     try {
-        console.log('checking cntroller')
         const payload = req.body
         if (!payload.sellingMethod) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
@@ -192,8 +191,6 @@ exports.create = async (req, res, next) => {
             _id: payload.nftId,
         })
         if (!getNFT) {
-            console.log('get nft loging', getNFT)
-
             return res.status(HTTP_STATUS_CODE.NOT_FOUND).send({
                 success: SUCCESS_STATUS.FALSE,
                 message: ERROR_MESSAGE.COPIES_FOR_AUCTION_CHECK,
@@ -236,14 +233,14 @@ exports.buyNow = async (req, res, next) => {
         })
 
         //in lazy minting case
-        if (req.body?.tokenId) { 
+        if (req.body?.tokenId) {
             await NFT.findByIdAndUpdate(
                 { _id: payload.nftId },
                 { $set: { tokenId: req.body.tokenId } },
                 { new: true }
             )
         }
-        if (buyNftDetail && nftAuctionDetail?.copiesForAuction > 0) { 
+        if (buyNftDetail && nftAuctionDetail?.copiesForAuction > 0) {
             if (
                 buyNftDetail.remainingCopies >
                 nftAuctionDetail?.copiesForAuction
