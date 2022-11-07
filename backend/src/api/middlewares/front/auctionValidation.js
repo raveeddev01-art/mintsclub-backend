@@ -39,7 +39,6 @@ const validateNFTFixedTAuctionSchema = (req, res, next) => {
     const sellingConfig = JSON.parse(req.body.sellingConfig)
     const sellingMethod = req.body.sellingMethod
     const payload = { ...req.body, sellingConfig, sellingMethod }
-    console.log('cheking payload====', payload)
 
     const { error } = schema.validate(payload, options)
     if (error) {
@@ -104,7 +103,6 @@ const validateNFTimedTAuctionSchema = (req, res, next) => {
     }
     const sellingConfig = JSON.parse(req.body.sellingConfig)
     const payload = { ...req.body, sellingConfig }
-    console.log('values =====', payload)
     const { error } = schema.validate(payload, options)
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
