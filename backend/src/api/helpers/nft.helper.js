@@ -90,6 +90,9 @@ const getNftListPipeline = async (
                     foreignField: 'nftId',
                     localField: '_id',
                     as: 'auction',
+                    pipeline: [
+                        { $match: { $expr: { $ne: ['$status', 'canceled'] } } },
+                    ],
                 },
             },
             {

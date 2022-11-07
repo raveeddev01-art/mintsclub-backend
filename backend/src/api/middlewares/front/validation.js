@@ -162,14 +162,14 @@ const validateUserProfile = async (req, res, next) => {
             },
         },
     }
-    
+
     let payload = {
-        userId: req?.body?.userId,
+        userId: req.body.userId ? req.body.userId : req.user,
         email: req.body.email,
         username: req.body.username,
         bio: req.body.bio,
     }
- 
+
     const { error } = schema.validate(payload, options)
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
