@@ -180,6 +180,7 @@ exports.live = async (req, res, next) => {
 exports.create = async (req, res, next) => {
     try {
         const payload = req.body
+
         if (!payload.sellingMethod) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.FALSE,
@@ -205,7 +206,7 @@ exports.create = async (req, res, next) => {
         }
 
         if (Number(payload.sellingMethod) === 1) {
-            payload.sellingConfig = JSON.parse(payload.sellingConfig)
+            // payload.sellingConfig = JSON.parse(payload.sellingConfig)
             helpers.auction.addFixedAuction(payload)
         } else {
             helpers.auction.addTimedAuction(payload)
@@ -371,10 +372,11 @@ exports.cancelList = async (req, res, next) => {
         )
         let payloadUpdateAuctionStatus = {
             auctionEnded: true,
-            status: 'canceled',
+            status: 'cancelled',
             sellingMethod: null,
             sellingConfig: null,
             copiesForAuction: null,
+            txnHash: req.body.txnHash,
         }
 
         if (cancelList[0]?.sellingMethod === 2) {
