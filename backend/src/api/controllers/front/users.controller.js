@@ -225,7 +225,7 @@ exports.subscribeUser = async (req, res, next) => {
                 'already a list member'
             )
         ) {
-            res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            res.status(HTTP_STATUS_CODE.OK).send({
                 success: SUCCESS_STATUS.FALSE,
                 message: ERROR_MESSAGE.EMAIL_ALREADY_SUBSCRIBED,
             })
