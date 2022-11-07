@@ -365,29 +365,21 @@ exports.cancelList = async (req, res, next) => {
             .where('_id', payload.auctionId)
             .populate('nftId')
 
-       const updateNFT = await NFT.findByIdAndUpdate(
+        const updateNFT = await NFT.findByIdAndUpdate(
             { _id: ObjectId(cancelList[0]?.nftId?._id) },
             { $set: { activeAuction: null, currentPrice: 0 } }
         )
-        let payloadUpdateAuctionStatus
+        let payloadUpdateAuctionStatus = {
+            auctionEnded: true,
+            status: 'canceled',
+            sellingMethod: null,
+            sellingConfig: null,
+            copiesForAuction: null,
+        }
+
         if (cancelList[0]?.sellingMethod === 2) {
-            payloadUpdateAuctionStatus = {
-                auctionEnded: true,
-                status: 'canceled',
-                sellingMethod: null,
-                sellingConfig: null,
-                copiesForAuction: null,
-                auctionStartDate: null,
-                auctionEndDate: null,
-            }
-        } else {
-            payloadUpdateAuctionStatus = {
-                auctionEnded: true,
-                status: 'canceled',
-                sellingMethod: null,
-                sellingConfig: null,
-                copiesForAuction: null,
-            }
+            payloadUpdateAuctionStatus.auctionStartDate = null
+            payloadUpdateAuctionStatus.auctionEndDate = null
         }
 
         await nftAuctions.findByIdAndUpdate(
