@@ -164,7 +164,7 @@ const validateUserProfile = async (req, res, next) => {
     }
 
     let payload = {
-        userId: req.body.userId ? req.body.userId : req.user,
+        userId: req?.body?.userId ? req.body.userId : req?.user,
         email: req.body.email,
         username: req.body.username,
         bio: req.body.bio,
