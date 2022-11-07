@@ -9,10 +9,17 @@ const validateNFTFixedTAuctionSchema = (req, res, next) => {
     const schema = Joi.object().keys({
         nftId: Joi.string().alphanum().min(12).max(24).required(),
         copiesForAuction: Joi.number().min(0).max(100000).required(),
-        sellId: Joi.number().required(),
+        sellId: Joi.alternatives().conditional('blockchainType', {
+            is: 'ethereum',
+            then: Joi.string().required(),
+        }),
         sellingMethod: Joi.number().valid(1, 2).required(),
-        signature: Joi.string(),
-        blockchainType: Joi.string().allow(''),
+        signature: Joi.string().optional(),
+        blockchainType: Joi.string().required().valid('ethereum', 'solana'),
+        txnHash: Joi.alternatives().conditional('blockchainType', {
+            is: 'solana',
+            then: Joi.string().required(),
+        }),
 
         sellingConfig: Joi.object()
             .keys({
@@ -36,9 +43,11 @@ const validateNFTFixedTAuctionSchema = (req, res, next) => {
             },
         },
     }
-    const sellingConfig = JSON.parse(req.body.sellingConfig)
-    const sellingMethod = req.body.sellingMethod
-    const payload = { ...req.body, sellingConfig, sellingMethod }
+    // const sellingConfig = JSON.parse(req.body.sellingConfig)
+    // const sellingMethod = req.body.sellingMethod
+    // const payload = { ...req.body, sellingConfig, sellingMethod }
+    const payload = req.body
+    payload.sellingConfig = JSON.parse(payload.sellingConfig)
 
     const { error } = schema.validate(payload, options)
     if (error) {
@@ -101,8 +110,11 @@ const validateNFTimedTAuctionSchema = (req, res, next) => {
             },
         },
     }
-    const sellingConfig = JSON.parse(req.body.sellingConfig)
-    const payload = { ...req.body, sellingConfig }
+    // const sellingConfig = JSON.parse(req.body.sellingConfig)
+    // const payload = { ...req.body, sellingConfig }
+    const payload = req.body
+    payload.sellingConfig = JSON.parse(payload.sellingConfig)
+
     const { error } = schema.validate(payload, options)
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
@@ -114,11 +126,11 @@ const validateNFTimedTAuctionSchema = (req, res, next) => {
 }
 const auctionValidation = (req, res, next) => {
     const sellingMethod = req.body.sellingMethod
-    if(sellingMethod===1){
-       validateNFTFixedTAuctionSchema(req,res,next)
+    if (sellingMethod === 1) {
+        validateNFTFixedTAuctionSchema(req, res, next)
     }
-    if (sellingMethod===2){
-        validateNFTimedTAuctionSchema(req,res,next)
+    if (sellingMethod === 2) {
+        validateNFTimedTAuctionSchema(req, res, next)
     }
 }
 
@@ -152,6 +164,7 @@ const validateBuyNowSchema = (req, res, next) => {
 const validateAuctionEndSchema = (req, res, next) => {
     const schema = Joi.object().keys({
         auctionId: Joi.string().alphanum().min(12).max(24).required(),
+        txnHash: Joi.string().optional(),
     })
     const options = {
         errors: {

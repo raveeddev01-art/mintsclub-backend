@@ -10,16 +10,18 @@ const Auction = require('../models/auctions.model')
 const addFixedAuction = (request) => {
     request.currentPrice = Number(request.sellingConfig?.price?.amount)
     request.auctionEnded = false
-    return request;
+    return request
 }
 
 const addTimedAuction = (request) => {
-    request.currentPrice = Number(request.sellingConfig.startPrice.amount)
-    const startDate = moment(new Date(request.sellingConfig.duration.startDate))
+    request.currentPrice = Number(request?.sellingConfig?.startPrice?.amount)
+    const startDate = moment(
+        new Date(request?.sellingConfig?.duration?.startDate)
+    )
         .utc(false)
         .toISOString()
 
-    const endDate = moment(new Date(request.sellingConfig.duration.endDate))
+    const endDate = moment(new Date(request?.sellingConfig?.duration?.endDate))
         .utc(false)
         .toISOString()
 
