@@ -26,4 +26,12 @@ router
         controller.endAuction
     )
 
+router
+    .route('/cancelList')
+    .post(
+        validatorMiddleware.validateAuctionEndSchema,
+        middleware.userValidation,
+        controller.cancelList
+    )
+
 module.exports = router

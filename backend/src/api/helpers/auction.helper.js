@@ -8,9 +8,9 @@ const Bid = require('../models/bids.model')
 const Auction = require('../models/auctions.model')
 
 const addFixedAuction = (request) => {
-    request.currentPrice = Number(request.sellingConfig.price.amount)
+    request.currentPrice = Number(request.sellingConfig?.price?.amount)
     request.auctionEnded = false
-    return request
+    return request;
 }
 
 const addTimedAuction = (request) => {
@@ -314,6 +314,17 @@ const updateAuction = async (auctionId, data) => {
     )
     return auctions
 }
+const updateActivityforCancelList = async (cancelListData) => {
+    const activityPayload = {
+        nftId: cancelListData?.nftId?._id,
+        ownerId: cancelListData?.nftId?.ownerId,
+        fromAddress: cancelListData?.nftId?.ownerAddress,
+        activityType: 'Canceled Listing',
+    }
+
+    const dataUpdated = await ActivityModal.create(activityPayload)
+    return dataUpdated
+}
 module.exports = {
     addFixedAuction,
     addTimedAuction,
@@ -323,4 +334,5 @@ module.exports = {
     updateNFTforEndAuction,
     getAllActiveAuctionsForCronJob,
     updateAuction,
+    updateActivityforCancelList,
 }

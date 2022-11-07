@@ -186,7 +186,6 @@ exports.create = async (req, res, next) => {
                 message: ERROR_MESSAGE.SELLING_METHOD,
             })
         }
-        payload.sellingConfig = JSON.parse(payload.sellingConfig)
 
         const getNFT = await NFT.findOne({
             _id: payload.nftId,
@@ -206,34 +205,12 @@ exports.create = async (req, res, next) => {
         }
 
         if (Number(payload.sellingMethod) === 1) {
-            payload.currentPrice = Number(payload.sellingConfig.price.amount)
-            payload.auctionEnded = false
+            payload.sellingConfig = JSON.parse(payload.sellingConfig)
+            helpers.auction.addFixedAuction(payload)
         } else {
-            payload.currentPrice = Number(
-                payload.sellingConfig.startPrice.amount
-            )
-            const startDate = moment(
-                new Date(payload.sellingConfig.duration.startDate)
-            )
-                .utc(false)
-                .toISOString()
-
-            const endDate = moment(
-                new Date(payload.sellingConfig.duration.endDate)
-            )
-                .utc(false)
-                .toISOString()
-
-            payload.sellingConfig.duration.startDate = startDate
-            payload.sellingConfig.duration.endDate = endDate
-            payload.auctionStartDate = startDate
-            payload.auctionEndDate = endDate
-            payload.highestBid = 0
-            payload.bid = []
-            payload.auctionEnded = false
+            helpers.auction.addTimedAuction(payload)
         }
         const nftAuction = await nftAuctions.create(payload)
-
         return res.status(HTTP_STATUS_CODE.CREATED).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.NFT_PUT_ON_SELL,
@@ -373,6 +350,47 @@ exports.endAuction = async (req, res, next) => {
         res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.AUCTION_ENDED,
+        })
+    } catch (err) {
+        return next(err)
+    }
+}
+
+exports.cancelList = async (req, res, next) => {
+    try {
+        const payload = req.body
+
+        const cancelList = await nftAuctions
+            .find({})
+            .where('_id', payload.auctionId)
+            .populate('nftId')
+
+        const updateNFT = await NFT.findByIdAndUpdate(
+            { _id: ObjectId(cancelList[0]?.nftId?._id) },
+            { $set: { activeAuction: null, currentPrice: 0 } }
+        )
+        let payloadUpdateAuctionStatus = {
+            auctionEnded: true,
+            status: 'canceled',
+            sellingMethod: null,
+            sellingConfig: null,
+            copiesForAuction: null,
+        }
+
+        if (cancelList[0]?.sellingMethod === 2) {
+            payloadUpdateAuctionStatus.auctionStartDate = null
+            payloadUpdateAuctionStatus.auctionEndDate = null
+        }
+
+        await nftAuctions.findByIdAndUpdate(
+            { _id: payload.auctionId },
+            { $set: payloadUpdateAuctionStatus }
+        )
+        await helpers.auction.updateActivityforCancelList(cancelList[0])
+
+        res.status(HTTP_STATUS_CODE.OK).send({
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.CANCEL_LIST,
         })
     } catch (err) {
         return next(err)
