@@ -16,7 +16,7 @@ const validateNFTFixedTAuctionSchema = (req, res, next) => {
         sellingMethod: Joi.number().valid(1, 2).required(),
         signature: Joi.string().optional(),
         blockchainType: Joi.string().required().valid('ethereum', 'solana'),
-        txnHash: Joi.alternatives().conditional('blockchainType', {
+        sellerTradeState: Joi.alternatives().conditional('blockchainType', {
             is: 'solana',
             then: Joi.string().required(),
         }),

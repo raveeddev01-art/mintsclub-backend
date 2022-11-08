@@ -211,6 +211,7 @@ exports.create = async (req, res, next) => {
         } else {
             helpers.auction.addTimedAuction(payload)
         }
+
         const nftAuction = await nftAuctions.create(payload)
         return res.status(HTTP_STATUS_CODE.CREATED).send({
             success: SUCCESS_STATUS.TRUE,
@@ -376,7 +377,7 @@ exports.cancelList = async (req, res, next) => {
             sellingMethod: null,
             sellingConfig: null,
             copiesForAuction: null,
-            txnHash: req.body.txnHash,
+            txnHash: req.body?.txnHash,
         }
 
         if (cancelList[0]?.sellingMethod === 2) {
