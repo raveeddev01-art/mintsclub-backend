@@ -34,6 +34,7 @@ const AuctionSchema = new mongoose.Schema(
         auctionEnded: { type: Boolean },
         sellId: { type: Number },
         txnHash: { type: String },
+        sellerTradeState: { type: String },
         sellerPublicKey: { type: String },
         signature: { type: String },
         bids: [{ type: mongoose.Schema.Types.ObjectId, ref: Bid }],
