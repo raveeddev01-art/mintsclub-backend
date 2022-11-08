@@ -11,7 +11,7 @@ const validateNFTFixedTAuctionSchema = (req, res, next) => {
         copiesForAuction: Joi.number().min(0).max(100000).required(),
         sellId: Joi.alternatives().conditional('blockchainType', {
             is: 'ethereum',
-            then: Joi.string().required(),
+            then: Joi.number().required(),
         }),
         sellingMethod: Joi.number().valid(1, 2).required(),
         signature: Joi.string().optional(),
