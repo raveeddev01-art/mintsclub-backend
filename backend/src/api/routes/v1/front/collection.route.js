@@ -7,10 +7,28 @@ const validatorMiddleware = require('../../../middlewares/front/collectionValida
 
 router
     .route('/create')
-    .post(middleware.userValidation,collectionUpload,  validatorMiddleware.validateCollectionSchema ,controller.create)
-router.route('/edit').put(collectionUpload,validatorMiddleware.validateEditCollectionSchema , controller.edit)
-router.route('/delete/:collectionId').delete(validatorMiddleware.validateCollectionId , controller.delete)
-router.route('/get/:collectionId').get(validatorMiddleware.validateCollectionId ,controller.get)
+    .post(
+        middleware.userValidation,
+        collectionUpload,
+        validatorMiddleware.validateCollectionSchema,
+        controller.create
+    )
+router
+    .route('/createDefault')
+    .post(middleware.userValidation, controller.createDefault)
+router
+    .route('/edit')
+    .put(
+        collectionUpload,
+        validatorMiddleware.validateEditCollectionSchema,
+        controller.edit
+    )
+router
+    .route('/delete/:collectionId')
+    .delete(validatorMiddleware.validateCollectionId, controller.delete)
+router
+    .route('/get/:collectionId')
+    .get(validatorMiddleware.validateCollectionId, controller.get)
 router.route('/list').get(controller.list)
 router.route('/myCollectionList').get(controller.myCollectionList)
 router.route('/popular').get(controller.popular)

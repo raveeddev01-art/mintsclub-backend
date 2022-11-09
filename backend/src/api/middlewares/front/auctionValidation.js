@@ -9,7 +9,23 @@ const validateNFTFixedTAuctionSchema = (req, res, next) => {
     const schema = Joi.object().keys({
         nftId: Joi.string().alphanum().min(12).max(24).required(),
         copiesForAuction: Joi.number().min(0).max(100000).required(),
-        sellId: Joi.number().required(),
+        sellId: Joi.number().optional(),
+
+        // sellId: Joi.alternatives().conditional(
+        //     'blockchainType',
+        //     {
+        //         is: 'ethereum',
+        //         then: Joi.number().required(),
+        //     },
+        //     {
+        //         is: 'polygon',
+        //         then: Joi.number().required(),
+        //     },
+        //     {
+        //         is: 'bsc',
+        //         then: Joi.number().required(),
+        //     }
+        // ),
         sellingMethod: Joi.number().valid(1, 2).required(),
         signature: Joi.string(),
         blockchainType: Joi.string().allow(''),
@@ -56,11 +72,22 @@ const validateNFTimedTAuctionSchema = (req, res, next) => {
         nftId: Joi.string().alphanum().min(12).max(24).required(),
         userId: Joi.string().alphanum().min(12).max(24).required(),
         auctionStartDate: Joi.date().allow(''),
-        // sellId: Joi.number().required(),
-        sellId: Joi.alternatives().conditional('blockchainType', {
-            is: 'ethereum',
-            then: Joi.number().required(),
-        }),
+        sellId: Joi.number().optional(),
+        // sellId: Joi.alternatives().conditional(
+        //     'blockchainType',
+        //     {
+        //         is: 'ethereum',
+        //         then: Joi.number().required(),
+        //     },
+        //     {
+        //         is: 'polygon',
+        //         then: Joi.number().required(),
+        //     },
+        //     {
+        //         is: 'bsc',
+        //         then: Joi.number().required(),
+        //     }
+        // ),
 
         auctionEndDate: Joi.date().allow(''),
         copiesForAuction: Joi.number().min(1).max(100000).required(),
@@ -114,11 +141,11 @@ const validateNFTimedTAuctionSchema = (req, res, next) => {
 }
 const auctionValidation = (req, res, next) => {
     const sellingMethod = req.body.sellingMethod
-    if(sellingMethod===1){
-       validateNFTFixedTAuctionSchema(req,res,next)
+    if (sellingMethod === 1) {
+        validateNFTFixedTAuctionSchema(req, res, next)
     }
-    if (sellingMethod===2){
-        validateNFTimedTAuctionSchema(req,res,next)
+    if (sellingMethod === 2) {
+        validateNFTimedTAuctionSchema(req, res, next)
     }
 }
 
