@@ -14,6 +14,9 @@ router
         controller.create
     )
 router
+    .route('/createDefault')
+    .post(middleware.userValidation, controller.createDefault)
+router
     .route('/edit')
     .put(
         collectionUpload,
@@ -30,8 +33,5 @@ router.route('/list').get(controller.list)
 router.route('/myCollectionList').get(controller.myCollectionList)
 router.route('/popular').get(controller.popular)
 router.route('/deploy').post(controller.deploy)
-router
-    .route('/createDefault')
-    .post(middleware.userValidation, controller.createDefault)
 
 module.exports = router
