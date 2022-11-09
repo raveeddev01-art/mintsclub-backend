@@ -58,7 +58,7 @@ exports.userNftLikes = async (req, res, next) => {
                 message: ERROR_MESSAGE.SIGN_IN_FIRST,
             })
 
-        const likes = await LikesModal.find({ userId })
+            const likes = await LikesModal.find({ userId }).populate([{ path: "nftId", model: "NFT"}])
 
         return res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,

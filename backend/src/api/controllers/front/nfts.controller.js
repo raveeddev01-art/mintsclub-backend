@@ -144,9 +144,11 @@ exports.list = async (req, res, next) => {
             auction,
             latest,
             keyword,
+            created,
+            collected,
+            // favourite,
         } = req.query
 
-        const ownerId1 = ObjectId(ownerId)
         let search
         if (keyword) {
             search = true
@@ -157,7 +159,7 @@ exports.list = async (req, res, next) => {
             ...(latest && {
                 createdAt: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
             }),
-            ...(ownerId && { ownerId: ownerId1 }),
+            ...(ownerId && { ownerId: ObjectId(ownerId) }),
             ...(gtePrice && {
                 currentPrice: {
                     $gte: Number(gtePrice),
@@ -190,6 +192,16 @@ exports.list = async (req, res, next) => {
                     { ownerAddress: { $regex: keyword, $options: 'i' } },
                 ],
             }),
+            ...(created &&{ 
+                creatorId: ObjectId(created)
+                }),
+            ...(collected &&{
+                creatorId: { $ne: ObjectId(collected)},
+                ownerId: ObjectId(collected)
+                }),
+            // ...(favourite &&{
+            //     userId: ObjectId(favourite)
+            // }) 
         }
 
         if (collectionId) filter.collectionId = ObjectId(collectionId)
