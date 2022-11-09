@@ -28,7 +28,9 @@ const validateNFTFixedTAuctionSchema = (req, res, next) => {
         // ),
         sellingMethod: Joi.number().valid(1, 2).required(),
         signature: Joi.string().optional(),
-        blockchainType: Joi.string().required().valid('ethereum', 'solana'),
+        blockchainType: Joi.string()
+            .required()
+            .valid('ethereum', 'solana', 'bsc', 'polygon'),
         sellerTradeState: Joi.alternatives().conditional('blockchainType', {
             is: 'solana',
             then: Joi.string().required(),
@@ -74,7 +76,9 @@ const validateNFTFixedTAuctionSchema = (req, res, next) => {
 
 const validateNFTimedTAuctionSchema = (req, res, next) => {
     const schema = Joi.object().keys({
-        blockchainType: Joi.string().required().valid('ethereum', 'solana'),
+        blockchainType: Joi.string()
+            .required()
+            .valid('ethereum', 'solana', 'bsc', 'polygon'),
         nftId: Joi.string().alphanum().min(12).max(24).required(),
         userId: Joi.string().alphanum().min(12).max(24).required(),
         auctionStartDate: Joi.date().allow(''),
