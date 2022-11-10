@@ -48,7 +48,7 @@ const createNewNFTtoBuy = async (request, buyNftDetail, auctionDetail) => {
             creatorId: buyNftDetail.creatorId,
             collectionId: buyNftDetail.collectionId,
             categoryId: buyNftDetail.categoryId,
-            currentPrice: buyNftDetail.currentPrice,
+            currentPrice: 0,
             metaData: buyNftDetail.metaData,
             image: buyNftDetail.image,
             remainingCopies: auctionDetail?.copiesForAuction,
@@ -64,6 +64,7 @@ const createNewNFTtoBuy = async (request, buyNftDetail, auctionDetail) => {
 
         const payloadUpdateAuctionStatus = {
             auctionEnded: true,
+            status: 'end',
         }
 
         await nftAuctions.findOneAndUpdate(
@@ -82,7 +83,11 @@ const createNewNFTtoBuy = async (request, buyNftDetail, auctionDetail) => {
         const remainingCopies =
             buyNftDetail.remainingCopies - auctionDetail?.copiesForAuction
 
-        const newPayloadCopies = { remainingCopies }
+        const newPayloadCopies = {
+            remainingCopies,
+            activeAuction: null,
+            currentPrice: 0,
+        }
 
         const nftUpdate = await NFT.findByIdAndUpdate(
             { _id: buyNftDetail._id },
@@ -125,6 +130,7 @@ const updateNFTForBuyNow = async (request, buyNftDetail, auctionDetail) => {
             copies: auctionDetail.copiesForAuction,
             remainingCopies: auctionDetail.copiesForAuction,
             activeAuction: null,
+            currentPrice: 0,
         }
         const nftUpdate = await NFT.findByIdAndUpdate(
             { _id: buyNftDetail._id },
@@ -189,30 +195,12 @@ const createNewNFTforEndAuction = async (bidData, auctionEndNft) => {
         }
 
         const NFTCreated = await NFT.create(payload)
-        const auctionPayload = {
-            nftId: NFTCreated?._id,
-            auctionEnded: false,
-            highestBid: 0,
-        }
-        await nftAuctions.create(auctionPayload)
-
-        const nftTokenDetail = await NftTokens.findOne({
-            nftId: auctionEndNft?.nftId?._id,
-        })
-
-        const nftTokenPayload = {
-            nftToken: nftTokenDetail.nftToken,
-            nftId: NFTCreated._id,
-            tokenStandard: nftTokenDetail.tokenStandard,
-        }
-
-        await NftTokens.create(nftTokenPayload)
 
         const remainingCopies =
             auctionEndNft?.nftId?.remainingCopies -
             auctionEndNft?.copiesForAuction
 
-        const nftUpdateNewPayload = { remainingCopies }
+        const nftUpdateNewPayload = { remainingCopies, currentPrice: 0 }
 
         const nftUpdate = await NFT.findByIdAndUpdate(
             { _id: auctionEndNft?.nftId?._id },
