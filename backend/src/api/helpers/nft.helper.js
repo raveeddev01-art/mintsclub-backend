@@ -93,7 +93,8 @@ const getNftListPipeline = async (
                     pipeline: [
                         {
                             $match: {
-                                $expr: { $ne: ['$status', 'cancelled'] },
+                                // $expr: { $ne: ['$status', 'cancelled'] },
+                                status: { $nin: ['cancelled', 'end'] },
                             },
                         },
                     ],
