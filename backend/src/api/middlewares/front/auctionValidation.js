@@ -167,7 +167,7 @@ const validateBuyNowSchema = (req, res, next) => {
         userId: Joi.string().alphanum().min(12).max(24).required(),
         nftId: Joi.string().alphanum().min(12).max(24).required(),
         ownerAddress: Joi.string()
-            .regex(/^0x[a-fA-F0-9]{40}$/)
+            // .regex(/^0x[a-fA-F0-9]{40}$/)
             .required(),
         tokenId: Joi.number().optional(),
     })
