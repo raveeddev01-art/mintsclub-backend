@@ -183,7 +183,7 @@ exports.edit = async (req, res, next) => {
         }
         let payload = {
             userId: req.body.userId,
-            _id: req.body._id,
+            _id: req.body.collectionId,
             categoryId: req.body.categoryId,
             name: req.body.name,
             url: req.body.url,
@@ -206,7 +206,7 @@ exports.edit = async (req, res, next) => {
 
         if (payload.name) {
             const existingCollection = await Collection.findOne({
-                _id: { $ne: payload._id },
+                _id: { $ne: payload.collectionId },
                 name: new RegExp(payload.name, 'gi'),
                 userId: payload.userId,
             })
@@ -218,7 +218,7 @@ exports.edit = async (req, res, next) => {
         }
 
         const collection = await Collection.findByIdAndUpdate(
-            { _id: payload._id },
+            { _id: payload.collectionId },
             { $set: payload },
             { new: true }
         )

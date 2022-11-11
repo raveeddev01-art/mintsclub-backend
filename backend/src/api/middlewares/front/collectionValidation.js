@@ -54,9 +54,9 @@ const validateCollectionSchema = (req,res,next) => {
 const validateEditCollectionSchema = (req,res,next) => {
     const schema = Joi.object().keys({
         userId: Joi.string().alphanum().min(12).max(24).required(),
-        _id: Joi.string().alphanum().min(12).max(24).required(),
+        collectionId: Joi.string().alphanum().min(12).max(24).required(),
         categoryId: Joi.string().alphanum().min(12).max(24).allow(''),
-        name: Joi.string().min(1).max(100).required(),
+        name: Joi.string().min(1).max(100).optional(),
         url: Joi.string().allow(''),
         description: Joi.string().min(1).max(150).allow(''),
         // category: Joi.string().allow(''),
@@ -70,7 +70,7 @@ const validateEditCollectionSchema = (req,res,next) => {
     }
     let payload = {
         userId: req.body.userId,
-        _id: req.body._id,
+        collectionId: req.body.collectionId,
         categoryId: req.body.categoryId,
         name: req.body.name,
         url: req.body.url,
