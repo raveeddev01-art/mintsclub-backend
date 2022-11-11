@@ -7,6 +7,9 @@ const {
 } = require('../../../config/constants')
 const validateNFTSchema = (req, res, next) => {
     const schema = Joi.object().keys({
+        blockchainType: Joi.string()
+            .required()
+            .valid('ethereum', 'solana', 'bsc', 'polygon'),
         name: Joi.string().min(1).max(100).required(),
         description: Joi.string().min(3).max(500).required(),
         creatorId: Joi.string().alphanum().min(12).max(24).allow(''),
@@ -30,11 +33,50 @@ const validateNFTSchema = (req, res, next) => {
         userId: Joi.string().alphanum().min(12).max(24).required(),
         categoryId: Joi.string().alphanum().min(12).max(24).allow(''),
         collectionId: Joi.string().alphanum().min(12).max(24).required(),
-        ownerAddress: Joi.string()
-            // .regex(/^0x[a-fA-F0-9]{40}$/)
-            .allow(''),
 
-        copies: Joi.number().min(1).max(1000000).required(),
+        ownerAddress: Joi.alternatives().conditional('blockchainType', [
+            {
+                is: 'ethereum',
+                then: Joi.string()
+                    .regex(/^0x[a-fA-F0-9]{40}$/)
+                    .allow(''),
+            },
+            {
+                is: 'polygon',
+                then: Joi.string()
+                    .regex(/^0x[a-fA-F0-9]{40}$/)
+                    .allow(''),
+            },
+            {
+                is: 'bsc',
+                then: Joi.string()
+                    .regex(/^0x[a-fA-F0-9]{40}$/)
+                    .allow(''),
+            },
+            {
+                is: 'solana',
+                then: Joi.string().allow(''),
+            },
+        ]),
+
+        copies: Joi.alternatives().conditional('blockchainType', [
+            {
+                is: 'ethereum',
+                then: Joi.number().min(1).max(1000000).required(),
+            },
+            {
+                is: 'polygon',
+                then: Joi.number().min(1).max(1000000).required(),
+            },
+            {
+                is: 'bsc',
+                then: Joi.number().min(1).max(1000000).required(),
+            },
+            {
+                is: 'solana',
+                then: Joi.number().optional(),
+            },
+        ]),
         collection: Joi.object().optional(),
         contractAddress: Joi.string().optional(),
         isApproved: Joi.boolean().required(),
@@ -51,7 +93,7 @@ const validateNFTSchema = (req, res, next) => {
     let payload = {
         ...req.body,
     }
-    console.log(req.body,"req.body")
+
     payload.properties = JSON.parse(req.body.properties)
     payload.levels = JSON.parse(req.body.levels)
     payload.stats = JSON.parse(req.body.stats)
@@ -59,6 +101,7 @@ const validateNFTSchema = (req, res, next) => {
     payload.copies = Number(payload.copies)
 
     const { error } = schema.validate(payload)
+
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
             success: SUCCESS_STATUS.FALSE,
