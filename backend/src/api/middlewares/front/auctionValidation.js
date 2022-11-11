@@ -9,28 +9,30 @@ const validateNFTFixedTAuctionSchema = (req, res, next) => {
     const schema = Joi.object().keys({
         nftId: Joi.string().alphanum().min(12).max(24).required(),
         copiesForAuction: Joi.number().min(0).max(100000).required(),
-        sellId: Joi.number().optional(),
-
-        // sellId: Joi.alternatives().conditional(
-        //     'blockchainType',
-        //     {
-        //         is: 'ethereum',
-        //         then: Joi.number().required(),
-        //     },
-        //     {
-        //         is: 'polygon',
-        //         then: Joi.number().required(),
-        //     },
-        //     {
-        //         is: 'bsc',
-        //         then: Joi.number().required(),
-        //     }
-        // ),
-        sellingMethod: Joi.number().valid(1, 2).required(),
-        signature: Joi.string().optional(),
         blockchainType: Joi.string()
             .required()
             .valid('ethereum', 'solana', 'bsc', 'polygon'),
+        sellId: Joi.alternatives().conditional('blockchainType', [
+            {
+                is: 'ethereum',
+                then: Joi.number().required(),
+            },
+            {
+                is: 'polygon',
+                then: Joi.number().required(),
+            },
+            {
+                is: 'bsc',
+                then: Joi.number().required(),
+            },
+            {
+                is: 'solana',
+                then: Joi.optional(),
+            },
+        ]),
+        sellingMethod: Joi.number().valid(1, 2).required(),
+        signature: Joi.string().optional(),
+
         sellerTradeState: Joi.alternatives().conditional('blockchainType', {
             is: 'solana',
             then: Joi.string().required(),
@@ -65,6 +67,7 @@ const validateNFTFixedTAuctionSchema = (req, res, next) => {
     payload.sellingConfig = JSON.parse(payload.sellingConfig)
 
     const { error } = schema.validate(payload, options)
+
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
             success: SUCCESS_STATUS.FALSE,
@@ -82,25 +85,44 @@ const validateNFTimedTAuctionSchema = (req, res, next) => {
         nftId: Joi.string().alphanum().min(12).max(24).required(),
         userId: Joi.string().alphanum().min(12).max(24).required(),
         auctionStartDate: Joi.date().allow(''),
-        sellId: Joi.number().optional(),
-        // sellId: Joi.alternatives().conditional(
-        //     'blockchainType',
-        //     {
-        //         is: 'ethereum',
-        //         then: Joi.number().required(),
-        //     },
-        //     {
-        //         is: 'polygon',
-        //         then: Joi.number().required(),
-        //     },
-        //     {
-        //         is: 'bsc',
-        //         then: Joi.number().required(),
-        //     }
-        // ),
+        sellId: Joi.alternatives().conditional('blockchainType', [
+            {
+                is: 'ethereum',
+                then: Joi.number().required(),
+            },
+            {
+                is: 'polygon',
+                then: Joi.number().required(),
+            },
+            {
+                is: 'bsc',
+                then: Joi.number().required(),
+            },
+            {
+                is: 'solana',
+                then: Joi.optional(),
+            },
+        ]),
 
         auctionEndDate: Joi.date().allow(''),
-        copiesForAuction: Joi.number().min(1).max(100000).required(),
+        copiesForAuction: Joi.alternatives().conditional('blockchainType', [
+            {
+                is: 'ethereum',
+                then: Joi.number().min(1).max(100000).required(),
+            },
+            {
+                is: 'polygon',
+                then: Joi.number().min(1).max(100000).required(),
+            },
+            {
+                is: 'bsc',
+                then: Joi.number().min(1).max(100000).required(),
+            },
+            {
+                is: 'solana',
+                then: Joi.optional(),
+            },
+        ]),
         sellingMethod: Joi.number().valid(1, 2).required(),
         txnHash: Joi.alternatives().conditional('blockchainType', {
             is: 'solana',
@@ -144,6 +166,7 @@ const validateNFTimedTAuctionSchema = (req, res, next) => {
     payload.sellingConfig = JSON.parse(payload.sellingConfig)
 
     const { error } = schema.validate(payload, options)
+
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
             success: SUCCESS_STATUS.FALSE,
