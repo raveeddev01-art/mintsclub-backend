@@ -147,6 +147,7 @@ exports.list = async (req, res, next) => {
             created,
             collected,
             // favourite,
+            userOwned,
         } = req.query
 
         let search
@@ -199,6 +200,9 @@ exports.list = async (req, res, next) => {
                 creatorId: { $ne: ObjectId(collected)},
                 ownerId: ObjectId(collected)
                 }),
+            ...(userOwned &&{
+                ownerId: ObjectId(userOwned)
+            }),
             // ...(favourite &&{
             //     userId: ObjectId(favourite)
             // }) 
