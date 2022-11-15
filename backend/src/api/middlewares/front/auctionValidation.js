@@ -221,6 +221,7 @@ const validateBuyNowSchema = (req, res, next) => {
     }
     const payload = req.body
     const { error } = schema.validate(payload, options)
+
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
             success: SUCCESS_STATUS.FALSE,

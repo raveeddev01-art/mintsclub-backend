@@ -148,7 +148,7 @@ exports.live = async (req, res, next) => {
                     compressedFile: { $first: '$nft.compressedFile' },
                     currentPrice: { $first: '$nft.currentPrice' },
                     fileType: { $first: '$nft.fileType' },
-                    createdAt: {$first: '$createdAt'}
+                    createdAt: { $first: '$createdAt' },
                 },
             },
             { $sort: { createdAt: -1 } },
@@ -232,6 +232,7 @@ exports.buyNow = async (req, res, next) => {
         const buyNftDetail = await NFT.findOne({
             _id: payload.nftId,
         })
+
         const nftAuctionDetail = await nftAuctions.findOne({
             nftId: payload.nftId,
         })
@@ -244,10 +245,17 @@ exports.buyNow = async (req, res, next) => {
                 { new: true }
             )
         }
-        if (buyNftDetail && nftAuctionDetail?.copiesForAuction > 0) {
+        let copiesCondition = true
+        if (buyNftDetail?.blockchainType !== 'solana') {
+            copiesCondition =
+                nftAuctionDetail?.copiesForAuction > 0 ? true : false
+        }
+
+        if (buyNftDetail && copiesCondition) {
             if (
                 buyNftDetail.remainingCopies >
-                nftAuctionDetail?.copiesForAuction
+                    nftAuctionDetail?.copiesForAuction &&
+                buyNftDetail?.blockchainType !== 'solana'
             ) {
                 const updateData = await helpers.auction.createNewNFTtoBuy(
                     payload,

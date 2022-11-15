@@ -74,14 +74,14 @@ const validateNFTSchema = (req, res, next) => {
             },
             {
                 is: 'solana',
-                then: Joi.number().optional(),
+                then: Joi.optional(),
             },
         ]),
         collection: Joi.object().optional(),
         contractAddress: Joi.string().optional(),
         isApproved: Joi.boolean().required(),
         image: Joi.string().optional(),
-        compressedFile: Joi.string().optional(),
+        compressedFile: Joi.optional(),
     })
     const options = {
         errors: {
@@ -98,7 +98,7 @@ const validateNFTSchema = (req, res, next) => {
     payload.levels = JSON.parse(req.body.levels)
     payload.stats = JSON.parse(req.body.stats)
     payload.collection = JSON.parse(payload.collection)
-    payload.copies = Number(payload.copies)
+    payload.copies = Number(payload?.copies)
 
     const { error } = schema.validate(payload)
 
