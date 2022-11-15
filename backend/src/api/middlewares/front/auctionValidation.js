@@ -8,10 +8,28 @@ const {
 const validateNFTFixedTAuctionSchema = (req, res, next) => {
     const schema = Joi.object().keys({
         nftId: Joi.string().alphanum().min(12).max(24).required(),
-        copiesForAuction: Joi.number().min(0).max(100000).required(),
+        // copiesForAuction: Joi.number().min(0).max(100000).required(),
         blockchainType: Joi.string()
             .required()
             .valid('ethereum', 'solana', 'bsc', 'polygon'),
+        copiesForAuction: Joi.alternatives().conditional('blockchainType', [
+            {
+                is: 'ethereum',
+                then: Joi.number().min(0).max(100000).required(),
+            },
+            {
+                is: 'polygon',
+                then: Joi.number().min(0).max(100000).required(),
+            },
+            {
+                is: 'bsc',
+                then: Joi.number().min(0).max(100000).required(),
+            },
+            {
+                is: 'solana',
+                then: Joi.optional(),
+            },
+        ]),
         sellId: Joi.alternatives().conditional('blockchainType', [
             {
                 is: 'ethereum',
