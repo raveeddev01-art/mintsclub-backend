@@ -75,7 +75,8 @@ exports.get = async (req, res, next) => {
             nftId,
         }
         payload.nftId = ObjectId(payload.nftId)
-        let nftDetail = await helpers.nft.getNftDetailPipeline(payload.nftId)
+        const getNft = await NFT.find({ _id: payload.nftId })
+        let nftDetail = await helpers.nft.getNftDetailPipeline(payload.nftId,getNft[0]?.blockchainType)
 
         nftDetail = nftDetail[0]
 
@@ -193,7 +194,7 @@ exports.list = async (req, res, next) => {
                     { ownerAddress: { $regex: keyword, $options: 'i' } },
                 ],
             }),
-            ...(created &&{ 
+            ...(created &&{
                 creatorId: ObjectId(created)
                 }),
             ...(collected &&{
@@ -205,7 +206,7 @@ exports.list = async (req, res, next) => {
             }),
             // ...(favourite &&{
             //     userId: ObjectId(favourite)
-            // }) 
+            // })
         }
 
         if (collectionId) filter.collectionId = ObjectId(collectionId)

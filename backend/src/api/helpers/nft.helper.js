@@ -1,8 +1,14 @@
 const NFT = require('../models/nfts.model')
 const Likes = require('../models/likes.model')
 
-const getNftDetailPipeline = async (nftId) => {
+const getNftDetailPipeline = async (nftId, blockChainType) => {
     try {
+        let auctionEndFilter = {}
+        if (blockChainType !== 'solana') {
+            auctionEndFilter = {
+                $expr: { $ne: ['$auctionEnded', true] },
+            }
+        }
         const pipeline = [
             {
                 $match: { _id: nftId },
@@ -14,11 +20,9 @@ const getNftDetailPipeline = async (nftId) => {
                     localField: '_id',
                     as: 'auction',
                     pipeline: [
-                        //     {
-                        //         // $match: {
-                        //         //     $expr: { $eq: ['$auctionEnded', true] },
-                        //         // },
-                        //     },
+                        {
+                            $match: auctionEndFilter,
+                        },
                         {
                             $sort: {
                                 createdAt: -1,
