@@ -16,7 +16,7 @@ const validateCollectionSchema = (req,res,next) => {
             // .regex(/^0x[a-fA-F0-9]{40}$/)
             .required(),
         deploy: Joi.boolean().default(false),
-        abi: Joi.required().allow(null),
+        // abi: Joi.required().allow(null),
         contractAddress: Joi.required().allow(''),
         blockchainType: Joi.string().required(),
     })
@@ -35,7 +35,6 @@ const validateCollectionSchema = (req,res,next) => {
         description: req.body.description,
         ownerAddress: req.body.ownerAddress,
         deploy: req.body.deploy ? req.body.deploy : false,
-        abi: req.body.abi ? req.body.abi : null,
         contractAddress: req.body.contractAddress
             ? req.body.contractAddress
             : '',
