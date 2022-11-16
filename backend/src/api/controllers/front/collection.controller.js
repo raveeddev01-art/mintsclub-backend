@@ -183,7 +183,7 @@ exports.edit = async (req, res, next) => {
         }
         let payload = {
             userId: req.body.userId,
-            _id: req.body.collectionId,
+            collectionId: req.body.collectionId,
             categoryId: req.body.categoryId,
             name: req.body.name,
             url: req.body.url,
