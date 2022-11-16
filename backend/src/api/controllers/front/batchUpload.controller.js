@@ -11,25 +11,13 @@ exports.batchUpload = async (req, res, next) => {
             fileName: req.body.fileName,
             collectionId: req.body.collectionId,
             fileType: req.body.fileType,
-            chainId: req.body.chainId,
+            blockchainType: req.body.blockchainType,
             categoryId: req.body.categoryId,
             status: 'inProgress',
             ownerAddress: req.body.ownerAddress,
             userId: req.body.userId,
         }
-        let blockchainType
-        if (payload?.chainId === 1) {
-            blockchainType = 'ethereum'
-        } else if (payload?.chainId === 137) {
-            blockchainType = 'polygon'
-        } else if (payload?.chainId === 0) {
-            blockchainType = 'bsc'
-        } else if (payload?.chainId === 'solana') {
-            blockchainType = 'solana'
-        } else {
-            blockchainType = 'algorand'
-        }
-        console.log("payload",payload,blockchainType)
+        let blockchainType = payload?.blockchainType
         const result = await BatchUpload.create(payload)
         if (result) {
             const {
