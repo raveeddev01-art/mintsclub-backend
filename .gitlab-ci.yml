@@ -2,16 +2,16 @@
 mintsclub-back-v2:
   stage: deploy
   tags:
-    - mintsclub-be-aws-self
+    - mintsclub-backend-prod
   before_script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - mkdir -p ~/.ssh
     - eval $(ssh-agent -s)
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
-    - echo "Deploy to AWS server"
-    - ssh-add <(echo "$AWS_SSH_KEY")
+    - echo "Deploy to New Backend Prod server"
+    - ssh-add <(echo "$SSH_PROD_BCKND_MINT")
     - rm -rf .git
-    - ssh -o StrictHostKeyChecking=no mintsclub@3.135.80.29 "cd /home/mintsclub/mintsclub-prod/backend-v2/backend; git reset --hard; git pull origin task/MintsClubBackend-V2; npm install; pm2 restart backend-v2; exit"
+    - ssh -o StrictHostKeyChecking=no mintsclub-new-backend@10.10.12.26 "cd /home/mintsclub-new-backend/backend-prod-mintsclub/backend-v2/backend; git reset --hard; git pull origin task/MintsClubBackend-V2; npm install; pm2 restart 0; exit"
   only:
     - task/MintsClubBackend-V2
