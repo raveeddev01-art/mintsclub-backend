@@ -439,10 +439,12 @@ exports.popular = async (req, res, next) => {
 exports.deploy = async (req, res, next) => {
     try {
         let payload = {}
-        const { abi, bytecode, buildFile } = this.getAbi()
-        payload.abi = abi
+        const { bytecode } = this.getAbi()
+        // payload.abi = abi
         payload.bytecode = bytecode
-        if (payload?.abi) {
+        // console.log(payload, 'payload')
+        if (payload) {
+            console.log('sending response=>')
             return res.status(HTTP_STATUS_CODE.OK).send({
                 success: SUCCESS_STATUS.TRUE,
                 message: SUCCESS_MESSAGE.ABI_CREATED,
@@ -454,14 +456,19 @@ exports.deploy = async (req, res, next) => {
             message: ERROR_MESSAGE.WENT_WRONG,
         })
     } catch (error) {
+        console.log(error, 'error')
         return next(error)
     }
 }
 
 exports.getAbi = () => {
-    const buildPath = compilingPreperations()
-    const config = createConfiguration()
-    const compiled = compileSources(config)
-    errorHandling(compiled)
-    return writeOutput(compiled, buildPath)
+    try {
+        // const buildPath = compilingPreperations()
+        const config = createConfiguration()
+        const compiled = compileSources(config)
+        errorHandling(compiled)
+        return writeOutput(compiled)
+    } catch (err) {
+        console.log(err, 'Error')
+    }
 }

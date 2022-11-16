@@ -340,7 +340,7 @@ exports.errorHandling = (compiledSources) => {
  */
 exports.writeOutput = (compiled, buildPath) => {
     // console.log('build', buildPath);
-    fs.ensureDirSync(buildPath)
+    // fs.ensureDirSync(buildPath)
     // console.log('compilesd', compiled);
     // console.log('compilesd', compiled.contracts);
 
@@ -368,13 +368,13 @@ exports.writeOutput = (compiled, buildPath) => {
     //   const contractName = contractFileName.replace('.sol', '');
     //   console.log('contract name', contractName);
     //   console.log('Writing: ', `${contractName}.json`);
-    const buildFile = path.resolve(buildPath, `${contractName}.json`)
-    fs.writeFile(buildFile, content, (err) => {
-        if (err) {
-            console.error(err)
-        }
-    })
-    return { abi, bytecode: byteCodeData, buildFile }
+    // const buildFile = path.resolve(buildPath, `${contractName}.json`)
+    // fs.writeFile(buildFile, content, (err) => {
+    //     if (err) {
+    //         console.error(err)
+    //     }
+    // })
+    return { bytecode: byteCodeData }
     // try {
     //   // fs.outputJsonSync(path.resolve(buildPath, `${contractName}.json`), abi);
 
