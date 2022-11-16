@@ -14,7 +14,7 @@ const BatchUploadSchema = new mongoose.Schema(
         metaData: { type: String },
         ownerAddress: { type: String },
         fileName:{type:String},
-        chainId:{type:String},
+        blockchainType:{type:String},
         collectionId:{type:String},
         categoryId:{type:String},
         key:{type:String},
