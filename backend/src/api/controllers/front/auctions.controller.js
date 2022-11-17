@@ -356,9 +356,6 @@ exports.endAuction = async (req, res, next) => {
             { _id: auctionEndNft[0]?.nftId?._id },
             { $set: payloadUpdateNFT }
         )
-        if (auctionEndNft[0]?.nftId?.blockchainType !== 'solana') {
-            await Bid.deleteMany({ nftId: auctionEndNft[0]?.nftId?._id })
-        }
         res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.AUCTION_ENDED,
