@@ -10,6 +10,8 @@ const uploadFileToIpfs = async (formData) => {
                 'Content-Type': `multipart/form-data; boundary= ${formData._boundary}`,
                 Authorization: `Bearer ${pinataJWT}`,
             },
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity,
         })
         return response
     } catch (err) {
