@@ -9,10 +9,7 @@ module.exports.startCron = () => {
     try {
         cron.schedule('*/1 * * * *', async () => {
             const auctions = await getAllActiveAuctionsForCronJob()
-            console.log(
-                '🚀 ~ file: AuctionStatusChangeJob.js ~ */1 * * * * */1 * * * * line 14 ~ cron.schedule ~ auctions',
-                auctions
-            )
+
             if (!auctions.length) return false
 
             auctions.forEach(async (auction) => {
@@ -23,8 +20,11 @@ module.exports.startCron = () => {
                     moment(),
                     'seconds'
                 )
-                if (remainingTime <= 0) {
+                if (remainingTime <= 0 && auction.bids.length > 0) {
                     await updateAuction(_id, 'claimNft')
+                }
+                if (remainingTime <= 0 && auction.bids.length === 0) {
+                    await updateAuction(_id, 'reclaimNft')
                 }
             })
         })
