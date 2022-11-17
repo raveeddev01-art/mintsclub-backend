@@ -59,24 +59,29 @@ exports.pinFileToIPFS = async (files, data) => {
     try {
         const originalFile = new FormData()
         const compressedFile = new FormData()
-
+        let compressedIpfsFile = null
         originalFile.append(
             'file',
             fs.createReadStream(`${files.image[0].path}`)
         )
-        compressedFile.append(
-            'file',
-            fs.createReadStream(`${files.compressedFile[0].path}`)
-        )
+        if (files?.compressedFile) {
+            compressedFile.append(
+                'file',
+                fs.createReadStream(`${files.compressedFile[0].path}`)
+            )
+            compressedIpfsFile = await uploadFileToIpfs(compressedFile)
+            compressedIpfsFile = `${pinataBaseUrl}/${compressedIpfsFile.data.IpfsHash}`
+            await deleteFileFromDirectory(files.compressedFile[0].path)
+        }
         const orignalIpfsFile = await uploadFileToIpfs(originalFile)
-        const compressedIpfsFile = await uploadFileToIpfs(compressedFile)
         const fileUrl = `${pinataBaseUrl}/${orignalIpfsFile.data.IpfsHash}`
-        const compressedFileUrl = `${pinataBaseUrl}/${compressedIpfsFile.data.IpfsHash}`
         await deleteFileFromDirectory(files.image[0].path)
-        await deleteFileFromDirectory(files.compressedFile[0].path)
 
-        const metaData = await handleJsons(fileUrl, { ...data })
-        return { ...metaData, compressedFileUrl }
+        let metaData = await handleJsons(fileUrl, { ...data })
+        if (compressedIpfsFile) {
+            metaData.compressedFileUrl = compressedIpfsFile
+        }
+        return metaData
     } catch (err) {
         console.log(err, 'error while file')
     }
