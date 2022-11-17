@@ -76,7 +76,10 @@ exports.get = async (req, res, next) => {
         }
         payload.nftId = ObjectId(payload.nftId)
         const getNft = await NFT.find({ _id: payload.nftId })
-        let nftDetail = await helpers.nft.getNftDetailPipeline(payload.nftId,getNft[0]?.blockchainType)
+        let nftDetail = await helpers.nft.getNftDetailPipeline(
+            payload.nftId,
+            getNft[0]?.blockchainType
+        )
 
         nftDetail = nftDetail[0]
 
@@ -194,15 +197,15 @@ exports.list = async (req, res, next) => {
                     { ownerAddress: { $regex: keyword, $options: 'i' } },
                 ],
             }),
-            ...(created &&{
-                creatorId: ObjectId(created)
-                }),
-            ...(collected &&{
-                creatorId: { $ne: ObjectId(collected)},
-                ownerId: ObjectId(collected)
-                }),
-            ...(userOwned &&{
-                ownerId: ObjectId(userOwned)
+            ...(created && {
+                creatorId: ObjectId(created),
+            }),
+            ...(collected && {
+                creatorId: { $ne: ObjectId(collected) },
+                ownerId: ObjectId(collected),
+            }),
+            ...(userOwned && {
+                ownerId: ObjectId(userOwned),
             }),
             // ...(favourite &&{
             //     userId: ObjectId(favourite)
@@ -357,15 +360,14 @@ exports.delete = async (req, res, next) => {
         const nftDetail = await NFT.find({ _id: nftId })
         const nft = await NFT.deleteOne({ _id: nftId })
         if (nft?.deletedCount) {
-            const nftToken = await NftTokens.deleteOne({ nftId })
-            await NFTAuction.deleteOne({ nftId })
-
+            await NftTokens.deleteOne({ nftId })
+            const deleteAuction = await NFTAuction.deleteMany({ nftId })
             const updateCollection = await Collection.updateOne(
                 { _id: nftDetail[0].collectionId },
                 { $pull: { nft: nftId } }
             )
 
-            if (nftToken && updateCollection) {
+            if (deleteAuction && updateCollection) {
                 return res.status(HTTP_STATUS_CODE.OK).send({
                     success: SUCCESS_STATUS.TRUE,
                     message: SUCCESS_MESSAGE.NFT_DELETED,
