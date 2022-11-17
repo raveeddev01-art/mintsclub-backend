@@ -311,7 +311,7 @@ const updateActivityforCancelList = async (cancelListData) => {
         nftId: cancelListData?.nftId?._id,
         ownerId: cancelListData?.nftId?.ownerId,
         fromAddress: cancelListData?.nftId?.ownerAddress,
-        activityType: 'Canceled Listing',
+        activityType: 'Cancelled Listing',
     }
 
     const dataUpdated = await ActivityModal.create(activityPayload)
