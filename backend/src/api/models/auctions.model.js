@@ -15,6 +15,7 @@ const AuctionSchema = new mongoose.Schema(
             enum: [
                 'active',
                 'claimNft',
+                'reclaimNft',
                 'claimPrice',
                 'end',
                 'cancelled',
