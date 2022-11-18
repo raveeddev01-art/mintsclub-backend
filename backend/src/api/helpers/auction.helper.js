@@ -53,7 +53,7 @@ const createNewNFTtoBuy = async (request, buyNftDetail, auctionDetail) => {
             image: buyNftDetail.image,
             remainingCopies: auctionDetail?.copiesForAuction,
             activeAuction: null,
-            tokenId: buyNftDetail.tokenId,
+            tokenId: (buyNftDetail?.lazyMinted) ? request?.tokenId : buyNftDetail.tokenId,
             isApproved: buyNftDetail.isApproved,
             blockchainType: buyNftDetail.blockchainType,
             lazyMinted: false,
