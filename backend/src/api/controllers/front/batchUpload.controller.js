@@ -10,24 +10,18 @@ exports.batchUpload = async (req, res, next) => {
             key: req.body.key,
             fileName: req.body.fileName,
             collectionId: req.body.collectionId,
-            fileType: req.body.fileType,
+            // fileType: req.body.fileType,
             blockchainType: req.body.blockchainType,
             categoryId: req.body.categoryId,
-            status: 'inProgress',
+            status: req.body.status,
             ownerAddress: req.body.ownerAddress,
             userId: req.body.userId,
         }
+
         let blockchainType = payload?.blockchainType
         const result = await BatchUpload.create(payload)
         if (result) {
-            const {
-                userId,
-                ownerAddress,
-                key,
-                fileName,
-                collectionId,
-                fileType,
-            } = result
+            const { userId, ownerAddress, key, fileName, collectionId } = result
             let s3Response = await getS3Object(key, fileName)
             if (s3Response) {
                 if (isDirExist(fileName)) {
@@ -60,6 +54,7 @@ exports.batchUpload = async (req, res, next) => {
                     files &&
                         files.length > 0 &&
                         files.map(async (item, index) => {
+                            const checkFileType = item.split('.')
                             if (
                                 !fs.existsSync(
                                     `./src/uploads/files/${fileName}/metaData/${item.substr(
@@ -70,46 +65,51 @@ exports.batchUpload = async (req, res, next) => {
                             ) {
                                 files.length--
                             } else if (
-                                fs.existsSync(
-                                    `./src/uploads/files/${fileName}/metaData/${item.substr(
-                                        0,
-                                        item.lastIndexOf('.')
-                                    )}.json`
-                                )
+                                checkFileType[1] === 'jpeg' ||
+                                checkFileType[1] === 'png'
                             ) {
-                                try {
-                                    let initialPayload = {
-                                        userId,
-                                        creatorId: userId,
-                                        ownerId: userId,
-                                        ownerAddress,
-                                        lazyMinted: true,
-                                        isApproved: true,
-                                        blockchainType,
-                                        collectionId,
-                                        key,
-                                        fileName,
-                                        fileType,
-                                        fileToFetch: item,
-                                        metaDataToFetch: `${item.substr(
+                                if (
+                                    fs.existsSync(
+                                        `./src/uploads/files/${fileName}/metaData/${item.substr(
                                             0,
                                             item.lastIndexOf('.')
-                                        )}.json`,
-                                        index,
-                                        files,
-                                        metaDataFiles,
-                                        id: result._id,
+                                        )}.json`
+                                    )
+                                ) {
+                                    try {
+                                        let initialPayload = {
+                                            userId,
+                                            creatorId: userId,
+                                            ownerId: userId,
+                                            ownerAddress,
+                                            lazyMinted: true,
+                                            isApproved: true,
+                                            blockchainType,
+                                            collectionId,
+                                            key,
+                                            fileName,
+                                            fileType: checkFileType[1],
+                                            fileToFetch: item,
+                                            metaDataToFetch: `${item.substr(
+                                                0,
+                                                item.lastIndexOf('.')
+                                            )}.json`,
+                                            index,
+                                            files,
+                                            metaDataFiles,
+                                            id: result._id,
+                                        }
+                                        await batchUploadQueue.add({
+                                            data: initialPayload,
+                                        })
+                                    } catch (err) {
+                                        await setStatus(result._id, 'rejected')
+                                        return res.status(200).send({
+                                            success: false,
+                                            message:
+                                                'Please upload zip as per mentioned conditions',
+                                        })
                                     }
-                                    await batchUploadQueue.add({
-                                        data: initialPayload,
-                                    })
-                                } catch (err) {
-                                    await setStatus(result._id, 'rejected')
-                                    return res.status(200).send({
-                                        success: false,
-                                        message:
-                                            'Please upload zip as per mentioned conditions',
-                                    })
                                 }
                             }
                         })
