@@ -164,7 +164,85 @@ const getNftListPipeline = async (
                 },
             },
         ])
-        const nftLiting = await Promise.all([total, nfts])
+        const nfts1 = NFT.aggregate([
+            {
+                $sort: sortFilters,
+            },
+            {
+                $lookup: {
+                    from: 'auctions',
+                    foreignField: 'nftId',
+                    localField: '_id',
+                    as: 'auction',
+                    pipeline: [
+                        {
+                            $match: {
+                                // $expr: { $ne: ['$status', 'cancelled'] },
+                                status: { $nin: ['cancelled', 'end'] },
+                            },
+                        },
+                    ],
+                },
+            },
+            {
+                $unwind: {
+                    path: '$auction',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    foreignField: '_id',
+                    localField: 'ownerId',
+                    as: 'owner',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$owner',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            { $match: filter },
+            {
+                $project: {
+                    _id: 1,
+                    name: 1,
+                    image: 1,
+                    description: 1,
+                    fileType: 1,
+                    copies: 1,
+                    currentPrice: 1,
+                    collectionId: 1,
+                    blockchainType: 1,
+                    ownerId: 1,
+                    creatorId: 1,
+                    userId: 1,
+                    remainingCopies: 1,
+                    ownerAddress: 1,
+                    compressedFile: 1,
+                    owner: {
+                        _id: '$owner._id',
+                        username: '$owner.username',
+                        profilePhoto: {
+                            $ifNull: ['$owner.profileImage', userDefaultImage],
+                        },
+                    },
+                    auction: {
+                        _id: '$auction._id',
+                        highestBid: '$auction.highestBid',
+                        sellingMethod: '$auction.sellingMethod',
+                        copiesForAuction: '$auction.copiesForAuction',
+                        sellId: '$auction.sellId',
+                        auctionStartDate: '$auction.auctionStartDate',
+                        auctionEndDate: '$auction.auctionEndDate',
+                        auctionEnded: '$auction.auctionEnded',
+                    },
+                },
+            },
+        ])
+        const nftLiting = await Promise.all([total, nfts, nfts1])
         const allNfts = nftLiting[1]
         for (const nft of allNfts) {
             const findCount = await Likes.findOne().where('nftId', nft._id)
@@ -173,13 +251,13 @@ const getNftListPipeline = async (
                 nft.likeCount = findCount.count
             }
         }
-
+        console.log(nftLiting, "This is nftListing......");
         const data = {
             nfts: nftLiting[1],
             pagination: {
                 page,
                 limit,
-                total: nftLiting[0],
+                total: nftLiting[2].length,
                 pages:
                     Math.ceil(nftLiting[0] / limit) <= 0
                         ? 1

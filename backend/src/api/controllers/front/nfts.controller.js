@@ -160,7 +160,7 @@ exports.list = async (req, res, next) => {
         }
 
         const filter = {
-            status: { $ne: 0 },
+            // status: { $ne: 0 },
             ...(latest && {
                 createdAt: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
             }),
@@ -216,8 +216,12 @@ exports.list = async (req, res, next) => {
 
         page = page !== undefined && page !== '' ? parseInt(page) : 1
         limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
+        // console.log('This is Filter:.....', filter)
+        const total = await NFT.countDocuments(filter)
 
-        const total = NFT.countDocuments(filter)
+        // console.log(total, 'This is our Total Record......')
+        const count1 = await NFT.countDocuments({'auction.sellingMethod':  2 ,  'auction.auctionEnded': false } )
+        console.log("This is Count......" , count1);
         let sortFilters = {
             ...(newest && { createdAt: -1 }),
             ...(oldest && { createdAt: 1 }),
