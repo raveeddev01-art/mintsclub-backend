@@ -23,10 +23,15 @@ const handleJsons = async (fileUrl, nftInfo) => {
     const url = `${ipfsBaseUrl}/pinJSONToIPFS`
     let { name, description, collection } = nftInfo
     collection = JSON.parse(collection)
+    let creators = []
+    if (nftInfo?.creators) {
+        creators = JSON.parse(nftInfo?.creators)
+    }
     const properties = {
         properties: JSON.parse(nftInfo.properties),
         levels: JSON.parse(nftInfo.levels),
         stats: JSON.parse(nftInfo.stats),
+        creators,
     }
     const data = {
         name,

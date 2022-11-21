@@ -27,7 +27,29 @@ const validateNFTSchema = (req, res, next) => {
             value: Joi.number().valid(1, 2, 3, 4, 5).allow(''),
             total: Joi.number().valid(5).allow(''),
         }),
-        fileType: Joi.string().valid('image', 'audio', 'video').required(),
+        creators: Joi.array().items({
+            address: Joi.string().allow(''),
+            share: Joi.number().allow(''),
+        }),
+        // fileType: Joi.string().valid('image', 'audio', 'video').required(),
+        fileType: Joi.alternatives().conditional('blockchainType', [
+            {
+                is: 'ethereum',
+                then: Joi.string().valid('image', 'audio', 'video').required(),
+            },
+            {
+                is: 'polygon',
+                then: Joi.string().valid('image', 'audio', 'video').required(),
+            },
+            {
+                is: 'bsc',
+                then: Joi.string().valid('image', 'audio', 'video').required(),
+            },
+            {
+                is: 'solana',
+                then: Joi.optional(),
+            },
+        ]),
         ownerId: Joi.string().alphanum().min(12).max(24).required(),
         // currentPrice: Joi.number().min(0).max(1000000).required(),
         userId: Joi.string().alphanum().min(12).max(24).required(),
@@ -94,10 +116,13 @@ const validateNFTSchema = (req, res, next) => {
         ...req.body,
     }
 
-    payload.properties = JSON.parse(req.body.properties)
-    payload.levels = JSON.parse(req.body.levels)
-    payload.stats = JSON.parse(req.body.stats)
-    payload.collection = JSON.parse(payload.collection)
+    payload.properties = JSON.parse(req.body?.properties)
+    payload.levels = JSON.parse(req.body?.levels)
+    payload.stats = JSON.parse(req.body?.stats)
+    if (req.body?.creators) {
+        payload.creators = JSON.parse(req.body?.creators)
+    }
+    payload.collection = JSON.parse(payload?.collection)
     payload.copies = Number(payload?.copies)
 
     const { error } = schema.validate(payload)
