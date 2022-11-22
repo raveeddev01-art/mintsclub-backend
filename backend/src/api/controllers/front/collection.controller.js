@@ -86,11 +86,10 @@ exports.create = async (req, res, next) => {
 
         const existingCollection = await Collection.findOne({
             name: new RegExp(payload.name, 'gi'),
-            userId: payload.userId,
         })
 
         if (existingCollection) {
-            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            return res.status(HTTP_STATUS_CODE.OK).send({
                 success: SUCCESS_STATUS.FALSE,
                 message: ERROR_MESSAGE.COLLECTION_EXIST_ALREADY,
             })
