@@ -245,6 +245,17 @@ exports.buyNow = async (req, res, next) => {
                 { new: true }
             )
         }
+        if (req.body?.mint) {
+            const updateMintAndMetadata = {
+                mint: req.body.mint,
+                metaData: req.body.metaData,
+            }
+            await NFT.findByIdAndUpdate(
+                { _id: payload.nftId },
+                { $set: updateMintAndMetadata },
+                { new: true }
+            )
+        }
         let copiesCondition = true
         if (buyNftDetail?.blockchainType !== 'solana') {
             copiesCondition =

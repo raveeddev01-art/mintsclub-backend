@@ -211,6 +211,8 @@ const validateBuyNowSchema = (req, res, next) => {
             // .regex(/^0x[a-fA-F0-9]{40}$/)
             .required(),
         tokenId: Joi.number().optional(),
+        mint: Joi.string().optional(),
+        metaData: Joi.string().optional(),
     })
     const options = {
         errors: {
