@@ -12,6 +12,6 @@ mintsclub-back-v2:
     - echo "Deploy to AWS server"
     - ssh-add <(echo "$SSH_PROD_BCKND_MINT")
     - rm -rf .git
-    - ssh -o StrictHostKeyChecking=no mintsclub-new-backend@10.10.12.26 "cd /home/mintsclub-new-backend/backend-prod-mintsclub/backend-v2/backend; git reset --hard; git pull origin task/MintsClubBackend-V2; npm install; pm2 restart 0; exit"
+    - ssh -o StrictHostKeyChecking=no mintsclub-new-backend@10.10.12.26 "cd /home/mintsclub-new-backend/backend-prod-mintsclub/backend-v2/backend; git reset --hard; pm2 delete 0; git pull origin task/MintsClubBackend-V2; npm install;  pm2 start ./src/index.js --name=backend; exit"
   only:
     - task/MintsClubBackend-V2
