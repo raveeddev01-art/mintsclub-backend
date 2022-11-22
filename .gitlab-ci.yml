@@ -1,6 +1,6 @@
   
-  mintsclub-back-v2:
-  stage: test
+mintsclub-back-v2:
+  stage: deploy
   tags:
     -  mintsclub-backend-prod
   before_script:
