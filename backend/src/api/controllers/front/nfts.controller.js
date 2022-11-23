@@ -1,4 +1,5 @@
 const fs = require('fs')
+const moment = require('moment')
 const Collection = require('../../models/collection.model')
 const NFT = require('../../models/nfts.model')
 const NFTAuction = require('../../models/auctions.model')
@@ -134,6 +135,7 @@ exports.get = async (req, res, next) => {
 exports.list = async (req, res, next) => {
     try {
         let { page, limit } = req.query
+        const dateTime = new Date(moment().utc(false).toISOString())
         const {
             collectionId,
             gtePrice,
@@ -181,9 +183,16 @@ exports.list = async (req, res, next) => {
             }),
             ...(auction && {
                 $and: [
-                    { 'auction.sellingMethod': { $eq: 2 } },
-                    { 'auction.auctionEnded': false },
-                ],
+                { 'auction.sellingMethod': { $eq: 2 } },
+                {'auction.auctionStartDate': {
+                    $lt: dateTime,
+                    }
+                },
+                {'auction.auctionEndDate': { 
+                    $gte: dateTime }
+                },
+                { 'auction.auctionEnded': false },
+            ],
             }),
             ...(search && {
                 $or: [
@@ -216,12 +225,9 @@ exports.list = async (req, res, next) => {
 
         page = page !== undefined && page !== '' ? parseInt(page) : 1
         limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
-        // console.log('This is Filter:.....', filter)
+
         const total = await NFT.countDocuments(filter)
 
-        // console.log(total, 'This is our Total Record......')
-        const count1 = await NFT.countDocuments({'auction.sellingMethod':  2 ,  'auction.auctionEnded': false } )
-        console.log("This is Count......" , count1);
         let sortFilters = {
             ...(newest && { createdAt: -1 }),
             ...(oldest && { createdAt: 1 }),
