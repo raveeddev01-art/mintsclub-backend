@@ -18,18 +18,20 @@ exports.uploadFileToS3 = async (path, filename) => {
                 Key: `${filename}`,
                 Body: fileContent,
             }
-          
+
             s3.upload(params, (err, data) => {
                 if (err) {
-                    reject({success:false,err})
+                    reject({ success: false, err })
                 }
                 fs.unlink(`${path}`, async (err) => {
                     if (err) {
-                        reject({success:false,err})
+                        reject({ success: false, err })
                     }
-                    resolve({success:true,file:data.Location}, 'data.location')
+                    resolve(
+                        { success: true, file: data.Location },
+                        'data.location'
+                    )
                 })
-              
             })
         })
     } catch (err) {
@@ -67,44 +69,53 @@ const unzipFile = async (fileKey, fileName) => {
         )
         const jsZipInstance = new jszip()
         const result = await jsZipInstance.loadAsync(fileContent)
-        console.log('checking result', result)
-
         if (!result?.files) {
-            console.log('reject while unzipping====>', result?.files)
             return resolve(false)
         }
         const Keys = Object.keys(result?.files).filter((value) => {
             return !value.match(/^__MACOSX\//) && !value.match(/.DS_Store/)
         })
 
+        let fileKeys = []
+        let attachKey = []
+        Keys.forEach((key) => {
+            if (key.includes('/')) {
+                attachKey.push(key)
+                const splitKeys = key.split('/')
+                fileKeys.push(splitKeys[1])
+            } else {
+                attachKey.push(key)
+                fileKeys.push(key)
+            }
+        })
+        fs.mkdirSync(`./src/uploads/files/${fileName}/`)
         fs.unlink(`./src/uploads/files/${fileName}.zip`, async (err) => {
             if (err) {
                 return err
             }
+            if (Keys?.[0].includes('/')) {
+                fileKeys.shift()
+                attachKey.shift()
+            }
 
-            for (let key of Keys) {
-                const item = result.files[key]
-                if (item.dir) {
-                    fs.mkdirSync(`./src/uploads/files/${item.name}`)
+            for (let key in fileKeys) {
+                const item = result.files[attachKey[key]]
+                let splitNameKeys
+                if (item?.name.includes('/')) {
+                    splitNameKeys = item?.name.split('/')
+                    splitNameKeys = splitNameKeys[1]
                 } else {
-                    fs.writeFileSync(
-                        './src/uploads/files/' + item.name,
-                        Buffer.from(await item.async('arraybuffer'))
-                    )
+                    splitNameKeys = item?.name
                 }
+                fs.writeFileSync(
+                    `./src/uploads/files/${fileName}/` + splitNameKeys,
+                    Buffer.from(await item.async('arraybuffer'))
+                )
             }
             resolve(true)
         })
     })
-
-    //    if(item.dir){
-    //        fs.mkdirSync(item.name)
-    //    }else{
-
-    //    }
 }
-// unzipFile()
-
 exports.deleteFromS3 = async (key) => {
     const deleteFiles = await s3
         .deleteObject({

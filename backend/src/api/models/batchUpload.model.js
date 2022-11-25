@@ -13,18 +13,15 @@ const BatchUploadSchema = new mongoose.Schema(
         },
         metaData: { type: String },
         ownerAddress: { type: String },
-        fileName:{type:String},
-        blockchainType:{type:String},
-        collectionId:{type:String},
-        categoryId:{type:String},
-        key:{type:String},
-        fileType:{type:String},
-        status:{type:String},
-        currentFile:{type:Number},
+        fileName: { type: String },
+        blockchainType: { type: String },
+        collectionId: { type: String },
+        categoryId: { type: String },
+        key: { type: String },
+        status: { type: String },
+        currentFile: { type: Number },
     },
     { timestamps: true }
 )
-
-
 
 module.exports = mongoose.model('BatchUpload', BatchUploadSchema)

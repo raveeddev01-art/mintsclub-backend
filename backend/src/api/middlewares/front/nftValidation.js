@@ -84,15 +84,15 @@ const validateNFTSchema = (req, res, next) => {
         copies: Joi.alternatives().conditional('blockchainType', [
             {
                 is: 'ethereum',
-                then: Joi.number().min(1).max(1000000).required(),
+                then: Joi.number().min(1).required(),
             },
             {
                 is: 'polygon',
-                then: Joi.number().min(1).max(1000000).required(),
+                then: Joi.number().min(1).required(),
             },
             {
                 is: 'bsc',
-                then: Joi.number().min(1).max(1000000).required(),
+                then: Joi.number().min(1).required(),
             },
             {
                 is: 'solana',
@@ -162,7 +162,7 @@ const validateEditNftSchema = (data) => {
         ownerAddress: Joi.string()
             .regex(/^0x[a-fA-F0-9]{40}$/)
             .allow(''),
-        copies: Joi.number().min(1).max(100000).required(),
+        copies: Joi.number().min(1).required(),
     })
     const options = {
         errors: {

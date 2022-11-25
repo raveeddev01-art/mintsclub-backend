@@ -10,112 +10,161 @@ exports.batchUpload = async (req, res, next) => {
             key: req.body.key,
             fileName: req.body.fileName,
             collectionId: req.body.collectionId,
-            fileType: req.body.fileType,
             blockchainType: req.body.blockchainType,
             categoryId: req.body.categoryId,
-            status: 'inProgress',
+            status: req.body.status,
             ownerAddress: req.body.ownerAddress,
             userId: req.body.userId,
         }
+
         let blockchainType = payload?.blockchainType
         const result = await BatchUpload.create(payload)
         if (result) {
-            const {
-                userId,
-                ownerAddress,
-                key,
-                fileName,
-                collectionId,
-                fileType,
-            } = result
+            const { userId, ownerAddress, key, fileName, collectionId } = result
             let s3Response = await getS3Object(key, fileName)
+
             if (s3Response) {
                 if (isDirExist(fileName)) {
                     let files = await promises.readdir(
-                        `./src/uploads/files/${fileName}/images`
+                        `./src/uploads/files/${fileName}/`
                     )
                     if (!files?.length > 0) {
                         await setStatus(result._id, 'rejected')
                         removeDirctory(fileName)
                         return res.status(200).send({
                             success: false,
-                            message: 'nft Images directory should not be empty',
+                            message: 'Zip File should not be empty',
                         })
                     }
+
                     if (files.length && files.length > 350) {
                         files = files.slice(0, 350)
                     }
+
                     let metaDataFiles = await promises.readdir(
-                        `./src/uploads/files/${fileName}/metaData`
+                        `./src/uploads/files/${fileName}/`
                     )
-                    if (!metaDataFiles?.length > 0) {
-                        await setStatus(result._id, 'rejected')
-                        removeDirctory(fileName)
-                        return res.status(200).send({
-                            success: false,
-                            message:
-                                'nft metadata directory should not be empty',
-                        })
-                    }
+
+                    metaDataFiles.filter((value) => {
+                        return value.match(/.json/)
+                    })
+
+                    let filesToIgnore = files.filter((value) => {
+                        return (
+                            (!value.match(/.jpeg/) &&
+                                !value.match(/.jpg/) &&
+                                !value.match(/.png/) &&
+                                !fs.existsSync(
+                                    `./src/uploads/files/${fileName}/${value.substr(
+                                        0,
+                                        value.lastIndexOf('.')
+                                    )}.json`
+                                )) ||
+                            !fs.existsSync(
+                                `./src/uploads/files/${fileName}/${value.substr(
+                                    0,
+                                    value.lastIndexOf('.')
+                                )}.json`
+                            ) ||
+                            (!value.match(/.jpeg/) &&
+                                !value.match(/.jpg/) &&
+                                !value.match(/.png/) &&
+                                !value.match(/.json/) &&
+                                fs.existsSync(
+                                    `./src/uploads/files/${fileName}/${value.substr(
+                                        0,
+                                        value.lastIndexOf('.')
+                                    )}.json`
+                                )) ||
+                            (!value.match(/.jpeg/) &&
+                                !value.match(/.jpg/) &&
+                                !value.match(/.png/) &&
+                                !value.match(/.json/) &&
+                                fs.existsSync(
+                                    `./src/uploads/files/${fileName}/${value.substr(
+                                        0,
+                                        value.lastIndexOf('.')
+                                    )}.json`
+                                ))
+                        )
+                    })
+
+                    filesToIgnore.filter((value) => {
+                        if (
+                            fs.existsSync(
+                                `./src/uploads/files/${fileName}/${value.substr(
+                                    0,
+                                    value.lastIndexOf('.')
+                                )}.json`
+                            )
+                        ) {
+                            filesToIgnore.push(value)
+                        }
+                    })
+                    filesToIgnore =
+                        filesToIgnore.length > 0 ? filesToIgnore.length : 0
+
+                    let FilesToDecrement = files.length - filesToIgnore
+
                     files &&
                         files.length > 0 &&
                         files.map(async (item, index) => {
+                            const checkFileType = item.split('.')
                             if (
-                                !fs.existsSync(
-                                    `./src/uploads/files/${fileName}/metaData/${item.substr(
-                                        0,
-                                        item.lastIndexOf('.')
-                                    )}.json`
-                                )
+                                checkFileType[1] === 'jpeg' ||
+                                checkFileType[1] === 'png' ||
+                                checkFileType[1] === 'jpg'
                             ) {
-                                files.length--
-                            } else if (
-                                fs.existsSync(
-                                    `./src/uploads/files/${fileName}/metaData/${item.substr(
-                                        0,
-                                        item.lastIndexOf('.')
-                                    )}.json`
-                                )
-                            ) {
-                                try {
-                                    let initialPayload = {
-                                        userId,
-                                        creatorId: userId,
-                                        ownerId: userId,
-                                        ownerAddress,
-                                        lazyMinted: true,
-                                        isApproved: true,
-                                        blockchainType,
-                                        collectionId,
-                                        key,
-                                        fileName,
-                                        fileType,
-                                        fileToFetch: item,
-                                        metaDataToFetch: `${item.substr(
+                                if (
+                                    fs.existsSync(
+                                        `./src/uploads/files/${fileName}/${item.substr(
                                             0,
                                             item.lastIndexOf('.')
-                                        )}.json`,
-                                        index,
-                                        files,
-                                        metaDataFiles,
-                                        id: result._id,
+                                        )}.json`
+                                    )
+                                ) {
+                                    try {
+                                        let initialPayload = {
+                                            userId,
+                                            creatorId: userId,
+                                            ownerId: userId,
+                                            ownerAddress,
+                                            lazyMinted: true,
+                                            isApproved: true,
+                                            blockchainType,
+                                            collectionId,
+                                            key,
+                                            fileName,
+                                            fileType: 'image',
+                                            fileToFetch: item,
+                                            metaDataToFetch: `${item.substr(
+                                                0,
+                                                item.lastIndexOf('.')
+                                            )}.json`,
+                                            index,
+                                            files,
+                                            metaDataFiles,
+                                            id: result._id,
+                                            FilesToDecrement,
+                                        }
+                                        await batchUploadQueue.add({
+                                            data: initialPayload,
+                                        })
+                                    } catch (err) {
+                                        await setStatus(result._id, 'rejected')
+                                        return res.status(200).send({
+                                            success: false,
+                                            message:
+                                                'Please follow file upload standards',
+                                        })
                                     }
-                                    await batchUploadQueue.add({
-                                        data: initialPayload,
-                                    })
-                                } catch (err) {
-                                    await setStatus(result._id, 'rejected')
-                                    return res.status(200).send({
-                                        success: false,
-                                        message:
-                                            'Please upload zip as per mentioned conditions',
-                                    })
                                 }
                             }
                         })
                     ////////////////////
                 } else {
                     await setStatus(result._id, 'rejected')
+                    removeDirctory(fileName)
                     return res.status(200).send({
                         success: false,
                         message: 'Please follow file upload standards',
@@ -123,6 +172,7 @@ exports.batchUpload = async (req, res, next) => {
                 }
             } else {
                 await setStatus(result._id, 'rejected')
+                removeDirctory(fileName)
                 return res.status(200).send({
                     success: false,
                     message: 'Please follow file upload standards',
@@ -139,10 +189,7 @@ exports.batchUpload = async (req, res, next) => {
 }
 
 const isDirExist = (fileName) => {
-    if (
-        fs.existsSync(`./src/uploads/files/${fileName}/images`) &&
-        fs.existsSync(`./src/uploads/files/${fileName}/metaData`)
-    ) {
+    if (fs.existsSync(`./src/uploads/files/${fileName}/`)) {
         return true
     } else {
         return false
