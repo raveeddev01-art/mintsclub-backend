@@ -21,16 +21,17 @@ const extracturrentMetaData = async (data) => {
             fileName,
             fileToFetch,
             metaDataToFetch,
-            index,
             files,
             key,
             id,
             metaDataFiles,
+            FilesToDecrement,
         } = data
+        let { index } = data
         try {
             //need to change sample to dynamic file name
             fs.readFile(
-                `./src/uploads/files/${fileName}/metaData/${metaDataToFetch}`,
+                `./src/uploads/files/${fileName}/${metaDataToFetch}`,
                 'utf8',
                 async (err, jsonString) => {
                     if (err) {
@@ -53,8 +54,8 @@ const extracturrentMetaData = async (data) => {
                         properties: JSON.parse(jsonString).properties,
                         levels: JSON.parse(jsonString).levels,
                         stats: JSON.parse(jsonString).stats,
-                        copies: JSON.parse(jsonString).copies,
-                        remainingCopies: JSON.parse(jsonString).copies,
+                        copies: 1,
+                        remainingCopies: 1,
                         activeAuction: null,
                         name: JSON.parse(jsonString).name,
                         currentPrice: 0,
@@ -62,11 +63,11 @@ const extracturrentMetaData = async (data) => {
                         image: uploadedFile.image,
                     }
                     await NFT.create(payload)
-                    console.log('deletion', index + 1, files.length)
 
-                    // await deleteUploadedFile(fileToFetch, metaDataToFetch, fileName)
-                    if (index + 1 === files.length) {
-                        console.log('conming inside deletion 1')
+                    if (FilesToDecrement === files.length) {
+                        index = index + 1
+                    }
+                    if (index === FilesToDecrement) {
                         await deleteUnZipedFolder(fileName, key, id)
                     }
                     resolve(true)
@@ -122,7 +123,7 @@ const pinFileToIPFS = async (fileToFetch, metaDataContent, fileName, index) => {
             data.append(
                 'file',
                 fs.createReadStream(
-                    `./src/uploads/files/${fileName}/images/${fileToFetch}`
+                    `./src/uploads/files/${fileName}/${fileToFetch}`
                 )
             )
             const fileData = await uploadFileToIpfs(data)
