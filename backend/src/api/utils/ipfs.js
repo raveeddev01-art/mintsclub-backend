@@ -27,6 +27,10 @@ const handleJsons = async (fileUrl, nftInfo) => {
     if (nftInfo?.creators) {
         creators = JSON.parse(nftInfo?.creators)
     }
+    let sellerFeeBasisPoints = 0
+    if (nftInfo?.sellerFeeBasisPoints) {
+        sellerFeeBasisPoints = nftInfo?.sellerFeeBasisPoints
+    }
     const properties = {
         properties: JSON.parse(nftInfo.properties),
         levels: JSON.parse(nftInfo.levels),
@@ -36,7 +40,7 @@ const handleJsons = async (fileUrl, nftInfo) => {
     const data = {
         name,
         symbol: 'Gamo',
-        sellerFeeBasisPoints: 0,
+        sellerFeeBasisPoints,
         image: fileUrl,
         description,
         properties,

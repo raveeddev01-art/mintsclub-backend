@@ -17,20 +17,22 @@ const validateNFTSchema = (req, res, next) => {
             name: Joi.string().max(10).allow(''),
             type: Joi.string().max(10).allow(''),
         }),
+
         levels: Joi.array().items({
             name: Joi.string().max(10).allow(''),
-            value: Joi.number().valid(1, 2, 3, 4, 5).allow(''),
-            total: Joi.number().valid(5).allow(''),
+            value: Joi.string().allow(''),
+            total: Joi.string().allow(''),
         }),
         stats: Joi.array().items({
             name: Joi.string().max(10).allow(''),
-            value: Joi.number().valid(1, 2, 3, 4, 5).allow(''),
-            total: Joi.number().valid(5).allow(''),
+            value: Joi.string().allow(''),
+            total: Joi.string().allow(''),
         }),
         creators: Joi.array().items({
             address: Joi.string().allow(''),
             share: Joi.number().allow(''),
         }),
+        sellerFeeBasisPoints: Joi.number().optional(),
         // fileType: Joi.string().valid('image', 'audio', 'video').required(),
         fileType: Joi.alternatives().conditional('blockchainType', [
             {
@@ -121,6 +123,9 @@ const validateNFTSchema = (req, res, next) => {
     payload.stats = JSON.parse(req.body?.stats)
     if (req.body?.creators) {
         payload.creators = JSON.parse(req.body?.creators)
+    }
+    if (req.body?.sellerFeeBasisPoints) {
+        payload.sellerFeeBasisPoints = req.body?.sellerFeeBasisPoints
     }
     payload.collection = JSON.parse(payload?.collection)
     payload.copies = Number(payload?.copies)
