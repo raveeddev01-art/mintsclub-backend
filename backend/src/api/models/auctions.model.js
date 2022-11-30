@@ -40,6 +40,7 @@ const AuctionSchema = new mongoose.Schema(
         signature: { type: String },
         bids: [{ type: mongoose.Schema.Types.ObjectId, ref: Bid }],
         highestBidder: { type: String },
+        globalState: { type: Object, default: null },
         // bids: [
         //     { bidId: { type: mongoose.Schema.Types.ObjectId, ref: Bid } },
         //     { bidAmount: { type: Number } },

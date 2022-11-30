@@ -51,10 +51,12 @@ const validateNFTFixedTAuctionSchema = (req, res, next) => {
         sellingMethod: Joi.number().valid(1, 2).required(),
         signature: Joi.string().optional(),
 
-        sellerTradeState: Joi.alternatives().conditional('blockchainType', {
-            is: 'solana',
-            then: Joi.string().required(),
-        }).optional(),
+        sellerTradeState: Joi.alternatives()
+            .conditional('blockchainType', {
+                is: 'solana',
+                then: Joi.string().required(),
+            })
+            .optional(),
 
         sellingConfig: Joi.object()
             .keys({
@@ -99,7 +101,7 @@ const validateNFTimedTAuctionSchema = (req, res, next) => {
     const schema = Joi.object().keys({
         blockchainType: Joi.string()
             .required()
-            .valid('ethereum', 'solana', 'bsc', 'polygon'),
+            .valid('ethereum', 'solana', 'bsc', 'polygon', 'algorand'),
         nftId: Joi.string().alphanum().min(12).max(24).required(),
         userId: Joi.string().alphanum().min(12).max(24).required(),
         auctionStartDate: Joi.date().allow(''),
@@ -120,6 +122,10 @@ const validateNFTimedTAuctionSchema = (req, res, next) => {
                 is: 'solana',
                 then: Joi.optional(),
             },
+            {
+                is: 'algorand',
+                then: Joi.number().required(),
+            },
         ]),
 
         auctionEndDate: Joi.date().allow(''),
@@ -137,6 +143,10 @@ const validateNFTimedTAuctionSchema = (req, res, next) => {
                 then: Joi.number().min(1).max(100000).required(),
             },
             {
+                is: 'algorand',
+                then: Joi.number().min(1).max(100000).required(),
+            },
+            {
                 is: 'solana',
                 then: Joi.optional(),
             },
@@ -150,9 +160,19 @@ const validateNFTimedTAuctionSchema = (req, res, next) => {
             is: 'solana',
             then: Joi.string().required(),
         }),
-        sellerPublicKey: Joi.alternatives().conditional('blockchainType', {
-            is: 'solana',
-            then: Joi.string().required(),
+        sellerPublicKey: Joi.alternatives().conditional('blockchainType', [
+            {
+                is: 'solana',
+                then: Joi.string().required(),
+            },
+            {
+                is: 'algorand',
+                then: Joi.string().required(),
+            },
+        ]),
+        globalState: Joi.alternatives().conditional('blockchainType', {
+            is: 'algorand',
+            then: Joi.object().required(),
         }),
         sellingConfig: Joi.object()
             .keys({
@@ -184,6 +204,10 @@ const validateNFTimedTAuctionSchema = (req, res, next) => {
     payload.sellingConfig = JSON.parse(payload.sellingConfig)
 
     const { error } = schema.validate(payload, options)
+    console.log(
+        '🚀 ~ file: auctionValidation.js ~ line 195 ~ validateNFTimedTAuctionSchema ~ error',
+        error
+    )
 
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({

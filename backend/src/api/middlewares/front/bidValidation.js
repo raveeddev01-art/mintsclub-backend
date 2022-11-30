@@ -15,6 +15,8 @@ const validateCreateBid = (req, res, next) => {
         isAccepted: Joi.boolean().default(false),
         auctionId: Joi.string().alphanum().min(12).max(24).required(),
         expiryDate: Joi.date().allow(''),
+        globalState: Joi.object().optional(),
+
         fromAddress: Joi.string()
             // .regex(/^0x[a-fA-F0-9]{40}$/)
             .required(),
@@ -33,6 +35,10 @@ const validateCreateBid = (req, res, next) => {
     const payload = req.body
 
     const { error } = schema.validate(payload, options)
+    console.log(
+        '🚀 ~ file: bidValidation.js ~ line 36 ~ validateCreateBid ~ error',
+        error
+    )
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
             success: SUCCESS_STATUS.FALSE,

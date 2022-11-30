@@ -26,7 +26,10 @@ exports.create = async (req, res, next) => {
             auctionId: req.body.auctionId,
             blockchainType: req.body.blockchainType,
         }
-
+        let globalState = undefined
+        if (req.body?.globalState) {
+            globalState = req.body?.globalState
+        }
         // helper function to fetch existing bid
 
         const maxBidByAnotherUser =
@@ -39,6 +42,7 @@ exports.create = async (req, res, next) => {
                 $push: { bids: bid?._id },
                 highestBid: payload?.bidAmount,
                 highestBidder: payload?.fromAddress,
+                globalState,
             }
         )
         if (bid) {
