@@ -22,7 +22,7 @@ const validateNFTSchema = (req, res, next) => {
             name: Joi.string().max(10).allow(''),
             value: Joi.string().allow(''),
             total: Joi.string().allow(''),
-        }),
+        }).optional(),
         stats: Joi.array().items({
             name: Joi.string().max(10).allow(''),
             value: Joi.string().allow(''),
