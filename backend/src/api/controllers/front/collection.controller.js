@@ -85,7 +85,7 @@ exports.create = async (req, res, next) => {
         }
 
         const existingCollection = await Collection.findOne({
-            name: new RegExp(payload.name, 'gi'),
+            name:payload.name
         })
 
         if (existingCollection) {
