@@ -153,11 +153,107 @@ exports.live = async (req, res, next) => {
             },
             { $sort: { createdAt: -1 } },
         ]
+        const totalAuctions = [
+            {
+                $match: filter,
+            },
+            {
+                $lookup: {
+                    from: 'nfts',
+                    foreignField: '_id',
+                    localField: 'nftId',
+                    as: 'nft',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$nft',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+
+            {
+                $lookup: {
+                    from: 'bids',
+                    foreignField: '_id',
+                    localField: 'bids',
+                    as: 'totalBids',
+                },
+            },
+            {
+                $addFields: {
+                    bidsCount: { $size: '$totalBids' },
+                },
+            },
+            {
+                $lookup: {
+                    from: 'bids',
+                    foreignField: '_id',
+                    localField: 'bids',
+                    as: 'bids',
+                    pipeline: [{ $limit: 2 }],
+                },
+            },
+            {
+                $unwind: {
+                    path: '$bids',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    foreignField: '_id',
+                    localField: 'userId',
+                    as: 'user',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$user',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            { $sort: { createdAt: -1 } },
+            // { $skip: limit * (page - 1) },
+            // { $limit: limit },
+            {
+                $group: {
+                    _id: '$_id',
+                    copiesForAuction: { $first: '$copiesForAuction' },
+                    auctionStartDate: { $first: '$auctionStartDate' },
+                    auctionEndDate: { $first: '$auctionEndDate' },
+                    highestBid: { $first: '$highestBid' },
+                    bidDetail: {
+                        $push: {
+                            _id: '$bids._id',
+                            bidByProfile: '$bids.bidByProfile',
+                        },
+                    },
+                    Totalbids: { $first: '$bidsCount' },
+                    userId: { $first: '$user._id' },
+                    username: { $first: '$user.username' },
+                    ownerAddress: { $first: '$nft.ownerAddress' },
+                    profilePhoto: {
+                        $first: '$user.profileImage',
+                    },
+                    nftId: { $first: '$nft._id' },
+                    nftName: { $first: '$nft.name' },
+                    nftImage: { $first: '$nft.image' },
+                    compressedFile: { $first: '$nft.compressedFile' },
+                    currentPrice: { $first: '$nft.currentPrice' },
+                    fileType: { $first: '$nft.fileType' },
+                    createdAt: { $first: '$createdAt' },
+                },
+            },
+            { $sort: { createdAt: -1 } },
+        ]
 
         const auctions = nftAuctions.aggregate(pipeline)
-        const auctionList = await Promise.all([total, auctions])
-        const allAuctions = auctionList[1]
-
+        const auctionsTotal = nftAuctions.aggregate(totalAuctions)
+        const auctionList = await Promise.all([total, auctions, auctionsTotal])
+        const allAuctions = auctionList[2]
+    
         return res.send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.LIVE_AUCTIONS,
