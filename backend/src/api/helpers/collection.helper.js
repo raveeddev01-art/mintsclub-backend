@@ -72,7 +72,6 @@ const collectionListPipeline = async (filter, all, limit, page) => {
                     createdAt: { $first: '$createdAt' },
                     contractAddress: { $first: '$contractAddress' },
                     isApproved: { $first: '$isApproved' },
-                    blockchainType:{$first:'$blockchainType'}
 
                 },
             },
@@ -159,7 +158,6 @@ const collectionListByUserId = async (total, userId, limit, page) => {
                     createdAt: { $first: '$createdAt' },
                     contractAddress: { $first: '$contractAddress' },
                     isApproved: { $first: '$isApproved' },
-                    blockchainType:{$first:'$blockchainType'}
                 },
             },
             { $sort: { createdAt: -1 } },
