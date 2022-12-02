@@ -214,9 +214,9 @@ exports.live = async (req, res, next) => {
                     preserveNullAndEmptyArrays: true,
                 },
             },
-            { $sort: { createdAt: -1 } },
-            // { $skip: limit * (page - 1) },
-            // { $limit: limit },
+            {
+                 $sort: { createdAt: -1 }
+            },
             {
                 $group: {
                     _id: '$_id',
