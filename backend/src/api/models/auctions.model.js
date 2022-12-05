@@ -56,9 +56,11 @@ const AuctionSchema = new mongoose.Schema(
 AuctionSchema.post('save', async function (next) {
     try {
         let price = 0
+        let appId = 0
 
         if (Number(this.sellingMethod) === 1) {
             price = this.sellingConfig.price.amount
+            appId = this.sellId
         } else {
             price = this?.sellingConfig?.startPrice?.amount
         }
@@ -68,6 +70,7 @@ AuctionSchema.post('save', async function (next) {
                 $set: {
                     activeAuction: this._id,
                     currentPrice: price,
+                    appId,
                 },
             },
             { new: true }

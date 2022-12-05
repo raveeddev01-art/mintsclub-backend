@@ -53,6 +53,19 @@ const getNftDetailPipeline = async (nftId, blockChainType) => {
             },
             {
                 $lookup: {
+                    from: 'users',
+                    foreignField: '_id',
+                    localField: 'creatorId',
+                    as: 'creator',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$creator',
+                },
+            },
+            {
+                $lookup: {
                     from: 'collections',
                     foreignField: '_id',
                     localField: 'collectionId',

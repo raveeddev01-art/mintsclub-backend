@@ -11,7 +11,7 @@ const validateNFTFixedTAuctionSchema = (req, res, next) => {
         // copiesForAuction: Joi.number().min(0).max(100000).required(),
         blockchainType: Joi.string()
             .required()
-            .valid('ethereum', 'solana', 'bsc', 'polygon'),
+            .valid('ethereum', 'solana', 'bsc', 'polygon', 'algorand'),
         copiesForAuction: Joi.alternatives().conditional('blockchainType', [
             {
                 is: 'ethereum',
@@ -23,6 +23,10 @@ const validateNFTFixedTAuctionSchema = (req, res, next) => {
             },
             {
                 is: 'bsc',
+                then: Joi.number().min(0).max(100000).required(),
+            },
+            {
+                is: 'algorand',
                 then: Joi.number().min(0).max(100000).required(),
             },
             {
@@ -44,6 +48,10 @@ const validateNFTFixedTAuctionSchema = (req, res, next) => {
                 then: Joi.number().required(),
             },
             {
+                is: 'algorand',
+                then: Joi.number().required(),
+            },
+            {
                 is: 'solana',
                 then: Joi.optional(),
             },
@@ -52,10 +60,16 @@ const validateNFTFixedTAuctionSchema = (req, res, next) => {
         signature: Joi.string().optional(),
 
         sellerTradeState: Joi.alternatives()
-            .conditional('blockchainType', {
-                is: 'solana',
-                then: Joi.string().required(),
-            })
+            .conditional('blockchainType', [
+                {
+                    is: 'solana',
+                    then: Joi.string().required(),
+                },
+                {
+                    is: 'algorand',
+                    then: Joi.string().required(),
+                },
+            ])
             .optional(),
 
         sellingConfig: Joi.object()
