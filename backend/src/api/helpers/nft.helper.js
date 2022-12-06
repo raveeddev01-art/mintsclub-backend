@@ -88,9 +88,6 @@ const getNftListPipeline = async (
             {
                 $sort: sortFilters,
             },
-            { 
-                $sort: { createdAt: -1 } 
-            },
             {
                 $lookup: {
                     from: 'auctions',
@@ -170,9 +167,6 @@ const getNftListPipeline = async (
         const nfts1 = NFT.aggregate([
             {
                 $sort: sortFilters,
-            },
-            { 
-                $sort: { createdAt: -1 } 
             },
             {
                 $lookup: {
