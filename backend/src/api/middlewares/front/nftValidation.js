@@ -18,22 +18,22 @@ const validateNFTSchema = (req, res, next) => {
             type: Joi.string().max(10).allow(''),
         }),
 
-        // levels: Joi.array().items({
-        //     name: Joi.string().regex(/^(?=.*[a-zA-Z])(?=.*[0-9])/)
-        //             .allow(''),
-        //     value: Joi.string().regex(/^(?=.*[a-zA-Z])(?=.*[0-9])/)
-        //             .allow(''),
-        //     total: Joi.string().regex(/^(?=.*[a-zA-Z])(?=.*[0-9])/)
-        //             .allow(''),
-        // }).optional(),
-        // stats: Joi.array().items({
-        //     name: Joi.string().regex(/^(?=.*[a-zA-Z])(?=.*[0-9])/)
-        //             .allow(''),
-        //     value: Joi.string().regex(/^(?=.*[a-zA-Z])(?=.*[0-9])/)
-        //             .allow(''),
-        //     total: Joi.string().regex(/^(?=.*[a-zA-Z])(?=.*[0-9])/)
-        //             .allow(''),
-        // }).optional(),
+        levels: Joi.array().items({
+            name: Joi.string().regex(/^[A-Za-z0-9]*$/)
+                    .allow(''),
+            value: Joi.string().regex(/^[A-Za-z0-9]*$/)
+                    .allow(''),
+            total: Joi.string().regex(/^[A-Za-z0-9]*$/)
+                    .allow(''),
+        }).optional(),
+        stats: Joi.array().items({
+            name: Joi.string().regex(/^[A-Za-z0-9]*$/)
+                    .allow(''),
+            value: Joi.string().regex(/^[A-Za-z0-9]*$/)
+                    .allow(''),
+            total: Joi.string().regex(/^[A-Za-z0-9]*$/)
+                    .allow(''),
+        }).optional(),
         creators: Joi.array().items({
             address: Joi.string().allow(''),
             share: Joi.number().allow(''),
