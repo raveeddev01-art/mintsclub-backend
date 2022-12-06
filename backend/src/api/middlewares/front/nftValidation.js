@@ -19,20 +19,14 @@ const validateNFTSchema = (req, res, next) => {
         }),
 
         levels: Joi.array().items({
-            name: Joi.string().regex(/^[A-Za-z0-9]*$/)
-                    .allow(''),
-            value: Joi.string().regex(/^[A-Za-z0-9]*$/)
-                    .allow(''),
-            total: Joi.string().regex(/^[A-Za-z0-9]*$/)
-                    .allow(''),
+            name: Joi.alternatives().try(Joi.number(), Joi.string()).allow(''),
+            value: Joi.alternatives().try(Joi.number(), Joi.string()).allow(''),
+            total: Joi.alternatives().try(Joi.number(), Joi.string()).allow(''),
         }).optional(),
         stats: Joi.array().items({
-            name: Joi.string().regex(/^[A-Za-z0-9]*$/)
-                    .allow(''),
-            value: Joi.string().regex(/^[A-Za-z0-9]*$/)
-                    .allow(''),
-            total: Joi.string().regex(/^[A-Za-z0-9]*$/)
-                    .allow(''),
+            name: Joi.alternatives().try(Joi.number(), Joi.string()).allow(''),
+            value: Joi.alternatives().try(Joi.number(), Joi.string()).allow(''),
+            total: Joi.alternatives().try(Joi.number(), Joi.string()).allow(''),
         }).optional(),
         creators: Joi.array().items({
             address: Joi.string().allow(''),
