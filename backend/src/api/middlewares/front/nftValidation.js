@@ -19,12 +19,12 @@ const validateNFTSchema = (req, res, next) => {
         }),
 
         levels: Joi.array().items({
-            name: Joi.max(10).allow(''),
+            name: Joi.allow(''),
             value: Joi.allow(''),
             total: Joi.allow(''),
         }).optional(),
         stats: Joi.array().items({
-            name: Joi.max(10).allow(''),
+            name: Joi.allow(''),
             value: Joi.allow(''),
             total: Joi.allow(''),
         }).optional(),
