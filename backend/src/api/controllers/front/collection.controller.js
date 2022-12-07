@@ -52,10 +52,13 @@ exports.create = async (req, res, next) => {
                 req.files.logo[0].path,
                 req.files.logo[0].filename
             )
+            console.log('featuredRes ===', req.files.featuredImg[0]);
+
             const featuredRes = await uploadFileToS3(
                 req.files.featuredImg[0].path,
                 req.files.featuredImg[0].filename
             )
+            console.log('featuredRes ===', featuredRes)
             if (!logoRes.success) {
                 return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                     success: SUCCESS_STATUS.FALSE,
