@@ -48,7 +48,7 @@ exports.create = async (req, res, next) => {
 
         if (req.files) {
             console.log(req.files, 'req.files')
-            console.log('logoRes ===', logoRes);
+            console.log('logoRes ===', req.files);
 
             const logoRes = await uploadFileToS3(
                 req.files.logo[0].path,
