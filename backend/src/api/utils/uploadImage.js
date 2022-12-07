@@ -7,21 +7,17 @@ const imagesDir = `${uploadsDir}images`
 const storage = multer.diskStorage({
     destination(req, file, cb) {
         // make uploads directory if do not exist
-        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir)
+        if (!fs.existsSync(uploadsDir)) await fs.mkdirSync(uploadsDir)
 
-        if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir)
+        if (!fs.existsSync(imagesDir)) await fs.mkdirSync(imagesDir)
 
         cb(null, imagesDir)
     },
     filename(req, file, cb) {
-        let fileExtension = file.mimetype.split('/')[1]
-        if (
-            !file.originalname.toLowerCase().match(/\.(jpg|jpeg|png)$/) &&
-            !file.orignalname === 'blob'
-        ) {
-            return cb(new Error('Only image files are allowed.'))
-        }
-        cb(null, +Date.now() + '.' + fileExtension)
+          cb(
+            null,
+            file.fieldname + "/" + req.body.fullname.replace(/\s/g, "") + ".png"
+        );
     },
 })
 const upload = multer({
