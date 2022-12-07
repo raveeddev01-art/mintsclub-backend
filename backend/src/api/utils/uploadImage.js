@@ -19,7 +19,7 @@ const storage = multer.diskStorage({
 
           cb(
             null,
-            new Date() + ".png"
+            Date.now() + ".png"
         );
     },
 })
