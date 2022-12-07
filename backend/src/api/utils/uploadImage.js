@@ -2,7 +2,7 @@ const fs = require('fs')
 const multer = require('multer')
 const axios = require('axios')
 const uploadsDir = './src/uploads/'
-const imagesDir = `${uploadsDir}images`
+const imagesDir = `${uploadsDir}images/`
 
 const storage = multer.diskStorage({
     destination(req, file, cb) {
