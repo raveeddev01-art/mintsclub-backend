@@ -19,7 +19,7 @@ const storage = multer.diskStorage({
 
           cb(
             null,
-            file.fieldname + "/" + req.body.fullname.replace(/\s/g, "") + ".png"
+            new Date() + ".png"
         );
     },
 })
