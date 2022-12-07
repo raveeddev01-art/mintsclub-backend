@@ -27,7 +27,7 @@ const validateNFTFixedTAuctionSchema = (req, res, next) => {
             },
             {
                 is: 'algorand',
-                then: Joi.number().min(0).max(100000).required(),
+                then: Joi.optional(),
             },
             {
                 is: 'solana',
@@ -158,7 +158,7 @@ const validateNFTimedTAuctionSchema = (req, res, next) => {
             },
             {
                 is: 'algorand',
-                then: Joi.number().min(1).max(100000).required(),
+                then: Joi.optional(),
             },
             {
                 is: 'solana',
@@ -249,6 +249,7 @@ const validateBuyNowSchema = (req, res, next) => {
             // .regex(/^0x[a-fA-F0-9]{40}$/)
             .required(),
         tokenId: Joi.number().optional(),
+        assetId: Joi.number().optional(),
         mint: Joi.string().optional(),
         metaData: Joi.string().optional(),
     })

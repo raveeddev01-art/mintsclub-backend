@@ -18,16 +18,32 @@ const validateNFTSchema = (req, res, next) => {
             type: Joi.string().max(10).allow(''),
         }),
 
-        levels: Joi.array().items({
-            name: Joi.alternatives().try(Joi.number(), Joi.string()).allow(''),
-            value: Joi.alternatives().try(Joi.number(), Joi.string()).allow(''),
-            total: Joi.alternatives().try(Joi.number(), Joi.string()).allow(''),
-        }).optional(),
-        stats: Joi.array().items({
-            name: Joi.alternatives().try(Joi.number(), Joi.string()).allow(''),
-            value: Joi.alternatives().try(Joi.number(), Joi.string()).allow(''),
-            total: Joi.alternatives().try(Joi.number(), Joi.string()).allow(''),
-        }).optional(),
+        levels: Joi.array()
+            .items({
+                name: Joi.alternatives()
+                    .try(Joi.number(), Joi.string())
+                    .allow(''),
+                value: Joi.alternatives()
+                    .try(Joi.number(), Joi.string())
+                    .allow(''),
+                total: Joi.alternatives()
+                    .try(Joi.number(), Joi.string())
+                    .allow(''),
+            })
+            .optional(),
+        stats: Joi.array()
+            .items({
+                name: Joi.alternatives()
+                    .try(Joi.number(), Joi.string())
+                    .allow(''),
+                value: Joi.alternatives()
+                    .try(Joi.number(), Joi.string())
+                    .allow(''),
+                total: Joi.alternatives()
+                    .try(Joi.number(), Joi.string())
+                    .allow(''),
+            })
+            .optional(),
         creators: Joi.array().items({
             address: Joi.string().allow(''),
             share: Joi.number().allow(''),
@@ -106,7 +122,7 @@ const validateNFTSchema = (req, res, next) => {
             },
             {
                 is: 'algorand',
-                then: Joi.number().min(1).required(),
+                then: Joi.optional(),
             },
             {
                 is: 'solana',
