@@ -72,7 +72,6 @@ const collectionListPipeline = async (filter, all, limit, page) => {
                     createdAt: { $first: '$createdAt' },
                     contractAddress: { $first: '$contractAddress' },
                     isApproved: { $first: '$isApproved' },
-
                 },
             },
             { $sort: { createdAt: -1 } },
@@ -129,9 +128,24 @@ const collectionListByUserId = async (total, userId, limit, page) => {
                     as: 'nfts',
                 },
             },
+
             {
                 $unwind: {
                     path: '$nfts',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $lookup: {
+                    from: 'auctions',
+                    foreignField: '_id',
+                    localField: 'nfts.activeAuction',
+                    as: 'auctions',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$auctions',
                     preserveNullAndEmptyArrays: true,
                 },
             },
@@ -144,6 +158,14 @@ const collectionListByUserId = async (total, userId, limit, page) => {
                             fileType: '$nfts.fileType',
                         },
                     },
+                    floorPriceForTimedAuction: {
+                        $min: '$auctions.sellingConfig.startPrice.amount',
+                    },
+                    floorPriceForFixedAuction: {
+                        $min: '$auctions.sellingConfig.price.amount',
+                    },
+                    totalVolume: { $sum: '$nfts.currentPrice' },
+                    avgSalePrice: { $avg: '$nfts.currentPrice' },
                     userId: { $first: '$userId' },
                     categoryId: { $first: '$categoryId' },
                     name: { $first: '$name' },
