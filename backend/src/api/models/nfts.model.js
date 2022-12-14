@@ -37,6 +37,7 @@ const NFTSchema = new mongoose.Schema(
         stats: { type: Array },
         copies: { type: Number, default: 0 },
         lazyMinted: { type: Boolean },
+        algoLazyMinted: { type: Boolean },
         lazyInfo: { type: Object },
         metaData: { type: String }, // ipfs link
         remainingCopies: { type: Number },

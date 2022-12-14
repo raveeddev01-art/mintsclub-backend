@@ -137,6 +137,15 @@ const updateNFTForBuyNow = async (request, buyNftDetail, auctionDetail) => {
             currentPrice: 0,
             lazyMinted: false,
         }
+        if (request?.algoLazyMinted === false) {
+            const payload = {
+                algoLazyMinted: false,
+            }
+            await NFT.findByIdAndUpdate(
+                { _id: buyNftDetail._id },
+                { $set: payload }
+            )
+        }
         const nftUpdate = await NFT.findByIdAndUpdate(
             { _id: buyNftDetail._id },
             { $set: newPayload }
