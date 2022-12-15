@@ -11,11 +11,35 @@ const validateCreateBid = (req, res, next) => {
         ownerId: Joi.string().alphanum().min(12).max(24).required(),
         nftId: Joi.string().alphanum().min(12).max(24).required(),
         bidAmount: Joi.number().required(),
-        blockchainType: Joi.string().required(),
+        blockchainType: Joi.string()
+            .required()
+            .valid('ethereum', 'solana', 'bsc', 'polygon', 'algorand'),
         isAccepted: Joi.boolean().default(false),
         auctionId: Joi.string().alphanum().min(12).max(24).required(),
         expiryDate: Joi.date().allow(''),
-        globalState: Joi.object().optional(),
+
+        globalState: Joi.alternatives().conditional('blockchainType', [
+            {
+                is: 'ethereum',
+                then: Joi.object().optional(),
+            },
+            {
+                is: 'polygon',
+                then: Joi.object().optional(),
+            },
+            {
+                is: 'bsc',
+                then: Joi.object().optional(),
+            },
+            {
+                is: 'solana',
+                then: Joi.object().optional(),
+            },
+            {
+                is: 'algorand',
+                then: Joi.object().required(),
+            },
+        ]),
 
         fromAddress: Joi.string()
             // .regex(/^0x[a-fA-F0-9]{40}$/)
