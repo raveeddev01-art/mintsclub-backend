@@ -47,6 +47,20 @@ const collectionListPipeline = async (filter, all, limit, page) => {
                     preserveNullAndEmptyArrays: true,
                 },
             },
+            {
+                $lookup: {
+                    from: 'auctions',
+                    foreignField: '_id',
+                    localField: 'nfts.activeAuction',
+                    as: 'auctions',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$auctions',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
 
             {
                 $group: {
@@ -57,6 +71,14 @@ const collectionListPipeline = async (filter, all, limit, page) => {
                             fileType: '$nfts.fileType',
                         },
                     },
+                    floorPriceForTimedAuction: {
+                        $min: '$auctions.sellingConfig.startPrice.amount',
+                    },
+                    floorPriceForFixedAuction: {
+                        $min: '$auctions.sellingConfig.price.amount',
+                    },
+                    totalVolume: { $sum: '$nfts.currentPrice' },
+                    avgSalePrice: { $avg: '$nfts.currentPrice' },
                     TotalNfts: { $first: '$NftsCount' },
                     userId: { $first: '$userId' },
                     categoryId: { $first: '$categoryId' },
