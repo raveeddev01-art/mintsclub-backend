@@ -48,17 +48,16 @@ exports.create = async (req, res, next) => {
 
         if (req.files) {
             console.log(req.files, 'req.files')
-            console.log('logoRes ===', req.files);
+            console.log('logoRes ===', req.files)
 
             const logoRes = await uploadFileToS3(
                 req.files.logo[0].path,
                 req.files.logo[0].filename
             )
 
-            console.log('logoRes ===', logoRes);
+            console.log('logoRes ===', logoRes)
 
-
-            console.log('featuredRes ===', req.files.featuredImg[0]);
+            console.log('featuredRes ===', req.files.featuredImg[0])
 
             const featuredRes = await uploadFileToS3(
                 req.files.featuredImg[0].path,
@@ -94,7 +93,7 @@ exports.create = async (req, res, next) => {
         }
 
         const existingCollection = await Collection.findOne({
-            name:payload.name
+            name: payload.name,
         })
 
         if (existingCollection) {
@@ -137,7 +136,7 @@ exports.createDefault = async (req, res, next) => {
                 ? req.body.contractAddress
                 : '',
             blockchainType: req.body.blockchainType,
-            logo: 'null',
+            logo: ' ',
             featuredImg: '',
             banner: '',
             isApproved: true,
