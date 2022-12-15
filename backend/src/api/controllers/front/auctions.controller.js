@@ -45,27 +45,6 @@ exports.live = async (req, res, next) => {
                     auctionEnded: false,
                 }
 
-        // if (myFilter && myFilter !== 'all') {
-        //     filter = {
-        //         sellingMethod: 2, // timed auctions only
-        //         auctionStartDate: {
-        //             $lt: dateTime,
-        //         },
-        //         auctionEndDate: { $gte: dateTime },
-        //         // 'nftId.categoryId': ObjectId(newFilter),
-        //         auctionEnded: false,
-        //     }
-        // } else {
-        //     filter = {
-        //         sellingMethod: 2, // timed auctions only
-        //         auctionStartDate: {
-        //             $lt: dateTime,
-        //         },
-        //         auctionEndDate: { $gte: dateTime },
-        //         auctionEnded: false,
-        //     }
-        // }
-
         const total = nftAuctions.countDocuments(filter)
 
         const pipeline = [
