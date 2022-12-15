@@ -420,7 +420,7 @@ exports.popular = async (req, res, next) => {
         if (myFilter && myFilter === 'all') {
             filter = {}
         }
-
+        
         let total = 0
 
         page = page !== undefined && page !== '' ? parseInt(page) : 1

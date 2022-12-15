@@ -9,7 +9,7 @@ const ActivityModal = require('../models/item-activity.modal')
  */
 const NFTSchema = new mongoose.Schema(
     {
-        name: { type: String },
+        name: { type: String, required: true },
         description: { type: String },
         creatorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
