@@ -1,4 +1,5 @@
 const moment = require('moment')
+const mongoose = require("mongoose");
 const NFT = require('../../models/nfts.model')
 const ObjectId = require('mongoose').Types.ObjectId
 const Categories = require('../../models/categories.model')
@@ -34,27 +35,15 @@ exports.live = async (req, res, next) => {
             }
             newFilter = applyFilter._id
         }
-
-        if (myFilter && myFilter !== 'all') {
-            filter = {
-                sellingMethod: 2, // timed auctions only
-                auctionStartDate: {
-                    $lt: dateTime,
-                },
-                auctionEndDate: { $gte: dateTime },
-                'nft.categoryId': ObjectId(newFilter),
-                auctionEnded: false,
-            }
-        } else {
-            filter = {
-                sellingMethod: 2, // timed auctions only
-                auctionStartDate: {
-                    $lt: dateTime,
-                },
-                auctionEndDate: { $gte: dateTime },
-                auctionEnded: false,
-            }
-        }
+        
+        filter = {
+                    sellingMethod: 2, // timed auctions only
+                    auctionStartDate: {
+                        $lt: dateTime,
+                    },
+                    auctionEndDate: { $gte: dateTime },
+                    auctionEnded: false,
+                }
 
         const total = nftAuctions.countDocuments(filter)
 
@@ -118,6 +107,11 @@ exports.live = async (req, res, next) => {
                     path: '$user',
                     preserveNullAndEmptyArrays: true,
                 },
+            },
+            {
+                $match: {
+                            ...(myFilter === "all" ? {} : {"nft.categoryId" : mongoose.Types.ObjectId(newFilter)})
+                        }
             },
             { $sort: { createdAt: -1 } },
             { $skip: limit * (page - 1) },
@@ -215,7 +209,13 @@ exports.live = async (req, res, next) => {
                 },
             },
             {
-                 $sort: { createdAt: -1 }
+                $match: {
+                            ...(myFilter === "all" ? {} : {"nft.categoryId" : mongoose.Types.ObjectId(newFilter)})
+                        }
+                
+            },
+            {
+                $sort: { createdAt: -1 }
             },
             {
                 $group: {
