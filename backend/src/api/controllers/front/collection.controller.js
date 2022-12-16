@@ -47,24 +47,15 @@ exports.create = async (req, res, next) => {
         }
 
         if (req.files) {
-            console.log(req.files, 'req.files')
-            console.log('logoRes ===', req.files);
-
             const logoRes = await uploadFileToS3(
                 req.files.logo[0].path,
                 req.files.logo[0].filename
             )
 
-            console.log('logoRes ===', logoRes);
-
-
-            console.log('featuredRes ===', req.files.featuredImg[0]);
-
             const featuredRes = await uploadFileToS3(
                 req.files.featuredImg[0].path,
                 req.files.featuredImg[0].filename
             )
-            console.log('featuredRes ===', featuredRes)
             if (!logoRes.success) {
                 return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                     success: SUCCESS_STATUS.FALSE,
@@ -94,7 +85,7 @@ exports.create = async (req, res, next) => {
         }
 
         const existingCollection = await Collection.findOne({
-            name:payload.name
+            name: payload.name,
         })
 
         if (existingCollection) {
@@ -137,7 +128,7 @@ exports.createDefault = async (req, res, next) => {
                 ? req.body.contractAddress
                 : '',
             blockchainType: req.body.blockchainType,
-            logo: 'null',
+            logo: ' ',
             featuredImg: '',
             banner: '',
             isApproved: true,
@@ -196,15 +187,11 @@ exports.edit = async (req, res, next) => {
             name: req.body.name,
             url: req.body.url,
             description: req.body.description,
-        }
-        payload = {
-            ...payload,
-            logo: req.body.logo,
+            logo: req.body.logoUrl,
             featuredImg: req.body.featuredImgUrl,
             banner: req.body.bannerUrl,
         }
         payload.categoryId = payload.categoryId ? payload.categoryId : null
-
         if (!payload?.logo) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.FALSE,
