@@ -58,6 +58,7 @@ const validateEditCollectionSchema = (req,res,next) => {
         name: Joi.string().min(1).max(100).optional(),
         url: Joi.string().allow(''),
         description: Joi.string().min(1).max(500).allow(''),
+        logo:Joi.string().optional(),
         // category: Joi.string().allow(''),
     })
     const options = {
@@ -74,7 +75,10 @@ const validateEditCollectionSchema = (req,res,next) => {
         name: req.body.name,
         url: req.body.url,
         description: req.body.description,
+        logo: req.body?.logoUrl
     }
+    console.log('this is bodyyy===',req.body)
+    console.log('this is payload validatttttt,',payload)
     const { error } =  schema.validate(payload, options)
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
