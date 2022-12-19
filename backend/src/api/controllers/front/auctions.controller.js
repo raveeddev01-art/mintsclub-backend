@@ -1,5 +1,5 @@
 const moment = require('moment')
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 const NFT = require('../../models/nfts.model')
 const ObjectId = require('mongoose').Types.ObjectId
 const Categories = require('../../models/categories.model')
@@ -35,15 +35,15 @@ exports.live = async (req, res, next) => {
             }
             newFilter = applyFilter._id
         }
-        
+
         filter = {
-                    sellingMethod: 2, // timed auctions only
-                    auctionStartDate: {
-                        $lt: dateTime,
-                    },
-                    auctionEndDate: { $gte: dateTime },
-                    auctionEnded: false,
-                }
+            sellingMethod: 2, // timed auctions only
+            auctionStartDate: {
+                $lt: dateTime,
+            },
+            auctionEndDate: { $gte: dateTime },
+            auctionEnded: false,
+        }
 
         const total = nftAuctions.countDocuments(filter)
 
@@ -110,8 +110,13 @@ exports.live = async (req, res, next) => {
             },
             {
                 $match: {
-                            ...(myFilter === "all" ? {} : {"nft.categoryId" : mongoose.Types.ObjectId(newFilter)})
-                        }
+                    ...(myFilter === 'all'
+                        ? {}
+                        : {
+                              'nft.categoryId':
+                                  mongoose.Types.ObjectId(newFilter),
+                          }),
+                },
             },
             { $sort: { createdAt: -1 } },
             { $skip: limit * (page - 1) },
@@ -210,12 +215,16 @@ exports.live = async (req, res, next) => {
             },
             {
                 $match: {
-                            ...(myFilter === "all" ? {} : {"nft.categoryId" : mongoose.Types.ObjectId(newFilter)})
-                        }
-                
+                    ...(myFilter === 'all'
+                        ? {}
+                        : {
+                              'nft.categoryId':
+                                  mongoose.Types.ObjectId(newFilter),
+                          }),
+                },
             },
             {
-                $sort: { createdAt: -1 }
+                $sort: { createdAt: -1 },
             },
             {
                 $group: {
@@ -253,7 +262,7 @@ exports.live = async (req, res, next) => {
         const auctionsTotal = nftAuctions.aggregate(totalAuctions)
         const auctionList = await Promise.all([total, auctions, auctionsTotal])
         const allAuctions = auctionList[2]
-    
+
         return res.send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.LIVE_AUCTIONS,
@@ -352,8 +361,22 @@ exports.buyNow = async (req, res, next) => {
                 { new: true }
             )
         }
+        if (req.body?.assetId) {
+            const updateMintAndMetadata = {
+                tokenId: req.body.assetId,
+                metaData: req.body.metaData,
+            }
+            await NFT.findByIdAndUpdate(
+                { _id: payload.nftId },
+                { $set: updateMintAndMetadata },
+                { new: true }
+            )
+        }
         let copiesCondition = true
-        if (buyNftDetail?.blockchainType !== 'solana') {
+        if (
+            buyNftDetail?.blockchainType !== 'solana' &&
+            buyNftDetail?.blockchainType !== 'algorand'
+        ) {
             copiesCondition =
                 nftAuctionDetail?.copiesForAuction > 0 ? true : false
         }
@@ -362,7 +385,8 @@ exports.buyNow = async (req, res, next) => {
             if (
                 buyNftDetail.remainingCopies >
                     nftAuctionDetail?.copiesForAuction &&
-                buyNftDetail?.blockchainType !== 'solana'
+                buyNftDetail?.blockchainType !== 'solana' &&
+                buyNftDetail?.blockchainType !== 'algorand'
             ) {
                 const updateData = await helpers.auction.createNewNFTtoBuy(
                     payload,

@@ -9,7 +9,7 @@ const validateNFTSchema = (req, res, next) => {
     const schema = Joi.object().keys({
         blockchainType: Joi.string()
             .required()
-            .valid('ethereum', 'solana', 'bsc', 'polygon'),
+            .valid('ethereum', 'solana', 'bsc', 'polygon', 'algorand'),
         name: Joi.string().min(1).max(100).required(),
         description: Joi.string().min(3).max(500).required(),
         creatorId: Joi.string().alphanum().min(12).max(24).allow(''),
@@ -18,16 +18,32 @@ const validateNFTSchema = (req, res, next) => {
             type: Joi.string().max(10).allow(''),
         }),
 
-        levels: Joi.array().items({
-            name: Joi.alternatives().try(Joi.number(), Joi.string()).allow(''),
-            value: Joi.alternatives().try(Joi.number(), Joi.string()).allow(''),
-            total: Joi.alternatives().try(Joi.number(), Joi.string()).allow(''),
-        }).optional(),
-        stats: Joi.array().items({
-            name: Joi.alternatives().try(Joi.number(), Joi.string()).allow(''),
-            value: Joi.alternatives().try(Joi.number(), Joi.string()).allow(''),
-            total: Joi.alternatives().try(Joi.number(), Joi.string()).allow(''),
-        }).optional(),
+        levels: Joi.array()
+            .items({
+                name: Joi.alternatives()
+                    .try(Joi.number(), Joi.string())
+                    .allow(''),
+                value: Joi.alternatives()
+                    .try(Joi.number(), Joi.string())
+                    .allow(''),
+                total: Joi.alternatives()
+                    .try(Joi.number(), Joi.string())
+                    .allow(''),
+            })
+            .optional(),
+        stats: Joi.array()
+            .items({
+                name: Joi.alternatives()
+                    .try(Joi.number(), Joi.string())
+                    .allow(''),
+                value: Joi.alternatives()
+                    .try(Joi.number(), Joi.string())
+                    .allow(''),
+                total: Joi.alternatives()
+                    .try(Joi.number(), Joi.string())
+                    .allow(''),
+            })
+            .optional(),
         creators: Joi.array().items({
             address: Joi.string().allow(''),
             share: Joi.number().allow(''),
@@ -45,6 +61,10 @@ const validateNFTSchema = (req, res, next) => {
             },
             {
                 is: 'bsc',
+                then: Joi.string().valid('image', 'audio', 'video').required(),
+            },
+            {
+                is: 'algorand',
                 then: Joi.string().valid('image', 'audio', 'video').required(),
             },
             {
@@ -81,6 +101,10 @@ const validateNFTSchema = (req, res, next) => {
                 is: 'solana',
                 then: Joi.string().allow(''),
             },
+            {
+                is: 'algorand',
+                then: Joi.string().allow(''),
+            },
         ]),
 
         copies: Joi.alternatives().conditional('blockchainType', [
@@ -95,6 +119,10 @@ const validateNFTSchema = (req, res, next) => {
             {
                 is: 'bsc',
                 then: Joi.number().min(1).required(),
+            },
+            {
+                is: 'algorand',
+                then: Joi.optional(),
             },
             {
                 is: 'solana',
@@ -131,6 +159,10 @@ const validateNFTSchema = (req, res, next) => {
     payload.copies = Number(payload?.copies)
 
     const { error } = schema.validate(payload)
+    console.log(
+        '🚀 ~ file: nftValidation.js ~ line 134 ~ validateNFTSchema ~ error',
+        error
+    )
 
     if (error) {
         return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({

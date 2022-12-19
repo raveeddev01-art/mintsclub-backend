@@ -4,7 +4,7 @@ const Likes = require('../models/likes.model')
 const getNftDetailPipeline = async (nftId, blockChainType) => {
     try {
         let auctionEndFilter = {}
-        if (blockChainType !== 'solana') {
+        if (blockChainType !== 'solana' && blockChainType !== 'algorand') {
             auctionEndFilter = {
                 $expr: { $ne: ['$auctionEnded', true] },
             }
@@ -49,6 +49,19 @@ const getNftDetailPipeline = async (nftId, blockChainType) => {
             {
                 $unwind: {
                     path: '$user',
+                },
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    foreignField: '_id',
+                    localField: 'creatorId',
+                    as: 'creator',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$creator',
                 },
             },
             {

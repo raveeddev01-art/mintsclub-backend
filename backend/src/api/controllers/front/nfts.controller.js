@@ -55,6 +55,9 @@ exports.storeDataInDb = async (req, res, next) => {
         createNFTPayload.properties = JSON.parse(req.body.data.properties)
         createNFTPayload.levels = JSON.parse(req.body.data.levels)
         createNFTPayload.stats = JSON.parse(req.body.data.stats)
+        if (req.body?.algoLazyMinted) {
+            createNFTPayload.algoLazyMinted = req.body.algoLazyMinted
+        }
 
         const nft = await NFT.create(createNFTPayload)
 
@@ -183,16 +186,19 @@ exports.list = async (req, res, next) => {
             }),
             ...(auction && {
                 $and: [
-                { 'auction.sellingMethod': { $eq: 2 } },
-                {'auction.auctionStartDate': {
-                    $lt: dateTime,
-                    }
-                },
-                {'auction.auctionEndDate': { 
-                    $gte: dateTime }
-                },
-                { 'auction.auctionEnded': false },
-            ],
+                    { 'auction.sellingMethod': { $eq: 2 } },
+                    {
+                        'auction.auctionStartDate': {
+                            $lt: dateTime,
+                        },
+                    },
+                    {
+                        'auction.auctionEndDate': {
+                            $gte: dateTime,
+                        },
+                    },
+                    { 'auction.auctionEnded': false },
+                ],
             }),
             ...(search && {
                 $or: [
