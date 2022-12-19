@@ -21,6 +21,22 @@ const {
 // API to create NFT
 exports.create = async (req, res, next) => {
     try {
+        let payload = {
+            name: req.body.name,
+            // blockchainType: req.body.blockchainType,
+            
+        }
+        const existingNFT = await NFT.findOne({
+            name:payload.name,
+            blockchainType:payload.blockchainType,
+        })
+
+        if (existingNFT) {
+            return res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.NFT_EXIST_ALREADY,
+            })
+        }
         let result = null
 
         if (req.files?.image) {
@@ -47,6 +63,7 @@ exports.storeDataInDb = async (req, res, next) => {
                 message: ERROR_MESSAGE.PROVIDE_DATA,
             })
         }
+        
 
         const createNFTPayload = req.body.data
         createNFTPayload.image = req.body.image

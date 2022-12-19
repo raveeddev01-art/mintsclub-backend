@@ -6,6 +6,7 @@ const ERROR_MESSAGE = {
     BID_NOT_FOUND: 'Bid not found for given Id',
     LOGO_REQUIRED: 'logo image is required',
     COLLECTION_EXIST_ALREADY: 'Collection with same name already exists',
+    NFT_EXIST_ALREADY: 'NFT with same name already exists',
     COLLECTION_NOT_FOUND: 'Collection not found for given Id',
     INVALID_FILTER_PASSED: 'Invalid Filter passed',
     SIGN_IN_FIRST: 'Please Sign In First',

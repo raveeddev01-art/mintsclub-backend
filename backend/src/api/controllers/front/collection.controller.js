@@ -85,7 +85,8 @@ exports.create = async (req, res, next) => {
         }
 
         const existingCollection = await Collection.findOne({
-            name: payload.name,
+            name:payload.name,
+            // blockchainType:payload.blockchainType,
         })
 
         if (existingCollection) {
