@@ -173,7 +173,7 @@ const updateNFTForBuyNow = async (request, buyNftDetail, auctionDetail) => {
         }
 
         const dataUpdated = await nftAuctions.findOneAndUpdate(
-            { nftId: request.nftId },
+            { nftId: request.nftId, status: 'active', auctionEnded: false },
             { $set: payloadUpdateAuctionStatus }
         )
 
