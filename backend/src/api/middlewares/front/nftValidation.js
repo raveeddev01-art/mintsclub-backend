@@ -110,15 +110,15 @@ const validateNFTSchema = (req, res, next) => {
         copies: Joi.alternatives().conditional('blockchainType', [
             {
                 is: 'ethereum',
-                then: Joi.number().min(1).required(),
+                then: Joi.number().min(1).max(1000000).required(),
             },
             {
                 is: 'polygon',
-                then: Joi.number().min(1).required(),
+                then: Joi.number().min(1).max(1000000).required(),
             },
             {
                 is: 'bsc',
-                then: Joi.number().min(1).required(),
+                then: Joi.number().min(1).max(1000000).required(),
             },
             {
                 is: 'algorand',
