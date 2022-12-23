@@ -96,7 +96,9 @@ exports.get = async (req, res, next) => {
             nftId,
         }
         payload.nftId = ObjectId(payload.nftId)
+        console.log('payload ======', payload);
         const getNft = await NFT.find({ _id: payload.nftId })
+        console.log('getNft ======', getNft);
         let nftDetail = await helpers.nft.getNftDetailPipeline(
             payload.nftId,
             getNft[0]?.blockchainType
