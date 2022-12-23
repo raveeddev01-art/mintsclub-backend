@@ -13,70 +13,70 @@ const getNftDetailPipeline = async (nftId, blockChainType) => {
             {
                 $match: { _id: nftId },
             },
-            {
-                $lookup: {
-                    from: 'auctions',
-                    foreignField: 'nftId',
-                    localField: '_id',
-                    as: 'auction',
-                    pipeline: [
-                        // {
-                        //     $match: auctionEndFilter,
-                        // },
-                        {
-                            $sort: {
-                                createdAt: -1,
-                            },
-                        },
-                    ],
-                },
-            },
-            {
-                $unwind: {
-                    path: '$auction',
-                    preserveNullAndEmptyArrays: true,
-                },
-            },
+            // {
+            //     $lookup: {
+            //         from: 'auctions',
+            //         foreignField: 'nftId',
+            //         localField: '_id',
+            //         as: 'auction',
+            //         pipeline: [
+            //             // {
+            //             //     $match: auctionEndFilter,
+            //             // },
+            //             {
+            //                 $sort: {
+            //                     createdAt: -1,
+            //                 },
+            //             },
+            //         ],
+            //     },
+            // },
+            // {
+            //     $unwind: {
+            //         path: '$auction',
+            //         preserveNullAndEmptyArrays: true,
+            //     },
+            // },
 
-            {
-                $lookup: {
-                    from: 'users',
-                    foreignField: '_id',
-                    localField: 'userId',
-                    as: 'user',
-                },
-            },
-            {
-                $unwind: {
-                    path: '$user',
-                },
-            },
-            {
-                $lookup: {
-                    from: 'users',
-                    foreignField: '_id',
-                    localField: 'creatorId',
-                    as: 'creator',
-                },
-            },
-            {
-                $unwind: {
-                    path: '$creator',
-                },
-            },
-            {
-                $lookup: {
-                    from: 'collections',
-                    foreignField: '_id',
-                    localField: 'collectionId',
-                    as: 'collection',
-                },
-            },
-            {
-                $unwind: {
-                    path: '$collection',
-                },
-            },
+            // {
+            //     $lookup: {
+            //         from: 'users',
+            //         foreignField: '_id',
+            //         localField: 'userId',
+            //         as: 'user',
+            //     },
+            // },
+            // {
+            //     $unwind: {
+            //         path: '$user',
+            //     },
+            // },
+            // {
+            //     $lookup: {
+            //         from: 'users',
+            //         foreignField: '_id',
+            //         localField: 'creatorId',
+            //         as: 'creator',
+            //     },
+            // },
+            // {
+            //     $unwind: {
+            //         path: '$creator',
+            //     },
+            // },
+            // {
+            //     $lookup: {
+            //         from: 'collections',
+            //         foreignField: '_id',
+            //         localField: 'collectionId',
+            //         as: 'collection',
+            //     },
+            // },
+            // {
+            //     $unwind: {
+            //         path: '$collection',
+            //     },
+            // },
         ]
 
         let nftDetail = await NFT.aggregate(pipeline)
