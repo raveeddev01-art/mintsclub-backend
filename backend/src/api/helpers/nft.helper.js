@@ -5,9 +5,9 @@ const getNftDetailPipeline = async (nftId, blockChainType) => {
     try {
         let auctionEndFilter = {}
         if (blockChainType !== 'solana' && blockChainType !== 'algorand') {
-            // auctionEndFilter = {
-            //     $expr: { $ne: ['$auctionEnded', true] },
-            // }
+            auctionEndFilter = {
+                $expr: { $ne: ['$auctionEnded', true] },
+            }
         }
         const pipeline = [
             {
@@ -20,9 +20,9 @@ const getNftDetailPipeline = async (nftId, blockChainType) => {
                     localField: '_id',
                     as: 'auction',
                     pipeline: [
-                        // {
-                        //     $match: auctionEndFilter,
-                        // },
+                        {
+                            $match: auctionEndFilter,
+                        },
                         {
                             $sort: {
                                 createdAt: -1,
