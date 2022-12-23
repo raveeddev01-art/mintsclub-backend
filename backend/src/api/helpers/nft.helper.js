@@ -13,24 +13,24 @@ const getNftDetailPipeline = async (nftId, blockChainType) => {
             {
                 $match: { _id: nftId },
             },
-            // {
-            //     $lookup: {
-            //         from: 'auctions',
-            //         foreignField: 'nftId',
-            //         localField: '_id',
-            //         as: 'auction',
-            //         pipeline: [
-            //             // {
-            //             //     $match: auctionEndFilter,
-            //             // },
-            //             {
-            //                 $sort: {
-            //                     createdAt: -1,
-            //                 },
-            //             },
-            //         ],
-            //     },
-            // },
+            {
+                $lookup: {
+                    from: 'auctions',
+                    foreignField: 'nftId',
+                    localField: '_id',
+                    as: 'auction',
+                    pipeline: [
+                        // {
+                        //     $match: auctionEndFilter,
+                        // },
+                        {
+                            $sort: {
+                                createdAt: -1,
+                            },
+                        },
+                    ],
+                },
+            },
             // {
             //     $unwind: {
             //         path: '$auction',
@@ -38,40 +38,40 @@ const getNftDetailPipeline = async (nftId, blockChainType) => {
             //     },
             // },
 
-            // {
-            //     $lookup: {
-            //         from: 'users',
-            //         foreignField: '_id',
-            //         localField: 'userId',
-            //         as: 'user',
-            //     },
-            // },
+            {
+                $lookup: {
+                    from: 'users',
+                    foreignField: '_id',
+                    localField: 'userId',
+                    as: 'user',
+                },
+            },
             // {
             //     $unwind: {
             //         path: '$user',
             //     },
             // },
-            // {
-            //     $lookup: {
-            //         from: 'users',
-            //         foreignField: '_id',
-            //         localField: 'creatorId',
-            //         as: 'creator',
-            //     },
-            // },
+            {
+                $lookup: {
+                    from: 'users',
+                    foreignField: '_id',
+                    localField: 'creatorId',
+                    as: 'creator',
+                },
+            },
             // {
             //     $unwind: {
             //         path: '$creator',
             //     },
             // },
-            // {
-            //     $lookup: {
-            //         from: 'collections',
-            //         foreignField: '_id',
-            //         localField: 'collectionId',
-            //         as: 'collection',
-            //     },
-            // },
+            {
+                $lookup: {
+                    from: 'collections',
+                    foreignField: '_id',
+                    localField: 'collectionId',
+                    as: 'collection',
+                },
+            },
             // {
             //     $unwind: {
             //         path: '$collection',
