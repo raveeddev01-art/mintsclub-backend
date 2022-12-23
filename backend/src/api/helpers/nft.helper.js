@@ -31,12 +31,12 @@ const getNftDetailPipeline = async (nftId, blockChainType) => {
                     ],
                 },
             },
-            {
-                $unwind: {
-                    path: '$auction',
-                    preserveNullAndEmptyArrays: true,
-                },
-            },
+            // {
+            //     $unwind: {
+            //         path: '$auction',
+            //         preserveNullAndEmptyArrays: true,
+            //     },
+            // },
 
             {
                 $lookup: {
