@@ -101,10 +101,12 @@ exports.get = async (req, res, next) => {
             payload.nftId,
             getNft[0]?.blockchainType
         )
-
+        console.log('nft details ======', nftDetail)
         nftDetail = nftDetail[0]
 
         if (!nftDetail) {
+            console.log('nft detail success ====== false');
+
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.FALSE,
                 message: SUCCESS_MESSAGE.NO_DATA_FOUND,
