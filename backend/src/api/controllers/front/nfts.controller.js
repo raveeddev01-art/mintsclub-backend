@@ -147,6 +147,7 @@ exports.get = async (req, res, next) => {
             data: returnData,
         })
     } catch (error) {
+        console.log('nft detail fetch error =========', error);
         return next(error)
     }
 }
