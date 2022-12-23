@@ -75,7 +75,9 @@ const validateNFTSchema = (req, res, next) => {
         ownerId: Joi.string().alphanum().min(12).max(24).required(),
         // currentPrice: Joi.number().min(0).max(1000000).required(),
         userId: Joi.string().alphanum().min(12).max(24).required(),
-        categoryId: Joi.string().alphanum().min(12).max(24).allow('').optional(),
+        // categoryId: Joi.string().alphanum().min(12).max(24).allow('').optional(),
+        categoryId: Joi.optional(),
+
         collectionId: Joi.string().alphanum().min(12).max(24).optional(),
 
         ownerAddress: Joi.alternatives().conditional('blockchainType', [
