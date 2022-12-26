@@ -6,6 +6,7 @@ const mongoose = require('mongoose')
  */
 const BatchUploadSchema = new mongoose.Schema(
     {
+        location: { type: String },
         userId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
@@ -20,6 +21,7 @@ const BatchUploadSchema = new mongoose.Schema(
         key: { type: String },
         status: { type: String },
         currentFile: { type: Number },
+        message: { type: String },
     },
     { timestamps: true }
 )

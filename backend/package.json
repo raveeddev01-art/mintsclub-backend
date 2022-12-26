@@ -38,6 +38,7 @@
         "@joi/date": "^2.1.0",
         "@mailchimp/mailchimp_marketing": "^3.0.72",
         "@openzeppelin/contracts": "^4.4.0",
+        "adm-zip": "^0.5.10",
         "algosdk": "^1.22.0",
         "atob": "^2.1.2",
         "aws-sdk": "^2.1211.0",
