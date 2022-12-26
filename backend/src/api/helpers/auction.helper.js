@@ -60,8 +60,22 @@ const createNewNFTtoBuy = async (request, buyNftDetail, auctionDetail) => {
             blockchainType: buyNftDetail.blockchainType,
             lazyMinted: false,
             appId: buyNftDetail.appId,
+            parentNftId: buyNftDetail?._id,
         }
+
         const nft = await NFT.create(newPayload)
+
+        if (nft) {
+            const activityPayload = {
+                nftId: nft?._id,
+                ownerId: nft?.ownerId,
+                fromAddress: buyNftDetail?.ownerAddress,
+                activityType: 'Transfer',
+                toAddress: nft?.ownerAddress,
+                price: buyNftDetail?.currentPrice,
+            }
+            await ActivityModal.create(activityPayload)
+        }
         const nftTokenDetail = await NftTokens.findOne({
             nftId: request.nftId,
         })
@@ -207,9 +221,22 @@ const createNewNFTforEndAuction = async (bidData, auctionEndNft) => {
             tokenId: auctionEndNft?.nftId?.tokenId,
             isApproved: auctionEndNft?.nftId?.isApproved,
             blockchainType: auctionEndNft?.nftId?.blockchainType,
+            parentNftId: auctionEndNft?.nftId?._id,
         }
 
         const NFTCreated = await NFT.create(payload)
+
+        if (NFTCreated?._id) {
+            const activityPayload = {
+                nftId: NFTCreated?._id,
+                ownerId: NFTCreated?.ownerId,
+                fromAddress: auctionEndNft?.nftId?.ownerAddress,
+                activityType: 'Transfer',
+                toAddress: NFTCreated?.ownerAddress,
+                price: bidData?.bidAmount,
+            }
+            await ActivityModal.create(activityPayload)
+        }
 
         const remainingCopies =
             auctionEndNft?.nftId?.remainingCopies -

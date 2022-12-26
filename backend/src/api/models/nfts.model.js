@@ -48,6 +48,7 @@ const NFTSchema = new mongoose.Schema(
         mint: { type: String },
         contractAddress: { type: String },
         appId: { type: Number, default: 0 },
+        parentNftId: { type: mongoose.Schema.Types.ObjectId, ref: 'NFT' },
     },
     { timestamps: true, collection: 'nfts' }
 )
@@ -69,14 +70,15 @@ NFTSchema.post('save', async function (next) {
 
         await NftTokens.create(nftTokenPayload)
 
-        const activityPayload = {
-            ownerId: this.ownerId,
-            toAddress: this.ownerAddress,
-            nftId: this._id,
-            activityType: 'Mint',
+        if (!this?.parentNftId) {
+            const activityPayload = {
+                ownerId: this.ownerId,
+                toAddress: this.ownerAddress,
+                nftId: this._id,
+                activityType: 'Mint',
+            }
+            await ActivityModal.create(activityPayload)
         }
-
-        await ActivityModal.create(activityPayload)
     } catch (error) {
         console.log('error', error)
     }
