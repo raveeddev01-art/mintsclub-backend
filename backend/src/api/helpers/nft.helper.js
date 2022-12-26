@@ -16,9 +16,9 @@ const getNftDetailPipeline = async (nftId, blockChainType) => {
             {
                 $lookup: {
                     from: 'auctions',
-                    foreignField: 'nftId',
-                    localField: '_id',
-                    as: 'auction',
+                    foreignField: '_id',
+                    localField: 'activeAuction',
+                    as: 'activeAuction',
                     pipeline: [
                         {
                             $match: auctionEndFilter,
@@ -31,12 +31,12 @@ const getNftDetailPipeline = async (nftId, blockChainType) => {
                     ],
                 },
             },
-            // {
-            //     $unwind: {
-            //         path: '$auction',
-            //         preserveNullAndEmptyArrays: true,
-            //     },
-            // },
+            {
+                $unwind: {
+                    path: '$activeAuction',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
 
             {
                 $lookup: {
