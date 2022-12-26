@@ -1,6 +1,7 @@
 const BatchUpload = require('../models/batchUpload.model')
 const { pinataJWT, pinataSecret, pinataKey } = require('../../config/vars')
 const BatchUploadFilesHistory = require('../models/fileHistory.model')
+var fs = require("fs")
 
 const NFT = require('../models/nfts.model')
 const FormData = require('form-data')
