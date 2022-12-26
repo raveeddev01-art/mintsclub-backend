@@ -72,12 +72,12 @@ const getNftDetailPipeline = async (nftId, blockChainType) => {
                     as: 'collection',
                 },
             },
-            {
-                $unwind: {
-                    path: '$collection',
-                    preserveNullAndEmptyArrays: true,
-                },
-            },
+            // {
+            //     $unwind: {
+            //         path: '$collection',
+            //         preserveNullAndEmptyArrays: true,
+            //     },
+            // },
         ]
 
         let nftDetail = await NFT.aggregate(pipeline)
