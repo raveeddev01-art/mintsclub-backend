@@ -85,7 +85,7 @@ exports.create = async (req, res, next) => {
         }
 
         const existingCollection = await Collection.findOne({
-            name:payload.name,
+            name: payload.name,
             // blockchainType:payload.blockchainType,
         })
 
@@ -408,16 +408,13 @@ exports.popular = async (req, res, next) => {
         if (myFilter && myFilter === 'all') {
             filter = {}
         }
-        
-        let total = 0
 
-        page = page !== undefined && page !== '' ? parseInt(page) : 1
-        limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
+        page = parseInt(page || '1')
+        limit = parseInt(limit || '10')
 
-        total = Collection.countDocuments({})
         const data = await helpers.collection.collectionListPopular(
             filter,
-            total,
+
             limit,
             page
         )

@@ -140,10 +140,8 @@ exports.topSellers = async (req, res, next) => {
     try {
         let { page, limit } = req.query
 
-        page = page !== undefined && page !== '' ? parseInt(page) : 1
-        limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
-
-        const total = UserModal.countDocuments({})
+        page = parseInt(page || '1')
+        limit = parseInt(limit || '10')
 
         const pipeline = [
             {
@@ -152,15 +150,17 @@ exports.topSellers = async (req, res, next) => {
             {
                 $sort: { totalETH: -1 },
             },
+            {
+                $facet: {
+                    metadata: [
+                        { $count: 'total' },
+                        { $addFields: { page } },
+                        { $addFields: { limit } },
+                    ],
+                    data: [{ $skip: limit * (page - 1) }, { $limit: limit }],
+                },
+            },
         ]
-        const newTotal = UserModal.aggregate(pipeline)
-        const topSellers = await Promise.all([total, newTotal])
-        if (page > Math.ceil(topSellers[0] / limit) && topSellers[0] > 0)
-            page = Math.ceil(topSellers[0] / limit)
-        const totalRecords = topSellers[1]?.length
-
-        pipeline.push({ $skip: limit * (page - 1) })
-        pipeline.push({ $limit: limit })
 
         const users = await UserModal.aggregate(pipeline)
 
@@ -168,15 +168,9 @@ exports.topSellers = async (req, res, next) => {
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.TOP_SELLERS_FETCHED,
             data: {
-                topSellers: users,
+                topSellers: users[0].data,
                 pagination: {
-                    page,
-                    limit,
-                    totalRecords,
-                    pages:
-                        Math.ceil(totalRecords / limit) <= 0
-                            ? 1
-                            : Math.ceil(totalRecords / limit),
+                    ...users[0],
                 },
             },
         })
