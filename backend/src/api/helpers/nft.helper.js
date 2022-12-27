@@ -9,6 +9,7 @@ const getNftDetailPipeline = async (nftId, blockChainType) => {
                 $expr: { $ne: ['$auctionEnded', true] },
             }
         }
+
         const pipeline = [
             {
                 $match: { _id: nftId },
@@ -95,11 +96,10 @@ const getNftListPipeline = async (
     filter,
     limit,
     page,
-    total,
     userDefaultImage
 ) => {
     try {
-        const nfts = NFT.aggregate([
+        const nfts = await NFT.aggregate([
             {
                 $sort: sortFilters,
             },
@@ -140,150 +140,26 @@ const getNftListPipeline = async (
                 },
             },
             { $match: filter },
-            { $skip: limit * (page - 1) },
-            { $limit: limit },
-            {
-                $project: {
-                    _id: 1,
-                    name: 1,
-                    image: 1,
-                    description: 1,
-                    fileType: 1,
-                    copies: 1,
-                    currentPrice: 1,
-                    collectionId: 1,
-                    blockchainType: 1,
-                    ownerId: 1,
-                    creatorId: 1,
-                    userId: 1,
-                    remainingCopies: 1,
-                    ownerAddress: 1,
-                    compressedFile: 1,
-                    owner: {
-                        _id: '$owner._id',
-                        username: '$owner.username',
-                        profilePhoto: {
-                            $ifNull: ['$owner.profileImage', userDefaultImage],
-                        },
-                    },
-                    auction: {
-                        _id: '$auction._id',
-                        highestBid: '$auction.highestBid',
-                        sellingMethod: '$auction.sellingMethod',
-                        copiesForAuction: '$auction.copiesForAuction',
-                        sellId: '$auction.sellId',
-                        auctionStartDate: '$auction.auctionStartDate',
-                        auctionEndDate: '$auction.auctionEndDate',
-                        auctionEnded: '$auction.auctionEnded',
-                    },
-                },
-            },
-        ])
-        const nfts1 = NFT.aggregate([
-            {
-                $sort: sortFilters,
-            },
-            {
-                $lookup: {
-                    from: 'auctions',
-                    foreignField: 'nftId',
-                    localField: '_id',
-                    as: 'auction',
-                    pipeline: [
-                        {
-                            $match: {
-                                // $expr: { $ne: ['$status', 'cancelled'] },
-                                status: { $nin: ['cancelled', 'end'] },
-                            },
-                        },
-                    ],
-                },
-            },
-            {
-                $unwind: {
-                    path: '$auction',
-                    preserveNullAndEmptyArrays: true,
-                },
-            },
-            {
-                $lookup: {
-                    from: 'users',
-                    foreignField: '_id',
-                    localField: 'ownerId',
-                    as: 'owner',
-                },
-            },
-            {
-                $unwind: {
-                    path: '$owner',
-                    preserveNullAndEmptyArrays: true,
-                },
-            },
-            { $match: filter },
-            {
-                $project: {
-                    _id: 1,
-                    name: 1,
-                    image: 1,
-                    description: 1,
-                    fileType: 1,
-                    copies: 1,
-                    currentPrice: 1,
-                    collectionId: 1,
-                    blockchainType: 1,
-                    ownerId: 1,
-                    creatorId: 1,
-                    userId: 1,
-                    remainingCopies: 1,
-                    ownerAddress: 1,
-                    compressedFile: 1,
-                    owner: {
-                        _id: '$owner._id',
-                        username: '$owner.username',
-                        profilePhoto: {
-                            $ifNull: ['$owner.profileImage', userDefaultImage],
-                        },
-                    },
-                    auction: {
-                        _id: '$auction._id',
-                        highestBid: '$auction.highestBid',
-                        sellingMethod: '$auction.sellingMethod',
-                        copiesForAuction: '$auction.copiesForAuction',
-                        sellId: '$auction.sellId',
-                        auctionStartDate: '$auction.auctionStartDate',
-                        auctionEndDate: '$auction.auctionEndDate',
-                        auctionEnded: '$auction.auctionEnded',
-                    },
-                },
-            },
-        ])
-        const nftLiting = await Promise.all([total, nfts, nfts1])
-        const allNfts = nftLiting[1]
-        for (const nft of allNfts) {
-            const findCount = await Likes.findOne().where('nftId', nft._id)
-            nft.likeCount = 0
-            if (findCount) {
-                nft.likeCount = findCount.count
-            }
-        }
 
-        const data = {
-            nfts: nftLiting[1],
+            {
+                $facet: {
+                    metadata: [
+                        { $count: 'total' },
+                        { $addFields: { page } },
+                        { $addFields: { limit } },
+                    ],
+                    data: [{ $skip: limit * (page - 1) }, { $limit: limit }],
+                },
+            },
+        ])
+        return {
+            nfts: nfts[0]?.data,
             pagination: {
-                page,
-                limit,
-                total: nftLiting[2].length,
-                pages:
-                    Math.ceil(nftLiting[0] / limit) <= 0
-                        ? 1
-                        : Math.ceil(nftLiting[0] / limit),
+                ...nfts[0]?.metadata[0],
             },
         }
-
-        return data
     } catch (error) {
         console.log('error', error)
-        // return error
     }
 }
 

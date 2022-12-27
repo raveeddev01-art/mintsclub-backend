@@ -24,11 +24,10 @@ exports.create = async (req, res, next) => {
         let payload = {
             name: req.body.name,
             // blockchainType: req.body.blockchainType,
-            
         }
         const existingNFT = await NFT.findOne({
-            name:payload.name,
-            blockchainType:payload.blockchainType,
+            name: payload.name,
+            blockchainType: payload.blockchainType,
         })
 
         if (existingNFT) {
@@ -63,7 +62,6 @@ exports.storeDataInDb = async (req, res, next) => {
                 message: ERROR_MESSAGE.PROVIDE_DATA,
             })
         }
-        
 
         const createNFTPayload = req.body.data
         createNFTPayload.image = req.body.image
@@ -96,19 +94,17 @@ exports.get = async (req, res, next) => {
             nftId,
         }
         payload.nftId = ObjectId(payload.nftId)
-        console.log('payload ======', payload);
+
         const getNft = await NFT.find({ _id: payload.nftId })
-        console.log('getNft ======', getNft);
+
         let nftDetail = await helpers.nft.getNftDetailPipeline(
             payload.nftId,
             getNft[0]?.blockchainType
         )
-        console.log('nft details ======', nftDetail)
+
         nftDetail = nftDetail[0]
 
         if (!nftDetail) {
-            console.log('nft detail success ====== false');
-
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
                 success: SUCCESS_STATUS.FALSE,
                 message: SUCCESS_MESSAGE.NO_DATA_FOUND,
@@ -151,7 +147,7 @@ exports.get = async (req, res, next) => {
             data: returnData,
         })
     } catch (error) {
-        console.log('nft detail fetch error =========', error);
+        console.log('nft detail fetch error =========', error)
         return next(error)
     }
 }
@@ -254,8 +250,6 @@ exports.list = async (req, res, next) => {
         page = page !== undefined && page !== '' ? parseInt(page) : 1
         limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
 
-        const total = await NFT.countDocuments(filter)
-
         let sortFilters = {
             ...(newest && { createdAt: -1 }),
             ...(oldest && { createdAt: 1 }),
@@ -268,7 +262,7 @@ exports.list = async (req, res, next) => {
             filter,
             limit,
             page,
-            total,
+
             userDefaultImage
         )
         return res.status(HTTP_STATUS_CODE.OK).send({
