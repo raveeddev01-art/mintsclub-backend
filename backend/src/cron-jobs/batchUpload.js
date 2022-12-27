@@ -246,6 +246,7 @@ module.exports.batchCrone = async () => {
                                             name: jsonMetadata?.name,
                                             currentPrice: 0,
                                             fileType: 'image',
+
                                             ...(batchToBeProcessed?.blockchainType ===
                                             'algorand'
                                                 ? {
@@ -253,6 +254,7 @@ module.exports.batchCrone = async () => {
                                                   }
                                                 : { lazyMinted: true }),
 
+                                            lazyMinted: true,
                                             image: imageFileUrl,
                                             ownerAddress:
                                                 batchToBeProcessed?.ownerAddress,
