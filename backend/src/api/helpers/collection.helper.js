@@ -246,7 +246,7 @@ const collectionListByUserId = async (total, userId, limit, page) => {
     }
 }
 
-const collectionListPopular = async (filter, total, limit, page) => {
+const collectionListPopular = async (filter, limit, page) => {
     try {
         const pipeline = [
             {
@@ -333,37 +333,27 @@ const collectionListPopular = async (filter, total, limit, page) => {
                     blockchainType: { $first: '$blockchainType' },
                 },
             },
-            { $sort: { _id: 1 } },
+            {
+                $facet: {
+                    metadata: [
+                        { $count: 'total' },
+                        { $addFields: { page } },
+                        { $addFields: { limit } },
+                    ],
+                    data: [{ $skip: limit * (page - 1) }, { $limit: limit }],
+                },
+            },
+            { $sort: { likesCount: -1 } },
         ]
 
-        const newTotal = Collection.aggregate(pipeline)
-
-        const popularCollections = await Promise.all([total, newTotal])
-        if (
-            page > Math.ceil(popularCollections[0] / limit) &&
-            popularCollections[0] > 0
-        )
-            page = Math.ceil(popularCollections[0] / limit)
-
-        const totalRecords = popularCollections[1]?.length
-
-        pipeline.push({ $skip: limit * (page - 1) })
-        pipeline.push({ $limit: limit })
-
         const collectionsList = await Collection.aggregate(pipeline)
-        const data = {
-            collectionsList,
+
+        return {
+            collectionsList: collectionsList[0]?.data,
             pagination: {
-                page,
-                limit,
-                totalRecords,
-                pages:
-                    Math.ceil(totalRecords / limit) <= 0
-                        ? 1
-                        : Math.ceil(totalRecords / limit),
+                ...collectionsList[0].metadata[0],
             },
         }
-        return data
     } catch (error) {
         console.log('error', error)
         // return error

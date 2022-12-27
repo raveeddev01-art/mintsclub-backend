@@ -239,12 +239,20 @@ module.exports.batchCrone = async () => {
                                             levels: jsonMetadata?.levels,
                                             stats: jsonMetadata?.stats,
                                             copies: 1,
+                                            creatorId:
+                                                batchToBeProcessed?.userId,
                                             remainingCopies: 1,
                                             activeAuction: null,
                                             name: jsonMetadata?.name,
                                             currentPrice: 0,
                                             fileType: 'image',
-                                            lazyMinted: true,
+                                            ...(batchToBeProcessed?.blockchainType ===
+                                            'algorand'
+                                                ? {
+                                                      algoLazyMinted: true,
+                                                  }
+                                                : { lazyMinted: true }),
+
                                             image: imageFileUrl,
                                             ownerAddress:
                                                 batchToBeProcessed?.ownerAddress,
@@ -253,6 +261,8 @@ module.exports.batchCrone = async () => {
                                             categoryId:
                                                 batchToBeProcessed?.categoryId,
                                             ownerId: batchToBeProcessed?.userId,
+                                            creatorId:
+                                                batchToBeProcessed?.userId,
                                             userId: batchToBeProcessed?.userId,
                                             blockchainType:
                                                 batchToBeProcessed?.blockchainType,
