@@ -1,23 +1,22 @@
-const Category = require('../../models/categories.model');
-
-// API to get active categories list
+const Category = require('../../models/categories.model')
+const { SUCCESS_MESSAGE, SUCCESS_STATUS } = require('../../../config/constants')
 exports.list = async (req, res, next) => {
-  try {
-    const categories = await Category.find(
-      { status: true }
-      // { name: 1, image: 1 }
-    ).sort({ name: 1 });
+    try {
+        let categories = await Category.find({
+            status: true,
+            name: { $ne: 'Default Collection' },
+        }).sort({
+            name: 1,
+        })
 
-    let total = 0;
-
-    total = categories.length;
-    return res.status(200).send({
-      status: true,
-      message: 'Categories fetched successfully',
-      categories,
-      count: total,
-    });
-  } catch (error) {
-    return next(error);
-  }
-};
+        const total = categories ? categories?.length : 0
+        return res.status(200).send({
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.CATEGORIES_FETCHED,
+            categories,
+            count: total,
+        })
+    } catch (error) {
+        return next(error)
+    }
+}

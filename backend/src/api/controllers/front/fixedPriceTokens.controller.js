@@ -1,64 +1,64 @@
 const FixedPriceTokens = require('../../models/fixedPriceTokens.model')
-
-
-exports.addNftToken=async (req,res)=>{
-    console.log("insdie fixed ")
+const {
+    SUCCESS_MESSAGE,
+    ERROR_MESSAGE,
+    SUCCESS_STATUS,
+    HTTP_STATUS_CODE,
+} = require('../../../config/constants')
+exports.addNftToken = async (req, res) => {
     try {
-        let result = await FixedPriceTokens.create(req.body);
+        const payload = req.body
+
+        const result = await FixedPriceTokens.create(payload)
 
         res.send({
-            status:"success",
-            data:result
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.ADD_NFT_TOKEN_FIXED_PRICE,
+            data: result,
         })
-    }
-    catch(err){
-        console.log(err,"error")
-        res.status(400).send({
-            status:"failure",
-            error:err
+    } catch (err) {
+        res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: ERROR_MESSAGE.ADD_NFT_TOKEN_FIXED_PRICE_FAILED,
+            error: err,
         })
     }
 }
 
+exports.getNftTokens = async (req, res) => {
+    try {
+        const result = await FixedPriceTokens.find()
 
+        res.status(HTTP_STATUS_CODE.OK).send({
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.NFT_TOKEN_FIXED_PRICE_LIST,
+            data: result,
+        })
+    } catch (err) {
+        res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: ERROR_MESSAGE.NFT_TOKEN_FIXED_PRICE_LIST_FAILED,
+            error: err,
+        })
+    }
+}
 
-exports.getNftTokens=async (req,res)=>{
+exports.getNftToken = async (req, res) => {
+    const id = req.params.id
 
     try {
-        let result = await FixedPriceTokens.find()
+        const result = await FixedPriceTokens.findOne({ nftId: id })
 
-        res.status(200).send({
-            status:"success",
-            data:result
+        res.status(HTTP_STATUS_CODE.OK).send({
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.NFT_TOKEN_FIXED_PRICE_FOR_NFT,
+            data: result,
         })
-    }
-    catch(err){
-        res.status(400).send({
-            status:"failure",
-            error:err
-        })
-    }
-}
-
-exports.getNftToken=async (req,res)=>{
-
-
-       const id=req.params.id
-
-    try {
-        let result = await FixedPriceTokens.findOne({nftId:id})
-       
-        res.status(200).send({
-            status:"success",
-            data:result
-        })
-    }
-    catch(err){
-        res.status(400).send({
-            status:"failure",
-            error:err
+    } catch (err) {
+        res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: ERROR_MESSAGE.NFT_TOKEN_FIXED_PRICE_FOR_NFT_FAILED,
+            error: err,
         })
     }
 }
-
-

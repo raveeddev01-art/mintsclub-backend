@@ -1,7 +1,37 @@
-const express = require('express');
-const controller = require('../../../controllers/front/auctions.controller');
-const router = express.Router();
+const express = require('express')
+const controller = require('../../../controllers/front/auctions.controller')
+const router = express.Router()
+const { cpUpload } = require('../../../utils/upload')
+const middleware = require('../../../middlewares/front/auth')
+const validatorMiddleware = require('../../../middlewares/front/auctionValidation')
 
-router.route('/live').get(controller.live);
+router.route('/live').get(controller.live)
+router.route('/create').post(
+    // cpUpload,
+    validatorMiddleware.auctionValidation,
+    controller.create
+)
+router
+    .route('/buyNft')
+    .post(
+        validatorMiddleware.validateBuyNowSchema,
+        middleware.userValidation,
+        controller.buyNow
+    )
+router
+    .route('/endAuction')
+    .post(
+        validatorMiddleware.validateAuctionEndSchema,
+        middleware.userValidation,
+        controller.endAuction
+    )
 
-module.exports = router;
+router
+    .route('/cancelList')
+    .post(
+        validatorMiddleware.validateAuctionEndSchema,
+        middleware.userValidation,
+        controller.cancelList
+    )
+
+module.exports = router

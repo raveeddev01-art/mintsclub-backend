@@ -1,70 +1,63 @@
-const Approvals = require("../../models/approvals.model");
+const Approvals = require('../../models/approvals.model')
 
 exports.getApprovals = async (req, res, next) => {
-  try {
-      let filter={}
-      let pipeline=[
-          {
-              $match:filter,
-          },
-          {
-            $lookup: {
-              from: 'users',
-              foreignField: '_id',
-              localField: 'userId',
-              as: 'user',
-            },
-          },
+    try {
+        let filter = {}
+        let pipeline = [
             {
-              $unwind: {
-                path: '$user',
-                preserveNullAndEmptyArrays: true,
-              },
+                $match: filter,
             },
             {
-              $group: {         
-                _id: '$_id',  
-                
-                username: { $first: '$user.username' },
-                address: { $first: '$user.address' },
-                email: { $first: '$user.email' },
-                createdAt: { $first: '$user.createdAt' },
-                profileImage: { $first: '$user.profileImage' },
-              },
+                $lookup: {
+                    from: 'users',
+                    foreignField: '_id',
+                    localField: 'userId',
+                    as: 'user',
+                },
             },
-          
-      ]
-    let approvals = await Approvals.aggregate(pipeline);
+            {
+                $unwind: {
+                    path: '$user',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $group: {
+                    _id: '$_id',
 
-    res
-      .status(200)
-      .send({
-        success: true,
-        data: approvals,
-        message: "Approvals Retrieved Successfully!",
-      });
-  } catch (err) {
-    return next(err);
-  }
-};
+                    username: { $first: '$user.username' },
+                    address: { $first: '$user.address' },
+                    email: { $first: '$user.email' },
+                    createdAt: { $first: '$user.createdAt' },
+                    profileImage: { $first: '$user.profileImage' },
+                },
+            },
+        ]
+        let approvals = await Approvals.aggregate(pipeline)
 
-exports.updateApproval=async (req,res,next)=>{
-  try{
+        res.status(200).send({
+            success: true,
+            data: approvals,
+            message: 'Approvals Retrieved Successfully!',
+        })
+    } catch (err) {
+        return next(err)
+    }
+}
 
-    let payload=req.body;
-    const Approvals = await Approvals.findByIdAndUpdate(
-      { _id: payload.id },
-      { $set: payload }
-      // { new: true }
-    );
+exports.updateApproval = async (req, res, next) => {
+    try {
+        let payload = req.body
+        const Approvals = await Approvals.findByIdAndUpdate(
+            { _id: payload.id },
+            { $set: payload }
+        )
 
-    res.status(200).send({
-      success:true,
-      message:"Account Approved Successfully!",
-
-    })
-
-  }catch(err){
-    return next(err)
-  }
+        res.status(200).send({
+            success: true,
+            message: 'Account Approved Successfully!',
+        })
+    } catch (err) {
+        return next(err)
+    }
 }

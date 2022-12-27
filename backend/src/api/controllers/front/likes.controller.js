@@ -1,128 +1,92 @@
-const LikesModal = require('../../models/likes.model');
-var ObjectId = require('mongodb').ObjectId;
+const LikesModal = require('../../models/likes.model')
+let ObjectId = require('mongodb').ObjectId
+const {
+    ERROR_MESSAGE,
+    SUCCESS_MESSAGE,
+    SUCCESS_STATUS,
+    HTTP_STATUS_CODE,
+} = require('../../../config/constants')
 
-exports.likeDislike = async (req, res, next) => {
-  let nftId = req.body.nftId;
-  let userId = req.body.userId;
-  let count = req.body.count;
-  console.log(req.body, 'body');
-
-  let foundCollection = await LikesModal.find({ nftId });
-
-  if (foundCollection[0]) {
-    // find if user already exist
-    await LikesModal.findOne(
-      {
-        likes: { $elemMatch: { userId: req.body.userId } },
-        nftId: req.body.nftId,
-      },
-      async function (err, user) {
-        console.log();
-        //error
-
-        if (err) {
-          console.log('error', err);
-        }
-
-        //if user exist then delete that record
-
-        if (user) {
-          console.log('found user');
-          await LikesModal.updateOne(
-            { nftId: new ObjectId(nftId) },
-            { $inc: { count: -1 } }
-          ).exec();
-
-          let result = await LikesModal.updateOne(
-            { nftId: new ObjectId(nftId) },
-            { $pull: { likes: { userId: new ObjectId(userId) } } },
-            { multi: true }
-          );
-          res.status(200).send(result);
-        }
-        //if user not found then insert a user like
-        else {
-          console.log('user not found inserting one');
-
-          let data = {
-            userId,
-          };
-          try {
-            await LikesModal.updateOne(
-              { nftId: new ObjectId(nftId) },
-              { $inc: { count: 1 } },
-
-              { new: true, upsert: true }
-            ).exec();
-
-            let insertedLike = await LikesModal.updateOne(
-              { nftId: new ObjectId(nftId) },
-              { $push: { likes: data } },
-              { new: true, upsert: true }
-            ).exec();
-            res.status(200).send({
-              success: true,
-              message: 'record updated successfully',
-              result: insertedLike,
-            });
-          } catch (error) {
-            return next(error);
-          }
-        }
-      }
-    );
-  }
-
-  //if collecton not found
-  else {
-    console.log('colleciton not found inserting one');
-    let data = {
-      nftId,
-      count,
-      likes: [
-        {
-          userId,
-        },
-      ],
-    };
-
+exports.likeDislike = async (req, res) => {
     try {
-      const result = await LikesModal.create(data);
-      res.status(201).json({ success: true, data: result });
-    } catch (error) {
-      res.status(200).json({ success: false, error: error });
-    }
-  }
-};
+        const Payload = {
+            nftId: req.body.nftId,
+            userId: req.body.userId,
+        }
 
-exports.get = async (req, res, next) => {
-  try {
-    const likes = await LikesModal.find();
-    res.status(201).json({ success: true, data: likes });
-  } catch (error) {
-    res.status(200).json({ success: false, error: error });
-  }
-};
+        const checkAlreadyExist = await LikesModal.find({ ...Payload })
+        if (checkAlreadyExist.length === 0) {
+            //TODO: Add like
+            const likeInserted = await LikesModal.create(Payload)
+            return res.status(HTTP_STATUS_CODE.OK).send(likeInserted)
+        }
+        //TODO: Remove like
+        const likeRemoved = await LikesModal.deleteOne(Payload)
+        return res.status(HTTP_STATUS_CODE.OK).send(likeRemoved)
+    } catch (error) {
+        return res.status(HTTP_STATUS_CODE.INTERNAL_SERVER).send({
+            success: SUCCESS_STATUS.FALSE,
+            message: error?.details[0]?.message,
+        })
+    }
+}
+
+exports.getNftLikes = async (req, res) => {
+    try {
+        const payload = {
+            nftId: req.query.nftId,
+        }
+        const likes = await LikesModal.find(payload)
+        res.status(HTTP_STATUS_CODE.OK).json({
+            success: SUCCESS_STATUS.TRUE,
+            data: likes,
+        })
+    } catch (error) {
+        return res.status(HTTP_STATUS_CODE.BAD_REQUEST).json({
+            success: SUCCESS_STATUS.FALSE,
+            error,
+        })
+    }
+}
 
 exports.userNftLikes = async (req, res, next) => {
-  try {
-    let { userId } = req.query;
-    if (!userId)
-      return res
-        .status(400)
-        .send({ success: false, message: 'Please Sign In First' });
+    try {
+        const { userId } = req.query
+        if (!userId)
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.SIGN_IN_FIRST,
+            })
 
-    const likes = await LikesModal.find({}, 'nftId').where(
-      'likes.userId',
-      userId
-    );
+            const likes = await LikesModal.find({ userId }).populate([{ path: "nftId", model: "NFT"}])
 
-    return res.status(200).send({
-      success: true,
-      message: 'User NFTs likes fetched successfully',
-      data: likes,
-    });
-  } catch (error) {
-    return next(error);
-  }
-};
+        return res.status(HTTP_STATUS_CODE.OK).send({
+            success: SUCCESS_STATUS.TRUE,
+            message: SUCCESS_MESSAGE.LIKES_NFT_FETCHED,
+            data: likes,
+        })
+    } catch (error) {
+        return res.status(HTTP_STATUS_CODE.INTERNAL_SERVER).send({
+            success: SUCCESS_STATUS.FALSE,
+            error,
+        })
+    }
+}
+exports.checkNftLikes = async (req, res) => {
+    try {
+        const Payload = {
+            nftId: req.query.nftId,
+            userId: req.query.userId,
+        }
+        const likedNft = await LikesModal.find(Payload)
+
+        return res
+            .status(HTTP_STATUS_CODE.OK)
+            .send({ likedByUser: likedNft.length > 0 })
+    } catch (error) {
+        return res.status(HTTP_STATUS_CODE.INTERNAL_SERVER).send({
+            success: SUCCESS_STATUS.FALSE,
+            error,
+        })
+    }
+}

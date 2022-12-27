@@ -1,66 +1,91 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
+const Collection = require('../models/collection.model')
+const NftTokens = require('../models/nftTokens.model')
+const ActivityModal = require('../models/item-activity.modal')
 
 /**
  * NFT Schema
  * @private
  */
 const NFTSchema = new mongoose.Schema(
-  {
-    name: { type: String },
-    description: { type: String },
-    creatorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    nftOwnerId: { type: String },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
-    collectionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Collection' },
-    currentPrice: { type: Number },
-    ownerAddress: { type: String },
-    txHash: { type: String },
-    tokenId: { type: Number },
-    image: { type: String },
-    fileType: { type: String },
-    royalty: { type: String },
-    properties:{type:Array},
-    levels:{type:Array},
-    stats:{type:Array},
-    //size: { type: String },
-    copies: { type: Number, default: 0 },
-    status: { type: Number, default: 1 }, // 1 = Put on Sale, 2 = Instant Sale Price, 3 = Unlock Purchased
-    sold: { type: Number, default: 0 },
-    sellingMethod: { type: Number }, // 1 = Fixed Price, 2 = Timed Auction
-    sellingConfig: { type: Object },
-    auctionStartDate: { type: Date },
-    auctionEndDate: { type: Date },
-    // auctionStartTime: { type: String },
-    // auctionEndTime: { type: String },
-    metaData: { type: String }, // ipfs link
-    highestBid: { type: Number },
-    copiesForAuction: { type: Number },
-    remainingCopies: { type: Number },
-    auctionEnded:{type:Boolean},
-    sellId:{type:Number},
-    properties: [
-      {
-        type: Object,
-      },
-    ],
-    levels: [
-      {
-        type: Object,
-      },
-    ],
-    stats: [
-      {
-        type: Object,
-      },
-    ],
-  },
-  { timestamps: true, collection: 'nfts' }
-);
+    {
+        name: { type: String, required: true },
+        description: { type: String },
+        creatorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        nftOwnerId: { type: String },
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
+        collectionId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Collection',
+        },
+        activeAuction: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Auction',
+            default: null,
+        },
+        currentPrice: { type: Number, default: 0 },
+        ownerAddress: { type: String },
+        compressedFile: { type: String },
+        txHash: { type: String },
+        tokenId: { type: Number },
+        image: { type: String },
+        fileType: { type: String },
+        properties: { type: Array },
+        levels: { type: Array },
+        stats: { type: Array },
+        copies: { type: Number, default: 0 },
+        lazyMinted: { type: Boolean },
+        algoLazyMinted: { type: Boolean },
+        lazyInfo: { type: Object },
+        metaData: { type: String }, // ipfs link
+        remainingCopies: { type: Number },
+        sellId: { type: Number },
+        blockchainType: { type: String, required: true },
+        isApproved: { type: Boolean, required: false },
+        txnHash: { type: String },
+        mint: { type: String },
+        contractAddress: { type: String },
+        appId: { type: Number, default: 0 },
+        parentNftId: { type: mongoose.Schema.Types.ObjectId, ref: 'NFT' },
+    },
+    { timestamps: true, collection: 'nfts' }
+)
+
+NFTSchema.post('save', async function (next) {
+    try {
+        const collectionRecord = await Collection.findOne({
+            _id: this.collectionId,
+        })
+
+        collectionRecord.nft.push(this?._id)
+        collectionRecord.save()
+
+        const nftTokenPayload = {
+            nftToken: this.token,
+            nftId: this._id,
+            tokenStandard: this.tokenStandard ? this.tokenStandard : 'ERC-1155',
+        }
+
+        await NftTokens.create(nftTokenPayload)
+
+        if (!this?.parentNftId) {
+            const activityPayload = {
+                ownerId: this.ownerId,
+                toAddress: this.ownerAddress,
+                nftId: this._id,
+                activityType: 'Mint',
+            }
+            await ActivityModal.create(activityPayload)
+        }
+    } catch (error) {
+        console.log('error', error)
+    }
+})
 
 /**
  * @typedef NFT
  */
 
-module.exports = mongoose.model('NFT', NFTSchema);
+module.exports = mongoose.model('NFT', NFTSchema)

@@ -1,6 +1,6 @@
 const Nfts = require('../../models/nfts.model')
 const Collection = require('../../models/collection.model')
-const { ObjectId } = require('mongodb');
+const { ObjectId } = require('mongodb')
 
 // API to get collection list
 exports.list = async (req, res, next) => {
@@ -21,47 +21,57 @@ exports.list = async (req, res, next) => {
                     from: 'users',
                     foreignField: '_id',
                     localField: 'userId',
-                    as: 'user'
-                }
+                    as: 'user',
+                },
             },
-            // {
-            //     $unwind: '$user'
-            // },
             {
                 $lookup: {
                     from: 'categories',
                     foreignField: '_id',
                     localField: 'categoryId',
-                    as: 'categories'
-                }
+                    as: 'categories',
+                },
             },
             { $sort: { createdAt: -1 } },
             { $skip: limit * (page - 1) },
             { $limit: limit },
             {
                 $project: {
-                    _id: 1, name: 1, logo: 1, featuredImg: 1, banner: 1, url: 1, description: 1,
+                    _id: 1,
+                    name: 1,
+                    logo: 1,
+                    featuredImg: 1,
+                    banner: 1,
+                    url: 1,
+                    description: 1,
                     user: {
                         _id: '$user._id',
                         username: '$user.username',
                         email: '$user.email',
-                        profilePhoto: '$user.profilePhoto',// { $ifNull: ['$user.profilePhoto', userDefaultImage] }
+                        profilePhoto: '$user.profilePhoto', // { $ifNull: ['$user.profilePhoto', userDefaultImage] }
                     },
-                    category: { $ifNull: [{ $arrayElemAt: ['$categories', 0] }, null] },
-                }
-            }
+                    category: {
+                        $ifNull: [{ $arrayElemAt: ['$categories', 0] }, null],
+                    },
+                },
+            },
         ])
-     
-    //  console.log(collections,"collections of admin==>")   
+
         return res.send({
-            success: true, message: 'Collections fetched successfully',
+            success: true,
+            message: 'Collections fetched successfully',
             data: {
                 collections,
                 pagination: {
-                    page, limit, total,
-                    pages: Math.ceil(total / limit) <= 0 ? 1 : Math.ceil(total / limit)
-                }
-            }
+                    page,
+                    limit,
+                    total,
+                    pages:
+                        Math.ceil(total / limit) <= 0
+                            ? 1
+                            : Math.ceil(total / limit),
+                },
+            },
         })
     } catch (error) {
         return next(error)
@@ -81,44 +91,51 @@ exports.get = async (req, res, next) => {
                         from: 'users',
                         foreignField: '_id',
                         localField: 'userId',
-                        as: 'user'
-                    }
+                        as: 'user',
+                    },
                 },
                 {
-                    $unwind: '$user'
+                    $unwind: '$user',
                 },
                 {
                     $lookup: {
                         from: 'categories',
                         foreignField: '_id',
                         localField: 'categoryId',
-                        as: 'category'
-                    }
+                        as: 'category',
+                    },
                 },
                 {
-                    $unwind: '$category'
+                    $unwind: '$category',
                 },
                 {
                     $project: {
-                        _id: 1, name: 1, logo: 1, featuredImg: 1, banner: 1, url: 1, description: 1,
+                        _id: 1,
+                        name: 1,
+                        logo: 1,
+                        featuredImg: 1,
+                        banner: 1,
+                        url: 1,
+                        description: 1,
                         user: {
                             _id: '$user._id',
                             username: '$user.username',
-                            email: '$user.email'
+                            email: '$user.email',
                         },
                         category: {
                             _id: '$category._id',
-                            name: '$category.name'
+                            name: '$category.name',
                         },
-                    }
-                }
+                    },
+                },
             ])
 
             if (collection.length) {
                 let { page, limit } = req.query
 
                 page = page !== undefined && page !== '' ? parseInt(page) : 1
-                limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
+                limit =
+                    limit !== undefined && limit !== '' ? parseInt(limit) : 10
 
                 const total = await Nfts.countDocuments({ collectionId })
 
@@ -129,76 +146,69 @@ exports.get = async (req, res, next) => {
                 const nfts = await Nfts.aggregate([
                     {
                         $match: {
-                            collectionId: ObjectId(collectionId)
-                        }
+                            collectionId: ObjectId(collectionId),
+                        },
                     },
                     {
                         $lookup: {
                             from: 'users',
                             foreignField: '_id',
                             localField: 'ownerId',
-                            as: 'owner'
-                        }
+                            as: 'owner',
+                        },
                     },
                     {
                         $lookup: {
                             from: 'users',
                             foreignField: '_id',
                             localField: 'creatorId',
-                            as: 'creator'
-                        }
+                            as: 'creator',
+                        },
                     },
-                    // {
-                    //     $unwind: '$owner'
-                    // },
-                    // {
-                    //     $unwind: '$creator'
-                    // },
                     { $sort: { createdAt: -1 } },
                     { $skip: limit * (page - 1) },
                     { $limit: limit },
                     {
                         $project: {
                             _id: 1,
-                            name: 1, currentPrice: 1, copies: 1, sold: 1,
-                            image: 1, status: 1,
-                            // owner: {
-                            //     _id: '$owner._id',
-                            //     username: '$owner.username',
-                            //     email: '$owner.email'
-                            // },
-                            // creator: {
-                            //     _id: '$creator._id',
-                            //     username: '$creator.username',
-                            //     email: '$creator.email'
-                            // },
-                        }
-                    }
+                            name: 1,
+                            currentPrice: 1,
+                            copies: 1,
+                            sold: 1,
+                            image: 1,
+                            status: 1,
+                        },
+                    },
                 ])
 
                 return res.send({
-                    success: true, message: 'Collection fetched successfully',
+                    success: true,
+                    message: 'Collection fetched successfully',
                     data: {
                         collection: collection[0],
                         nfts,
                         pagination: {
-                            page, limit, total,
-                            pages: Math.ceil(total / limit) <= 0 ? 1 : Math.ceil(total / limit)
-                        }
-                    }
+                            page,
+                            limit,
+                            total,
+                            pages:
+                                Math.ceil(total / limit) <= 0
+                                    ? 1
+                                    : Math.ceil(total / limit),
+                        },
+                    },
+                })
+            } else {
+                return res.status(400).send({
+                    success: false,
+                    message: 'collection not found for given Id',
                 })
             }
-            else {
-                return res.status(400).send({ success: false, message: 'collection not found for given Id' })
-            }
-
-
+        } else {
+            return res
+                .status(400)
+                .send({ success: false, message: 'Collection Id is required' })
         }
-        else {
-            return res.status(400).send({ success: false, message: 'Collection Id is required' })
-        }
-
-
     } catch (error) {
         return next(error)
     }
@@ -211,10 +221,20 @@ exports.delete = async (req, res, next) => {
         if (collectionId) {
             const collection = await Collection.deleteOne({ _id: collectionId })
             if (collection.deletedCount)
-                return res.send({ success: true, message: 'Collection deleted successfully', collectionId })
-            else return res.status(400).send({ success: false, message: 'Collection not found for given Id' })
+                return res.send({
+                    success: true,
+                    message: 'Collection deleted successfully',
+                    collectionId,
+                })
+            else
+                return res.status(400).send({
+                    success: false,
+                    message: 'Collection not found for given Id',
+                })
         } else
-            return res.status(400).send({ success: false, message: 'Collection Id is required' })
+            return res
+                .status(400)
+                .send({ success: false, message: 'Collection Id is required' })
     } catch (error) {
         return next(error)
     }

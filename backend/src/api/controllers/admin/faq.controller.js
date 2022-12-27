@@ -1,21 +1,21 @@
-const fs = require('fs')
-const ObjectId = require('mongoose').Types.ObjectId
 const FAQ = require('../../models/faq.model')
-const { addImage } = require('../../utils/upload')
 const { checkDuplicate } = require('../../../config/errors')
 
 // API to create FAQ
 exports.create = async (req, res, next) => {
     try {
         let payload = req.body
-        
+
         const faq = await FAQ.create(payload)
-        return res.send({ success: true, message: 'FAQ created successfully', faq })
+        return res.send({
+            success: true,
+            message: 'FAQ created successfully',
+            faq,
+        })
     } catch (error) {
         if (error.code === 11000 || error.code === 11001)
             checkDuplicate(error, res, 'FAQ')
-        else
-            return next(error)
+        else return next(error)
     }
 }
 
@@ -23,13 +23,20 @@ exports.create = async (req, res, next) => {
 exports.edit = async (req, res, next) => {
     try {
         let payload = req.body
-        const faq = await FAQ.findByIdAndUpdate({ _id: payload._id }, { $set: payload }, { new: true })
-        return res.send({ success: true, message: 'FAQ updated successfully', faq })
+        const faq = await FAQ.findByIdAndUpdate(
+            { _id: payload._id },
+            { $set: payload },
+            { new: true }
+        )
+        return res.send({
+            success: true,
+            message: 'FAQ updated successfully',
+            faq,
+        })
     } catch (error) {
         if (error.code === 11000 || error.code === 11001)
             checkDuplicate(error, res, 'FAQ')
-        else
-            return next(error)
+        else return next(error)
     }
 }
 
@@ -40,10 +47,20 @@ exports.delete = async (req, res, next) => {
         if (faqId) {
             const faq = await FAQ.deleteOne({ _id: faqId })
             if (faq && faq.deletedCount)
-                return res.send({ success: true, message: 'FAQ deleted successfully', faqId })
-            else return res.status(400).send({ success: false, message: 'FAQ not found for given Id' })
+                return res.send({
+                    success: true,
+                    message: 'FAQ deleted successfully',
+                    faqId,
+                })
+            else
+                return res.status(400).send({
+                    success: false,
+                    message: 'FAQ not found for given Id',
+                })
         } else
-            return res.status(400).send({ success: false, message: 'FAQ Id is required' })
+            return res
+                .status(400)
+                .send({ success: false, message: 'FAQ Id is required' })
     } catch (error) {
         return next(error)
     }
@@ -54,12 +71,25 @@ exports.get = async (req, res, next) => {
     try {
         const { faqId } = req.params
         if (faqId) {
-            const faq = await FAQ.findOne({ _id: faqId }, { _id: 1, title: 1, desc: 1 }).lean(true)
+            const faq = await FAQ.findOne(
+                { _id: faqId },
+                { _id: 1, title: 1, desc: 1 }
+            ).lean(true)
             if (faq)
-                return res.json({ success: true, message: 'FAQ retrieved successfully', faq })
-            else return res.status(400).send({ success: false, message: 'FAQ not found for given Id' })
+                return res.json({
+                    success: true,
+                    message: 'FAQ retrieved successfully',
+                    faq,
+                })
+            else
+                return res.status(400).send({
+                    success: false,
+                    message: 'FAQ not found for given Id',
+                })
         } else
-            return res.status(400).send({ success: false, message: 'FAQ Id is required' })
+            return res
+                .status(400)
+                .send({ success: false, message: 'FAQ Id is required' })
     } catch (error) {
         return next(error)
     }
@@ -84,20 +114,27 @@ exports.list = async (req, res, next) => {
             { $limit: limit },
             {
                 $project: {
-                    _id: 1, title: 1
-                }
-            }
+                    _id: 1,
+                    title: 1,
+                },
+            },
         ])
 
         return res.send({
-            success: true, message: 'FAQs fetched successfully',
+            success: true,
+            message: 'FAQs fetched successfully',
             data: {
                 faqs,
                 pagination: {
-                    page, limit, total,
-                    pages: Math.ceil(total / limit) <= 0 ? 1 : Math.ceil(total / limit)
-                }
-            }
+                    page,
+                    limit,
+                    total,
+                    pages:
+                        Math.ceil(total / limit) <= 0
+                            ? 1
+                            : Math.ceil(total / limit),
+                },
+            },
         })
     } catch (error) {
         return next(error)

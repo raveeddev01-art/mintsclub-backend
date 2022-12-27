@@ -1,7 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 const Contact = require('../../models/contact.model')
 const { checkDuplicate } = require('../../../config/errors')
-
 
 // API to get contacts list
 exports.list = async (req, res, next) => {
@@ -19,20 +18,28 @@ exports.list = async (req, res, next) => {
             { $limit: limit },
             {
                 $project: {
-                    __v: 0, createdAt: 0, updatedAt: 0
-                }
-            }
+                    __v: 0,
+                    createdAt: 0,
+                    updatedAt: 0,
+                },
+            },
         ])
 
         return res.send({
-            success: true, message: 'Contacts fetched successfully',
+            success: true,
+            message: 'Contacts fetched successfully',
             data: {
                 contacts,
                 pagination: {
-                    page, limit, total,
-                    pages: Math.ceil(total / limit) <= 0 ? 1 : Math.ceil(total / limit)
-                }
-            }
+                    page,
+                    limit,
+                    total,
+                    pages:
+                        Math.ceil(total / limit) <= 0
+                            ? 1
+                            : Math.ceil(total / limit),
+                },
+            },
         })
     } catch (error) {
         return next(error)
@@ -44,17 +51,21 @@ exports.edit = async (req, res, next) => {
     try {
         let payload = req.body
         let newPayload = {
-            status: payload.status
+            status: payload.status,
         }
-        let updatedContact = await Contact.findByIdAndUpdate({ _id: mongoose.Types.ObjectId(payload._id) }, { $set: newPayload }, { new: true })
-        return res.send({ success: true, message: 'Contact updated successfully', updatedContact })
+        let updatedContact = await Contact.findByIdAndUpdate(
+            { _id: mongoose.Types.ObjectId(payload._id) },
+            { $set: newPayload },
+            { new: true }
+        )
+        return res.send({
+            success: true,
+            message: 'Contact updated successfully',
+            updatedContact,
+        })
     } catch (error) {
         if (error.code === 11000 || error.code === 11001)
             checkDuplicate(error, res, 'Contact')
-        else
-            return next(error)
+        else return next(error)
     }
 }
-
-
-

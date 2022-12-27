@@ -1,49 +1,79 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
+const Nft = require('../models/nfts.model')
+const User = require('../models/users.model')
+const ObjectId = require('mongoose').Types.ObjectId
+const Auction = require('../models/auctions.model')
 
 /**
  * Bid Schema
  * @private
  */
 const BidSchema = new mongoose.Schema(
-  {
-    bidBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
+    {
+        bidBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true,
+        },
+        bidByProfile: { type: String },
+        ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        nftId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'NFT',
+            required: true,
+        },
+        auctionId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Auction',
+            required: true,
+        },
+        bidAmount: { type: Number },
+        fromAddress: { type: String },
+        toAddress: { type: String },
+        isAccepted: { type: Boolean, default: false },
+        expiryDate: { type: Date },
+        status: {
+            type: String,
+            enum: ['pending', 'claimable', 'outbid', 'winner', 'refunded'],
+            default: 'pending',
+        },
+        blockchainType: { type: String },
     },
-    bidByProfile: { type: String },
-    ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    // auctionIdnftOwnerId: { type: String },
-    nftId: { type: mongoose.Schema.Types.ObjectId, ref: 'NFT' },
-    // auctionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Auction' },
-    bidAmount: { type: Number }, // temp.
-    // txHash: { type: String },
-    fromAddress: { type: String },
-    toAddress: { type: String },
-    // price: {
-    //   type: Object,
-    //   default: {
-    //     currency: {
-    //       type: String,
-    //       default: '',
-    //     },
-    //     amount: {
-    //       type: Number,
-    //       default: 0,
-    //     },
-    //   },
-    //   required: true,
-    // },
-    isAccepted: { type: Boolean, default: false },
-    // isClaimable: { type: Boolean, default: false },
-    // isclaimed: { type: Boolean, default: false },
-    expiryDate: { type: Date },
-  },
-  { timestamps: true }
-);
+    { timestamps: true }
+)
 
-// /**
-//  * @typedef Bid
-//  */
+/**
+ * Methods
+ */
 
-module.exports = mongoose.model('Bid', BidSchema);
+BidSchema.pre('save', async function (next) {
+    try {
+        const bidUser = await User.findOne({ _id: this?.bidBy })
+        this.bidByProfile = bidUser.profileImage ? bidUser.profileImage : null
+    } catch (error) {
+        console.log('error', error)
+        // next(error)
+    }
+})
+// BidSchema.post('save', async function (next) {
+//     try {
+//         console.log('this', this)
+//         const check = await Auction.findOneAndUpdate(
+//             { _id: this?.auctionId },
+//             { $push: { bids: this._id }, highestBid: this.bidAmount }
+//         )
+//         console.log('check', check)
+//     } catch (error) {
+//         console.log('error', error)
+//         // next(error)
+//     }
+// })
+
+// BidSchema.post('findOneAndUpdate', async function (next) {
+//     const docToUpdate = await this.model.findOne(this.getQuery())
+// }
+/**
+ * @typedef Bid
+ */
+
+module.exports = mongoose.model('Bid', BidSchema)

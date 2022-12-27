@@ -1,16 +1,38 @@
-const express = require('express');
-const controller = require('../../../controllers/front/users.controller');
-const router = express.Router();
-const middleware=require('../../../middlewares/front/auth')
+const express = require('express')
+const controller = require('../../../controllers/front/users.controller')
+const router = express.Router()
+const middleware = require('../../../middlewares/front/auth')
+const validatorMiddleware = require('../../../middlewares/front/validation')
 
-const { profileUpload, uploadSingle } = require('../../../utils/uploadImage');
-const passport = require('passport');
-const localStrategy = require('passport-local').Strategy;
-router.route('/').post(controller.create);
-router.route('/updateProfile').put(middleware.userValidation,profileUpload, controller.updateProfile);
-router.route('/creators').post(controller.getCreators);
-router.route('/top-sellers').get(controller.topSellers);
-router.route('/:userId').get(controller.getUser);
-router.route('/subscribe').post(controller.subscribeUser);
+const {uploadSingle,profileUpload } = require('../../../utils/uploadImage')
+router.route('/').post(controller.create)
+router
+    .route('/updateProfile')
+    .put(
+        middleware.userValidation,
+        validatorMiddleware.validateUserProfile,
+        profileUpload,
+        controller.updateProfile
+    )
+router.route('/creators').post(controller.getCreators)
+router.route('/top-sellers').get(controller.topSellers)
+router
+    .route('/:userId')
+    .get(validatorMiddleware.validateUser, controller.getUser)
+router.route('/subscribe').post(controller.subscribeUser)
+router
+    .route('/validate/:address')
+    .post(middleware.authenticate, controller.signUser)
+router
+    .route('/createUser')
+    .post(
+        middleware.authenticate,
+        validatorMiddleware.validateAddress,
+        controller.createUser
+    )
+router
+    .route('/authenticate')
+    .post(middleware.authenticate, controller.authenticate)
+router.route('/sign-nonce').post(controller.signNonce)
 
-module.exports = router;
+module.exports = router
