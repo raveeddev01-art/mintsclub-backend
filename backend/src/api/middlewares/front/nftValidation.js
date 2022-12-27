@@ -133,7 +133,7 @@ const validateNFTSchema = (req, res, next) => {
         ]),
         collection: Joi.object().optional(),
         contractAddress: Joi.string().optional(),
-        isApproved: Joi.boolean().required(),
+        isApproved: Joi.optional(),
         image: Joi.string().optional(),
         compressedFile: Joi.optional(),
     })
