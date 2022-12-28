@@ -285,7 +285,7 @@ module.exports.batchCrone = async () => {
 
                                         const NFTAdded = await NFT.create({
                                             ...payload,
-                                            metadata:
+                                            metaData:
                                                 metadataUriResponse?.dataInput
                                                     ?.metaDataUrl,
                                         })
