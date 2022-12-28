@@ -90,17 +90,8 @@ exports.storeDataInDb = async (req, res, next) => {
 exports.get = async (req, res, next) => {
     try {
         const { nftId } = req.params
-        let payload = {
-            nftId,
-        }
-        payload.nftId = ObjectId(payload.nftId)
 
-        const getNft = await NFT.find({ _id: payload.nftId })
-
-        let nftDetail = await helpers.nft.getNftDetailPipeline(
-            payload.nftId,
-            getNft[0]?.blockchainType
-        )
+        let nftDetail = await helpers.nft.getNftDetailPipeline(ObjectId(nftId))
 
         nftDetail = nftDetail[0]
 
@@ -111,40 +102,10 @@ exports.get = async (req, res, next) => {
             })
         }
 
-        const tokenData = NftTokens.findOne({ nftId: payload.nftId })
-
-        const nftLikes = Likes.findOne({ nftId: payload.nftId })
-
-        const returnData = JSON.parse(JSON.stringify(nftDetail))
-
-        const lowestInCollection = NFT.find({
-            collectionId: nftDetail.collectionId,
-        })
-            .sort({ currentPrice: 1 })
-            .limit(1)
-
-        const nftList = await Promise.all([
-            tokenData,
-            nftLikes,
-            lowestInCollection,
-        ])
-
-        if (nftList[2]) {
-            returnData.lowestNftPrice = nftList[2][0]['currentPrice']
-        }
-
-        if (nftList[0]) {
-            returnData.nftToken = nftList[0]['nftToken']
-        }
-
-        returnData.likesCount = 0
-        if (nftList[1]) {
-            returnData.likesCount = nftList[1]['count']
-        }
         return res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.NFT_FETCHED,
-            data: returnData,
+            data: nftDetail,
         })
     } catch (error) {
         console.log('nft detail fetch error =========', error)
@@ -207,7 +168,7 @@ exports.list = async (req, res, next) => {
                     { 'auction.sellingMethod': { $eq: 2 } },
                     {
                         'auction.auctionStartDate': {
-                            $lt: dateTime,
+                            $lte: dateTime,
                         },
                     },
                     {

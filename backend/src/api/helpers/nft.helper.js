@@ -1,15 +1,8 @@
 const NFT = require('../models/nfts.model')
 const Likes = require('../models/likes.model')
 
-const getNftDetailPipeline = async (nftId, blockChainType) => {
+const getNftDetailPipeline = async (nftId) => {
     try {
-        let auctionEndFilter = {}
-        if (blockChainType !== 'solana' && blockChainType !== 'algorand') {
-            auctionEndFilter = {
-                $expr: { $ne: ['$auctionEnded', true] },
-            }
-        }
-
         const pipeline = [
             {
                 $match: { _id: nftId },
@@ -20,16 +13,23 @@ const getNftDetailPipeline = async (nftId, blockChainType) => {
                     foreignField: '_id',
                     localField: 'activeAuction',
                     as: 'activeAuction',
-                    pipeline: [
-                        {
-                            $match: auctionEndFilter,
-                        },
-                        {
-                            $sort: {
-                                createdAt: -1,
-                            },
-                        },
-                    ],
+
+                    // pipeline: [
+                    //     {
+                    //         $match: {
+                    //             blockchainType: { $ne: 'solana' },
+                    //             blockchainType: { $ne: 'algorand' },
+                    //             $expr: {
+                    //                 $ne: ['$auctionEnded', true],
+                    //             },
+                    //         },
+                    //     },
+                    //     {
+                    //         $sort: {
+                    //             createdAt: -1,
+                    //         },
+                    //     },
+                    // ],
                 },
             },
             {
@@ -77,6 +77,59 @@ const getNftDetailPipeline = async (nftId, blockChainType) => {
             {
                 $unwind: {
                     path: '$collection',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+
+            {
+                $lookup: {
+                    from: 'nfttokens',
+                    localField: '_id',
+                    foreignField: 'nftId',
+                    as: 'nftToken',
+                },
+            },
+            {
+                $unwind: {
+                    path: '$nftToken',
+                    includeArrayIndex: '0',
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+
+            {
+                $lookup: {
+                    from: 'nfts',
+                    localField: 'collectionId',
+                    foreignField: 'collectionId',
+                    as: 'collectionFloorPriceNft',
+                    pipeline: [
+                        {
+                            $match: {
+                                activeAuction: { $ne: null },
+                                currentPrice: { $ne: 0 },
+                            },
+                        },
+                        {
+                            $limit: 1,
+                        },
+                        {
+                            $sort: {
+                                currentPrice: 1,
+                            },
+                        },
+                        {
+                            $project: {
+                                currentPrice: true,
+                            },
+                        },
+                    ],
+                },
+            },
+            {
+                $unwind: {
+                    path: '$collectionFloorPriceNft',
+                    includeArrayIndex: '0',
                     preserveNullAndEmptyArrays: true,
                 },
             },

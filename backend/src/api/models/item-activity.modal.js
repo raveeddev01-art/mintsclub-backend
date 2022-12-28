@@ -11,7 +11,7 @@ const ItemActivity = new mongoose.Schema(
             ref: 'User',
             required: true,
         },
-        nftId: { type: String },
+        nftId: { type: mongoose.Schema.Types.ObjectId },
         fromAddress: { type: String },
         toAddress: { type: String },
         price: { type: Number },
