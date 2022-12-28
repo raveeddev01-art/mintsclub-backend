@@ -86,5 +86,5 @@ app.use('/v1/front', frontRoutes)
 //start cron jobs
 // job.startCron();
 auctionStatusJob.startCron()
-batchUploadJob.batchCrone()
+// batchUploadJob.batchCrone()
 module.exports = app

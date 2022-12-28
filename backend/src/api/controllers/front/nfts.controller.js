@@ -157,6 +157,7 @@ exports.list = async (req, res, next) => {
     try {
         let { page, limit } = req.query
         const dateTime = new Date(moment().utc(false).toISOString())
+        let filter 
         const {
             collectionId,
             gtePrice,
@@ -181,9 +182,8 @@ exports.list = async (req, res, next) => {
         if (keyword) {
             search = true
         }
-
-        const filter = {
-            // status: { $ne: 0 },
+        const listingFilter = {
+            'auction.auctionEnded': false,
             ...(latest && {
                 createdAt: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
             }),
@@ -243,6 +243,73 @@ exports.list = async (req, res, next) => {
             // ...(favourite &&{
             //     userId: ObjectId(favourite)
             // })
+        }
+
+        const userOwnedFilter = {
+            ...(latest && {
+                createdAt: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+            }),
+            ...(ownerId && { ownerId: ObjectId(ownerId) }),
+            ...(gtePrice && {
+                currentPrice: {
+                    $gte: Number(gtePrice),
+                    $lte: Number(ltePrice),
+                },
+            }),
+            ...(collectionId && { collectionId }),
+            ...(categoryId && { categoryId }),
+            ...(buy && {
+                $and: [
+                    { 'auction.sellingMethod': { $eq: 1 } },
+                    { 'auction.auctionEnded': false },
+                ],
+            }),
+            ...(auction && {
+                $and: [
+                    { 'auction.sellingMethod': { $eq: 2 } },
+                    {
+                        'auction.auctionStartDate': {
+                            $lt: dateTime,
+                        },
+                    },
+                    {
+                        'auction.auctionEndDate': {
+                            $gte: dateTime,
+                        },
+                    },
+                    { 'auction.auctionEnded': false },
+                ],
+            }),
+            ...(search && {
+                $or: [
+                    { name: { $regex: '.*' + keyword + '.*', $options: 'i' } },
+                    {
+                        description: {
+                            $regex: '.*' + keyword + '.*',
+                            $options: 'i',
+                        },
+                    },
+                    { ownerAddress: { $regex: keyword, $options: 'i' } },
+                ],
+            }),
+            ...(created && {
+                creatorId: ObjectId(created),
+            }),
+            ...(collected && {
+                creatorId: { $ne: ObjectId(collected) },
+                ownerId: ObjectId(collected),
+            }),
+            ...(userOwned && {
+                ownerId: ObjectId(userOwned),
+            }),
+            // ...(favourite &&{
+            //     userId: ObjectId(favourite)
+            // })
+        }
+        if(req.query.userOwned){
+            filter = userOwnedFilter
+        } else {
+            filter = listingFilter
         }
 
         if (collectionId) filter.collectionId = ObjectId(collectionId)
