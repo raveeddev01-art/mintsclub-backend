@@ -248,11 +248,9 @@ module.exports.batchCrone = async () => {
                                             fileType: 'image',
 
                                             ...(batchToBeProcessed?.blockchainType ===
-                                            'algorand'
-                                                ? {
-                                                      algoLazyMinted: true,
-                                                  }
-                                                : { lazyMinted: true }),
+                                                'algorand' && {
+                                                algoLazyMinted: true,
+                                            }),
 
                                             lazyMinted: true,
                                             image: imageFileUrl,
