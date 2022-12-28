@@ -2,7 +2,7 @@
 const router = require('express').Router()
 const controller = require('../../../controllers/front/nfts.controller')
 const { cpUpload } = require('../../../utils/upload')
-const {uploadDataOnIpfs}=require('../../../utils/uploadImage')
+const { uploadDataOnIpfs } = require('../../../utils/uploadImage')
 const middleware = require('../../../middlewares/front/auth')
 const validatorMiddleware = require('../../../middlewares/front/nftValidation')
 

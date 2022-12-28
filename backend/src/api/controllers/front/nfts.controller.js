@@ -90,17 +90,8 @@ exports.storeDataInDb = async (req, res, next) => {
 exports.get = async (req, res, next) => {
     try {
         const { nftId } = req.params
-        let payload = {
-            nftId,
-        }
-        payload.nftId = ObjectId(payload.nftId)
 
-        const getNft = await NFT.find({ _id: payload.nftId })
-
-        let nftDetail = await helpers.nft.getNftDetailPipeline(
-            payload.nftId,
-            getNft[0]?.blockchainType
-        )
+        let nftDetail = await helpers.nft.getNftDetailPipeline(ObjectId(nftId))
 
         nftDetail = nftDetail[0]
 
@@ -111,40 +102,10 @@ exports.get = async (req, res, next) => {
             })
         }
 
-        const tokenData = NftTokens.findOne({ nftId: payload.nftId })
-
-        const nftLikes = Likes.findOne({ nftId: payload.nftId })
-
-        const returnData = JSON.parse(JSON.stringify(nftDetail))
-
-        const lowestInCollection = NFT.find({
-            collectionId: nftDetail.collectionId,
-        })
-            .sort({ currentPrice: 1 })
-            .limit(1)
-
-        const nftList = await Promise.all([
-            tokenData,
-            nftLikes,
-            lowestInCollection,
-        ])
-
-        if (nftList[2]) {
-            returnData.lowestNftPrice = nftList[2][0]['currentPrice']
-        }
-
-        if (nftList[0]) {
-            returnData.nftToken = nftList[0]['nftToken']
-        }
-
-        returnData.likesCount = 0
-        if (nftList[1]) {
-            returnData.likesCount = nftList[1]['count']
-        }
         return res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.NFT_FETCHED,
-            data: returnData,
+            data: nftDetail,
         })
     } catch (error) {
         console.log('nft detail fetch error =========', error)
@@ -157,6 +118,7 @@ exports.list = async (req, res, next) => {
     try {
         let { page, limit } = req.query
         const dateTime = new Date(moment().utc(false).toISOString())
+        let filter 
         const {
             collectionId,
             gtePrice,
@@ -181,9 +143,70 @@ exports.list = async (req, res, next) => {
         if (keyword) {
             search = true
         }
+        const listingFilter = {
+            'auction.auctionEnded': false,
+            ...(latest && {
+                createdAt: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+            }),
+            ...(ownerId && { ownerId: ObjectId(ownerId) }),
+            ...(gtePrice && {
+                currentPrice: {
+                    $gte: Number(gtePrice),
+                    $lte: Number(ltePrice),
+                },
+            }),
+            ...(collectionId && { collectionId }),
+            ...(categoryId && { categoryId }),
+            ...(buy && {
+                $and: [
+                    { 'auction.sellingMethod': { $eq: 1 } },
+                    { 'auction.auctionEnded': false },
+                ],
+            }),
+            ...(auction && {
+                $and: [
+                    { 'auction.sellingMethod': { $eq: 2 } },
+                    {
+                        'auction.auctionStartDate': {
+                            $lte: dateTime,
+                        },
+                    },
+                    {
+                        'auction.auctionEndDate': {
+                            $gte: dateTime,
+                        },
+                    },
+                    { 'auction.auctionEnded': false },
+                ],
+            }),
+            ...(search && {
+                $or: [
+                    { name: { $regex: '.*' + keyword + '.*', $options: 'i' } },
+                    {
+                        description: {
+                            $regex: '.*' + keyword + '.*',
+                            $options: 'i',
+                        },
+                    },
+                    { ownerAddress: { $regex: keyword, $options: 'i' } },
+                ],
+            }),
+            ...(created && {
+                creatorId: ObjectId(created),
+            }),
+            ...(collected && {
+                creatorId: { $ne: ObjectId(collected) },
+                ownerId: ObjectId(collected),
+            }),
+            ...(userOwned && {
+                ownerId: ObjectId(userOwned),
+            }),
+            // ...(favourite &&{
+            //     userId: ObjectId(favourite)
+            // })
+        }
 
-        const filter = {
-            // status: { $ne: 0 },
+        const userOwnedFilter = {
             ...(latest && {
                 createdAt: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
             }),
@@ -243,6 +266,11 @@ exports.list = async (req, res, next) => {
             // ...(favourite &&{
             //     userId: ObjectId(favourite)
             // })
+        }
+        if(req.query.userOwned){
+            filter = userOwnedFilter
+        } else {
+            filter = listingFilter
         }
 
         if (collectionId) filter.collectionId = ObjectId(collectionId)
