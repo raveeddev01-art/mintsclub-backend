@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-expressions */
 const cron = require('node-cron')
-// const { pinataJWT, pinataSecret, pinataKey } = require('../config/vars')
+
+const { cronStop } = require('../config/vars')
 // const BatchUpload = require('../api/models/batchUpload.model')
 const BatchUploadFilesHistory = require('../api/models/fileHistory.model')
 const NFT = require('../api/models/nfts.model')
@@ -23,6 +24,12 @@ const path = require('path')
 // const axios = require('axios')
 
 module.exports.batchCrone = async () => {
+    console.log('CronStop', cronStop)
+    if (!cronStop || cronStop === 'true') {
+        console.log('CRON-JOB Only Running on Server.')
+        return false
+    }
+
     cron.schedule('*/10 * * * * *', async () => {
         let batchToBeProcessed = undefined
         try {
