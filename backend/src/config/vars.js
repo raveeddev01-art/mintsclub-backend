@@ -23,7 +23,7 @@ module.exports = {
     pinataJWT: process.env.PINATA_JWT,
     pinataKey: process.env.PINATA_KEY,
     pinataSecret: process.env.PINATA_SECRET,
-    pinataBaseUrl:process.env.PINATA_BASEURL,
+    pinataBaseUrl: process.env.PINATA_BASEURL,
     mailChimp: {
         apiKey: process.env.MAILCHIMP_APIKEY,
         server: process.env.MAILCHIMP_SERVER,
@@ -38,4 +38,5 @@ module.exports = {
         port: process.env.REDIS_PORT,
         password: process.env.REDIS_PASSWORD,
     },
+    cronStop: process.env.CRONSTOP,
 }
