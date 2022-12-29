@@ -283,7 +283,7 @@ exports.list = async (req, res, next) => {
             ...(oldest && { createdAt: 1 }),
             ...(lowToHigh && { currentPrice: 1 }),
             ...(highToLow && { currentPrice: -1 }),
-            name: 1,
+            updatedAt: -1,
         }
         let data = await helpers.nft.getNftListPipeline(
             sortFilters,

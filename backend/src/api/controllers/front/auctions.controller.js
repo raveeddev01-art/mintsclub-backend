@@ -146,9 +146,10 @@ exports.live = async (req, res, next) => {
                     fileType: { $first: '$nft.fileType' },
                     blockchainType: { $first: '$nft.blockchainType' },
                     createdAt: { $first: '$createdAt' },
+                    updatedAt: { $first: '$updatedAt' },
                 },
             },
-            { $sort: { createdAt: -1 } },
+            { $sort: { updatedAt: -1 } },
             {
                 $facet: {
                     metadata: [
