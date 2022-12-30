@@ -13,6 +13,8 @@ const {
     checkFileAlreadyProcessedOrNot,
     updateFields,
     getBatchByStatus,
+    checkNFTwithSameNameAlreadyExists,
+    metadataVerification,
 } = require('../api/helpers/batchUpload.helper')
 
 // const FormData = require('form-data')
@@ -173,6 +175,24 @@ module.exports.batchCrone = async () => {
                                         try {
                                             jsonMetadata =
                                                 JSON.parse(jsonFileContent)
+
+                                            const metadataVerificationResponse =
+                                                metadataVerification(
+                                                    jsonMetadata
+                                                )
+                                            if (
+                                                metadataVerificationResponse !==
+                                                true
+                                            ) {
+                                                throw new Error(
+                                                    metadataVerificationResponse?.message
+                                                )
+                                            }
+
+                                            jsonMetadata.name =
+                                                await checkNFTwithSameNameAlreadyExists(
+                                                    jsonMetadata?.name
+                                                )
                                         } catch (err) {
                                             console.log(
                                                 '🚀 ~ file: batchUpload.js:180 ~ err',
@@ -186,17 +206,11 @@ module.exports.batchCrone = async () => {
                                                     {
                                                         $set: {
                                                             status: 'failed',
+                                                            message:
+                                                                err.message,
                                                         },
                                                     }
                                                 ),
-                                                // database.batchUpload.updateBatchStatus(
-                                                //     pendingBatch?._id,
-                                                //     'failed'
-                                                // ),
-                                                // database.batchUpload.setMessage(
-                                                //     pendingBatch?._id,
-                                                //     err.message
-                                                // ),
                                             ])
 
                                             const remainingFilesInSideFolder =
