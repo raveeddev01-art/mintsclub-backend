@@ -1,12 +1,28 @@
 const BatchUpload = require('../models/batchUpload.model')
 const { pinataJWT, pinataSecret, pinataKey } = require('../../config/vars')
 const BatchUploadFilesHistory = require('../models/fileHistory.model')
-var fs = require("fs")
+var fs = require('fs')
 
 const NFT = require('../models/nfts.model')
 const FormData = require('form-data')
 
 const axios = require('axios')
+
+const checkNFTwithSameNameAlreadyExists = async (name) => {
+    const splitName = name.split('#')
+
+    const nft = await NFT.countDocuments({
+        name: { $regex: splitName[0].trim(), $options: 'gi' },
+    })
+    if (nft > 0) {
+        const number = parseInt(nft) + 1
+        if (splitName?.length > 1) {
+            return `${splitName[0].trim()} #${parseInt(splitName[1]) + number}`
+        }
+        return `${splitName[0].trim()} #${number}`
+    }
+    return name
+}
 
 const getBatchByStatus = async (status) => {
     const batch = await BatchUpload.findOne({ status })
@@ -41,6 +57,48 @@ const groupFilesByName = (files) => {
             '🚀 ~ file: helpers.js ~ line 182 ~ groupFilesByName ~ err',
             err
         )
+    }
+}
+
+const STANDARD_METADATA_REQUIRED = ['name', 'description']
+// const STANDARD_OPTIONAL_METADATA = ['edition', 'properties', 'levels', 'stats']
+const METADATA_DATA_TYPES = {
+    name: 'string',
+    description: 'string',
+    image: 'string',
+    edition: 'number',
+    properties: 'array',
+    levels: 'array',
+    stats: 'array',
+}
+
+const metadataVerification = (JSON_METADATA) => {
+    try {
+        const usersMetadataKeys = Object.keys(JSON_METADATA)
+
+        STANDARD_METADATA_REQUIRED.forEach((key) => {
+            if (!usersMetadataKeys.includes(key)) {
+                throw new Error('Standard metadata is not matched.')
+            }
+        })
+        usersMetadataKeys.forEach((key) => {
+            if (METADATA_DATA_TYPES[key]) {
+                if (typeof JSON_METADATA[key] === 'object') {
+                    if (!Array.isArray(JSON_METADATA[key])) {
+                        throw new Error(
+                            'Standard metadata types is not matched.'
+                        )
+                    }
+                } else if (
+                    typeof JSON_METADATA[key] !== METADATA_DATA_TYPES[key]
+                ) {
+                    throw new Error('Standard metadata types is not matched.')
+                }
+            }
+        })
+        return true
+    } catch (err) {
+        return { success: false, message: err.message }
     }
 }
 
@@ -113,4 +171,6 @@ module.exports = {
     checkFileAlreadyProcessedOrNot,
     updateFields,
     getBatchByStatus,
+    checkNFTwithSameNameAlreadyExists,
+    metadataVerification,
 }
