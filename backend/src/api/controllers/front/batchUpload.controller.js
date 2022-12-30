@@ -162,6 +162,11 @@ exports.getBatchByUser = async (request, response) => {
                 },
             },
             {
+                $sort: {
+                    _id: -1,
+                },
+            },
+            {
                 $project: {
                     blockchainType: true,
                     categoryId: true,
@@ -183,11 +188,6 @@ exports.getBatchByUser = async (request, response) => {
                         { $addFields: { limit } },
                     ],
                     data: [{ $skip: limit * (page - 1) }, { $limit: limit }],
-                },
-            },
-            {
-                $sort: {
-                    _id: -1,
                 },
             },
         ]
