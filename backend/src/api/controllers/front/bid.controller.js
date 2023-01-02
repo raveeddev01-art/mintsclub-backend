@@ -108,8 +108,8 @@ exports.list = async (req, res, next) => {
         page = page !== undefined && page !== '' ? parseInt(page) : 1
         limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
         const filter = {}
-        if (nftId) {
-            filter.nftId = ObjectId(nftId)
+        if (auctionId) {
+            filter.auctionId = ObjectId(auctionId)
         }
         const startIndex = (page - 1) * limit
         const endIndex = page * limit
