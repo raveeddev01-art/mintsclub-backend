@@ -111,37 +111,18 @@ exports.list = async (req, res, next) => {
         if (auctionId) {
             filter.auctionId = ObjectId(auctionId)
         }
-        const startIndex = (page - 1) * limit
-        const endIndex = page * limit
 
         const allBids = await Bid.aggregate([
             { $match: filter },
             { $sort: { createdAt: -1 } },
         ])
 
-        const data = {}
-
-        data.totalRecords = allBids.length
-
-        if (endIndex < allBids.length) {
-            data.next = {
-                page: page + 1,
-                limit,
-            }
-        }
-        if (startIndex > 0) {
-            data.previous = {
-                page: page - 1,
-                limit,
-            }
-        }
-
-        data.Bids = allBids.slice(startIndex, endIndex)
-
         return res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.BID_FETCHED,
-            data,
+            data: {
+                Bids: allBids,
+            },
         })
     } catch (error) {
         return next(error)

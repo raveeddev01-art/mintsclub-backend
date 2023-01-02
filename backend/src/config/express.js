@@ -62,6 +62,11 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
     next()
 })
+
+app.get('/', (req, res) => {
+    return res.send({ success: true, message: 'connected' })
+})
+
 // mount admin api v1 routes
 app.use('/v1/admin', adminRoutes)
 

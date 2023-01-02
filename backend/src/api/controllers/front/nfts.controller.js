@@ -118,7 +118,7 @@ exports.list = async (req, res, next) => {
     try {
         let { page, limit } = req.query
         const dateTime = new Date(moment().utc(false).toISOString())
-        let filter 
+        let filter
         const {
             collectionId,
             gtePrice,
@@ -144,7 +144,7 @@ exports.list = async (req, res, next) => {
             search = true
         }
         const listingFilter = {
-            'auction.auctionEnded': false,
+            // 'auction.auctionEnded': false,
             ...(latest && {
                 createdAt: { $gt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
             }),
@@ -267,7 +267,7 @@ exports.list = async (req, res, next) => {
             //     userId: ObjectId(favourite)
             // })
         }
-        if(req.query.userOwned){
+        if (req.query.userOwned) {
             filter = userOwnedFilter
         } else {
             filter = listingFilter

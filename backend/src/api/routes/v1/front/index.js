@@ -18,6 +18,7 @@ const router = express.Router()
 /**
  * GET v1/status
  */
+
 router.use('/auth', authRoutes)
 router.use('/category', categoryRoutes)
 router.use('/nfts', nftsRoutes)
