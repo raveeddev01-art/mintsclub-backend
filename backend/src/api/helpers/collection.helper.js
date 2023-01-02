@@ -333,6 +333,7 @@ const collectionListPopular = async (filter, limit, page) => {
                     blockchainType: { $first: '$blockchainType' },
                 },
             },
+            { $sort: { soldCopies: -1 } },
             {
                 $facet: {
                     metadata: [
