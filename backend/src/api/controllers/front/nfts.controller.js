@@ -83,6 +83,7 @@ exports.storeDataInDb = async (req, res, next) => {
             nft,
         })
     } catch (error) {
+        console.log("error storeDataInDb ===", error);
         return next(error)
     }
 }
