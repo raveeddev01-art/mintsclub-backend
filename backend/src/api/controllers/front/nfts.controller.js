@@ -18,6 +18,8 @@ const {
     HTTP_STATUS_CODE,
 } = require('../../../config/constants')
 
+const socketSingleton = require('../../../utils/socket')
+
 // API to create NFT
 exports.create = async (req, res, next) => {
     try {
@@ -49,7 +51,7 @@ exports.create = async (req, res, next) => {
             data: result,
         })
     } catch (err) {
-        console.log("nft create error =====", error);
+        console.log('nft create error =====', error)
         return next(err)
     }
 }
@@ -83,7 +85,7 @@ exports.storeDataInDb = async (req, res, next) => {
             nft,
         })
     } catch (error) {
-        console.log("error storeDataInDb ===", error);
+        console.log('error storeDataInDb ===', error)
         return next(error)
     }
 }
@@ -120,7 +122,7 @@ exports.list = async (req, res, next) => {
     try {
         let { page, limit } = req.query
         const dateTime = new Date(moment().utc(false).toISOString())
-        let filter 
+        let filter
         const {
             collectionId,
             gtePrice,
@@ -269,7 +271,7 @@ exports.list = async (req, res, next) => {
             //     userId: ObjectId(favourite)
             // })
         }
-        if(req.query.userOwned || req.query.collectionId){
+        if (req.query.userOwned || req.query.collectionId) {
             filter = userOwnedFilter
         } else {
             filter = listingFilter
