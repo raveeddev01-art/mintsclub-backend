@@ -269,7 +269,7 @@ exports.list = async (req, res, next) => {
             //     userId: ObjectId(favourite)
             // })
         }
-        if(req.query.userOwned){
+        if(req.query.userOwned || req.query.collectionId){
             filter = userOwnedFilter
         } else {
             filter = listingFilter
