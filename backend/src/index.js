@@ -1,31 +1,39 @@
 /* eslint-disable no-global-assign */
 Promise = require('bluebird')
 const { port } = require('./config/vars')
-const SocketSingleton = require('./utils/socket')
+const socket = require('./utils/socket')
 const mongooseDatabase = require('./config/mongoose')
 const app = require('./config/express')
 const http = require('http')
 mongooseDatabase.connect()
 const server = http.createServer(app)
+const io = require('socket.io')(server, {
+    pingTimeout: 6000,
+    cors: {
+        origin: '*',
+        credentials: true,
+    },
+})
 
-SocketSingleton.configure(server)
+socket.configure(io)
 
-SocketSingleton.io.on('connection', (socket) => {
-    console.log('New Connection established with SOCKET_ID', socket.id)
+io.on('connection', (socketIo) => {
+    console.log('New Connection established with SOCKET_ID', socketIo.id)
 
-    socket.on('join', (roomId) => {
+    socketIo.on('join', (roomId) => {
         if (roomId) {
-            socket.join(roomId)
+            socketIo.join(roomId)
             console.log('Room Joined - RoomId: ', roomId)
         }
     })
-})
 
-// console.log("Socket Rooms", SocketSingleton.io.)
-// SocketSingleton.io.on('join', (roomId) => {
-//     SocketSingleton.io.join(roomId)
-//     console.log('Room Joined - roomId: ', roomId)
-// })
+    socketIo.on('leave', (roomId) => {
+        if (roomId) {
+            socketIo.leave(roomId)
+            console.log('Room leaved - RoomId: ', roomId)
+        }
+    })
+})
 
 server.listen(port)
 

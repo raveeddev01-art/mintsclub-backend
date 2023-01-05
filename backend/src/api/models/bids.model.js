@@ -3,7 +3,7 @@ const Nft = require('../models/nfts.model')
 const User = require('../models/users.model')
 const ObjectId = require('mongoose').Types.ObjectId
 const Auction = require('../models/auctions.model')
-const socketSingleton = require('../../utils/socket')
+const socket = require('../../utils/socket')
 
 /**
  * Bid Schema
@@ -59,31 +59,14 @@ BidSchema.pre('save', async function (next) {
 })
 
 BidSchema.post('save', function (doc) {
-    console.log('🚀 ~ file: bids.model.js:62 ~ doc', doc?.nftId)
     let price = 0
     if (doc?.blockchainType !== 'algorand') {
         price = (5 / 100) * doc?.bidAmount + doc?.bidAmount
     } else {
         price = doc?.bidAmount + 0.1
     }
-    console.log(
-        '🚀 ~ file: bids.model.js:71 ~ socketSingleton.io',
-        socketSingleton.io
-    )
-    console.log(
-        '🚀 ~ file: bids.model.js:71 ~ socketSingleton',
-        socketSingleton
-    )
-    console.log(
-        '🚀 ~ file: bids.model.js:71 ~ socketSingleton.io.sockets',
-        socketSingleton.io.sockets
-    )
+    socket.io.to(`${doc?.nftId}`).emit('bidPlaced', { price })
 
-    // socketSingleton.io.sockets.to(doc?.nftId).emit('bidPlaced', { price })
-    // socketSingleton.io.emit('bidPlaced', { price })
-    socketSingleton.io.to(doc?.nftId).emit('bidPlaced', { price })
-
-    console.log('%s has been saved', doc?.nftId)
 })
 
 // BidSchema.post('save', async function (next) {
