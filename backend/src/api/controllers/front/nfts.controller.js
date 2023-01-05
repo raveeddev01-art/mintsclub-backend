@@ -51,7 +51,7 @@ exports.create = async (req, res, next) => {
             data: result,
         })
     } catch (err) {
-        console.log('nft create error =====', error)
+        console.log('nft create error =====', err)
         return next(err)
     }
 }
