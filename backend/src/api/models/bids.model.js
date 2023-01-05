@@ -3,6 +3,7 @@ const Nft = require('../models/nfts.model')
 const User = require('../models/users.model')
 const ObjectId = require('mongoose').Types.ObjectId
 const Auction = require('../models/auctions.model')
+const socket = require('../../utils/socket')
 
 /**
  * Bid Schema
@@ -49,12 +50,25 @@ const BidSchema = new mongoose.Schema(
 BidSchema.pre('save', async function (next) {
     try {
         const bidUser = await User.findOne({ _id: this?.bidBy })
+
         this.bidByProfile = bidUser.profileImage ? bidUser.profileImage : null
     } catch (error) {
         console.log('error', error)
         // next(error)
     }
 })
+
+BidSchema.post('save', function (doc) {
+    let price = 0
+    if (doc?.blockchainType !== 'algorand') {
+        price = (5 / 100) * doc?.bidAmount + doc?.bidAmount
+    } else {
+        price = doc?.bidAmount + 0.1
+    }
+    socket.io.to(`${doc?.nftId}`).emit('bidPlaced', { price })
+
+})
+
 // BidSchema.post('save', async function (next) {
 //     try {
 //         console.log('this', this)

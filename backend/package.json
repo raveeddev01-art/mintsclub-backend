@@ -87,6 +87,7 @@
         "randomstring": "^1.2.1",
         "s3-unzip": "^0.1.13",
         "sendgrid": "^5.2.3",
+        "socket.io": "^4.5.4",
         "solc": "^0.8.10",
         "tweetnacl": "^1.0.3",
         "twilio": "^3.67.1",
