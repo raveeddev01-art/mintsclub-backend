@@ -372,7 +372,7 @@ exports.endAuction = async (req, res, next) => {
             auctionEnded: true,
             status: 'end',
         }
-        await nftAuctions.findByIdAndUpdate(
+        const auctionDetail = await nftAuctions.findByIdAndUpdate(
             { _id: auctionEndNft[0]?._id },
             { $set: payloadUpdateAuctionStatus }
         )
@@ -384,6 +384,11 @@ exports.endAuction = async (req, res, next) => {
             { _id: auctionEndNft[0]?.nftId?._id },
             { $set: payloadUpdateNFT }
         )
+
+        socket.io.to(`${auctionDetail?.nftId}`).emit('auctionUpdated', {
+            nftId: auctionDetail?.nftId,
+            userId: auctionDetail?.userId,
+        })
 
         res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,

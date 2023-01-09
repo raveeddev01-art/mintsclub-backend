@@ -67,11 +67,6 @@ const createNewNFTtoBuy = async (request, buyNftDetail, auctionDetail) => {
         const nft = await NFT.create(newPayload)
 
         if (nft) {
-            socket.io.to(`${newPayload?.userId}`).emit('newNftAdded', {
-                nftId: nft?._id,
-                userId: nft?.userId,
-            })
-
             const activityPayload = {
                 nftId: nft?._id,
                 ownerId: nft?.ownerId,
@@ -136,6 +131,16 @@ const createNewNFTtoBuy = async (request, buyNftDetail, auctionDetail) => {
             { $set: { nftAuction: null } }
         )
         if (dataUpdated) {
+            socket.io.to(`${newPayload?.userId}`).emit('newNftAdded', {
+                nftId: nft?._id,
+                userId: nft?.userId,
+            })
+
+            socket.io.to(`${buyNftDetail?._id}`).emit('auctionUpdated', {
+                nftId: nftUpdate?._id,
+                userId: nftUpdate?.userId,
+            })
+
             return true
         }
         return false
@@ -172,11 +177,6 @@ const updateNFTForBuyNow = async (request, buyNftDetail, auctionDetail) => {
         )
 
         if (nftUpdate) {
-            socket.io.to(`${newPayload?.userId}`).emit('newNftAdded', {
-                nftId: nftUpdate?._id,
-                userId: nftUpdate?.userId,
-            })
-
             const findUserDetail = await Users.findOne({
                 _id: nftUpdate.ownerId,
             })
@@ -203,6 +203,18 @@ const updateNFTForBuyNow = async (request, buyNftDetail, auctionDetail) => {
         )
 
         if (dataUpdated) {
+            socket.io.to(`${newPayload?.userId}`).emit('newNftAdded', {
+                nftId: nftUpdate?._id,
+                userId: nftUpdate?.userId,
+            })
+
+            socket.io
+                .to(`${auctionDetail?.nftId?._id}`)
+                .emit('auctionUpdated', {
+                    nftId: nftUpdate?._id,
+                    userId: nftUpdate?.userId,
+                })
+
             return true
         }
         return false

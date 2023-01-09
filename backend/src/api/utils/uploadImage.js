@@ -14,13 +14,7 @@ const storage = multer.diskStorage({
         cb(null, imagesDir)
     },
     filename(req, file, cb) {
-            console.log('file ====', file)
-            console.log('req ====', req)
-
-          cb(
-            null,
-            Date.now() + ".png"
-        );
+        cb(null, Date.now() + '.png')
     },
 })
 const upload = multer({

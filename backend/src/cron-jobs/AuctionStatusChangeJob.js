@@ -33,6 +33,7 @@ module.exports.startCron = () => {
                     moment(),
                     'seconds'
                 )
+
                 if (remainingTime <= 0) {
                     if (auction.bids.length > 0) {
                         await updateAuction(_id, 'claimNft')

@@ -26,6 +26,7 @@ exports.get = async (req, res, next) => {
             nftId: req.query.nftId,
             activityType: { $ne: 'Bid' },
         }
+
         const activities = await ItemActivity.find(payload)
         
 
