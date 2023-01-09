@@ -53,4 +53,4 @@ notificationSchema.post('save', (doc) => {
 // notificationSchema.plugin(mongoosePaginate);
 // const Nft = model("Notification", notificationSchema);
 // module.exports = Nft;
-module.exports = model('Notification', notificationSchema)
+module.exports = model("Notification", notificationSchema);

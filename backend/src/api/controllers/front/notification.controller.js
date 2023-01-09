@@ -17,6 +17,23 @@ const getUserUnSeenNotifications = async (userId) => {
   return await Notification.find({ userId, isSeen: false });
 };
 
+// const createNotifications = async (req, res, next) => {
+//   try {
+//       const payload = req.body
+
+//       const notification = await Notification.create(payload)
+
+//       return res.status(HTTP_STATUS_CODE.OK).send({
+//           success: SUCCESS_STATUS.TRUE,
+//           message: SUCCESS_MESSAGE.OFFER_MADE_SUCCESSFULLY,
+//           notification,
+//       })
+//   } catch (error) {
+//       return next(error)
+//   }
+// }
+
+
 const updateNotifications = async (notificationId, data) => {
   return await Notification.findOneAndUpdate(
     { _id: notificationId },
@@ -54,6 +71,31 @@ const getUserUnSeenNotification = async (req, res) => {
   } catch (err) {
     console.log("notificaton error ===", err);
     return res.status(HTTP_STATUS_CODE.INTERNAL_SERVER).json(err);
+  }
+};
+
+const createNotification = async (request, response) => {
+  try {
+    const { body } = request;
+    const data = await addNotification(
+      body
+    );
+    return response.status(HTTP_STATUS_CODE.OK).json(data);
+  } catch (error) {
+    console.log("createNotification error ====", error);
+    return response.status(HTTP_STATUS_CODE.INTERNAL_SERVER).json(error);
+  }
+};
+const createManyNotification = async (request, response) => {
+  try {
+    const { body } = request;
+    const data = await addManyNotification(
+      body
+    );
+    return response.status(HTTP_STATUS_CODE.OK).json(data);
+  } catch (error) {
+    console.log("createManyNotification error ====", error);
+    return response.status(HTTP_STATUS_CODE.INTERNAL_SERVER).json(error);
   }
 };
 
@@ -102,8 +144,10 @@ const getAllNotifications = async (request, response) => {
 };
 
 module.exports = {
+  createManyNotification,
   getUserUnSeenNotification,
   updateNotification,
+  createNotification,
   getUserSeenNotification,
   getAllNotifications,
 };
