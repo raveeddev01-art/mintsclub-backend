@@ -345,9 +345,9 @@ exports.endAuction = async (req, res, next) => {
             )
         }
         const bid = await Bid.find({
-            nftId: ObjectId(auctionEndNft[0]?.nftId?._id),
+            auctionId: ObjectId(auctionEndNft[0]?._id),
             bidAmount: auctionEndNft[0]?.highestBid,
-        })
+        }).sort({ bidAmount: -1 })
 
         if (bid.length > 0) {
             let bidData = bid[0]

@@ -7,7 +7,7 @@ const {
 
 module.exports.startCron = () => {
     try {
-        cron.schedule('*/1 * * * *', async () => {
+        cron.schedule('*/5 * * * * *', async () => {
             const auctions = await getAllActiveAuctionsForCronJob()
 
             if (!auctions.length) return false
