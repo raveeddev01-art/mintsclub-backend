@@ -6,6 +6,7 @@ const Users = require('../models/users.model')
 const ActivityModal = require('../models/item-activity.modal')
 const Bid = require('../models/bids.model')
 const Auction = require('../models/auctions.model')
+const socket = require('../../utils/socket')
 
 const addFixedAuction = (request) => {
     request.currentPrice = Number(request.sellingConfig?.price?.amount)
@@ -66,6 +67,11 @@ const createNewNFTtoBuy = async (request, buyNftDetail, auctionDetail) => {
         const nft = await NFT.create(newPayload)
 
         if (nft) {
+            socket.io.to(`${newPayload?.userId}`).emit('newNftAdded', {
+                nftId: nft?._id,
+                userId: nft?.userId,
+            })
+
             const activityPayload = {
                 nftId: nft?._id,
                 ownerId: nft?.ownerId,
@@ -166,6 +172,11 @@ const updateNFTForBuyNow = async (request, buyNftDetail, auctionDetail) => {
         )
 
         if (nftUpdate) {
+            socket.io.to(`${newPayload?.userId}`).emit('newNftAdded', {
+                nftId: nftUpdate?._id,
+                userId: nftUpdate?.userId,
+            })
+
             const findUserDetail = await Users.findOne({
                 _id: nftUpdate.ownerId,
             })
@@ -225,6 +236,12 @@ const createNewNFTforEndAuction = async (bidData, auctionEndNft) => {
         }
 
         const NFTCreated = await NFT.create(payload)
+
+        // Send Event for Fetch NFTs for user.
+        socket.io.to(`${payload?.userId}`).emit('newNftAdded', {
+            nftId: NFTCreated?._id,
+            userId: NFTCreated?.userId,
+        })
 
         if (NFTCreated?._id) {
             const activityPayload = {
@@ -311,6 +328,12 @@ const updateNFTforEndAuction = async (bidData, auctionEndNft) => {
                 { $set: { totalETH: newTotalETH } }
             )
         }
+
+        socket.io.to(`${nftPayload?.userId}`).emit('newNftAdded', {
+            nftId: nftUpdate?._id,
+            userId: nftUpdate?.userId,
+        })
+
         const activityPayload = {
             nftId: auctionEndNft?.nftId?._id,
             ownerId: auctionEndNft?.nftId?.ownerId,
@@ -346,6 +369,15 @@ const updateAuction = async (auctionId, data) => {
     )
     return auctions
 }
+
+const updateAuctionFields = async (auctionId, updatedFields) => {
+    const auctionUpdated = await Auction.findOneAndUpdate(
+        { _id: auctionId },
+        { $set: updatedFields }
+    )
+    return auctionUpdated
+}
+
 const updateActivityforCancelList = async (cancelListData) => {
     const activityPayload = {
         nftId: cancelListData?.nftId?._id,
@@ -367,4 +399,5 @@ module.exports = {
     getAllActiveAuctionsForCronJob,
     updateAuction,
     updateActivityforCancelList,
+    updateAuctionFields,
 }

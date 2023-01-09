@@ -31,4 +31,5 @@ router
     )
 router.route('/myNftListing').get(controller.myNftListing)
 router.route('/getNFTsByCollection').post(controller.getNFTsbyCollection)
+router.route('/getNftByDetails').get(controller.getNftByDetails)
 module.exports = router
