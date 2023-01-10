@@ -203,11 +203,11 @@ exports.edit = async (req, res, next) => {
         if (payload.name) {
             const existingCollection = await Collection.findOne({
                 _id: { $ne: payload.collectionId },
-                name: new RegExp(payload.name, 'gi'),
+                name: payload?.name,
                 userId: payload.userId,
             })
             if (existingCollection)
-                return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                return res.status(HTTP_STATUS_CODE.OK).send({
                     success: SUCCESS_STATUS.FALSE,
                     message: ERROR_MESSAGE.COLLECTION_EXIST_ALREADY,
                 })

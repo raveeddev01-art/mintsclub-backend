@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const Bid = require('../models/bids.model')
 const NFT = require('../models/nfts.model')
+const socket = require('../../utils/socket')
 
 /**
  * Auction Schema
@@ -41,6 +42,7 @@ const AuctionSchema = new mongoose.Schema(
         bids: [{ type: mongoose.Schema.Types.ObjectId, ref: Bid }],
         highestBidder: { type: String },
         globalState: { type: Object, default: null },
+        auctionStarted: { type: Boolean, default: false },
         // bids: [
         //     { bidId: { type: mongoose.Schema.Types.ObjectId, ref: Bid } },
         //     { bidAmount: { type: Number } },
@@ -75,6 +77,17 @@ AuctionSchema.post('save', async function (next) {
             },
             { new: true }
         )
+
+        socket.io.to(`${this.nftId}`).emit('auctionCreated', {
+            auctionId: this?._id,
+            nftId: this?.nftId,
+        })
+
+        socket.io.emit('newAuctionCreated', {
+            auctionId: this?._id,
+            createdBy: this?.userId,
+            nftId: this?.userId,
+        })
     } catch (error) {
         console.log('error', error)
     }

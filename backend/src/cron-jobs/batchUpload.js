@@ -23,6 +23,7 @@ const AdmZip = require('adm-zip')
 const fs = require('fs')
 const https = require('https')
 const path = require('path')
+const socket = require('../utils/socket')
 // const axios = require('axios')
 
 module.exports.batchCrone = async () => {
@@ -57,6 +58,13 @@ module.exports.batchCrone = async () => {
                 { _id: batchToBeProcessed?._id },
                 { $set: { status: 'processing' } }
             )
+
+            socket.io
+                .to(`${batchToBeProcessed?.userId}`)
+                .emit('batchStatusUpdated', {
+                    batchId: batchToBeProcessed?._id,
+                    userId: batchToBeProcessed?.userId,
+                })
 
             const acceptedImageFiles = ['jpg', 'png', 'jpeg']
             const acceptedFiles = [...acceptedImageFiles, 'json']
@@ -213,6 +221,16 @@ module.exports.batchCrone = async () => {
                                                 ),
                                             ])
 
+                                            socket.io
+                                                .to(
+                                                    `${batchToBeProcessed?.userId}`
+                                                )
+                                                .emit('batchStatusUpdated', {
+                                                    batchId:
+                                                        batchToBeProcessed?._id,
+                                                    userId: batchToBeProcessed?.userId,
+                                                })
+
                                             const remainingFilesInSideFolder =
                                                 fs.readdirSync(
                                                     'zipExtractedFiles',
@@ -256,9 +274,9 @@ module.exports.batchCrone = async () => {
                                                 .toString()
                                                 .substring(1),
                                             properties:
-                                                jsonMetadata?.properties,
-                                            levels: jsonMetadata?.levels,
-                                            stats: jsonMetadata?.stats,
+                                                jsonMetadata?.properties || [],
+                                            levels: jsonMetadata?.levels || [],
+                                            stats: jsonMetadata?.stats || [],
                                             copies: 1,
                                             creatorId:
                                                 batchToBeProcessed?.userId,
@@ -288,7 +306,6 @@ module.exports.batchCrone = async () => {
                                             blockchainType:
                                                 batchToBeProcessed?.blockchainType,
                                         }
-
                                         const metadataUriResponse =
                                             await uploadJsonToIpfs(
                                                 {
@@ -351,6 +368,13 @@ module.exports.batchCrone = async () => {
                                 //         : 'batchUploaded',
                                 // }),
                             ])
+
+                            socket.io
+                                .to(`${batchToBeProcessed?.userId}`)
+                                .emit('batchStatusUpdated', {
+                                    batchId: batchToBeProcessed?._id,
+                                    userId: batchToBeProcessed?.userId,
+                                })
                         }
                     } catch (err) {
                         await updateFields(
@@ -374,6 +398,14 @@ module.exports.batchCrone = async () => {
 
                         fs.unlinkSync(downloadedFilePath)
                         console.log('BATCH-UPLOAD-CRON-JOB: Zip File Removed')
+
+                        socket.io
+                            .to(`${batchToBeProcessed?.userId}`)
+                            .emit('batchStatusUpdated', {
+                                batchId: batchToBeProcessed?._id,
+                                userId: batchToBeProcessed?.userId,
+                            })
+
                         throw err
                     }
                 })
@@ -387,6 +419,13 @@ module.exports.batchCrone = async () => {
                 { _id: batchToBeProcessed?._id },
                 { $set: { status: 'failed', message: err?.message } }
             )
+
+            socket.io
+                .to(`${batchToBeProcessed?.userId}`)
+                .emit('batchStatusUpdated', {
+                    batchId: batchToBeProcessed?._id,
+                    userId: batchToBeProcessed?.userId,
+                })
             return false
         }
     })
