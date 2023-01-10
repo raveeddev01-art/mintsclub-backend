@@ -6,7 +6,6 @@ const Categories = require('../../models/categories.model')
 const nftAuctions = require('../../models/auctions.model')
 const Bid = require('../../models/bids.model')
 const helpers = require('../../helpers')
-const socket = require('../../../utils/socket')
 
 const {
     SUCCESS_MESSAGE,
@@ -384,7 +383,6 @@ exports.endAuction = async (req, res, next) => {
             { _id: auctionEndNft[0]?.nftId?._id },
             { $set: payloadUpdateNFT }
         )
-
         res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.AUCTION_ENDED,
@@ -426,18 +424,6 @@ exports.cancelList = async (req, res, next) => {
             { $set: payloadUpdateAuctionStatus }
         )
         await helpers.auction.updateActivityforCancelList(cancelList[0])
-
-        // Sending Event for get list of auction on nft details page.
-        socket.io.to(`${cancelList[0]?.nftId?._id}`).emit('auctionCancelled', {
-            auctionId: payload?.auctionId,
-            nftId: cancelList[0]?.nftId?._id,
-        })
-
-        // Sending Event for get list of auction on page 1
-        socket.io.emit('auctionUpdated', {
-            auctionId: payload?.auctionId,
-            nftId: cancelList[0]?.nftId?._id,
-        })
 
         res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
