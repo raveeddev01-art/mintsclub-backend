@@ -123,7 +123,7 @@ const getUserSeenNotification = async (request, response) => {
 
     return response.status(HTTP_STATUS_CODE.OK).json(userNotification);
   } catch (error) {
-    console.log("updateNotification error ====", error);
+    console.log("Get User Seen Notification ====", error);
     return response.status(HTTP_STATUS_CODE.INTERNAL_SERVER).json(error);
   }
 };
@@ -131,14 +131,13 @@ const getUserSeenNotification = async (request, response) => {
 const getAllNotifications = async (request, response) => {
   try {
     const { user } = request;
-
     const userNotification = await getUserNotifications(
       user.id
     );
 
     return response.status(HTTP_STATUS_CODE.OK).json(userNotification);
   } catch (error) {
-    console.log("updateNotification error ====", error);
+    console.log("get all Notification error ====", error);
     return response.status(HTTP_STATUS_CODE.INTERNAL_SERVER).json(error);
   }
 };
