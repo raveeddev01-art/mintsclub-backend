@@ -2,7 +2,6 @@ const mongoose = require('mongoose')
 const Collection = require('../models/collection.model')
 const NftTokens = require('../models/nftTokens.model')
 const ActivityModal = require('../models/item-activity.modal')
-const socket = require('../../utils/socket')
 
 /**
  * NFT Schema
@@ -10,7 +9,7 @@ const socket = require('../../utils/socket')
  */
 const NFTSchema = new mongoose.Schema(
     {
-        name: { type: String, required: true, unique: true },
+        name: { type: String, required: true },
         description: { type: String },
         creatorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -80,8 +79,6 @@ NFTSchema.post('save', async function (next) {
             }
             await ActivityModal.create(activityPayload)
         }
-
-        socket.io.to(`${this.userId}`).emit('nftCreated', { nftId: this._id })
     } catch (error) {
         console.log('error', error)
     }

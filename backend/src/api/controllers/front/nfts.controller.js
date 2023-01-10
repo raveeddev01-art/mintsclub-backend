@@ -503,31 +503,3 @@ exports.myNftListing = async (req, res, next) => {
         return next(error)
     }
 }
-
-exports.getNftByDetails = async (request, response, next) => {
-    try {
-        const { name } = request.query
-
-        if (!name) {
-            throw new Error('Name required')
-        }
-
-        const nftAlreadyExists = await NFT.findOne({ name })
-        if (nftAlreadyExists) {
-            return response.status(HTTP_STATUS_CODE.OK).send({
-                success: SUCCESS_STATUS.FALSE,
-                message: ERROR_MESSAGE.NFT_EXIST_ALREADY,
-            })
-        }
-
-        return response.status(HTTP_STATUS_CODE.OK).send({
-            success: SUCCESS_STATUS.TRUE,
-            message: "You're good to update the NFT",
-        })
-    } catch (error) {
-        return response.status(HTTP_STATUS_CODE.INTERNAL_SERVER).send({
-            success: SUCCESS_STATUS.FALSE,
-            error: error,
-        })
-    }
-}
