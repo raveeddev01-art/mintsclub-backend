@@ -14,13 +14,13 @@ const {
  */
 const AdminSchema = new mongoose.Schema(
     {
-        name: { type: String, required: true },
+        name: { type: String },
         email: { type: String, required: true, lowercase: true, unique: true },
         phone: { type: String },
         address: { type: String },
         password: { type: String, required: true },
-        roleId: { type: String, required: true },
-        status: { type: Boolean, required: true, default: false },
+        roleId: { type: String, default:'admin' },
+        status: { type: Boolean, default: false },
         image: { type: String },
         resetCode: { type: String },
     },
