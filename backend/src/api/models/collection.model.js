@@ -13,7 +13,7 @@ const CollectionSchema = new mongoose.Schema(
             required: true,
         },
         categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
-        name: { type: String, required: true },
+        name: { type: String, required: true , unique : true },
         isApproved: { type: Boolean, required: false },
         logo: { type: String, required: true },
         featuredImg: { type: String },

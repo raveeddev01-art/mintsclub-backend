@@ -31,6 +31,10 @@ const ERROR_MESSAGE = {
     USER_DOES_NOT_EXIST: 'User does not exist',
     EMAIL_ALREADY_SUBSCRIBED: 'Email is already subscribed',
     SIGNATURE_VERIFICATION_FAILED: 'Signature verification failed',
+    PASSWORD_INCORRECT:"please enter Correct Password",
+    USER_NOT_FOUND:'Please Enter Valid Email',
+    UNAUTHORIZED:"Please Login First"
+
 }
 
 const SUCCESS_MESSAGE = {

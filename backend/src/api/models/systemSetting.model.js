@@ -2,7 +2,8 @@ const mongoose = require('mongoose')
 
 const systemSettingSchema = new mongoose.Schema(
     {
-        sellerFeeBasisPoints: { type: Number, default: 200 },
+        royalityFee: { type: Number },
+        platformFee: { type: Number },
     },
     { timestamps: true }
 )

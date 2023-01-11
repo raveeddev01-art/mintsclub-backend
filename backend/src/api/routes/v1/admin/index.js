@@ -11,6 +11,7 @@ const settingsRoutes = require('./settings.route')
 const faqRoutes = require('./faq.route')
 const contactRoutes = require('./contact.route')
 const approvalsRoutes = require('./approvals.route')
+const systemSettingRoutes =require('./systemSetting.route')
 const router = express.Router()
 
 /**
@@ -28,5 +29,6 @@ router.use('/settings', settingsRoutes)
 router.use('/faq', faqRoutes)
 router.use('/contacts', contactRoutes)
 router.use('/approvals', approvalsRoutes)
+router.use('/systemSetting', systemSettingRoutes)
 
 module.exports = router

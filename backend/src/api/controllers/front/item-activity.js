@@ -7,7 +7,6 @@ const {
 exports.create = async (req, res, next) => {
     try {
         const payload = req.body
-
         const result = await ItemActivity.create(payload)
         if (result) {
             res.status(HTTP_STATUS_CODE.OK).send({
@@ -25,8 +24,10 @@ exports.get = async (req, res, next) => {
     try {
         const payload = {
             nftId: req.query.nftId,
+            activityType: { $ne: 'Bid' },
         }
         const activities = await ItemActivity.find(payload)
+        
 
         res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,

@@ -1,14 +1,24 @@
 /* eslint-disable no-unused-vars */
 const fs = require('fs')
-const passport = require('passport')
-const localStrategy = require('passport-local').Strategy
 const mongoose = require('mongoose')
 const Admin = require('../../models/admin.model')
 const { addImage } = require('../../utils/upload')
 const { checkDuplicate } = require('../../../config/errors')
 const { sendEmail } = require('../../utils/emails/emails')
 const { adminUrl } = require('../../../config/vars')
+const bcrypt = require('bcrypt')
 const randomstring = require('randomstring')
+const jwt = require('jsonwebtoken')
+const {
+    ERROR_MESSAGE,
+    SUCCESS_MESSAGE,
+    SUCCESS_STATUS,
+    HTTP_STATUS_CODE,
+} = require('../../../config/constants')
+const createToken = (adminDetails, secretKey, next) => {
+    return jwt.sign(adminDetails, secretKey)
+    next()
+}
 
 // API to login admin
 exports.login = async (req, res, next) => {
@@ -17,86 +27,34 @@ exports.login = async (req, res, next) => {
 
         email = email.toLowerCase()
         const user = await Admin.findOne({ email }).lean()
-
-        if (!user)
-            return res.status(404).send({
-                success: false,
-                message: 'Incorrect email or password',
+        if (!user) {
+            return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.USER_NOT_FOUND,
             })
-
-        passport.use(
-            new localStrategy(
-                { usernameField: 'email' },
-                (username, password, done) => {
-                    Admin.findOne(
-                        { email: username },
-                        'name email phone address roleId status image password',
-                        (err, user) => {
-                            if (err) return done(err)
-                            else if (!user)
-                                // unregistered email
-                                return done(null, false, {
-                                    success: false,
-                                    message: 'Incorrect email or password',
-                                })
-                            else if (!user.verifyPassword(password))
-                                // wrong password
-                                return done(null, false, {
-                                    success: false,
-                                    message: 'Incorrect email or password',
-                                })
-                            else return done(null, user)
-                        }
-                    )
-                }
-            )
-        )
-
-        // call for passport authentication
-        passport.authenticate('local', async (err, user, info) => {
-            if (err)
-                return res.status(400).send({
-                    err,
-                    success: false,
-                    message: 'Oops! Something went wrong while authenticating',
+        } else {
+            const cmp = await bcrypt.compare(req.body.password, user.password)
+            if (!cmp) {
+                return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                    success: SUCCESS_STATUS.FALSE,
+                    message: ERROR_MESSAGE.PASSWORD_INCORRECT,
                 })
-            // registered user
-            else if (user) {
-                if (!user.status)
-                    return res.status(403).send({
-                        success: false,
-                        message:
-                            'Your account is inactive, kindly contact admin',
-                        user,
-                    })
-                else {
-                    let accessToken = await user.token()
-                    let data = {
-                        ...user._doc,
-                        accessToken,
-                    }
-                    await Admin.updateOne(
-                        { _id: user._id },
-                        { $set: { accessToken } },
-                        { upsert: true }
-                    )
-                    
-                    return res.status(200).send({
-                        success: true,
-                        message: 'Admin logged in successfully',
-                        data,
-                    })
-                }
             }
-            // unknown user or wrong password
-            else
-                return res.status(402).send({
+            if (!user.status)
+                return res.status(403).send({
                     success: false,
-                    message: 'Incorrect email or password',
+                    message:
+                        'Your account is not Approved, kindly contact admin',
+                    user,
                 })
-        })(req, res)
+            const token = createToken(
+                { _id: Admin._id, role: 'admin' },
+                process.env.JWT_SECRET
+            )
+            return res.status(200).send({ token, user: user })
+        }
     } catch (error) {
-        return next(error)
+        return res.status(404).json(error.message)
     }
 }
 
@@ -109,10 +67,9 @@ exports.create = async (req, res, next) => {
             const imgData = fs.readFileSync(image.path)
             payload.image = await addImage(imgData)
         }
-
-        const admin = new Admin(payload)
+        const { status, roleId, resetCode, ...otherAttributes } = payload
+        const admin = new Admin(otherAttributes)
         await admin.save()
-
         return res.send({
             success: true,
             message: 'Admin user created successfully',
