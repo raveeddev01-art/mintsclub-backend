@@ -36,6 +36,18 @@ exports.create = async (req, res, next) => {
             await helpers.bid.getPendingHighestBigByAuctionId(payload.auctionId)
 
         const bid = await Bid.create(payload)
+        const auctionDetails = await Auction.findOne().where(
+            '_id',
+            payload.auctionId
+        )
+        if (auctionDetails?.status === 'reclaimNft' && bid) {
+            await Auction.findOneAndUpdate(
+                { _id: payload?.auctionId },
+                {
+                    status: 'claimNft',
+                }
+            )
+        }
         await Auction.findOneAndUpdate(
             { _id: payload?.auctionId },
             {
