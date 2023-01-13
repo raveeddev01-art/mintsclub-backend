@@ -16,31 +16,18 @@ const notificationSchema = new Schema(
         isSeen: { type: Boolean, default: false },
         type: {
             type: String,
-            enum: [
-                // "refundBid",
-                'claimNft',
-                // "claimPrice",
+            enum: [            
+                'claimNft',          
                 'upBid',
                 'addBid',
                 // "auctionEnd",
-                // "reClaimNft",
                 'endAuction',
                 'startAuction',
                 'bidWinner',
-                // "noBidAuctionEnded",
-                // "staked",
-                // "successfulPurchase",
-                // "fractionSold",
-                // "claimMainNft",
+                
                 'transferred',
                 'batchUploaded',
-                // "launchUploaded",
-                // "rentTimeout",
-                // "getRentedNft",
-                // "nftReturned",
-                // "securityClaimed",
-                // "claimedRentedNft",
-                // "noRenter",
+                
             ],
         },
     },
@@ -51,7 +38,4 @@ notificationSchema.post('save', (doc) => {
     socket.io.to(`${doc?.toUserId}`).emit('notification', doc)
 })
 
-// notificationSchema.plugin(mongoosePaginate);
-// const Nft = model("Notification", notificationSchema);
-// module.exports = Nft;
 module.exports = model("Notification", notificationSchema);
