@@ -117,6 +117,11 @@ exports.list = async (req, res, next) => {
     try {
         let { page, limit, nftId, auctionId } = req.query
 
+        if (!auctionId || auctionId === 'undefined' || auctionId == 'null') {
+            return response
+                .status(HTTP_STATUS_CODE.OK)
+                .send({ success: false, message: 'Auction Id not found' })
+        }
         page = page !== undefined && page !== '' ? parseInt(page) : 1
         limit = limit !== undefined && limit !== '' ? parseInt(limit) : 10
         const filter = {}

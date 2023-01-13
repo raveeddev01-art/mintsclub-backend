@@ -7,15 +7,19 @@ const {
 } = require('../../../config/constants')
 const validateCreateBid = (req, res, next) => {
     const schema = Joi.object().keys({
-        bidBy: Joi.string().alphanum().min(12).max(24).required(),
-        ownerId: Joi.string().alphanum().min(12).max(24).required(),
-        nftId: Joi.string().alphanum().min(12).max(24).required(),
+        bidBy: Joi.string().alphanum(),
+
+        ownerId: Joi.string().alphanum(),
+
+        nftId: Joi.string().alphanum(),
+
         bidAmount: Joi.number().required(),
         blockchainType: Joi.string()
             .required()
             .valid('ethereum', 'solana', 'bsc', 'polygon', 'algorand'),
         isAccepted: Joi.boolean().default(false),
-        auctionId: Joi.string().alphanum().min(12).max(24).required(),
+        auctionId: Joi.string().alphanum(),
+
         expiryDate: Joi.date().allow(''),
 
         globalState: Joi.alternatives().conditional('blockchainType', [
