@@ -45,12 +45,8 @@ const validateCreateBid = (req, res, next) => {
             },
         ]),
 
-        fromAddress: Joi.string()
-            // .regex(/^0x[a-fA-F0-9]{40}$/)
-            .required(),
-        toAddress: Joi.string()
-            // .regex(/^0x[a-fA-F0-9]{40}$/)
-            .required(),
+        fromAddress: Joi.string().required(),
+        toAddress: Joi.string().required(),
     })
     const options = {
         errors: {
