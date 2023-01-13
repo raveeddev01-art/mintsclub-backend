@@ -5,13 +5,14 @@ const {
     updateAuction,
     updateAuctionFields,
 } = require('../../../backend/src/api/helpers/auction.helper')
+const Notification = require('../api/models/notification.model')
 const socket = require('../utils/socket')
 
 module.exports.startCron = () => {
     try {
         cron.schedule('*/5 * * * * *', async () => {
             const auctions = await getAllActiveAuctionsForCronJob()
-
+            // console.log('This is auction:', auctions);
             if (!auctions.length) return false
 
             auctions.forEach(async (auction) => {
@@ -44,6 +45,14 @@ module.exports.startCron = () => {
                         await updateAuction(_id, 'reclaimNft')
                     }
 
+                    await Notification.create({
+                        toUserId: auctions?.userId,
+                        // fromUserId: payload?.bidBy,
+                        type: 'endAuction',
+                        nftId: auction?.nftId,
+                        auctionId: _id,
+                    })
+
                     socket?.io
                         ?.to(`${auction?.nftId}`)
                         .emit('auctionTimeEnded', {
@@ -58,6 +67,14 @@ module.exports.startCron = () => {
                     socket?.io?.to(`${auction?.nftId}`).emit('auctionStarted', {
                         auctionId: _id,
                         nftId: auction?.nftId,
+                    })
+
+                    await Notification.create({
+                        toUserId: auctions?.userId,
+                        // fromUserId: payload?.bidBy,
+                        type: 'startAuction',
+                        nftId: auction?.nftId,
+                        auctionId: _id,
                     })
                     socket?.io.emit('auctionLive', {
                         auctionId: _id,
