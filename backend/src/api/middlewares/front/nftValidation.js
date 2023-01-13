@@ -48,7 +48,7 @@ const validateNFTSchema = (req, res, next) => {
             address: Joi.string().allow(''),
             share: Joi.number().allow(''),
         }),
-        sellerFeeBasisPoints: Joi.number().optional(),
+        sellerFeeBasisPoints: Joi.optional(),
         // fileType: Joi.string().valid('image', 'audio', 'video').required(),
         fileType: Joi.alternatives().conditional('blockchainType', [
             {

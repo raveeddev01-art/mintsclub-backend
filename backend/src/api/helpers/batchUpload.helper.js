@@ -16,9 +16,7 @@ const checkNFTwithSameNameAlreadyExists = async (name) => {
     })
     if (nft > 0) {
         const number = parseInt(nft) + 1
-        if (splitName?.length > 1) {
-            return `${splitName[0].trim()} #${parseInt(splitName[1]) + number}`
-        }
+
         return `${splitName[0].trim()} #${number}`
     }
     return name

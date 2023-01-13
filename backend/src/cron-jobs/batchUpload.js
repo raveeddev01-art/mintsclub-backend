@@ -321,24 +321,103 @@ module.exports.batchCrone = async () => {
                                                 ?.metaDataUrl
                                         )
 
-                                        const NFTAdded = await NFT.create({
-                                            ...payload,
-                                            metaData:
-                                                metadataUriResponse?.dataInput
-                                                    ?.metaDataUrl,
-                                        })
+                                        try {
+                                            const NFTAdded = await NFT.create({
+                                                ...payload,
+                                                metaData:
+                                                    metadataUriResponse
+                                                        ?.dataInput
+                                                        ?.metaDataUrl,
+                                            })
 
-                                        if (NFTAdded?._id) {
-                                            await BatchUploadFilesHistory.create(
-                                                {
-                                                    nftId: NFTAdded?._id,
-                                                    fileName: imageFile?.name,
+                                            if (NFTAdded?._id) {
+                                                socket.io
+                                                    .to(
+                                                        `${batchToBeProcessed?.userId}`
+                                                    )
+                                                    .emit(
+                                                        'batchStatusUpdated',
+                                                        {
+                                                            batchId:
+                                                                batchToBeProcessed?._id,
+                                                            userId: batchToBeProcessed?.userId,
+                                                        }
+                                                    )
+
+                                                await BatchUploadFilesHistory.create(
+                                                    {
+                                                        nftId: NFTAdded?._id,
+                                                        fileName:
+                                                            imageFile?.name,
+                                                        batchId:
+                                                            batchToBeProcessed?._id,
+                                                        zipFile:
+                                                            downloadedFilePath,
+                                                    }
+                                                )
+                                                fs.unlinkSync(jsonFile?.path)
+                                            }
+                                        } catch (err) {
+                                            console.log(
+                                                '🚀 ~ file: batchUpload.js:361 ~ err',
+                                                err
+                                            )
+                                            await Promise.all([
+                                                updateFields(
+                                                    {
+                                                        _id: batchToBeProcessed?._id,
+                                                    },
+                                                    {
+                                                        $set: {
+                                                            status: 'failed',
+                                                            message:
+                                                                err.message,
+                                                        },
+                                                    }
+                                                ),
+                                            ])
+
+                                            socket.io
+                                                .to(
+                                                    `${batchToBeProcessed?.userId}`
+                                                )
+                                                .emit('batchStatusUpdated', {
                                                     batchId:
                                                         batchToBeProcessed?._id,
-                                                    zipFile: downloadedFilePath,
-                                                }
+                                                    userId: batchToBeProcessed?.userId,
+                                                })
+
+                                            const remainingFilesInSideFolder =
+                                                fs.readdirSync(
+                                                    'zipExtractedFiles',
+                                                    { withFileTypes: true }
+                                                )
+
+                                            for (const {
+                                                name,
+                                            } of remainingFilesInSideFolder) {
+                                                console.log(
+                                                    'File Removed => ',
+                                                    name
+                                                )
+                                                fs.unlinkSync(
+                                                    path.join(
+                                                        'zipExtractedFiles',
+                                                        name
+                                                    )
+                                                )
+                                            }
+
+                                            console.log(
+                                                'BATCH-UPLOAD-CRON-JOB: Other Files Removed'
                                             )
-                                            fs.unlinkSync(jsonFile?.path)
+
+                                            fs.unlinkSync(downloadedFilePath)
+                                            console.log(
+                                                'BATCH-UPLOAD-CRON-JOB: Zip File Removed'
+                                            )
+
+                                            return false
                                         }
                                     }
                                 } else {
