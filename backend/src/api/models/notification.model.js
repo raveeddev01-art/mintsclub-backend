@@ -25,6 +25,7 @@ const notificationSchema = new Schema(
                 // "auctionEnd",
                 // "reClaimNft",
                 'endAuction',
+                'startAuction',
                 'bidWinner',
                 // "noBidAuctionEnded",
                 // "staked",

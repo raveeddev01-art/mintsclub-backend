@@ -21,6 +21,7 @@ module.exports.startCron = () => {
                     auctionEndDate,
                     auctionStartDate,
                     auctionStarted,
+                    userId,
                 } = auction
 
                 const auctionStartDateTime = moment(auctionStartDate)
@@ -46,8 +47,8 @@ module.exports.startCron = () => {
                     }
 
                     await Notification.create({
-                        toUserId: auctions?.userId,
-                        // fromUserId: payload?.bidBy,
+                        toUserId: userId,
+                        fromUserId: userId,
                         type: 'endAuction',
                         nftId: auction?.nftId,
                         auctionId: _id,
@@ -68,10 +69,10 @@ module.exports.startCron = () => {
                         auctionId: _id,
                         nftId: auction?.nftId,
                     })
-
+        
                     await Notification.create({
-                        toUserId: auctions?.userId,
-                        // fromUserId: payload?.bidBy,
+                        toUserId: userId,
+                        fromUserId: userId,
                         type: 'startAuction',
                         nftId: auction?.nftId,
                         auctionId: _id,
