@@ -382,6 +382,7 @@ exports.getNFTsbyCollection = async (req, res) => {
                     modal: 'User',
                 },
             ])
+            .limit(4)
             .lean()
 
         res.status(HTTP_STATUS_CODE.OK).send({
