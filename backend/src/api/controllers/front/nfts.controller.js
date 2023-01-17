@@ -370,40 +370,20 @@ exports.updateNft = async (req, res, next) => {
 exports.getNFTsbyCollection = async (req, res) => {
     try {
         const collectionId = req.body.collectionId
-        const NFTs = await NFT.aggregate([
-            {
-                $match: { collectionId: ObjectId(collectionId) },
-            },
-            {
-                $lookup: {
-                    from: 'auctions',
-                    foreignField: 'nftId',
-                    localField: '_id',
-                    as: 'auction',
+
+        const NFTs = await NFT.find({ collectionId })
+            .populate([
+                {
+                    path: 'activeAuction',
+                    modal: 'Auction',
                 },
-            },
-            {
-                $unwind: {
-                    path: '$auction',
-                    preserveNullAndEmptyArrays: true,
+                {
+                    path: 'userId',
+                    modal: 'User',
                 },
-            },
-            {
-                $lookup: {
-                    from: 'users',
-                    foreignField: '_id',
-                    localField: 'ownerId',
-                    as: 'owner',
-                },
-            },
-        ])
-        for (const nft of NFTs) {
-            const findCount = await Likes.findOne().where('nftId', nft._id)
-            nft.likeCount = 0
-            if (findCount) {
-                nft.likeCount = findCount.count
-            }
-        }
+            ])
+            .lean()
+
         res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.NFTS_BY_COLLECTION,
