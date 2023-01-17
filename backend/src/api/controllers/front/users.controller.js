@@ -251,11 +251,22 @@ exports.createUser = async (req, res, next) => {
     try {
         let payload = {
             address: req.body.address,
+            blockchainType: req.body.blockchainType,
+        }
+
+        const checkUserExists = await UserModal.findOne(payload)
+
+        if (checkUserExists) {
+            return res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.TRUE,
+                data: checkUserExists,
+                message: SUCCESS_MESSAGE.USER_CREATED,
+            })
         }
 
         payload.profileImage = null
         payload.totalETH = 0
-        payload.blockchainType = req.body.blockchainType
+        // payload.blockchainType = req.body.blockchainType
         payload.isApproved = false
 
         payload.nounce = Math.floor(Math.random() * 1000000)
@@ -289,6 +300,10 @@ exports.authenticate = async (req, res, next) => {
 
         const accessToken = await user.token()
         user = user._doc
+        console.log(
+            '🚀 ~ file: users.controller.js:292 ~ exports.authenticate= ~ user',
+            user
+        )
 
         user.isApproved = true
         const data = {
@@ -324,10 +339,18 @@ exports.authenticate = async (req, res, next) => {
 
         if (blockchainType?.toLowerCase() !== 'solana') {
             const msgBuffer = ethUtil.bufferToHex(Buffer.from(msg, 'utf8'))
+            console.log(
+                '🚀 ~ file: users.controller.js:327 ~ exports.authenticate= ~ msgBuffer',
+                msgBuffer
+            )
             const signAddress = sigUtil.recoverPersonalSignature({
                 data: msgBuffer,
                 sig: signature,
             })
+            console.log(
+                '🚀 ~ file: users.controller.js:335 ~ exports.authenticate= ~ signAddress',
+                signAddress
+            )
 
             if (signAddress.toLowerCase() === address.toLowerCase()) {
                 user.nounce = Math.floor(Math.random() * 1000000)
