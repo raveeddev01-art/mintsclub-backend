@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const Bid = require('../models/bids.model')
 const NFT = require('../models/nfts.model')
 const socket = require('../../utils/socket')
+const Notification = require('../models/notification.model')
 
 /**
  * Auction Schema
@@ -93,4 +94,43 @@ AuctionSchema.post('save', async function (next) {
     }
 })
 
-module.exports = mongoose.model('Auction', AuctionSchema)
+    
+AuctionSchema.post('findOneAndUpdate', async function (doc) {
+    const id = doc._id;
+    const data = await Auction.findOne(id)
+    
+    if (data.status === 'claimNft' || data.status === 'reclaimNft') {
+        Notification.create({
+            toUserId: data?.userId,
+            fromUserId: data?.userId,
+            type: 'endAuction',
+            nftId: data?.nftId,
+            auctionId: data?._id,
+        })
+    }
+    if (
+        data.auctionStarted === true &&
+        data.status === 'active' &&
+        data.highestBid === 0
+    ) {
+        Notification.create({
+            toUserId: data.userId,
+            fromUserId: data.userId,
+            type: 'startAuction',
+            nftId: data?.nftId,
+            auctionId: data._id,
+        })
+    }
+
+    if (data.status === 'claimNft' && data.highestBidder) {
+        Notification.create({
+            toUserId: data?.userId,
+            fromUserId: data?.userId,
+            type: 'claimNft',
+            nftId: data?.nftId,
+            auctionId: data?._id,
+        })
+    }
+})
+const Auction  = mongoose.model('Auction', AuctionSchema)
+module.exports = Auction

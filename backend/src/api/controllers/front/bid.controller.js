@@ -58,25 +58,7 @@ exports.create = async (req, res, next) => {
                 globalState,
             }
         )
-        // TODO: Send notification for placing bid
-
-        await Notification.create({
-            toUserId: auctionDetails?.userId,
-            fromUserId: payload?.bidBy,
-            type: 'addBid',
-            nftId: payload?.nftId,
-            auctionId: payload?.auctionId,
-        })
-
-        // TODO: send notification to previous lastest bidder
-
-        await Notification.create({
-            toUserId: maxBidByAnotherUser[0]?.bidBy,
-            fromUserId: payload?.bidBy,
-            type: 'upBid',
-            nftId: payload?.nftId,
-            auctionId: payload?.auctionId,
-        })
+        
 
         if (bid) {
             // helper function to update existing bid

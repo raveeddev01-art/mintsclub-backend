@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const Nft = require('../models/nfts.model')
 const User = require('../models/users.model')
+const Notification = require('../models/notification.model')
 const ObjectId = require('mongoose').Types.ObjectId
 const Auction = require('../models/auctions.model')
 const socket = require('../../utils/socket')
@@ -67,7 +68,25 @@ BidSchema.post('save', function (doc) {
     }
     socket.io.to(`${doc?.nftId}`).emit('bidPlaced', { price })
 
+
+    Notification.create({
+        toUserId: doc.userId,
+        fromUserId: doc.bidBy,
+        type: 'addBid',
+        nftId: doc.nftId,
+        auctionId: doc.auctionId,
+    })
+
+    Notification.create({
+        toUserId: doc?.bidBy,
+        fromUserId: doc?.bidBy,
+        type: 'upBid',
+        nftId: doc?.nftId,
+        auctionId: doc?.auctionId,
+    })
 })
+
+
 
 // BidSchema.post('save', async function (next) {
 //     try {

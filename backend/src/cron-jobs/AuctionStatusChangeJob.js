@@ -5,7 +5,7 @@ const {
     updateAuction,
     updateAuctionFields,
 } = require('../../../backend/src/api/helpers/auction.helper')
-const Notification = require('../api/models/notification.model')
+
 const socket = require('../utils/socket')
 
 module.exports.startCron = () => {
@@ -46,14 +46,7 @@ module.exports.startCron = () => {
                         await updateAuction(_id, 'reclaimNft')
                     }
 
-                    await Notification.create({
-                        toUserId: userId,
-                        fromUserId: userId,
-                        type: 'endAuction',
-                        nftId: auction?.nftId,
-                        auctionId: _id,
-                    })
-
+                
                     socket?.io
                         ?.to(`${auction?.nftId}`)
                         .emit('auctionTimeEnded', {
@@ -70,13 +63,6 @@ module.exports.startCron = () => {
                         nftId: auction?.nftId,
                     })
         
-                    await Notification.create({
-                        toUserId: userId,
-                        fromUserId: userId,
-                        type: 'startAuction',
-                        nftId: auction?.nftId,
-                        auctionId: _id,
-                    })
                     socket?.io.emit('auctionLive', {
                         auctionId: _id,
                         nftId: auction?.nftId,

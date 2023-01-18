@@ -252,7 +252,7 @@ exports.createUser = async (req, res, next) => {
         let payload = {
             address: req.body.address,
         }
-
+        
         payload.profileImage = null
         payload.totalETH = 0
         payload.blockchainType = req.body.blockchainType
