@@ -35,6 +35,7 @@ module.exports.startCron = () => {
                 )
 
                 if (remainingTime <= 0) {
+                    console.log('\t\t\tAuction Time Ended')
                     if (auction.bids.length > 0) {
                         await updateAuction(_id, 'claimNft')
                     }
@@ -52,6 +53,7 @@ module.exports.startCron = () => {
                 }
 
                 if (remainingStartTime <= 0 && !auctionStarted) {
+                    console.log('\t\t\tAuction Time Started...')
                     await updateAuctionFields(_id, { auctionStarted: true })
                     socket?.io?.to(`${auction?.nftId}`).emit('auctionStarted', {
                         auctionId: _id,

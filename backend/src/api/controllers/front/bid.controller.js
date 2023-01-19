@@ -118,7 +118,7 @@ exports.list = async (req, res, next) => {
         let { page, limit, nftId, auctionId } = req.query
 
         if (!auctionId || auctionId === 'undefined' || auctionId == 'null') {
-            return response
+            return res
                 .status(HTTP_STATUS_CODE.OK)
                 .send({ success: false, message: 'Auction Id not found' })
         }
