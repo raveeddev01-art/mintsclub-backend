@@ -31,10 +31,9 @@ const ERROR_MESSAGE = {
     USER_DOES_NOT_EXIST: 'User does not exist',
     EMAIL_ALREADY_SUBSCRIBED: 'Email is already subscribed',
     SIGNATURE_VERIFICATION_FAILED: 'Signature verification failed',
-    PASSWORD_INCORRECT:"please enter Correct Password",
-    USER_NOT_FOUND:'Please Enter Valid Email',
-    UNAUTHORIZED:"Please Login First"
-
+    PASSWORD_INCORRECT: 'please enter Correct Password',
+    USER_NOT_FOUND: 'Please Enter Valid Email',
+    UNAUTHORIZED: 'Please Login First',
 }
 
 const SUCCESS_MESSAGE = {
@@ -77,7 +76,9 @@ const SUCCESS_MESSAGE = {
     NFT_DELETED: 'NFT deleted successfully',
     MY_NFTS_FETCHED: 'My NFTs fetched successfully',
     OWNERSHIP_TRANSFERED: 'Ownership transferred successfully',
-    AUCTION_ENDED: 'Auction Ended successfully',
+    AUCTION_ENDED: 'Auction ended successfully',
+    ALGO_AUCTION_ENDED:
+        'Auction ended successfully and NFT has been transferred to highest bidder.',
     TOKEN_ADDED_FOR_NFT: 'Token added for nft successfully',
     OFFER_MADE_SUCCESSFULLY: 'You have made offer successfully',
     OFFER_CANCELLED: 'Your Offer has been cancelled successfully',
