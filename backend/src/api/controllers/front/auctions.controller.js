@@ -389,11 +389,17 @@ exports.endAuction = async (req, res, next) => {
             nftId: auctionDetail?.nftId,
             userId: auctionDetail?.userId,
         })
-
-        res.status(HTTP_STATUS_CODE.OK).send({
-            success: SUCCESS_STATUS.TRUE,
-            message: SUCCESS_MESSAGE.AUCTION_ENDED,
-        })
+        if (auctionEndNft[0].nftId.blockchainType === 'algorand') {
+            res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.TRUE,
+                message: SUCCESS_MESSAGE.ALGO_AUCTION_ENDED,
+            })
+        } else {
+            res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.TRUE,
+                message: SUCCESS_MESSAGE.AUCTION_ENDED,
+            })
+        }
     } catch (err) {
         return next(err)
     }
