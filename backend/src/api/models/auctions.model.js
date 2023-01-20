@@ -98,7 +98,7 @@ AuctionSchema.post('save', async function (next) {
 AuctionSchema.post('findOneAndUpdate', async function (doc) {
     const id = doc._id;
     const data = await Auction.findOne(id)
-    
+
     if (data.status === 'claimNft' || data.status === 'reclaimNft') {
         Notification.create({
             toUserId: data?.userId,

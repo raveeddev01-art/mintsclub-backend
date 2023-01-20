@@ -1,6 +1,6 @@
 // const fs = require('fs')
 const Notification = require('../../models/notification.model')
-const Collection = require('../../models/collection.model')
+const { ObjectId } = require('mongodb')
 
 const addNotification = async (payload) => {
     const notification = new Notification(payload)
@@ -13,7 +13,7 @@ const addManyNotification = async (payload) => {
 }
 
 const getUserUnSeenNotifications = async (userId) => {
-    return await Notification.find({ userId, isSeen: false })
+    return await Notification.find({ toUserId: userId, isSeen: false })
 }
 
 
@@ -22,14 +22,14 @@ const updateNotifications = async (notificationId, data) => {
 }
 
 const getUserSeenNotifications = async (userId) => {
-    return await Notification.find({ userId, isSeen: true }).sort({
+    return await Notification.find({ toUserId: userId, isSeen: true }).sort({
         createdAt: -1,
     })
 }
 
 const getUserNotifications = async (userId) => {
-
-    return await Notification.find({ userId }).sort({
+    // console.log('This is userId', userId);
+    return await Notification.find({toUserId: userId}).sort({
         createdAt: -1,
     })
 }
@@ -40,7 +40,7 @@ const getUserUnSeenNotification = async (req, res) => {
     try {
         const { user } = req
 
-        const userNotification = await getUserUnSeenNotifications(user.id)
+        const userNotification = await getUserUnSeenNotifications(user)
 
         return res.status(HTTP_STATUS_CODE.OK).json(userNotification)
     } catch (err) {
@@ -88,7 +88,7 @@ const getUserSeenNotification = async (request, response) => {
     try {
         const { user } = request
 
-        const userNotification = await getUserSeenNotifications(user.id)
+        const userNotification = await getUserSeenNotifications(user)
 
         return response.status(HTTP_STATUS_CODE.OK).json(userNotification)
     } catch (error) {
@@ -100,9 +100,13 @@ const getUserSeenNotification = async (request, response) => {
 const getAllNotifications = async (request, response) => {
     try {
         const { user } = request
-        const userNotification = await getUserNotifications(user.id)
-
+        const userNotification = await getUserNotifications(user)
         const Notifications = await Notification.aggregate([
+            {
+                $match: {
+                    toUserId: ObjectId(user),
+                },
+            },
             {
                 $sort: {
                     _id: -1
@@ -121,9 +125,7 @@ const getAllNotifications = async (request, response) => {
                     path: '$nftId',
                     includeArrayIndex: '0',
                     preserveNullAndEmptyArrays: true
-                  }
-
-                
+                  }          
             },
             {
                 $lookup: {
