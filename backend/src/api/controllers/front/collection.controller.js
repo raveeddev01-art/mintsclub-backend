@@ -199,18 +199,14 @@ exports.edit = async (req, res, next) => {
                 message: ERROR_MESSAGE.LOGO_REQUIRED,
             })
         }
-
-        if (payload.name) {
-            const existingCollection = await Collection.findOne({
-                _id: { $ne: payload.collectionId },
-                name: payload?.name,
-                userId: payload.userId,
+        const existingCollection = await Collection.findOne({
+            name: payload.name,
+        })
+        if (existingCollection) {
+            return res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.FALSE,
+                message: ERROR_MESSAGE.COLLECTION_EXIST_ALREADY,
             })
-            if (existingCollection)
-                return res.status(HTTP_STATUS_CODE.OK).send({
-                    success: SUCCESS_STATUS.FALSE,
-                    message: ERROR_MESSAGE.COLLECTION_EXIST_ALREADY,
-                })
         }
 
         const collection = await Collection.findByIdAndUpdate(
