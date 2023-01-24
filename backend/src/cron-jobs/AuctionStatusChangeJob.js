@@ -5,13 +5,14 @@ const {
     updateAuction,
     updateAuctionFields,
 } = require('../../../backend/src/api/helpers/auction.helper')
+
 const socket = require('../utils/socket')
 
 module.exports.startCron = () => {
     try {
         cron.schedule('*/5 * * * * *', async () => {
             const auctions = await getAllActiveAuctionsForCronJob()
-
+            // console.log('This is auction:', auctions);
             if (!auctions.length) return false
 
             auctions.forEach(async (auction) => {
@@ -20,6 +21,7 @@ module.exports.startCron = () => {
                     auctionEndDate,
                     auctionStartDate,
                     auctionStarted,
+                    userId,
                 } = auction
 
                 const auctionStartDateTime = moment(auctionStartDate)
@@ -44,6 +46,7 @@ module.exports.startCron = () => {
                         await updateAuction(_id, 'reclaimNft')
                     }
 
+                
                     socket?.io
                         ?.to(`${auction?.nftId}`)
                         .emit('auctionTimeEnded', {
@@ -59,6 +62,7 @@ module.exports.startCron = () => {
                         auctionId: _id,
                         nftId: auction?.nftId,
                     })
+        
                     socket?.io.emit('auctionLive', {
                         auctionId: _id,
                         nftId: auction?.nftId,

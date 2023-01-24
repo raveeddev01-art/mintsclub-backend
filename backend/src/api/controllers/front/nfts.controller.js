@@ -51,7 +51,7 @@ exports.create = async (req, res, next) => {
             data: result,
         })
     } catch (err) {
-        console.log('nft create error =====', error)
+        console.log("nft create error =====", err);
         return next(err)
     }
 }
@@ -271,7 +271,7 @@ exports.list = async (req, res, next) => {
             //     userId: ObjectId(favourite)
             // })
         }
-        if (req.query.userOwned || req.query.collectionId) {
+        if(req.query.userOwned || req.query.collectionId){
             filter = userOwnedFilter
         } else {
             filter = listingFilter
