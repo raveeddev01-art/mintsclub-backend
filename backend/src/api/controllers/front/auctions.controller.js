@@ -237,6 +237,7 @@ exports.buyNow = async (req, res, next) => {
 
         const nftAuctionDetail = await nftAuctions.findOne({
             nftId: payload.nftId,
+            status: 'active',
         })
 
         //in lazy minting case
@@ -277,7 +278,6 @@ exports.buyNow = async (req, res, next) => {
             copiesCondition =
                 nftAuctionDetail?.copiesForAuction > 0 ? true : false
         }
-
         if (buyNftDetail && copiesCondition) {
             if (
                 buyNftDetail.remainingCopies >
