@@ -28,6 +28,7 @@ const notificationSchema = new Schema(
                 'transferred',
                 'batchUploaded',
                 'auctionEnded',
+                'buyNft',
                 
             ],
         },

@@ -81,7 +81,7 @@ const isDirExist = (fileName) => {
 }
 
 const setStatus = async (id, status) => {
-    await BatchUpload.findByIdAndUpdate({ _id: id }, { $set: { status } })
+    await BatchUpload.findOneAndUpdate({ _id: id }, { $set: { status } })
     return true
 }
 
