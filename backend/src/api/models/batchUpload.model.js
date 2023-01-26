@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const Notification = require('../models/notification.model')
 /**
  * Batch Upload Schema
  * @private
@@ -30,22 +29,4 @@ const BatchUploadSchema = new mongoose.Schema(
     { timestamps: true }
 )
 
-
-BatchUploadSchema.post('findOneAndUpdate', async function(doc){
-    const id = doc._id;
-    const data = await BatchUpload.findOne(id)
-
-    if(data.status === "completed") {
-        Notification.create({
-            toUserId: data?.userId,
-            fromUserId: data?.userId,
-            type: 'batchUploaded',
-            nftId: data?.userId,
-            auctionId: data?.userId,
-            
-        })
-    }
-    
-})
-const BatchUpload =mongoose.model('BatchUpload', BatchUploadSchema)
-module.exports = BatchUpload
+module.exports = mongoose.model('BatchUpload', BatchUploadSchema)
