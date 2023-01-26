@@ -400,6 +400,15 @@ exports.endAuction = async (req, res, next) => {
                 message: SUCCESS_MESSAGE.AUCTION_ENDED,
             })
         }
+        // Socket to Remove NFT from Profile
+        socket.io.to(`${auctionDetail?.nftId}`).emit('auctionUpdated', {
+            nftId: auctionDetail?.nftId,
+            userId: auctionDetail?.userId,
+        })
+        socket.io.to(`${auctionDetail?.nftId}`).emit('auctionEnded', {
+            nftId: auctionDetail?.nftId,
+            // userId: auctionDetail?.userId,
+        })
     } catch (err) {
         return next(err)
     }
