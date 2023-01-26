@@ -86,6 +86,7 @@ const validateNFTFixedTAuctionSchema = (req, res, next) => {
                 // reserveFor: Joi.string().allow(''),
             })
             .required(),
+            userId: Joi.string().alphanum().min(12).max(24).required(),
     })
     const options = {
         errors: {
