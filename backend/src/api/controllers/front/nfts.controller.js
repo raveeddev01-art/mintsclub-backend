@@ -313,6 +313,15 @@ exports.editNft = async (req, res, next) => {
         const update = {
             nftOwnerId: req.body.currentUserId,
         }
+        const existingNft = await NFT.findOne({
+            name: payload.name,
+        })
+        if (existingNft) {
+            return res.status(HTTP_STATUS_CODE.OK).send({
+                success: SUCCESS_STATUS.FALSE,
+                message:  ERROR_MESSAGE.NFT_EXIST_ALREADY,
+            })
+        }
         const updatedNft = await NFT.findOneAndUpdate(filter, update, {
             new: true,
         })

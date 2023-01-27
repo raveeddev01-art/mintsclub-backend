@@ -8,6 +8,7 @@ const Category = require('../../models/categories.model')
 const { uploadFileToS3 } = require('../../utils/s3Bucket.js')
 const validation = require('../../middlewares/front/collectionValidation')
 const helpers = require('../../helpers')
+const socket = require('../../../utils/socket')
 
 const {
     SUCCESS_MESSAGE,
@@ -96,6 +97,9 @@ exports.create = async (req, res, next) => {
             })
         }
         const collection = await Collection.create(payload)
+        socket.io.to("collections").emit('collectionCreated', {
+            collections:"collections"
+        })
         return res.status(HTTP_STATUS_CODE.CREATED).send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.COLLECTION_CREATED,
