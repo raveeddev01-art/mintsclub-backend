@@ -93,7 +93,6 @@ AuctionSchema.post('save', async function (next) {
         console.log('error', error)
     }
 })
-
     
 AuctionSchema.post('findOneAndUpdate', async function (doc) {
     const id = doc._id;
@@ -127,6 +126,15 @@ AuctionSchema.post('findOneAndUpdate', async function (doc) {
             toUserId: data?.userId,
             fromUserId: data?.userId,
             type: 'claimNft',
+            nftId: data?.nftId,
+            auctionId: data?._id,
+        })
+    }
+    if (data.status === 'end' && data.sellingMethod === 1 && data.auctionEnded === true) {
+        Notification.create({
+            toUserId: data?.userId,
+            fromUserId: data?.userId,
+            type: 'buyNft',
             nftId: data?.nftId,
             auctionId: data?._id,
         })
