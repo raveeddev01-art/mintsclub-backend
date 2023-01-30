@@ -77,7 +77,7 @@ const SUCCESS_MESSAGE = {
     MY_NFTS_FETCHED: 'My NFTs fetched successfully',
     OWNERSHIP_TRANSFERED: 'Ownership transferred successfully',
     AUCTION_ENDED: 'Auction ended successfully',
-    ALGO_AUCTION_ENDED:
+    AUCTION_ENDED_SUCCESSFULLY:
         'Auction ended successfully and NFT has been transferred to highest bidder.',
     TOKEN_ADDED_FOR_NFT: 'Token added for nft successfully',
     OFFER_MADE_SUCCESSFULLY: 'You have made offer successfully',
