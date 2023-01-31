@@ -41,7 +41,7 @@ const AuctionSchema = new mongoose.Schema(
         sellerPublicKey: { type: String },
         signature: { type: String },
         bids: [{ type: mongoose.Schema.Types.ObjectId, ref: Bid }],
-        highestBidder: { type: String },
+        highestBidder: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         globalState: { type: Object, default: null },
         auctionStarted: { type: Boolean, default: false },
         // bids: [
@@ -97,7 +97,7 @@ AuctionSchema.post('save', async function (next) {
 AuctionSchema.post('findOneAndUpdate', async function (doc) {
     const id = doc._id;
     const data = await Auction.findOne(id)
-
+    
     if (data.status === 'claimNft' || data.status === 'reclaimNft') {
         Notification.create({
             toUserId: data?.userId,
@@ -107,6 +107,9 @@ AuctionSchema.post('findOneAndUpdate', async function (doc) {
             auctionId: data?._id,
         })
     }
+    socket.io.emit('endAuction', {
+        addBid: 'addBid',
+    })
     if (
         data.auctionStarted === true &&
         data.status === 'active' &&
@@ -120,16 +123,22 @@ AuctionSchema.post('findOneAndUpdate', async function (doc) {
             auctionId: data._id,
         })
     }
+    socket.io.emit('startAuction', {
+        addBid: 'addBid',
+    })
 
     if (data.status === 'claimNft' && data.highestBidder) {
         Notification.create({
-            toUserId: data?.userId,
-            fromUserId: data?.userId,
+            toUserId: data.highestBidder,
+            fromUserId: data.highestBidder,
             type: 'claimNft',
             nftId: data?.nftId,
             auctionId: data?._id,
         })
     }
+    socket.io.emit('claimNft', {
+        addBid: 'addBid',
+    })
     if (data.status === 'end' && data.sellingMethod === 1 && data.auctionEnded === true) {
         Notification.create({
             toUserId: data?.userId,
@@ -139,6 +148,9 @@ AuctionSchema.post('findOneAndUpdate', async function (doc) {
             auctionId: data?._id,
         })
     }
+    socket.io.emit('buyNft', {
+        addBid: 'addBid',
+    })
 })
 const Auction  = mongoose.model('Auction', AuctionSchema)
 module.exports = Auction
