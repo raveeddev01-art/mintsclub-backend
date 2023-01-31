@@ -139,18 +139,18 @@ AuctionSchema.post('findOneAndUpdate', async function (doc) {
     socket.io.emit('claimNft', {
         addBid: 'addBid',
     })
-    if (data.status === 'end' && data.sellingMethod === 1 && data.auctionEnded === true) {
-        Notification.create({
-            toUserId: data?.userId,
-            fromUserId: data?.userId,
-            type: 'buyNft',
-            nftId: data?.nftId,
-            auctionId: data?._id,
-        })
-    }
-    socket.io.emit('buyNft', {
-        addBid: 'addBid',
-    })
+    // if (data.status === 'end' && data.sellingMethod === 1 && data.auctionEnded === true) {
+    //     Notification.create({
+    //         toUserId: data?.userId,
+    //         fromUserId: data?.userId,
+    //         type: 'buyNft',
+    //         nftId: data?.nftId,
+    //         auctionId: data?._id,
+    //     })
+    // }
+    // socket.io.emit('buyNft', {
+    //     addBid: 'addBid',
+    // })
 })
 const Auction  = mongoose.model('Auction', AuctionSchema)
 module.exports = Auction
