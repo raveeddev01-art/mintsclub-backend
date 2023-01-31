@@ -81,6 +81,9 @@ exports.create = async (req, res, next) => {
                 bid,
             })
         }
+        socket.io.to(`${auctionDetail?.nftId}`).emit('bidPlaced', {
+            nftId: auctionDetail?.nftId,
+        })
         return res.send({
             success: SUCCESS_STATUS.FALSE,
             message: ERROR_MESSAGE.WENT_WRONG,
