@@ -11,6 +11,7 @@ const {
 } = require('../../../config/constants')
 const helpers = require('../../helpers')
 const Notification = require('../../models/notification.model')
+const socket = require('../../../utils/socket')
 
 // API to create bid validateNftId
 exports.create = async (req, res, next) => {
@@ -54,7 +55,7 @@ exports.create = async (req, res, next) => {
             {
                 $push: { bids: bid?._id },
                 highestBid: payload?.bidAmount,
-                highestBidder: payload?.fromAddress,
+                highestBidder: payload?.bidBy,
                 globalState,
             }
         )
@@ -81,8 +82,8 @@ exports.create = async (req, res, next) => {
                 bid,
             })
         }
-        socket.io.to(`${auctionDetail?.nftId}`).emit('bidPlaced', {
-            nftId: auctionDetail?.nftId,
+        socket.io.to(`${auctionDetails?.nftId}`).emit('bidPlaced', {
+            nftId: auctionDetails?.nftId,
         })
         return res.send({
             success: SUCCESS_STATUS.FALSE,

@@ -59,7 +59,7 @@ BidSchema.pre('save', async function (next) {
     }
 })
 
-BidSchema.post('save', function (doc) {
+BidSchema.post('save', async function (doc) { 
     let price = 0
     if (doc?.blockchainType !== 'algorand') {
         price = (5 / 100) * doc?.bidAmount + doc?.bidAmount
@@ -67,22 +67,27 @@ BidSchema.post('save', function (doc) {
         price = doc?.bidAmount + 0.1
     }
     socket.io.to(`${doc?.nftId}`).emit('bidPlaced', { price })
-
+    
 
     Notification.create({
-        toUserId: doc.userId,
+        toUserId: doc.ownerId,
         fromUserId: doc.bidBy,
         type: 'addBid',
         nftId: doc.nftId,
         auctionId: doc.auctionId,
     })
-
+    socket.io.emit('addBid', {
+        addBid: 'addBid',
+    })
     Notification.create({
         toUserId: doc?.bidBy,
         fromUserId: doc?.bidBy,
         type: 'upBid',
         nftId: doc?.nftId,
         auctionId: doc?.auctionId,
+    })
+    socket.io.emit('upBid', {
+        addBid: 'addBid',
     })
 })
 
@@ -108,5 +113,5 @@ BidSchema.post('save', function (doc) {
 /**
  * @typedef Bid
  */
-
+ 
 module.exports = mongoose.model('Bid', BidSchema)
