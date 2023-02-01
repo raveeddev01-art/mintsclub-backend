@@ -93,7 +93,7 @@ AuctionSchema.post('save', async function (next) {
         console.log('error', error)
     }
 })
-    
+
 AuctionSchema.post('findOneAndUpdate', async function (doc) {
     const id = doc._id;
     const data = await Auction.findOne(id)
@@ -151,6 +151,18 @@ AuctionSchema.post('findOneAndUpdate', async function (doc) {
     socket.io.emit('buyNft', {
         addBid: 'addBid',
     })
+    if (data.status === 'active' && doc.highestBidder && data.auctionEnded === false) {
+        Notification.create({
+            toUserId: doc?.highestBidder,
+            fromUserId: doc?.userId,
+            type: 'upBid',
+            nftId: doc?.nftId,
+            auctionId: doc?.auctionId,
+        })
+    }
+    socket.io.emit('upBid', {
+        addBid: 'addBid',
+    })
 })
-const Auction  = mongoose.model('Auction', AuctionSchema)
+let Auction  = mongoose.model('Auction', AuctionSchema)
 module.exports = Auction
