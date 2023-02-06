@@ -203,10 +203,9 @@ exports.edit = async (req, res, next) => {
                 message: ERROR_MESSAGE.LOGO_REQUIRED,
             })
         }
-        const existingCollection = await Collection.findOne({
-            name: payload.name,
-        })
+        const existingCollection = await Collection.findOne({name:payload.name , collectionId: {$ne: payload._id}})
         if (existingCollection) {
+            console.log('its here')
             return res.status(HTTP_STATUS_CODE.OK).send({
                 success: SUCCESS_STATUS.FALSE,
                 message: ERROR_MESSAGE.COLLECTION_EXIST_ALREADY,
