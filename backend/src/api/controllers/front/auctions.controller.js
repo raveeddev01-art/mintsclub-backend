@@ -239,6 +239,11 @@ exports.buyNow = async (req, res, next) => {
             nftId: payload.nftId,
             status: 'active',
         })
+        await NFT.findByIdAndUpdate(
+            { _id: payload.nftId },
+            { $set: { isSold: true } },
+            { new: true }
+        )
 
         //in lazy minting case
         if (req.body?.tokenId) {
@@ -256,7 +261,7 @@ exports.buyNow = async (req, res, next) => {
             await NFT.findByIdAndUpdate(
                 { _id: payload.nftId },
                 { $set: updateMintAndMetadata },
-                { new: true }
+                { new: true },
             )
         }
         if (req.body?.assetId) {
@@ -290,13 +295,13 @@ exports.buyNow = async (req, res, next) => {
                     buyNftDetail,
                     nftAuctionDetail
                 )
-
                 if (updateData) {
                     return res.status(HTTP_STATUS_CODE.OK).send({
                         success: SUCCESS_STATUS.TRUE,
                         message: SUCCESS_MESSAGE.OWNERSHIP_TRANSFERED,
                     })
                 }
+                
             } else {
                 const updateData = await helpers.auction.updateNFTForBuyNow(
                     payload,

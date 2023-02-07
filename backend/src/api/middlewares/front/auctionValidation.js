@@ -254,6 +254,7 @@ const validateBuyNowSchema = (req, res, next) => {
         mint: Joi.string().optional(),
         metaData: Joi.string().optional(),
         algoLazyMinted: Joi.optional(),
+        isSold:Joi.string().optional()
     })
     const options = {
         errors: {
