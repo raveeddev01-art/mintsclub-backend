@@ -50,6 +50,7 @@ const NFTSchema = new mongoose.Schema(
         contractAddress: { type: String },
         appId: { type: Number, default: 0 },
         parentNftId: { type: mongoose.Schema.Types.ObjectId, ref: 'NFT' },
+        isSold: { type: Boolean, default : false },
     },
     { timestamps: true, collection: 'nfts' }
 )
