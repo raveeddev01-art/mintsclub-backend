@@ -529,7 +529,7 @@ exports.getNftByDetails = async (request, response, next) => {
         )
         return response.status(HTTP_STATUS_CODE.INTERNAL_SERVER).send({
             success: SUCCESS_STATUS.FALSE,
-            error: error,
+            error,
         })
     }
 }

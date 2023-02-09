@@ -41,7 +41,8 @@ const AuctionSchema = new mongoose.Schema(
         sellerPublicKey: { type: String },
         signature: { type: String },
         bids: [{ type: mongoose.Schema.Types.ObjectId, ref: Bid }],
-        highestBidder: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        highestBidder: { type: String},
+        highestBidderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         globalState: { type: Object, default: null },
         auctionStarted: { type: Boolean, default: false },
         // bids: [
@@ -97,7 +98,7 @@ AuctionSchema.post('save', async function (next) {
 AuctionSchema.post('findOneAndUpdate', async function (doc) {
     const id = doc._id;
     const data = await Auction.findOne(id)
-    
+
     if (data.status === 'claimNft' || data.status === 'reclaimNft') {
         Notification.create({
             toUserId: data?.userId,
@@ -127,10 +128,10 @@ AuctionSchema.post('findOneAndUpdate', async function (doc) {
         addBid: 'addBid',
     })
 
-    if (data.status === 'claimNft' && data.highestBidder) {
+    if (data.status === 'claimNft' && data.highestBidderId) {
         Notification.create({
-            toUserId: data.highestBidder,
-            fromUserId: data.highestBidder,
+            toUserId: data.highestBidderId,
+            fromUserId: data.highestBidderId,
             type: 'claimNft',
             nftId: data?.nftId,
             auctionId: data?._id,
@@ -151,9 +152,9 @@ AuctionSchema.post('findOneAndUpdate', async function (doc) {
     socket.io.emit('buyNft', {
         addBid: 'addBid',
     })
-    if (data.status === 'active' && doc.highestBidder && data.auctionEnded === false) {
+    if (data.status === 'active' && doc.highestBidderId && data.auctionEnded === false) {
         Notification.create({
-            toUserId: doc?.highestBidder,
+            toUserId: doc?.highestBidderId,
             fromUserId: doc?.userId,
             type: 'upBid',
             nftId: doc?.nftId,
