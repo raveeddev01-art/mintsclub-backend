@@ -55,7 +55,8 @@ exports.create = async (req, res, next) => {
             {
                 $push: { bids: bid?._id },
                 highestBid: payload?.bidAmount,
-                highestBidder: payload?.bidBy,
+                highestBidder: payload?.fromAddress,
+                highestBidderId: payload?.bidBy,
                 globalState,
             }
         )
