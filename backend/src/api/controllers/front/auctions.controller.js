@@ -243,9 +243,9 @@ exports.buyNow = async (req, res, next) => {
             { $set: { isSold: true } },
             { new: true }
         )
-        socket.io.to('userProfileRefetch').emit('fixedPrice', {
-            userProfileRefetch: "userProfileRefetch",
-        })
+        // socket.io.to('userProfileRefetch').emit('fixedPrice', {
+        //     userProfileRefetch: "userProfileRefetch",
+        // })
         //in lazy minting case
         if (req.body?.tokenId) {
             await NFT.findByIdAndUpdate(
@@ -382,11 +382,11 @@ exports.endAuction = async (req, res, next) => {
             { _id: auctionEndNft[0]?._id },
             { $set: payloadUpdateAuctionStatus }
         )
-        await NFT.findByIdAndUpdate(
-            { _id: payload.nftId },
-            { $set: { isSold: true } },
-            { new: true }
-        )
+        // await NFT.findByIdAndUpdate(
+        //     { _id: payload.nftId },
+        //     { $set: { isSold: true } },
+        //     { new: true }
+        // )
         const payloadUpdateNFT = {
             activeAuction: null,
         }
@@ -416,10 +416,10 @@ exports.endAuction = async (req, res, next) => {
             nftId: auctionDetail?.nftId,
             userId: auctionDetail?.userId,
         })
-        socket.io.to(`${auctionDetail?.nftId}`).emit('auctionUpdatedforprofile', {
-            nftId: auctionDetail?.nftId,
-            userId: auctionDetail?.userId,
-        })
+        // socket.io.to(`${auctionDetail?.nftId}`).emit('auctionUpdatedforprofile', {
+        //     nftId: auctionDetail?.nftId,
+        //     userId: auctionDetail?.userId,
+        // })
         socket.io.to(`${auctionDetail?.nftId}`).emit('auctionEnded', {
             nftId: auctionDetail?.nftId,
             // userId: auctionDetail?.userId,
