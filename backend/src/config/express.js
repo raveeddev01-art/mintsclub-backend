@@ -41,7 +41,8 @@ app.use('/v1/', apiRequestLimiterAll)
 app.use(cookieParser())
 app.use(
     cors({
-        origin: [
+        origin:
+         [
             'http://localhost:3000',
             'http://localhost:3001',
             'https://mintsclub-v3-marketplace.invo.zone',
