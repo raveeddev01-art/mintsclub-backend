@@ -62,6 +62,7 @@ const createNewNFTtoBuy = async (request, buyNftDetail, auctionDetail) => {
             lazyMinted: false,
             appId: buyNftDetail.appId,
             parentNftId: buyNftDetail?._id,
+            isSold:true,
         }
 
         const nft = await NFT.create(newPayload)
@@ -245,6 +246,7 @@ const createNewNFTforEndAuction = async (bidData, auctionEndNft) => {
             isApproved: auctionEndNft?.nftId?.isApproved,
             blockchainType: auctionEndNft?.nftId?.blockchainType,
             parentNftId: auctionEndNft?.nftId?._id,
+            isSold:true,
         }
 
         const NFTCreated = await NFT.create(payload)
