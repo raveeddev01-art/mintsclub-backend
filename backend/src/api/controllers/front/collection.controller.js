@@ -106,7 +106,7 @@ exports.create = async (req, res, next) => {
             collection,
         })
     } catch (error) {
-        return next(error)
+        return next(error.message)
     }
 }
 
