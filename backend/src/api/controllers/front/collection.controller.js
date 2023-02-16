@@ -97,8 +97,8 @@ exports.create = async (req, res, next) => {
             })
         }
         const collection = await Collection.create(payload)
-        socket.io.to("collections").emit('collectionCreated', {
-            collections:"collections"
+        socket.io.to('collections').emit('collectionCreated', {
+            collections: 'collections',
         })
         return res.status(HTTP_STATUS_CODE.CREATED).send({
             success: SUCCESS_STATUS.TRUE,
@@ -203,7 +203,10 @@ exports.edit = async (req, res, next) => {
                 message: ERROR_MESSAGE.LOGO_REQUIRED,
             })
         }
-        const existingCollection = await Collection.findOne({name:payload.name , collectionId: {$ne: payload._id}})
+        const existingCollection = await Collection.findOne({
+            name: payload.name,
+            collectionId: { $ne: payload._id },
+        })
         if (existingCollection) {
             console.log('its here')
             return res.status(HTTP_STATUS_CODE.OK).send({
@@ -217,6 +220,9 @@ exports.edit = async (req, res, next) => {
             { $set: payload },
             { new: true }
         )
+        socket.io.to('collections').emit('collectionEdited', {
+            collections: 'collections',
+        })
         return res.send({
             success: SUCCESS_STATUS.TRUE,
             message: SUCCESS_MESSAGE.COLLECTION_UPDATED,
@@ -232,6 +238,9 @@ exports.delete = async (req, res, next) => {
     try {
         const { collectionId } = req.params
         const collection = await Collection.deleteOne({ _id: collectionId })
+        socket.io.to('collections').emit('collectionDeleted', {
+            collections: 'collections',
+        })
         if (collection.deletedCount)
             return res.send({
                 success: SUCCESS_STATUS.TRUE,
