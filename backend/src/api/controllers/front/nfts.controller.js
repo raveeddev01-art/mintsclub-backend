@@ -10,6 +10,8 @@ const Likes = require('../../models/likes.model')
 const { userDefaultImage, pinataJWT } = require('../../../config/vars')
 const helpers = require('../../helpers')
 const { pinFileToIPFS, uploadJsonToIpfs } = require('../../utils/ipfs')
+const NFTNotification = require('../../models/notification.model')
+const socket = require('../../../utils/socket')
 
 const {
     ERROR_MESSAGE,
@@ -416,12 +418,17 @@ exports.delete = async (req, res, next) => {
         if (nft?.deletedCount) {
             await NftTokens.deleteOne({ nftId })
             const deleteAuction = await NFTAuction.deleteMany({ nftId })
+            const deleteNotification = await NFTNotification.deleteMany({ nftId })
+
             const updateCollection = await Collection.updateOne(
                 { _id: nftDetail[0].collectionId },
                 { $pull: { nft: nftId } }
             )
 
-            if (deleteAuction && updateCollection) {
+            if (deleteAuction && updateCollection && deleteNotification) {
+                socket.io.emit('deleteNFT', {
+                    deleteNFT: 'deleteNFT',
+                })
                 return res.status(HTTP_STATUS_CODE.OK).send({
                     success: SUCCESS_STATUS.TRUE,
                     message: SUCCESS_MESSAGE.NFT_DELETED,
