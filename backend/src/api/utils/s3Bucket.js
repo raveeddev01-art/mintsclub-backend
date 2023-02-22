@@ -26,6 +26,7 @@ exports.uploadFileToS3 = async (path, filename) => {
                 if (fs.existsSync(`${path}`)) {
                     fs.unlink(`${path}`, async (err) => {
                         if (err) {
+                            console.log("🚀 ~ file: s3Bucket.js:29 ~ fs.unlink ~ err:", err.message)
                             reject({ success: false, err })
                         }
                         resolve(
@@ -37,7 +38,7 @@ exports.uploadFileToS3 = async (path, filename) => {
             })
         })
     } catch (err) {
-        console.log(err, 'error=>')
+        console.log(err.message, 'error=>')
         return { success: false, err }
     }
 }
