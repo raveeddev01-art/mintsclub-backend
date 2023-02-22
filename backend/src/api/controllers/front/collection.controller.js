@@ -26,6 +26,7 @@ const {
 // API to create collection
 exports.create = async (req, res, next) => {
     try {
+        console.log('its here in create controller')
         let payload = {
             userId: req.body.userId,
             categoryId: req.body.categoryId,
@@ -46,16 +47,15 @@ exports.create = async (req, res, next) => {
             ...payload,
             banner: req.body.bannerUrl,
         }
-
         if (req.files) {
             const logoRes = await uploadFileToS3(
-                req.files.logo[0].path,
-                req.files.logo[0].filename
+                req?.files?.logo[0]?.path,
+                req?.files?.logo[0]?.filename
             )
 
             const featuredRes = await uploadFileToS3(
-                req.files.featuredImg[0].path,
-                req.files.featuredImg[0].filename
+                req?.files?.featuredImg[0]?.path,
+                req?.files?.featuredImg[0]?.filename
             )
             if (!logoRes.success) {
                 return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
