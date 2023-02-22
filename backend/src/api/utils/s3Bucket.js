@@ -23,19 +23,22 @@ exports.uploadFileToS3 = async (path, filename) => {
                 if (err) {
                     reject({ success: false, err })
                 }
-                fs.unlink(`${path}`, async (err) => {
-                    if (err) {
-                        reject({ success: false, err })
-                    }
-                    resolve(
-                        { success: true, file: data.Location },
-                        'data.location'
-                    )
-                })
+                if (fs.existsSync(`${path}`)) {
+                    fs.unlink(`${path}`, async (err) => {
+                        if (err) {
+                            reject({ success: false, err })
+                        }
+                        resolve(
+                            { success: true, file: data.Location },
+                            'data.location'
+                        )
+                    })
+                }
             })
         })
     } catch (err) {
         console.log(err, 'error=>')
+        return { success: false, err }
     }
 }
 exports.getS3Object = async (Key, fileName) => {
