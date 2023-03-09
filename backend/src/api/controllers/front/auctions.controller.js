@@ -259,7 +259,7 @@ exports.buyNow = async (req, res, next) => {
             await NFT.findByIdAndUpdate(
                 { _id: payload.nftId },
                 { $set: updateMintAndMetadata },
-                { new: true },
+                { new: true }
             )
         }
         if (req.body?.assetId) {
@@ -299,13 +299,16 @@ exports.buyNow = async (req, res, next) => {
                         message: SUCCESS_MESSAGE.OWNERSHIP_TRANSFERED,
                     })
                 }
-                
+
             } else {
                 const updateData = await helpers.auction.updateNFTForBuyNow(
                     payload,
                     buyNftDetail,
                     nftAuctionDetail
                 )
+                socket.io.emit('updateNFT', {
+                    updateNFT: 'updateNFT',
+                })
 
                 if (updateData) {
                     return res.status(HTTP_STATUS_CODE.OK).send({
@@ -381,7 +384,7 @@ exports.endAuction = async (req, res, next) => {
         )
         const payloadUpdateNFT = {
             activeAuction: null,
-            isSold:true,
+            isSold: true,
         }
 
         await NFT.findByIdAndUpdate(

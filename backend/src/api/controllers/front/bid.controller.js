@@ -2,7 +2,6 @@ const Bid = require('../../models/bids.model')
 const Nft = require('../../models/nfts.model')
 const Auction = require('../../models/auctions.model')
 const ObjectId = require('mongoose').Types.ObjectId
-const nftValidation = require('../../middlewares/front/nftValidation')
 const {
     SUCCESS_MESSAGE,
     ERROR_MESSAGE,
@@ -10,7 +9,6 @@ const {
     HTTP_STATUS_CODE,
 } = require('../../../config/constants')
 const helpers = require('../../helpers')
-const Notification = require('../../models/notification.model')
 const socket = require('../../../utils/socket')
 
 // API to create bid validateNftId
@@ -125,7 +123,7 @@ exports.list = async (req, res, next) => {
     try {
         let { page, limit, nftId, auctionId } = req.query
 
-        if (!auctionId || auctionId === 'undefined' || auctionId == 'null') {
+        if (!auctionId || auctionId === 'undefined' || auctionId === 'null') {
             return res
                 .status(HTTP_STATUS_CODE.OK)
                 .send({ success: false, message: 'Auction Id not found' })

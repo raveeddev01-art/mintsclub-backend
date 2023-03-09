@@ -1,9 +1,6 @@
 const mongoose = require('mongoose')
-const Nft = require('../models/nfts.model')
 const User = require('../models/users.model')
 const Notification = require('../models/notification.model')
-const ObjectId = require('mongoose').Types.ObjectId
-const Auction = require('../models/auctions.model')
 const socket = require('../../utils/socket')
 
 /**
