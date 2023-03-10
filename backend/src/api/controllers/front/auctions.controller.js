@@ -415,6 +415,9 @@ exports.endAuction = async (req, res, next) => {
         socket.io.to(`${auctionDetail?.nftId}`).emit('auctionEnded', {
             nftId: auctionDetail?.nftId,
         })
+        socket.io.emit('updateNFT', {
+            updateNFT: 'updateNFT',
+        })
     } catch (err) {
         return next(err)
     }
