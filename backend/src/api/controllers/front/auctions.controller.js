@@ -323,6 +323,9 @@ exports.buyNow = async (req, res, next) => {
                 message: ERROR_MESSAGE.NOT_ON_SALE,
             })
         }
+        socket.io.emit('updateNFT', {
+            updateNFT: 'updateNFT',
+        })
     } catch (error) {
         return next(error)
     }
