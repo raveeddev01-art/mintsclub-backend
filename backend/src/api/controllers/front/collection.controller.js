@@ -196,6 +196,40 @@ exports.edit = async (req, res, next) => {
             featuredImg: req.body.featuredImgUrl,
             banner: req.body.bannerUrl,
         }
+        if (req.files.featuredImg) {
+
+            const featuredRes = await uploadFileToS3(
+                req?.files?.featuredImg[0]?.path,
+                req?.files?.featuredImg[0]?.filename
+            )
+            
+            if (!featuredRes.success) {
+                return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                    success: SUCCESS_STATUS.FALSE,
+                    message: featuredRes.err,
+                })
+            }
+            payload.featuredImg = featuredRes?.file
+        } 
+        else {  
+            payload.featuredImg = req?.body?.featuredImg
+        }
+
+        if(req.files.logo){
+            const logoRes = await uploadFileToS3(
+                req?.files?.logo[0]?.path,
+                req?.files?.logo[0]?.filename
+            )
+            if (!logoRes.success) {
+                return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
+                    success: SUCCESS_STATUS.FALSE,
+                    message: logoRes.err,
+                })
+            }
+            payload.logo = logoRes.file
+        } else {
+            payload.logo = req.body.logo
+        }
         payload.categoryId = payload.categoryId ? payload.categoryId : null
         if (!payload?.logo) {
             return res.status(HTTP_STATUS_CODE.BAD_REQUEST).send({
