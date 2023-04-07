@@ -19,6 +19,7 @@ const {
     HTTP_STATUS_CODE,
 } = require('../../../config/constants')
 const fs = require('fs')
+const socket = require('../../../utils/socket')
 
 mailchimp.setConfig({
     apiKey: mailChimp.apiKey,
