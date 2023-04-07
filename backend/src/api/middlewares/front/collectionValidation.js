@@ -57,7 +57,7 @@ const validateEditCollectionSchema = (req,res,next) => {
         categoryId: Joi.string().alphanum().min(12).max(24).allow(''),
         name: Joi.string().min(1).max(100).optional(),
         url: Joi.string().allow(''),
-        description: Joi.string().min(1).max(1000).allow(''),
+        description: Joi.string().min(1).allow(''),
         logo:Joi.string().optional(),
         // category: Joi.string().allow(''),
     })
