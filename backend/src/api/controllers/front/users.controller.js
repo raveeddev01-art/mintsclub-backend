@@ -45,6 +45,7 @@ exports.updateProfile = async (req, res, next) => {
                 message: SUCCESS_MESSAGE.PROFILE_UPDATED,
             })
         }
+        
         payload = {
             email: req.body.email,
             username: req.body.username,
@@ -102,11 +103,15 @@ exports.updateProfile = async (req, res, next) => {
 
         const newPayload = { ...payload }
         let user = await helpers.user.updateUserProfile(newPayload)
+        socket.io.emit('updateProfile', {
+            updateProfile: 'updateProfile',
+        })
         return res.status(HTTP_STATUS_CODE.OK).send({
             success: SUCCESS_STATUS.TRUE,
             user,
             message: SUCCESS_MESSAGE.PROFILE_UPDATED,
         })
+        
     } catch (error) {
         return next(error)
     }
