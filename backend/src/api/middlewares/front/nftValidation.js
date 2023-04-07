@@ -11,7 +11,7 @@ const validateNFTSchema = (req, res, next) => {
             .required()
             .valid('ethereum', 'solana', 'bsc', 'polygon', 'algorand'),
         name: Joi.string().min(1).max(100).required(),
-        description: Joi.string().min(3).max(1000).required(),
+        description: Joi.string().min(3).required(),
         creatorId: Joi.string().alphanum().min(12).max(24).allow(''),
         properties: Joi.array().items({
             name: Joi.string().max(10).allow(''),
