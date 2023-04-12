@@ -10,7 +10,7 @@ const validateCollectionSchema = (req,res,next) => {
         categoryId: Joi.string().alphanum().min(12).max(24).allow(''),
         name: Joi.string().min(1).max(55).required(),
         url: Joi.string().allow(''),
-        description: Joi.string().min(3).max(500).allow(''),
+        description: Joi.string().min(3).allow(''),
         isApproved:Joi.boolean().required(),
         ownerAddress: Joi.string()
             // .regex(/^0x[a-fA-F0-9]{40}$/)
