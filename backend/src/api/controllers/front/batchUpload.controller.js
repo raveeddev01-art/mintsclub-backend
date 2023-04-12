@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-expressions */
 const BatchUpload = require('../../models/batchUpload.model')
 const ObjectId = require('mongoose').Types.ObjectId
+const fs = require('fs')
 
 exports.verifyFileAlreadyProcessed = async (request, response) => {
     try {

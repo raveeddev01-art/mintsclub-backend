@@ -179,7 +179,7 @@ const validateEditNftSchema = (data) => {
         nftId: Joi.string().alphanum().min(12).max(24).required(),
         userId: Joi.string().alphanum().min(12).max(24).required(),
         name: Joi.string().min(1).max(100).required(),
-        description: Joi.string().min(1).max(500).required(),
+        description: Joi.string().min(1).required(),
         fileType: Joi.string().valid('image', 'audio', 'video').required(),
         attributes: Joi.array().items({
             name: Joi.string().max(10).allow(''),
