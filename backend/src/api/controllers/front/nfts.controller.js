@@ -353,6 +353,7 @@ exports.updateNft = async (req, res, next) => {
             collectionId: req.body.collectionId,
             copies: req.body.copies,
             metaData: req.body.metaData,
+            compressedFile: req.body.image,
         }
 
         if (!payload.image) {
