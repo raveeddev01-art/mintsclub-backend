@@ -1,7 +1,7 @@
 const BatchUpload = require('../models/batchUpload.model')
 const { pinataJWT, pinataSecret, pinataKey } = require('../../config/vars')
 const BatchUploadFilesHistory = require('../models/fileHistory.model')
-let fs = require('fs')
+var fs = require('fs')
 
 const NFT = require('../models/nfts.model')
 const FormData = require('form-data')
@@ -12,7 +12,7 @@ const checkNFTwithSameNameAlreadyExists = async (name) => {
     const splitName = name.split('#')
 
     const nft = await NFT.countDocuments({
-        name: { $regex: splitName[0].trim(), $options: 'i' },
+        name: { $regex: splitName[0].trim(), $options: 'gi' },
     })
     if (nft > 0) {
         const number = parseInt(nft) + 1
