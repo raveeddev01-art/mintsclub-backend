@@ -14,7 +14,7 @@ exports.verifyFileAlreadyProcessed = async (request, response) => {
             })
         }
         const fileNameValidation = await BatchUpload.findOne({
-            fileName: { $regex: fileName, $options: 'gi' },
+            fileName: { $regex: fileName, $options: 'i' },
             userId,
         })
 
