@@ -12,7 +12,7 @@ const checkNFTwithSameNameAlreadyExists = async (name) => {
     const splitName = name.split('#')
 
     const nft = await NFT.countDocuments({
-        name: { $regex: splitName[0].trim(), $options: 'gi' },
+        name: { $regex: splitName[0].trim(), $options: 'i' },
     })
     if (nft > 0) {
         const number = parseInt(nft) + 1

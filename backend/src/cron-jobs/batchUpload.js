@@ -72,9 +72,14 @@ module.exports.batchCrone = async () => {
             const currentTimeStamp =
                 new Date().getTime() + Math.floor(Math.random() * 1000)
             const downloadedFilePath = `zipFiles/${currentTimeStamp}-${currentTimeStamp}.zip`
+            if (!fs.existsSync("zipFiles")) {
+                fs.mkdirSync("zipFiles", { recursive: true });
+                console.log(`Folder created successfully`);
+              } else {
+                console.log(`Folder already exists`);
+              }
 
             const file = fs.createWriteStream(downloadedFilePath)
-
             https.get(batchToBeProcessed?.location, async (response) => {
                 response.pipe(file)
 
@@ -300,8 +305,6 @@ module.exports.batchCrone = async () => {
                                             categoryId:
                                                 batchToBeProcessed?.categoryId,
                                             ownerId: batchToBeProcessed?.userId,
-                                            creatorId:
-                                                batchToBeProcessed?.userId,
                                             userId: batchToBeProcessed?.userId,
                                             blockchainType:
                                                 batchToBeProcessed?.blockchainType,
