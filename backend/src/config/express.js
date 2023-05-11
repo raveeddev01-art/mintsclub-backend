@@ -46,7 +46,7 @@ app.use(
             'http://localhost:3000',
             'http://localhost:3001',
             'https://mintsclub-v3-marketplace.invo.zone',
-            'https://api.mintsclub.io',
+            'https://mintsclub.io',
         ], // allow to server to accept request from different origin
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
         credentials: true, // allow session cookie from browser to pass through
